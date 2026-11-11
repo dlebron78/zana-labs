@@ -223,7 +223,7 @@ if(GUIDED){G=labs.store.get('guided',null);
 function saveG(){labs.store.set('guided',G);}
 function roundHeader(){document.querySelector('header .cap').textContent='Zana test';$('seg').hidden=true;$('idea').hidden=false;$('exl').hidden=true;
  $('h1').innerHTML='Round '+(G.round+1)+' of 3';
- $('task').hidden=false;$('task').innerHTML='Write one part you’d actually program this week, in your own words. Set it up so your members can record it the way you want. Then tap <b>Done with this round</b>.'+
+ $('task').hidden=false;$('task').innerHTML='Write a workout you’d actually give your clients, in your own words. One piece or a full session, your call. Set it up so they can record it the way you want, then tap <b>Done with this round</b>.'+
   '<span class="dots" style="margin-top:12px" aria-hidden="true">'+[0,1,2].map(function(k){return '<i class="'+(k<=G.round?'on':'')+'"></i>';}).join('')+'</span>';
  $('idea').innerHTML='This round: '+({write:'You type the part on one board, settings included, as labelled lines (<code>log:</code>, <code>target:</code>, <code>scaled:</code>, <code>time:</code>).',sentence:'You type the part on a board, and choose its settings on the line under the board.',stack:'You fill in the part’s name, workout and settings in separate fields.'})[M];}
 function nextRound(){G.round++;G.started=Date.now();saveG();
