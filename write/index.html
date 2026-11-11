@@ -221,7 +221,7 @@ if(GUIDED){G=labs.store.get('guided',null);
  if(!G||Q.get('restart')!==null){var o=['write','sentence','stack'].sort(function(){return Math.random()-.5;});G={order:o,round:0,started:Date.now(),done:[],finished:false};labs.store.set('guided',G);}
  ONE=G.order[Math.min(G.round,2)];M=ONE;START='blank';P=blank();READY=false;labs.store.set('day-'+VN[M],null);}
 function saveG(){labs.store.set('guided',G);}
-function roundHeader(){document.querySelector('header .cap').textContent='Zana test · about 10 minutes';$('seg').hidden=true;$('idea').hidden=false;$('exl').hidden=true;
+function roundHeader(){document.querySelector('header .cap').textContent='Zana test';$('seg').hidden=true;$('idea').hidden=false;$('exl').hidden=true;
  $('h1').innerHTML='Round '+(G.round+1)+' of 3';
  $('task').hidden=false;$('task').innerHTML='Write one part you’d actually program this week, in your own words. Set it up so your members can record it the way you want. Then tap <b>Done with this round</b>.'+
   '<span class="dots" style="margin-top:12px" aria-hidden="true">'+[0,1,2].map(function(k){return '<i class="'+(k<=G.round?'on':'')+'"></i>';}).join('')+'</span>';
