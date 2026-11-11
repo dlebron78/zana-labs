@@ -28,12 +28,19 @@
       session_recording: { maskAllInputs: false }
     });
     if (L.tester) window.posthog.identify(L.tester);
+    /* anything recorded while tracking was off is sent now, marked as recovered */
+    try { var k = 'labs:outbox', ob = JSON.parse(localStorage.getItem(k) || '[]');
+      ob.forEach(function (e) { e[1].recovered = true; window.posthog.capture(e[0], e[1]); });
+      if (ob.length) window.posthog.capture('recovered_backlog', { events: ob.length, test: L.testName });
+      localStorage.removeItem(k); } catch (e) {}
   }
 
   L.track = function (name, props) {
     if (!L.testName) return; /* a page without labs.test() records nothing */
     var p = Object.assign({ test: L.testName, version: L.version, tester: L.tester, device: innerWidth < 760 ? 'phone' : 'laptop' }, props || {});
-    if (window.posthog && window.posthog.capture) window.posthog.capture(name, p); else queue.push([name, p]);
+    p.at = new Date().toISOString();
+    if (window.posthog && window.posthog.capture) window.posthog.capture(name, p);
+    else { queue.push([name, p]); try { var k = 'labs:outbox'; var ob = JSON.parse(localStorage.getItem(k) || '[]'); ob.push([name, p]); localStorage.setItem(k, JSON.stringify(ob.slice(-500))); } catch (e) {} }
     try { console.debug('[labs]', name, p); } catch (e) {}
   };
 
@@ -90,7 +97,8 @@
   function el(h) { var d = document.createElement('div'); d.innerHTML = h; return d.firstElementChild; }
   function strip() {
     var s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
-    var bar = el('<div class="labs-strip" role="note"><span><b>Zana test</b> · your taps are recorded to improve it</span><button type="button" data-labs="fb">Feedback</button><button type="button" data-labs="reset">Start over</button></div>');
+    var off = !cfg.posthogKey;
+    var bar = el('<div class="labs-strip" role="note"'+(off?' style="background:#A8261B"':'')+'><span><b>Zana test</b> · '+(off?'TRACKING IS OFF: answers are not being saved':'your taps are recorded to improve it')+'</span><button type="button" data-labs="fb">Feedback</button><button type="button" data-labs="reset">Start over</button></div>');
     document.body.insertBefore(bar, document.body.firstChild);
     document.documentElement.style.setProperty('--labs-h', '32px');
     addEventListener('scroll', function () { document.documentElement.style.setProperty('--labs-h', Math.max(0, 32 - scrollY) + 'px'); }, { passive: true });
