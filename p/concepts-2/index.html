@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workout Day Blank Slate</title>
+<style>
+:root{--ink:#141414;--ink2:#4d4d4d;--mute:#8b8b8b;--line:#dadada;--soft:#efefed;--bg:#f5f5f3;--card:#fff;--acc:#d9480f;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#2a2a2a;font-family:var(--sans);color:var(--ink);font-size:15px;line-height:1.4}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+input,textarea{font:inherit;color:inherit;-webkit-appearance:none;appearance:none;border-radius:0}
+:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+
+/* ---------- prototype switch bar ---------- */
+.bar{background:#161616;color:#eee;padding:12px 16px 14px;display:grid;gap:8px}
+.bar .r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bar .l{width:74px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d8d8d;flex:none}
+.sw{display:flex;flex-wrap:wrap;gap:4px}
+.sw button{background:#2b2b2b;border:1px solid #3a3a3a;color:#cfcfcf;border-radius:7px;padding:7px 12px;font-size:14px;min-height:36px}
+.sw button.on{background:#fff;color:#111;border-color:#fff;font-weight:600}
+#cdesc{margin:0 0 2px 84px;font-size:14px;color:#bdbdbd;min-height:20px}
+@media(max-width:560px){#cdesc{margin-left:0}.bar .l{width:100%}}
+.stage{padding:18px 16px 40px;overflow-x:auto}
+.frame{margin:0 auto;background:var(--bg);border-radius:14px;overflow:hidden;container-type:inline-size;container-name:f;box-shadow:0 0 0 1px #000,0 12px 40px rgba(0,0,0,.5)}
+
+/* ---------- app shell (shared by every concept) ---------- */
+.app{height:100%;display:flex;flex-direction:column;min-width:0}
+.hd{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--line)}
+.hd .d{font-size:12px;color:var(--mute);white-space:nowrap}
+.hd input{border:0;background:none;font-weight:700;font-size:17px;padding:2px 0;width:100%;min-width:0}
+.hd .w{flex:1;min-width:0}
+.pill{font-size:12px;font-weight:600;padding:4px 9px;border-radius:99px;background:var(--soft);color:var(--ink2);white-space:nowrap;flex:none}
+.pill.rd{background:var(--acc);color:#fff}
+.pill i{font-style:normal;font-weight:400}
+@container f (max-width:520px){.pill i{display:none}}
+main{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;min-height:0;position:relative}
+.ft{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--card);border-top:1px solid var(--line)}
+.ft #sum{flex:1;font-size:13px;color:var(--ink2);font-family:var(--mono);min-width:0}
+.btn{border:1px solid var(--ink);background:#fff;border-radius:9px;padding:9px 14px;font-weight:600;min-height:42px;white-space:nowrap}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+
+/* ---------- shared vocabulary: each kind of information has one look ---------- */
+.lb{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);font-weight:600;margin:0 0 5px}
+.ix{flex:none;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;font-weight:700;display:inline-grid;place-items:center}
+/* name */
+.nm{display:block;resize:none;overflow:hidden;line-height:1.25;border:0;border-bottom:1.5px solid transparent;background:none;font-weight:700;font-size:19px;letter-spacing:-.01em;padding:3px 0;width:100%;min-width:0}
+.nm:focus{outline:0;border-bottom-color:var(--ink)}
+.nm::placeholder,.ta::placeholder{color:#b3b3b3;font-weight:400}
+/* description */
+.ta{display:block;width:100%;border:1px solid var(--line);border-radius:8px;background:#fff;padding:9px 11px;font-size:16px;line-height:1.45;resize:none;overflow:hidden;min-height:44px}
+.ta:focus,.num:focus{outline:0;border-color:var(--ink)}
+/* log method: solid black when chosen */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 12px;font-size:14px;min-height:38px}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+/* target: accent bullseye + mono numerals */
+.tg{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;color:var(--acc);font-weight:600}
+.tg svg{flex:none}
+.tg em{font-style:normal;color:var(--ink2);font-weight:400}
+.num{font-family:var(--mono);font-size:16px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:7px 8px;width:76px;text-align:center;color:var(--ink);min-height:38px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.seg button{border:0;background:none;padding:7px 10px;font-size:14px;min-height:36px;color:var(--ink2);font-weight:400;border-left:1px solid var(--line)}
+.seg button:first-child{border-left:0}
+.seg button.on{background:var(--ink);color:#fff;font-weight:600}
+/* scaled: grey block with a bar */
+.scl{background:var(--soft);border-left:3px solid #9a9a9a;border-radius:0 8px 8px 0;padding:8px 10px 10px}
+.scl .ta{background:#fafafa}
+/* time: clock + mono */
+.tm{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:14px;color:var(--ink2);white-space:nowrap}
+.tm .num{width:52px}
+.x{border:0;background:none;color:var(--mute);font-size:20px;line-height:1;width:34px;height:34px;border-radius:8px;flex:none}
+.add{border:1.5px dashed #b9b9b9;background:none;border-radius:10px;padding:13px;width:100%;font-weight:600;color:var(--ink2);min-height:48px}
+.gh{border:1px dashed #b9b9b9;background:none;border-radius:99px;padding:6px 12px;font-size:14px;color:var(--ink2);min-height:36px}
+.tools{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0 2px}
+.tools button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 10px;font-size:13px;min-height:36px}
+.tools .dl{color:var(--acc)}
+.dots{border:0;background:none;width:36px;height:36px;border-radius:8px;font-size:20px;line-height:1;color:var(--ink2);flex:none}
+.empty{padding:36px 16px;text-align:center;color:var(--mute)}
+
+/* ---------- 1 · Stack ---------- */
+.stk{padding:14px;display:grid;gap:12px;max-width:1040px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px 14px;min-width:0}
+.ch{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cg{display:grid;gap:14px}
+.cg>div{min-width:0;display:grid;gap:12px;align-content:start}
+.opt{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.opt .lb{margin:0;width:100%}
+.sclh{display:flex;align-items:center;justify-content:space-between}
+.sclh .lb{margin:0}
+.adds{display:flex;flex-wrap:wrap;gap:6px}
+@container f (min-width:820px){.cg{grid-template-columns:minmax(0,1fr) 340px;gap:22px}}
+
+/* ---------- 2 · Write ---------- */
+.wr{display:flex;flex-direction:column;height:100%}
+.wtabs{display:flex;gap:0;border-bottom:1px solid var(--line);background:var(--card)}
+.wtabs button{flex:1;border:0;background:none;padding:11px;font-weight:600;color:var(--mute);border-bottom:2px solid transparent;min-height:44px}
+.wtabs button.on{color:var(--ink);border-bottom-color:var(--ink)}
+.wp{flex:1;min-height:0;display:none;flex-direction:column;min-width:0}
+.wr[data-tab=write] .wed,.wr[data-tab=check] .wout{display:flex}
+.wins{padding:8px 12px;background:var(--card);border-bottom:1px solid var(--line);display:grid;gap:6px}
+.wins div{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.wins span{font-family:var(--mono);font-size:13px;color:var(--mute);margin-right:2px}
+.wins button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 9px;font-size:13px;min-height:34px;font-family:var(--mono)}
+#wtext{flex:1;min-height:300px;width:100%;border:0;background:#fff;padding:14px;font-family:var(--mono);font-size:16px;line-height:1.55;resize:none;outline:0;white-space:pre-wrap}
+.whelp{margin:0;padding:8px 14px;font-size:12.5px;color:var(--mute);background:var(--card);border-top:1px solid var(--line)}
+.whelp b{font-family:var(--mono);color:var(--ink2);font-weight:400}
+.wout{overflow:auto;padding:12px;gap:10px;background:var(--bg)}
+.wout h4{margin:0;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+.ck{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;display:grid;gap:8px;flex:none}
+.ckh{display:flex;align-items:center;gap:9px}
+.ckh b{flex:1;font-size:17px;min-width:0;overflow-wrap:anywhere}
+.ck p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.ck .scl{white-space:pre-wrap;overflow-wrap:anywhere}
+.ckf{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.warn{font-size:13px;color:var(--acc);border:1px dashed var(--acc);border-radius:8px;padding:6px 9px}
+@container f (min-width:700px){
+  .wtabs{display:none}.wr{flex-direction:row}
+  .wp{display:flex!important;flex:1 1 0}
+  .wed{border-right:1px solid var(--line)}
+}
+
+/* ---------- 3 · Rundown ---------- */
+.rd{height:100%;display:flex;min-width:0}
+.rl,.rdt{flex:1;min-width:0;overflow:auto;padding:14px}
+.rd .rdt{display:none}.rd.in .rdt{display:block}.rd.in .rl{display:none}
+.tb{display:flex;gap:3px;height:30px;margin-bottom:6px}
+.tb button{border:0;border-radius:5px;background:#cfcfcf;color:#333;font-size:12px;font-weight:700;min-width:22px;padding:0;overflow:hidden}
+.tb button.nt{background:repeating-linear-gradient(135deg,#e2e2e2 0 4px,#f3f3f3 4px 8px);flex:0 0 22px!important}
+.tb button.on{background:var(--ink);color:#fff}
+.tbc{font-size:12px;color:var(--mute);font-family:var(--mono);margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 12px;margin-bottom:6px;min-height:58px}
+.row.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t span{display:block;font-size:13px;color:var(--ink2);overflow-wrap:anywhere}
+.row .t span u{text-decoration:none;color:var(--acc);font-weight:600}
+.row .ch2{color:var(--mute);font-size:18px}
+.rnav{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.rnav .bk{border:0;background:none;font-weight:600;padding:8px 8px 8px 0;min-height:40px}
+.rnav span{flex:1;text-align:center;font-size:13px;color:var(--mute);font-family:var(--mono)}
+.rnav .pn{border:1px solid var(--line);background:#fff;border-radius:8px;width:40px;height:40px}
+.fr{padding:12px 0;border-top:1px solid var(--line);display:grid;gap:6px;min-width:0}
+.fr:first-of-type{border-top:0}
+.fr>.lb{margin:0;padding-top:4px}
+.fr .hint{font-size:12.5px;color:var(--mute);margin:0}
+.rads{display:grid;gap:6px;grid-template-columns:1fr 1fr}
+.rad{display:flex;gap:8px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 10px;min-height:54px}
+.rad i{flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid #999;margin-top:2px}
+.rad.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.rad.on i{border:5px solid #fff}
+.rad b{display:block;font-size:14px}.rad small{display:block;font-size:12px;opacity:.7}
+@container f (min-width:700px){
+  .rd .rl,.rd.in .rl{display:block;flex:0 0 clamp(280px,36%,380px);border-right:1px solid var(--line)}
+  .rd .rdt{display:block;padding:14px 22px}
+  .rnav .bk,.row .ch2{display:none}
+  .fr{grid-template-columns:150px minmax(0,1fr);gap:14px}
+  .rads{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ---------- 4 · Member's view ---------- */
+.mv{padding:14px;display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));align-items:start;max-width:1240px;margin:0 auto}
+.mnote{grid-column:1/-1;margin:0;font-size:13px;color:var(--mute)}
+.mc{background:var(--card);border-radius:16px;box-shadow:0 1px 0 var(--line),0 0 0 1px var(--line);padding:14px;display:grid;gap:10px;min-width:0}
+.mt{display:flex;align-items:center;gap:8px}
+.mc .ta{border-color:transparent;padding:4px 0;border-radius:0;border-bottom:1px dashed #cfcfcf}
+.mc .ta:focus{border-bottom:1px solid var(--ink)}
+.mc .scl .ta{padding:4px 6px;background:none;border-bottom:1px dashed #b5b5b5}
+.rx{justify-self:start}
+.rx button b{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-left:5px;vertical-align:middle}
+.mtg{min-height:40px;display:flex;align-items:center}
+.lw{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:11px 12px;display:grid;gap:8px;text-align:left;width:100%}
+.lw .cap{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--mute)}
+.lw .cap b{color:var(--ink);font-size:13px}
+.lw .cap u{color:var(--ink2)}
+.mk{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-family:var(--mono);font-size:13px;color:var(--ink2)}
+.mk.col{display:grid;gap:5px}.mk.col div{display:flex;align-items:center;gap:6px}
+.mk.col b{width:16px;color:var(--mute)}
+.bx{display:inline-block;border:1px solid #c4c4c4;background:#fff;border-radius:6px;padding:4px 9px;min-width:54px;text-align:center;color:#a5a5a5}
+.cb{display:inline-block;width:20px;height:20px;border:1.5px solid #999;border-radius:5px;background:#fff}
+.nil{font-family:var(--sans);color:var(--mute);font-style:italic}
+.pk{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pk button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px;display:grid;gap:6px;text-align:left;align-content:start;min-width:0}
+.pk button.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.pk button>b{font-size:13px}
+.pk .bx{min-width:34px;padding:2px 5px;font-size:11px}.pk .mk{font-size:11px;gap:4px}.pk .cb{width:16px;height:16px}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="r"><span class="l">Concept</span><div class="sw" id="swc"></div></div>
+  <p id="cdesc"></p>
+  <div class="r"><span class="l">Width</span><div class="sw" id="sww"></div></div>
+  <div class="r"><span class="l">Load day</span><div class="sw" id="swd"></div></div>
+</div>
+<div class="stage">
+  <div class="frame" id="frame">
+    <div class="app" id="app">
+      <header class="hd">
+        <div class="w"><div class="d">Tuesday 10 Nov</div><input id="dtitle" aria-label="Day title"></div>
+        <span class="pill" id="pill"></span>
+      </header>
+      <main id="body"></main>
+      <footer class="ft"><span id="sum"></span><span id="fb" style="display:flex;gap:8px"></span></footer>
+    </div>
+  </div>
+</div>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let uid=1;
+const P=(name,desc,log,target='',unit='lb',scaled='',time='')=>({id:uid++,name,desc,log,target,unit,scaled,time});
+const LOGS=[
+ {k:'sets',l:'Each set',h:'weight × reps, per set',t:'weight'},
+ {k:'time',l:'Time',h:'one time, mm:ss',t:'time'},
+ {k:'rounds',l:'Rounds + reps',h:'AMRAP-style score',t:'rounds'},
+ {k:'weight',l:'Weight',h:'one number',t:'weight'},
+ {k:'done',l:'Done / not done',h:'a tick',t:null},
+ {k:'none',l:'Nothing',h:'members just read it',t:null}];
+const LG=k=>LOGS.find(x=>x.k===k)||LOGS[5];
+const kind=p=>LG(p.log).t;
+const DAYS={
+ crossfit:{label:'CrossFit day',title:'CrossFit · all classes',parts:()=>[
+  P('Warm-up','3 rounds, easy pace:\n200 m run\n10 air squats\n10 ring rows\n5 inchworms','done','','lb','','10'),
+  P('Back squat','5 × 5, climbing each set.\nRest 2:00 between sets.','sets','75','%','Goblet squat 5 × 8, same tempo','20'),
+  P('"Short Fuse"','21-15-9 for time:\nThrusters (95 / 65 lb)\nPull-ups','time','6:00','lb','Thrusters 65 / 45 lb\nJumping pull-ups','12'),
+  P('Finisher','AMRAP 7:\n10 kettlebell swings\n10 burpees','rounds','5','lb','Russian swings, step-back burpees','7')]},
+ bodybuilding:{label:'Bodybuilding day',title:'Push day · chest, shoulders, triceps',parts:()=>[
+  P('Bench press','4 sets of 6–8. Leave 1–2 reps in the tank.\nRest 2:30.','sets','80','%','','18'),
+  P('Incline dumbbell press','3 × 10–12 with a 2-second pause at the bottom.','sets','60','lb','Machine chest press 3 × 12','12'),
+  P('Cable fly + triceps pushdown','Superset, 3 × 15 each. Rest 60 s after the pair.','sets','','lb','','10'),
+  P('Overhead press, top set','Work up to one heavy set of 5. Log the top set only.','weight','60','kg','Seated dumbbell press, heavy set of 8','10'),
+  P('Stretch','Pec doorway stretch and lat hang, 2 × 45 s each.','done','','lb','','5')]},
+ yoga:{label:'Yoga day',title:'Vinyasa flow · 60 min',parts:()=>[
+  P('Arrival','Seated, eyes closed. Five minutes of slow nasal breathing, 4 counts in and 6 out.','none','','lb','','5'),
+  P('Sun salutations','Surya Namaskar A × 5, then B × 3.\nOne breath per movement.','done','','lb','Knees down in chaturanga; step back instead of jumping','15'),
+  P('Standing flow','Warrior II → reverse warrior → extended side angle → half moon.\n5 breaths each, both sides.','done','','lb','Block under the lower hand in half moon','20'),
+  P('Crow hold','Bakasana. Three attempts, hold as long as you stay steady. Log your longest.','time','0:30','lb','Toes on a block, lift one foot at a time','8'),
+  P('Savasana','Lie back. Nothing to do.','none','','lb','','7')]}
+};
+const CONCEPTS={
+ stack:{name:'Stack',desc:'A plain stack of cards: every part open at once, every field edited where it sits, optional fields appear only when you add them.'},
+ write:{name:'Write',desc:'Type the whole day like a whiteboard; the app reads it into parts as you go and shows what it understood.'},
+ rundown:{name:'Rundown',desc:'The day as a timed running order on one side, one part at a time in full on the other.'},
+ mirror:{name:"Member's view",desc:'Edit the workout exactly as members will see it: you pick how they log by picking the widget they will use.'}
+};
+const WIDTHS={laptop:['Laptop','min(1280px,100%)',780],fold:['Fold 8 open · 930','930px',700],cover:['Fold 8 cover · 475','475px',860],phone:['Phone · 390','390px',780]};
+const S={concept:'stack',width:'laptop',dayKey:'crossfit',day:null,sel:0,detail:false,tab:'write',open:{},menu:null,picker:null,variant:{},text:'',warn:[],focus:null};
+const body=$('#body');
+const ICO={clock:'<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.5V8l2.5 1.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+ bull:'<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2.6" fill="currentColor"/></svg>'};
+const L=i=>String.fromCharCode(65+i%26);
+const parts=()=>S.day.parts;
+
+/* ---------- shared pieces ---------- */
+function fmtT(p){const k=kind(p);if(!p.target||!k)return'';return k==='weight'?p.target+(p.unit==='%'?'% of max':' '+p.unit):k==='rounds'?p.target+' rounds':p.target}
+function tgt(i,p){const k=kind(p);if(!k)return'';const v=`data-i="${i}" data-f="target" value="${esc(p.target)}" aria-label="Target"`;
+ if(k==='weight')return`<span class="tg">${ICO.bull}<input class="num" inputmode="decimal" placeholder="0" ${v}><span class="seg">${['lb','kg','%'].map(u=>`<button data-act="unit" data-i="${i}" data-arg="${u}" class="${p.unit===u?'on':''}">${u==='%'?'% of max':u}</button>`).join('')}</span></span>`;
+ if(k==='time')return`<span class="tg">${ICO.bull}<input class="num" inputmode="numeric" placeholder="mm:ss" ${v}><em>finish time</em></span>`;
+ return`<span class="tg">${ICO.bull}<input class="num" inputmode="numeric" placeholder="0" ${v}><em>rounds</em></span>`}
+function tm(i,p){return`<span class="tm">${ICO.clock}<input class="num" inputmode="numeric" placeholder="–" data-i="${i}" data-f="time" value="${esc(p.time)}" aria-label="Minutes to complete">min</span>`}
+function tools(i){return`<div class="tools"><button data-act="up" data-i="${i}">↑ Move up</button><button data-act="down" data-i="${i}">↓ Move down</button><button data-act="dup" data-i="${i}">Duplicate</button><button class="dl" data-act="del" data-i="${i}">Delete</button></div>`}
+function chips(i,p){return`<div class="chips">${LOGS.map(o=>`<button class="chip ${p.log===o.k?'on':''}" data-act="log" data-i="${i}" data-arg="${o.k}">${o.l}</button>`).join('')}</div>`}
+function mock(k,u){u=u==='kg'?'kg':'lb';
+ return k==='sets'?`<div class="mk col">${[1,2,3].map(n=>`<div><b>${n}</b><span class="bx">${u}</span>×<span class="bx">reps</span></div>`).join('')}</div>`
+ :k==='time'?`<div class="mk"><span class="bx">mm</span>:<span class="bx">ss</span></div>`
+ :k==='rounds'?`<div class="mk"><span class="bx">rounds</span>+<span class="bx">reps</span></div>`
+ :k==='weight'?`<div class="mk"><span class="bx">0</span>${u}</div>`
+ :k==='done'?`<div class="mk"><span class="cb"></span>Done</div>`
+ :`<div class="mk"><span class="nil">Nothing to log</span></div>`}
+
+/* ---------- 1 · Stack ---------- */
+const show=(p,f)=>p[f]||S.open[p.id+f];
+function stack(){const ps=parts();
+ return`<div class="stk">${ps.map((p,i)=>{const k=kind(p),sT=k&&show(p,'target'),sS=show(p,'scaled'),sM=show(p,'time');
+  return`<section class="card"><div class="ch"><span class="ix">${L(i)}</span><textarea class="nm auto" rows="1" placeholder="Name this part" data-i="${i}" data-f="name">${esc(p.name)}</textarea><button class="dots" data-act="menu" data-i="${i}" aria-label="More">⋯</button></div>
+  ${S.menu===i?tools(i):''}
+  <div class="cg"><div>
+    <div><label class="lb">The work</label><textarea class="ta auto" rows="2" placeholder="What members do" data-i="${i}" data-f="desc">${esc(p.desc)}</textarea></div>
+    ${sS?`<div class="scl"><div class="sclh"><label class="lb">Scaled version</label><button class="x" data-act="clear" data-i="${i}" data-arg="scaled" aria-label="Remove scaled version">×</button></div><textarea class="ta auto" rows="1" placeholder="Easier option" data-i="${i}" data-f="scaled">${esc(p.scaled)}</textarea></div>`:''}
+  </div><div>
+    <div><label class="lb">Members log</label>${chips(i,p)}</div>
+    ${sT?`<div class="opt"><label class="lb">Target</label>${tgt(i,p)}<button class="x" data-act="clear" data-i="${i}" data-arg="target" aria-label="Remove target">×</button></div>`:''}
+    ${sM?`<div class="opt"><label class="lb">Time to complete</label>${tm(i,p)}<button class="x" data-act="clear" data-i="${i}" data-arg="time" aria-label="Remove time">×</button></div>`:''}
+    ${(k&&!sT)||!sS||!sM?`<div class="adds">${k&&!sT?`<button class="gh" data-act="open" data-i="${i}" data-arg="target">+ Target</button>`:''}${!sS?`<button class="gh" data-act="open" data-i="${i}" data-arg="scaled">+ Scaled version</button>`:''}${!sM?`<button class="gh" data-act="open" data-i="${i}" data-arg="time">+ Time</button>`:''}</div>`:''}
+  </div></div></section>`}).join('')}
+  <button class="add" data-act="add">+ Add part</button></div>`}
+
+/* ---------- 2 · Write ---------- */
+function ser(){return parts().map(p=>{const a=[p.name.trim()||'Part'];
+  if(p.desc.trim())a.push(p.desc.trim().replace(/\n\s*\n+/g,'\n'));
+  a.push('log: '+LG(p.log).l.toLowerCase());
+  const t=fmtT(p);if(t)a.push('target: '+(kind(p)==='weight'&&p.unit==='%'?p.target+'%':t));
+  if(p.scaled.trim())a.push('scaled: '+p.scaled.trim().replace(/\n\s*\n+/g,'\n'));
+  if(p.time)a.push('time: '+p.time+' min');return a.join('\n')}).join('\n\n')}
+function parseLog(v){v=v.toLowerCase();return /set/.test(v)?'sets':/round|amrap/.test(v)?'rounds':/time|clock/.test(v)?'time':/weight|load|heav/.test(v)?'weight':/done|tick|check/.test(v)?'done':/^$|noth|none|^no$|^-$/.test(v)?'none':null}
+function parse(t){const old=parts(),out=[],warn=[];
+ t.replace(/\r/g,'').split(/\n[ \t]*\n+/).forEach(b=>{const ls=b.split('\n').map(x=>x.replace(/\s+$/,''));while(ls.length&&!ls[0].trim())ls.shift();if(!ls.length)return;
+  const n=out.length,p={id:old[n]?old[n].id:uid++,name:ls[0].trim(),desc:'',log:'none',target:'',unit:'lb',scaled:'',time:''},w=[];let tv='',inS=false,d=[],sc=[];
+  ls.slice(1).forEach(l=>{const m=l.match(/^\s*(log|target|scaled|time)\s*:\s*(.*)$/i);
+   if(!m){(inS?sc:d).push(l);return}
+   const key=m[1].toLowerCase(),v=m[2].trim();inS=key==='scaled';
+   if(key==='log'){const k=parseLog(v);if(k)p.log=k;else w.push(`Didn't understand “log: ${v}”. Try: each set, time, rounds, weight, done, nothing.`)}
+   else if(key==='target')tv=v;else if(key==='scaled')sc.push(v);
+   else{const x=parseInt(v);if(x>0)p.time=String(x);else if(v)w.push(`Time should be minutes, e.g. “time: 15”.`)}});
+  p.desc=d.join('\n').trim();p.scaled=sc.join('\n').trim();
+  if(tv){const k=kind(p);if(!k)w.push('Target ignored: members log '+(p.log==='done'?'done / not done':'nothing')+', so there is no unit to aim for.');
+   else if(k==='weight'){const m=tv.match(/^([\d.]+)\s*(lbs?|kg|%)?/i);if(m){p.target=m[1];p.unit=m[2]?(m[2][0]==='%'?'%':m[2].toLowerCase().slice(0,2)):'lb'}else w.push(`Target should be a weight, e.g. “135 lb”, “60 kg” or “80%”.`)}
+   else if(k==='rounds'){const m=tv.match(/[\d.]+/);if(m)p.target=m[0];else w.push('Target should be a number of rounds.')}
+   else p.target=tv}
+  out.push(p);warn.push(w)});
+ S.day.parts=out;S.warn=warn}
+function wout(){const ps=parts();return`<h4>What members will get · ${ps.length} part${ps.length===1?'':'s'}</h4>`+(ps.length?ps.map((p,i)=>`<article class="ck">
+  <div class="ckh"><span class="ix">${L(i)}</span><b>${esc(p.name)}</b>${p.time?`<span class="tm">${ICO.clock}${esc(p.time)} min</span>`:''}</div>
+  ${p.desc?`<p>${esc(p.desc)}</p>`:''}
+  ${p.scaled?`<div class="scl"><span class="lb">Scaled version</span>${esc(p.scaled)}</div>`:''}
+  <div class="ckf"><button class="chip on" data-act="pick" data-i="${i}">Log: ${LG(p.log).l} ▾</button>${fmtT(p)?`<span class="tg">${ICO.bull}${esc(fmtT(p))}</span>`:''}</div>
+  ${S.picker===i?chips(i,p):''}
+  ${(S.warn[i]||[]).map(w=>`<div class="warn">${esc(w)}</div>`).join('')}</article>`).join(''):'<div class="empty">Start typing. The first line of a block is its name.</div>')}
+function write(){return`<div class="wr" data-tab="${S.tab}">
+ <div class="wtabs"><button class="${S.tab==='write'?'on':''}" data-act="tab" data-arg="write">Write</button><button class="${S.tab==='check'?'on':''}" data-act="tab" data-arg="check">Check (${parts().length})</button></div>
+ <div class="wp wed"><div class="wins"><div><span>add</span><button data-act="ins" data-arg="part">new part</button><button data-act="ins" data-arg="target">target:</button><button data-act="ins" data-arg="scaled">scaled:</button><button data-act="ins" data-arg="time">time:</button></div>
+  <div><span>log:</span>${LOGS.map(o=>`<button data-act="ins" data-arg="log" data-val="${o.l.toLowerCase()}">${o.l.toLowerCase()}</button>`).join('')}</div></div>
+  <textarea id="wtext" data-i="-" data-f="text" spellcheck="false" autocapitalize="sentences" aria-label="The day, as text">${esc(S.text)}</textarea>
+  <p class="whelp">First line of a block is the part's name. Leave an empty line to start the next part. <b>log:</b> <b>target:</b> <b>scaled:</b> <b>time:</b> lines are optional.</p></div>
+ <div class="wp wout" id="wout" data-scroll="wout">${wout()}</div></div>`}
+function ins(key,val){const ta=$('#wtext');let t=ta.value,pos=ta.selectionStart??t.length,a,b;
+ if(key==='part'){t=t.replace(/\s+$/,'');t+=(t?'\n\n':'')+'New part';a=t.length-8;b=t.length;t+='\nlog: nothing'}
+ else{let s=t.lastIndexOf('\n\n',Math.max(0,pos-1));s=s<0?0:s+2;let e=t.indexOf('\n\n',Math.max(pos,s));if(e<0)e=t.length;
+  const ls=t.slice(s,e).split('\n');while(ls.length>1&&!ls[ls.length-1].trim())ls.pop();
+  const re=new RegExp('^\\s*'+key+'\\s*:','i');let k=ls.findIndex(l=>re.test(l));
+  if(k<0){ls.push(key+': '+(val||''));k=ls.length-1}else if(val!=null)ls[k]=key+': '+val;
+  const before=ls.slice(0,k).join('\n');b=s+before.length+(k?1:0)+ls[k].length;a=val!=null?b:b-(ls[k].length-ls[k].indexOf(':')-1)+(/:\s/.test(ls[k])?1:0);
+  t=t.slice(0,s)+ls.join('\n')+t.slice(e)}
+ S.text=ta.value=t;parse(t);$('#wout').innerHTML=wout();chrome();ta.focus();try{ta.setSelectionRange(a,b)}catch(e){}}
+
+/* ---------- 3 · Rundown ---------- */
+function rlist(){const ps=parts(),tot=ps.reduce((a,p)=>a+(parseInt(p.time)||0),0),un=ps.filter(p=>!parseInt(p.time)).length;
+ return`${ps.length?`<div class="tb">${ps.map((p,i)=>{const m=parseInt(p.time)||0;return`<button class="${m?'':'nt'} ${i===S.sel?'on':''}" style="flex:${m||1} 1 0" data-act="sel" data-i="${i}" aria-label="Part ${L(i)}">${L(i)}</button>`}).join('')}</div>
+ <div class="tbc">${tot} min planned${un?` · ${un} part${un>1?'s':''} untimed`:''}</div>`:''}
+ ${ps.map((p,i)=>{const t=fmtT(p);return`<button class="row ${i===S.sel?'on':''}" data-act="sel" data-i="${i}"><span class="ix">${L(i)}</span><span class="t"><b>${esc(p.name)||'Untitled part'}</b><span>${LG(p.log).l}${t?` · <u>${esc(t)}</u>`:''}${p.scaled.trim()?' · scaled':''}</span></span>${p.time?`<span class="tm">${esc(p.time)} min</span>`:''}<span class="ch2">›</span></button>`}).join('')}
+ <button class="add" data-act="add">+ Add part</button>`}
+function rundown(){const ps=parts();S.sel=Math.max(0,Math.min(S.sel,ps.length-1));const i=S.sel,p=ps[i];
+ return`<div class="rd ${S.detail&&p?'in':''}"><div class="rl" id="rl" data-scroll="rl">${rlist()}</div><div class="rdt" data-scroll="rdt">${p?`
+  <div class="rnav"><button class="bk" data-act="back">‹ Whole day</button><span>Part ${L(i)} of ${ps.length}</span><button class="pn" data-act="sel" data-i="${Math.max(0,i-1)}" aria-label="Previous part">↑</button><button class="pn" data-act="sel" data-i="${Math.min(ps.length-1,i+1)}" aria-label="Next part">↓</button></div>
+  <div class="fr"><label class="lb">Name</label><textarea class="nm auto" rows="1" placeholder="Name this part" data-i="${i}" data-f="name">${esc(p.name)}</textarea></div>
+  <div class="fr"><label class="lb">The work</label><textarea class="ta auto" rows="3" placeholder="What members do" data-i="${i}" data-f="desc">${esc(p.desc)}</textarea></div>
+  <div class="fr"><label class="lb">Members log</label><div class="rads">${LOGS.map(o=>`<button class="rad ${p.log===o.k?'on':''}" data-act="log" data-i="${i}" data-arg="${o.k}"><i></i><span><b>${o.l}</b><small>${o.h}</small></span></button>`).join('')}</div></div>
+  <div class="fr"><label class="lb">Target</label>${kind(p)?`<div>${tgt(i,p)}</div>`:`<p class="hint">No target: there is no number to aim for when members log ${p.log==='done'?'done / not done':'nothing'}.</p>`}</div>
+  <div class="fr"><label class="lb">Scaled version</label><div class="scl"><textarea class="ta auto" rows="1" placeholder="Easier option (leave empty for none)" data-i="${i}" data-f="scaled">${esc(p.scaled)}</textarea></div></div>
+  <div class="fr"><label class="lb">Time to complete</label><div>${tm(i,p)}</div></div>
+  <div class="fr"><label class="lb">This part</label>${tools(i)}</div>`:'<div class="empty">No parts yet. Add the first one.</div>'}</div></div>`}
+
+/* ---------- 4 · Member's view ---------- */
+function mirror(){const ps=parts();
+ return`<div class="mv"><p class="mnote">This is the card each member sees. Dashed lines are yours to type into; members never see the dashes.</p>${ps.map((p,i)=>{const sc=S.variant[p.id]==='scaled',k=kind(p);
+  return`<article class="mc"><div class="mt"><span class="ix">${L(i)}</span><textarea class="nm auto" rows="1" placeholder="Name this part" data-i="${i}" data-f="name">${esc(p.name)}</textarea>${tm(i,p)}<button class="dots" data-act="menu" data-i="${i}" aria-label="More">⋯</button></div>
+  ${S.menu===i?tools(i):''}
+  <span class="seg rx"><button class="${sc?'':'on'}" data-act="variant" data-i="${i}" data-arg="rx">As written</button><button class="${sc?'on':''}" data-act="variant" data-i="${i}" data-arg="scaled">Scaled${p.scaled.trim()?'<b></b>':' +'}</button></span>
+  ${sc?`<div class="scl"><span class="lb">Scaled version</span><textarea class="ta auto" rows="2" placeholder="Easier option members can switch to" data-i="${i}" data-f="scaled">${esc(p.scaled)}</textarea></div>`
+     :`<textarea class="ta auto" rows="2" placeholder="What members do" data-i="${i}" data-f="desc">${esc(p.desc)}</textarea>`}
+  ${k?`<div class="mtg">${tgt(i,p)}</div>`:''}
+  ${S.picker===i?`<div class="lw"><div class="cap"><b>How should members log this?</b></div><div class="pk">${LOGS.map(o=>`<button class="${p.log===o.k?'on':''}" data-act="log" data-i="${i}" data-arg="${o.k}"><b>${o.l}</b>${mock(o.k,p.unit)}</button>`).join('')}</div></div>`
+   :`<button class="lw" data-act="pick" data-i="${i}"><span class="cap"><b>${p.log==='none'?'No logging':'Members log: '+LG(p.log).l}</b><u>Change</u></span>${mock(p.log,p.unit)}</button>`}
+  </article>`}).join('')}
+  <button class="add" data-act="add" style="min-height:120px">+ Add part</button></div>`}
+
+const VIEW={stack,write,rundown,mirror};
+
+/* ---------- render ---------- */
+function fit(t){t.style.height='auto';t.style.height=(t.scrollHeight+2)+'px'}
+function chrome(){const ps=parts(),m=ps.reduce((a,p)=>a+(parseInt(p.time)||0),0),r=S.day.status==='ready';
+ $('#sum').textContent=`${ps.length} part${ps.length===1?'':'s'}${m?' · '+m+' min':''}`;
+ $('#pill').innerHTML=r?'Ready<i> · members can see it</i>':'Draft<i> · only you can see it</i>';$('#pill').className='pill'+(r?' rd':'');
+ $('#fb').innerHTML=r?'<button class="btn" data-act="status" data-arg="draft">Back to draft</button>':'<button class="btn" data-act="save">Save draft</button><button class="btn pri" data-act="status" data-arg="ready">Mark ready</button>'}
+function render(){const a=document.activeElement,key=a&&body.contains(a)&&a.dataset.f?[a.dataset.i,a.dataset.f,a.selectionStart,a.selectionEnd]:null;
+ const sc={};$$('[data-scroll]',body).forEach(e=>sc[e.dataset.scroll]=e.scrollTop);
+ body.innerHTML=VIEW[S.concept]();chrome();
+ $$('.auto',body).forEach(fit);
+ $$('[data-scroll]',body).forEach(e=>{if(sc[e.dataset.scroll])e.scrollTop=sc[e.dataset.scroll]});
+ let e=null;if(S.focus)e=$(S.focus,body);else if(key)e=$(`[data-i="${key[0]}"][data-f="${key[1]}"]`,body);
+ if(e){e.focus({preventScroll:!S.focus});if(key&&!S.focus)try{e.setSelectionRange(key[2],key[3])}catch(x){}}
+ S.focus=null}
+function bars(){
+ $('#swc').innerHTML=Object.entries(CONCEPTS).map(([k,c],n)=>`<button data-c="${k}" class="${S.concept===k?'on':''}">${n+1} · ${c.name}</button>`).join('');
+ $('#cdesc').textContent=CONCEPTS[S.concept].desc;
+ $('#sww').innerHTML=Object.entries(WIDTHS).map(([k,w])=>`<button data-w="${k}" class="${S.width===k?'on':''}">${w[0]}</button>`).join('');
+ $('#swd').innerHTML=Object.entries(DAYS).map(([k,d])=>`<button data-d="${k}" class="${S.dayKey===k?'on':''}">${d.label}</button>`).join('');
+ const f=$('#frame'),w=WIDTHS[S.width];f.style.width=w[1];f.style.height=w[2]+'px'}
+function load(k){S.dayKey=k;S.day={title:DAYS[k].title,status:'draft',parts:DAYS[k].parts()};$('#dtitle').value=S.day.title;
+ Object.assign(S,{sel:0,detail:false,tab:'write',open:{},menu:null,picker:null,variant:{},warn:[]});S.text=ser()}
+
+/* ---------- actions ---------- */
+const A={
+ add(){parts().push(P('','','none'));const i=parts().length-1;S.sel=i;S.detail=true;S.menu=S.picker=null;S.focus=`[data-i="${i}"][data-f="name"]`},
+ del(i){parts().splice(i,1);S.menu=S.picker=null;S.sel=Math.max(0,Math.min(S.sel,parts().length-1));if(!parts().length)S.detail=false;else if(S.concept==='rundown'&&S.detail)S.detail=false},
+ up(i){if(i>0){const p=parts();[p[i-1],p[i]]=[p[i],p[i-1]];S.sel=i-1;if(S.menu===i)S.menu=i-1}},
+ down(i){const p=parts();if(i<p.length-1){[p[i+1],p[i]]=[p[i],p[i+1]];S.sel=i+1;if(S.menu===i)S.menu=i+1}},
+ dup(i){const p=parts()[i];parts().splice(i+1,0,{...p,id:uid++,name:p.name?p.name+' (copy)':''});S.sel=i+1;S.menu=null},
+ log(i,arg){const p=parts()[i],k0=kind(p);p.log=arg;if(kind(p)!==k0)p.target='';S.picker=null},
+ unit(i,arg){parts()[i].unit=arg},
+ open(i,arg){S.open[parts()[i].id+arg]=1;S.focus=`[data-i="${i}"][data-f="${arg}"]`},
+ clear(i,arg){const p=parts()[i];p[arg]='';delete S.open[p.id+arg]},
+ menu(i){S.menu=S.menu===i?null:i},
+ pick(i){S.picker=S.picker===i?null:i},
+ variant(i,arg){S.variant[parts()[i].id]=arg;if(arg==='scaled'&&!parts()[i].scaled)S.focus=`[data-i="${i}"][data-f="scaled"]`},
+ sel(i){S.sel=i;S.detail=true},
+ back(){S.detail=false},
+ tab(_,arg){S.tab=arg},
+ status(_,arg){S.day.status=arg},
+ save(){chrome();$('#sum').textContent='Draft saved';setTimeout(chrome,1400);return false}
+};
+$('#app').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const act=b.dataset.act,i=b.dataset.i==null?null:+b.dataset.i;
+ if(act==='ins'){ins(b.dataset.arg,b.dataset.val);return}
+ if(A[act](i,b.dataset.arg)===false)return;
+ if(S.concept==='write'&&act!=='tab'&&act!=='pick'&&act!=='status')S.text=ser();
+ render()});
+$('#app').addEventListener('input',e=>{const t=e.target;if(t.id==='dtitle'){S.day.title=t.value;return}
+ const f=t.dataset.f;if(!f)return;
+ if(f==='text'){S.text=t.value;parse(t.value);$('#wout').innerHTML=wout();const c=$('.wtabs button:last-child');if(c)c.textContent=`Check (${parts().length})`;chrome();return}
+ const p=parts()[+t.dataset.i];if(!p)return;
+ if(f==='name'&&/\n/.test(t.value))t.value=t.value.replace(/\n/g,' ');
+ if(f==='time')t.value=t.value.replace(/\D/g,'').slice(0,3);
+ p[f]=t.value;if(t.classList.contains('auto'))fit(t);
+ if(S.concept==='rundown'){const r=$('#rl');const st=r.scrollTop;r.innerHTML=rlist();r.scrollTop=st}
+ chrome()});
+$('.bar').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.c){S.concept=d.c;S.menu=S.picker=null;S.detail=false;if(d.c==='write'){S.text=ser();S.warn=[]}}
+ else if(d.w)S.width=d.w;else if(d.d)load(d.d);else return;
+ bars();render();body.scrollTop=0});
+window.addEventListener('resize',()=>$$('.auto',body).forEach(fit));
+load('crossfit');bars();render();
+</script>
+</body>
+</html>
