@@ -134,7 +134,8 @@ main{padding-bottom:64px}
 .adds{display:flex;gap:16px;padding:10px 18px 14px;border-top:1px solid var(--rowline)}
 
 /* members */
-.check{position:sticky;top:16px;display:grid;gap:10px}
+.pvcol{position:sticky;top:16px}
+.check{display:grid;gap:10px}
 .mc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 18px;display:grid;gap:8px}
 .mh{display:flex;align-items:center;gap:10px}
 .ix{flex:none;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#FFF;font-size:12px;font-weight:700;display:grid;place-items:center}
@@ -152,7 +153,7 @@ main{padding-bottom:64px}
   .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
   h1{font-size:28px}
   .cols{grid-template-columns:minmax(0,1fr)}
-  .check{position:static}
+  .pvcol{position:static}
   .seg{width:100%}.seg button{flex:1;padding:0 8px}
   .fr{grid-template-columns:1fr;gap:4px}
   #wtext{min-height:360px}
@@ -171,8 +172,8 @@ main{padding-bottom:64px}
 </header>
 <main>
   <div class="cols">
-    <section><p class="lab">Write the day</p><div id="ed"></div><div class="fin"><span id="state">Draft</span><span class="exl" id="exl" hidden><button class="link" id="ex" type="button">See an example</button></span><button class="btn pri" id="ready" type="button">Mark ready</button></div></section>
-    <section><p class="lab">Preview</p><div class="check" id="check"></div></section>
+    <section><p class="lab">Write the day</p><div id="ed"></div></section>
+    <section class="pvcol"><p class="lab">Preview</p><div class="check" id="check"></div><div class="fin"><span id="state">Draft</span><span class="exl" id="exl" hidden><button class="link" id="ex" type="button">See an example</button></span><button class="btn pri" id="ready" type="button">Mark ready</button></div></section>
   </div>
   <div id="after"></div>
 </main>
