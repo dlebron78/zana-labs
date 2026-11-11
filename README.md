@@ -20,3 +20,9 @@ Nothing here touches the real app or real data.
   - `&intro=0` skips the welcome card
   - `&t=leo` names the tester in the results
 - Example: `/workouts/?day=thu&start=blank&intro=0&t=leo`
+
+## Three ways to write (`/write/`)
+
+- `/write/` all three with the switch, filled with an example (for review)
+- `?v=day` One board per day · `?v=part` One board per part · `?v=field` One field per item: one version, no switch, blank day, the tester task
+- `&start=filled` or `&start=blank` overrides the starting day; `&t=leo` names the tester

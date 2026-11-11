@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="labs-version" content="v1">
+<title>Three Ways to Write · Zana Labs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<script src="../kit/config.js"></script>
+<script src="../kit/labs.js"></script>
+<script>
+labs.test({
+  name: 'write',
+  question: 'Which way of writing gets a coach from a blank day to Ready fastest, without help?',
+  kpis: [
+    { name: 'Marked the day ready',             from: 'opened', to: 'day_ready',     target: 0.80 },
+    { name: 'Minutes from open to ready',       time: ['opened', 'day_ready'],       target: 5 },
+    { name: 'Set how members log',              from: 'opened', to: 'log_set',       target: 0.70 },
+    { name: 'Wrote it without loading the example', from: 'day_ready', to: 'example_loaded', target: 0.20, lower_is_better: true },
+    { name: 'Would use it (feedback)',          from: 'opened', to: 'feedback_sent', target: 0.40 }
+  ]
+});
+</script>
+<style>[hidden]{display:none!important}html,body{margin:0}</style>
+<style>
+/* Zana kit, Black look. Layout: one day, three ways to write it (switch on top); what members get beside it on a laptop, under it on a phone. Light only. */
+:root{
+  --ink:#111111; --text2:#4A4A48; --text3:#5C5C59; --line:#E8E8E5; --rowline:#F0F0ED; --page:#F5F5F3; --card:#FFFFFF;
+  --fill:#F0F0ED; --fill-hover:#E4E4E0; --note:#F3F3F0; --green:#17663A;
+  --sans:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--page);color:var(--ink)}
+body{font:15px/1.45 var(--sans)}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 2px #FFF,0 0 0 4px var(--ink)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+header{padding-block:28px 16px;display:grid;gap:14px}
+.cap{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+h1{margin:0;font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.seg{display:inline-flex;background:var(--fill);border-radius:12px;padding:4px;gap:4px;width:fit-content;max-width:100%}
+.seg button{border:0;background:none;border-radius:9px;min-height:36px;padding:4px 14px;line-height:1.2;font-size:15px;font-weight:600;color:var(--text2)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(17,17,17,.12)}
+.task{margin:0;font-size:16px;max-width:60ch}
+.fin{display:flex;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap}
+.fin #state{flex:1;font-size:14px;color:var(--text2)}
+.fin #state.r{color:var(--green);font-weight:600}
+.btn.pri{background:var(--ink);color:#FFF}.btn.pri:hover{background:#2E2E2C}
+.idea{font-size:15px;color:var(--text2);max-width:70ch;margin:0}
+.idea b{color:var(--ink)}
+main{padding-bottom:64px}
+.cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:24px;align-items:start}
+.lab{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:0 0 8px}
+.btn{border:0;background:var(--fill);border-radius:10px;height:36px;padding:0 14px;font-size:15px;font-weight:600}
+.btn:hover{background:var(--fill-hover)}
+.btn.sm{height:32px;border-radius:8px;font-size:14px;padding:0 12px}
+.link{border:0;background:none;padding:0;font-size:14px;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+
+/* 1 · Write */
+.board{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.board:focus-within{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.bar{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--rowline);overflow-x:auto}
+.bar .btn{font-family:var(--mono);font-weight:500;flex:none}
+.bar .btn.part{font-family:var(--sans);font-weight:600}
+#wtext{display:block;width:100%;min-height:440px;border:0;outline:0;resize:vertical;padding:16px 20px;font:16px/1.65 var(--mono);background:var(--card)}
+
+/* 2 · Sentence and 3 · Stack share the part card */
+.parts{display:grid;gap:12px}
+.pc{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pc:focus-within{border-color:var(--ink)}
+.pc textarea{display:block;width:100%;border:0;outline:0;resize:none;padding:14px 18px 10px;font:16px/1.6 var(--mono);background:var(--card);overflow:hidden}
+.pc textarea::placeholder{color:#9A9A96}
+.sent{display:flex;flex-wrap:wrap;align-items:center;gap:6px 6px;padding:12px 18px 14px;border-top:1px solid var(--rowline);font-size:15px;color:var(--text2);line-height:2}
+.sent select,.sent input{border:0;border-bottom:2px solid var(--ink);background:none;font-weight:700;color:var(--ink);padding:0 2px;height:28px;border-radius:0}
+.sent select{appearance:none;-webkit-appearance:none;padding-right:16px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' fill='none' stroke='%23111' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 2px center}
+.sent select.guess{border-bottom-style:dashed;color:var(--text2)}
+.sent input{width:62px;text-align:center}
+.sent input::placeholder{color:#B5B5B0;font-weight:500}
+.guessn{font-size:12px;color:var(--text3);font-style:italic}
+.extras{display:flex;flex-wrap:wrap;gap:6px 16px;padding:0 18px 14px;font-size:14px;color:var(--text2)}
+.extras input{border:0;border-bottom:1px solid var(--line);background:none;font-size:14px;padding:2px 2px;min-width:0}
+.scl-in{flex:1 1 220px}
+.min-in{width:44px;text-align:center}
+
+/* 3 · Stack */
+.fr{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;align-items:center;padding:10px 18px;border-top:1px solid var(--rowline)}
+.fr:first-child{border-top:0}
+.fr>label{font-size:14px;color:var(--text3)}
+.fr input,.fr select,.fr textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:8px 10px;font-size:15px;min-height:40px}
+.fr textarea{font:15px/1.5 var(--mono);resize:vertical;overflow:auto;min-height:84px;padding:8px 10px}
+.fr .unit{display:flex;align-items:center;gap:8px}.fr .unit span{font-size:14px;color:var(--text2);white-space:nowrap}
+.fr .unit input{width:96px}
+.fname{font-weight:600}
+.adds{display:flex;gap:16px;padding:10px 18px 14px;border-top:1px solid var(--rowline)}
+
+/* members */
+.check{position:sticky;top:16px;display:grid;gap:10px}
+.mc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 18px;display:grid;gap:8px}
+.mh{display:flex;align-items:center;gap:10px}
+.ix{flex:none;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#FFF;font-size:12px;font-weight:700;display:grid;place-items:center}
+.mh b{flex:1;min-width:0;font-size:18px;font-weight:700;overflow-wrap:anywhere}
+.mins{font-size:13px;color:var(--text3);font-variant-numeric:tabular-nums}
+.md{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px}
+.mv{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;font-size:14px;color:var(--text2)}.mvl{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.ms{background:var(--note);border-radius:10px;padding:8px 12px;font-size:14px;white-space:pre-wrap}
+.ms span{display:block;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.mf{display:flex;flex-wrap:wrap;gap:6px 16px;padding-top:8px;border-top:1px solid var(--rowline);font-size:14px;color:var(--text2)}
+.mf b{color:var(--ink)}
+.sum{font-size:14px;color:var(--text2);margin-bottom:4px;font-variant-numeric:tabular-nums}
+
+@media (max-width:759px){
+  .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  h1{font-size:28px}
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .check{position:static}
+  .seg{width:100%}.seg button{flex:1;padding:0 8px}
+  .fr{grid-template-columns:1fr;gap:4px}
+  #wtext{min-height:360px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="cap">Thursday, November 12 · CrossFit, all classes</div>
+  <h1 id="h1">Three ways to write a workout</h1>
+  <p class="task" id="task" hidden>Write Thursday’s workout the way you would for your 6 AM class. When you’re happy with it, tap <b>Mark ready</b>.</p>
+  <div class="seg" role="tablist" id="seg"><button data-m="write" class="on">One board per day</button><button data-m="sentence">One board per part</button><button data-m="stack">One field per item</button></div>
+  <p class="idea" id="idea"></p>
+</header>
+<main>
+  <div class="cols">
+    <section><p class="lab">Write the day</p><div id="ed"></div><div class="fin"><span id="state">Draft</span><span class="exl" id="exl" hidden><button class="link" id="ex" type="button">See an example</button></span><button class="btn pri" id="ready" type="button">Mark ready</button></div></section>
+    <section><p class="lab">Preview</p><div class="check" id="check"></div></section>
+  </div>
+</main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var LOGS=[['sets','each set','weight'],['time','time','time'],['rounds','rounds','rounds'],['weight','weight','weight'],['done','done',null],['none','nothing',null]];
+function L(k){for(var i=0;i<LOGS.length;i++)if(LOGS[i][0]===k)return LOGS[i];return null;}
+function wordToLog(w){w=(w||'').toLowerCase();for(var i=0;i<LOGS.length;i++)if(LOGS[i][1]===w||LOGS[i][0]===w)return LOGS[i][0];return null;}
+function guess(p){var t=(p.name+'\n'+p.body).toLowerCase();
+ if(/amrap|as many rounds/.test(t))return 'rounds';if(/for time|time cap/.test(t))return 'time';
+ if(/\d+\s*[x×]\s*\d+|\d+(\s*-\s*\d+){2,}/.test(t))return 'sets';if(/emom|flow|savasana|stretch|warm-?up|breath/.test(t))return 'done';return null;}
+var IDEAS={
+ write:'You type the whole day on one board, including part names, workouts and settings, with each setting written as a labelled line (<code>log:</code>, <code>target:</code>, <code>scaled:</code>, <code>time:</code>).',
+ sentence:'You type each part’s name and workout on its own board, and choose that part’s settings on a line under the board. A dashed choice is the app’s guess.',
+ stack:'You fill in each part’s name, workout and settings in separate labelled fields, one field for each.'};
+/* one day, shared by all three */
+var P=[
+ {name:'Warm-up',body:'3 rounds, easy pace:\n200 m run, 10 air squats, 10 ring rows',log:'done',target:'',scaled:'',time:'10'},
+ {name:'Back squat',body:'5-5-5-5-5 @ 70-80%\nRest 2 min between sets',log:'sets',target:'80%',scaled:'',time:'20'},
+ {name:'Fran',body:'21-15-9 for time\nThrusters 95/65\nPull-ups',log:null,target:'',scaled:'',time:''}];
+var M='write';
+/* links: ?v=day|part|field (one version, no switch)  &start=blank|filled  &t=leo */
+var Q=new URLSearchParams(location.search),VM={day:'write',part:'sentence',field:'stack'},VN={write:'day',sentence:'part',stack:'field'};
+var FILLED=JSON.parse(JSON.stringify(P));
+var ONE=VM[(Q.get('v')||'').toLowerCase()]||null;if(ONE)M=ONE;
+var START=(Q.get('start')||(ONE?'blank':'filled')).toLowerCase();
+function blank(){return [{name:'',body:'',log:null,target:'',scaled:'',time:''}];}
+var saved=labs.store.get('day-'+(ONE?VN[M]:'all'),null);
+if(Q.get('start'))saved=null;
+P=saved&&saved.P?saved.P:(START==='blank'?blank():P);var READY=!!(saved&&saved.ready);
+function save(){labs.store.set('day-'+(ONE?VN[M]:'all'),{P:P,ready:READY});}
+function logCount(){return P.filter(function(p){return p.log;}).length;}
+var lastLogs=logCount();
+function afterChange(){save();var n=logCount();if(n>lastLogs)labs.track('log_set',{via:M==='write'?'typed':'picked',count:n});lastLogs=n;
+ if(READY){READY=false;labs.track('day_edited');}showState();}
+function showState(){var st=$('state');st.textContent=READY?'Ready':'Draft · saved';st.className=READY?'r':'';$('ready').textContent=READY?'Ready ✓':'Mark ready';}
+if(ONE){$('seg').hidden=true;$('task').hidden=false;$('h1').textContent='Write Thursday';$('idea').hidden=true;if(START==='blank')$('exl').hidden=false;}
+
+
+var MOVES=[
+ ['Back squat',['back squat','back squats']],['Front squat',['front squat','front squats']],['Goblet squat',['goblet squat','goblet squats']],['Air squat',['air squat','air squats']],
+ ['Deadlift',['deadlift','deadlifts']],['Bench press',['bench press']],['Incline dumbbell press',['incline dumbbell press','incline db press']],['Chest press',['chest press']],
+ ['Overhead press',['overhead press','strict press']],['Push press',['push press']],['Thruster',['thruster','thrusters']],['Clean',['power clean','squat clean','clean']],['Snatch',['snatch']],
+ ['Pull-up',['pull-up','pull-ups','pullup','pullups','pull up','pull ups']],['Ring row',['ring row','ring rows']],['Push-up',['push-up','push-ups','pushup','pushups']],
+ ['Burpee',['burpee','burpees','burpee box jump']],['Kettlebell swing',['kettlebell swing','kettlebell swings','kb swings','swings','russian swing','russian swings']],
+ ['Box jump',['box jump','box jumps']],['Wall ball',['wall ball','wall balls']],['Double-under',['double-under','double-unders','double under','double unders']],
+ ['Toes-to-bar',['toes-to-bar','toes to bar','t2b']],['Lunge',['lunge','lunges']],['Inchworm',['inchworm','inchworms']],['Run',['run','running']],['Row',['row','rowing']],
+ ['Cable fly',['cable fly','cable flies']],['Triceps pushdown',['triceps pushdown','tricep pushdown']],['Lateral raise',['lateral raise','lateral raises']],
+ ['Hanging knee raise',['hanging knee raise','hanging knee raises']],['Plank',['plank']],
+ ['Sun salutation A',['surya namaskar a','sun salutation a']],['Sun salutation B',['surya namaskar b','sun salutation b']],['Chaturanga',['chaturanga']],
+ ['Warrior II',['warrior ii','warrior 2']],['Reverse warrior',['reverse warrior']],['Extended side angle',['extended side angle']],['Half moon',['half moon']],
+ ['Crow pose',['crow pose','bakasana','crow']],['Savasana',['savasana']]];
+var ALIASES=[];MOVES.forEach(function(m){m[1].forEach(function(a){ALIASES.push([a,m[0]]);});});
+ALIASES.sort(function(x,y){return y[0].length-x[0].length;});
+function movesIn(text){var t=' '+text.toLowerCase().replace(/[^a-z0-9\- ]+/g,' ')+' ',found=[];
+ ALIASES.forEach(function(a){var re=new RegExp('(^|[^a-z0-9-])'+a[0].replace(/[-]/g,'\\-')+'(?=[^a-z0-9-]|$)');var m=t.match(re);
+  if(m){t=t.replace(re,function(x,pre){return pre+' '.repeat(a[0].length);});if(found.indexOf(a[1])<0)found.push(a[1]);}});
+ return found;}
+/* ---------- members ---------- */
+function tgtText(p){var k=p.log?L(p.log)[2]:null;if(!p.target||!k)return '';
+ if(k==='time')return 'under '+p.target;if(k==='rounds')return 'at least '+p.target+' rounds';
+ return /%$/.test(p.target)?p.target+' of your max':p.target;}
+function renderCheck(){var m=P.reduce(function(a,p){return a+(parseInt(p.time,10)||0);},0);
+ $('check').innerHTML='<div class="sum">'+P.length+' part'+(P.length===1?'':'s')+(m?' · '+m+' min':'')+'</div>'+P.map(function(p,i){var lg=p.log?L(p.log):null,t=tgtText(p);
+  return '<article class="mc"><div class="mh"><span class="ix">'+String.fromCharCode(65+i)+'</span><b>'+esc(p.name||'Untitled part')+'</b>'+(parseInt(p.time,10)?'<span class="mins">'+parseInt(p.time,10)+' min</span>':'')+'</div>'+
+  (p.body?'<p class="md">'+esc(p.body)+'</p>':'')+(function(){var mv=movesIn(p.name+'\n'+p.body);return mv.length?'<div class="mv"><span class="mvl">Movements</span><span>'+mv.map(esc).join(' · ')+'</span></div>':'';})()+(p.scaled?'<div class="ms"><span>Scaled</span>'+esc(p.scaled)+'</div>':'')+
+  '<div class="mf">'+(lg?'<span>Members log <b>'+lg[1]+'</b></span>':'<span>Nothing to log yet</span>')+(t?'<span>◎ Target <b>'+esc(t)+'</b></span>':'')+'</div></article>';}).join('');}
+
+/* ---------- 1 · Write ---------- */
+function toText(){if(P.length===1&&!P[0].name&&!P[0].body)return '';return P.map(function(p){var l=[p.name];if(p.body)l.push(p.body);if(p.log)l.push('log: '+L(p.log)[1]);if(p.target)l.push('target: '+p.target);if(p.scaled)l.push('scaled: '+p.scaled);if(p.time)l.push('time: '+p.time);return l.join('\n');}).join('\n\n');}
+function fromText(t){var out=[];t.split(/\n\s*\n/).forEach(function(b){var ls=b.split('\n').filter(function(x){return x.trim();});if(!ls.length)return;
+ var p={name:ls[0].trim(),body:[],log:null,target:'',scaled:'',time:''};
+ ls.slice(1).forEach(function(l){var m=l.match(/^\s*(log|target|scaled|time)\s*:\s*(.*)$/i);if(!m){p.body.push(l);return;}var k=m[1].toLowerCase(),v=m[2].trim();
+  if(k==='log')p.log=wordToLog(v);else p[k]=v;});p.body=p.body.join('\n');out.push(p);});P=out;}
+function edWrite(){$('ed').innerHTML='<div class="board"><div class="bar"><button class="btn sm part" data-ins="part">+ Part</button><button class="btn sm" data-ins="log: ">log:</button><button class="btn sm" data-ins="target: ">target:</button><button class="btn sm" data-ins="scaled: ">scaled:</button><button class="btn sm" data-ins="time: ">time:</button></div><textarea id="wtext" spellcheck="false" aria-label="The day as text"></textarea></div>';
+ var ta=$('wtext');ta.value=toText();
+ ta.addEventListener('input',function(){fromText(ta.value);renderCheck();afterChange();});
+ if(START==='blank'&&!P[0].name)ta.placeholder='Back squat\n5-5-5-5-5 @ 75%\nlog: each set\n\nLeave an empty line before the next part.';
+ $('ed').querySelector('.bar').addEventListener('mousedown',function(e){e.preventDefault();});
+ $('ed').querySelector('.bar').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var v=ta.value,pos=ta.selectionStart,ins=b.dataset.ins;
+  if(ins==='part'){ta.value=v.replace(/\s+$/,'')+'\n\n';pos=ta.value.length;}
+  else{var ls=v.lastIndexOf('\n',pos-1)+1,line=v.slice(ls,v.indexOf('\n',pos)<0?v.length:v.indexOf('\n',pos));var pre=line.trim()?'\n':'';var le=v.indexOf('\n',pos);if(le<0)le=v.length;ta.value=v.slice(0,le)+pre+ins+v.slice(le);pos=le+pre.length+ins.length;}
+  ta.focus();ta.setSelectionRange(pos,pos);fromText(ta.value);renderCheck();});}
+
+/* ---------- 2 · Sentence ---------- */
+function grow(t){t.style.height='auto';t.style.height=(t.scrollHeight+2)+'px';}
+function edSentence(){$('ed').innerHTML='<div class="parts">'+P.map(function(p,i){var g=p.log?null:guess(p),lk=p.log||g,k=lk?L(lk)[2]:null;
+ var tgt='';if(k==='time')tgt=', aiming for under <input data-i="'+i+'" data-f="target" value="'+esc(p.target)+'" placeholder="6:00" aria-label="Target time">';
+ else if(k==='rounds')tgt=', aiming for at least <input data-i="'+i+'" data-f="target" value="'+esc(p.target)+'" placeholder="5" aria-label="Target rounds"> rounds';
+ else if(k==='weight')tgt=', aiming for <input data-i="'+i+'" data-f="target" value="'+esc(p.target)+'" placeholder="185 lb" aria-label="Target weight">';
+ return '<div class="pc"><textarea data-i="'+i+'" data-f="text" rows="3" spellcheck="false" placeholder="Part name&#10;The workout" aria-label="Part '+(i+1)+'">'+esc(p.name+(p.body?'\n'+p.body:''))+'</textarea>'+
+ '<div class="sent">Members log <select data-i="'+i+'" data-f="log" class="'+(g?'guess':'')+'" aria-label="How members log">'+(lk?'':'<option value="" selected>choose</option>')+LOGS.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===lk?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>'+tgt+(g?' <span class="guessn">guessed</span>':'')+'</div>'+
+ '<div class="extras">'+(p.scaled||p.scOpen?'<span style="display:flex;gap:6px;align-items:center;flex:1 1 260px">Scaled: <input class="scl-in" data-i="'+i+'" data-f="scaled" value="'+esc(p.scaled)+'" placeholder="an easier version"></span>':'<button class="link" data-add="sc" data-i="'+i+'">+ Scaled version</button>')+
+ '<span>Takes <input class="min-in" data-i="'+i+'" data-f="time" value="'+esc(p.time)+'" placeholder="–" inputmode="numeric" aria-label="Minutes"> min</span></div></div>';}).join('')+
+ '<button class="btn" data-add="part" style="justify-self:start">+ Part</button></div>';
+ $('ed').querySelectorAll('textarea').forEach(grow);}
+
+/* ---------- 3 · Stack ---------- */
+function edStack(){$('ed').innerHTML='<div class="parts">'+P.map(function(p,i){var k=p.log?L(p.log)[2]:null,unit=k==='time'?['under','6:00','']:k==='rounds'?['at least','5','rounds']:k==='weight'?['','185','lb, kg or %']:null;
+ return '<div class="pc"><div class="fr"><label for="n'+i+'">Name</label><input id="n'+i+'" placeholder="e.g. Back squat" class="fname" data-i="'+i+'" data-f="name" value="'+esc(p.name)+'"></div>'+
+ '<div class="fr"><label for="b'+i+'">Workout</label><textarea id="b'+i+'" data-i="'+i+'" data-f="body" rows="3" spellcheck="false">'+esc(p.body)+'</textarea></div>'+
+ '<div class="fr"><label for="l'+i+'">Members log</label><select id="l'+i+'" data-i="'+i+'" data-f="log">'+(p.log?'':'<option value="" selected>Choose…</option>')+LOGS.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===p.log?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'+
+ (unit?'<div class="fr"><label for="t'+i+'">Target</label><div class="unit">'+(unit[0]?'<span>'+unit[0]+'</span>':'')+'<input id="t'+i+'" data-i="'+i+'" data-f="target" value="'+esc(p.target)+'" placeholder="'+unit[1]+'">'+(unit[2]?'<span>'+unit[2]+'</span>':'')+'</div></div>':'')+
+ (p.scaled||p.scOpen?'<div class="fr"><label for="s'+i+'">Scaled</label><input id="s'+i+'" data-i="'+i+'" data-f="scaled" value="'+esc(p.scaled)+'"></div>':'')+
+ (p.time||p.tmOpen?'<div class="fr"><label for="m'+i+'">Minutes</label><input id="m'+i+'" data-i="'+i+'" data-f="time" value="'+esc(p.time)+'" inputmode="numeric" style="width:96px"></div>':'')+
+ ((p.scaled||p.scOpen)&&(p.time||p.tmOpen)?'':'<div class="adds">'+(p.scaled||p.scOpen?'':'<button class="link" data-add="sc" data-i="'+i+'">+ Scaled</button>')+(p.time||p.tmOpen?'':'<button class="link" data-add="tm" data-i="'+i+'">+ Time</button>')+'</div>')+'</div>';}).join('')+
+ '<button class="btn" data-add="part" style="justify-self:start">+ Part</button></div>';}
+
+/* ---------- shared editing ---------- */
+function draw(){if(!ONE)$('idea').innerHTML=IDEAS[M];({write:edWrite,sentence:edSentence,stack:edStack})[M]();renderCheck();}
+$('ed').addEventListener('input',function(e){var t=e.target,i=+t.dataset.i,f=t.dataset.f;if(isNaN(i)||!f||M==='write')return;var p=P[i];
+ if(f==='text'){var ls=t.value.split('\n');p.name=ls[0]||'';p.body=ls.slice(1).join('\n').trim();grow(t);}
+ else if(f!=='log')p[f]=t.value;
+ renderCheck();afterChange();
+ if(f==='text'&&M==='sentence'&&!p.log){var sel=$('ed').querySelector('select[data-i="'+i+'"]'),g=guess(p);if(sel&&((sel.value||null)!==g)){var pos=t.selectionStart;edSentence();var nt=$('ed').querySelector('textarea[data-i="'+i+'"]');nt.focus();nt.setSelectionRange(pos,pos);}}});
+$('ed').addEventListener('change',function(e){var t=e.target;if(t.dataset.f!=='log')return;var p=P[+t.dataset.i];p.log=t.value||null;p.target='';draw();afterChange();});
+$('ed').addEventListener('click',function(e){var b=e.target.closest('[data-add]');if(!b)return;var a=b.dataset.add;
+ if(a==='part'){P.push({name:'',body:'',log:null,target:'',scaled:'',time:''});labs.track('part_added');draw();save();var all=$('ed').querySelectorAll(M==='stack'?'.fname':'textarea');var last=all[all.length-1];if(last){last.focus();last.select&&last.select();}return;}
+ var p=P[+b.dataset.i];if(a==='sc')p.scOpen=true;if(a==='tm')p.tmOpen=true;draw();
+ var f=$('ed').querySelector('[data-i="'+b.dataset.i+'"][data-f="'+(a==='sc'?'scaled':'time')+'"]');if(f)f.focus();});
+$('seg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;M=b.dataset.m;labs.track('switched',{to:VN[M]});[].forEach.call($('seg').children,function(x){x.classList.toggle('on',x===b);});draw();});
+$('ready').addEventListener('click',function(){if(READY)return;var named=P.filter(function(p){return (p.name||p.body).trim();});
+ if(!named.length){$('state').textContent='Write at least one part first.';return;}
+ READY=true;save();showState();
+ labs.track('day_ready',{parts:named.length,with_log:named.filter(function(p){return p.log;}).length,with_target:named.filter(function(p){return p.target;}).length,with_scaled:named.filter(function(p){return p.scaled;}).length,minutes:named.reduce(function(a,p){return a+(parseInt(p.time,10)||0);},0),from_example:!!S_EX,day:JSON.stringify(named)});});
+var S_EX=false;
+$('ex').addEventListener('click',function(){P=JSON.parse(JSON.stringify(FILLED));S_EX=true;labs.track('example_loaded');draw();save();$('exl').hidden=true;});
+if(M!=='write')[].forEach.call($('seg').children,function(x){x.classList.toggle('on',x.dataset.m===M);});
+draw();showState();
+})();
+</script>
+
+</body>
+</html>
