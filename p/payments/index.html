@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}html,body{margin:0}</style>
+</head>
+<body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings Payments</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --ink:#111; --t2:#4A4A48; --t3:#5C5C59; --line:#E8E8E5; --rowline:#F0F0ED; --page:#F5F5F3; --card:#fff; --fill:#F0F0ED; --fillh:#E4E4E0; --grey:#F3F3F0; --red:#A8261B; --redbg:#FDE8E6; --blue:#1F4FB8; --bluebg:#E5EEFF; --green:#17663A; --greenbg:#E4F5E8; --warnbg:#FDF1EF; --warnline:#F6D3CE; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--page); color:var(--ink); font-family:'Geist',system-ui,sans-serif; }
+button, input, textarea { font-family:inherit; }
+button { cursor:pointer; }
+.test { background:#111; color:#ddd; font-size:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:8px 16px; position:sticky; top:0; z-index:50; }
+.test b { color:#fff; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:11px; }
+.seg { display:inline-flex; gap:2px; background:#2a2a2a; padding:2px; border-radius:8px; flex-wrap:wrap; }
+.seg button { border:0; background:none; color:#ccc; height:28px; padding:0 10px; border-radius:6px; font-size:12px; }
+.seg button[aria-pressed="true"] { background:#fff; color:#111; }
+.case { background:#1d1d1c; color:#e9e9e6; font-size:13px; padding:8px 16px; line-height:1.45; } .case b { color:#fff; }
+.frame { display:grid; grid-template-columns:96px 1fr; min-height:calc(100vh - 80px); }
+.band { background:#0E0E0E; }
+.appmain { padding:32px 40px 80px; max-width:880px; }
+.phone .frame { grid-template-columns:1fr; } .phone .band { display:none; }
+.phone .wrap { background:#ddd; padding:16px 0; } .phone .appmain { max-width:390px; margin:0 auto; padding:20px 16px 80px; background:var(--page); min-height:800px; }
+.lab { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }
+h1 { margin:4px 0 16px; font-size:40px; font-weight:700; letter-spacing:-.03em; } .phone h1 { font-size:28px; }
+.tabs { display:flex; gap:20px; border-bottom:1px solid var(--line); margin-bottom:24px; overflow-x:auto; }
+.tabs span { padding:10px 0; font-size:15px; color:var(--t3); white-space:nowrap; } .tabs span.on { color:var(--ink); font-weight:600; border-bottom:2px solid var(--ink); }
+.sec { margin-bottom:28px; }
+.sech { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; gap:12px; }
+.sech h2 { margin:0; font-size:20px; font-weight:700; } .sech p { margin:4px 0 0; color:var(--t3); font-size:14px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+.banner { background:var(--bluebg); color:var(--blue); border-radius:12px; padding:10px 14px; font-size:14px; margin-bottom:10px; font-weight:500; }
+/* Stripe card */
+.stripe { padding:18px 20px; display:flex; gap:16px; align-items:center; container-type:inline-size; }
+.stripe .tx { flex:1; min-width:0; }
+.stripe .nm { font-size:16px; font-weight:600; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.stripe .st { font-size:14px; color:var(--t2); margin-top:4px; }
+.stripe .fee { font-size:13px; color:var(--t3); margin-top:6px; }
+.pill { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 7px; border-radius:6px; }
+.pill.red { background:var(--redbg); color:var(--red); } .pill.green { background:var(--greenbg); color:var(--green); } .pill.grey { background:var(--fill); color:var(--t2); } .pill.blue { background:var(--bluebg); color:var(--blue); }
+.ic { width:40px; height:40px; border-radius:12px; background:var(--fill); display:grid; place-items:center; flex:none; color:var(--t2); }
+.ic svg { width:22px; height:22px; }
+/* rows */
+.mrow { display:flex; align-items:center; gap:12px; padding:12px 20px; border-top:1px solid var(--rowline); min-height:68px; cursor:pointer; }
+.mrow:first-child { border-top:0; } .mrow:hover { background:#FAFAF8; }
+.mrow .tx { flex:1; min-width:0; } .mrow .nm { font-size:16px; font-weight:500; }
+.mrow .why { font-size:14px; color:var(--t2); margin-top:3px; display:flex; gap:8px; align-items:center; white-space:nowrap; overflow:hidden; }
+.mrow .why .f { overflow:hidden; text-overflow:ellipsis; }
+.kl { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); flex:none; }
+.chev { color:var(--t3); font-size:20px; }
+.mrow.stopped .nm, .mrow.stopped .why { color:var(--t3); }
+/* buttons */
+.btn { height:36px; padding:0 14px; border-radius:10px; border:0; background:var(--fill); color:var(--ink); font-size:15px; font-weight:500; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+.btn:hover { background:var(--fillh); } .btn.main { background:var(--ink); color:#fff; } .btn.risk { background:var(--redbg); color:var(--red); }
+.btn.sm { height:32px; padding:0 12px; font-size:14px; border-radius:8px; }
+.btn:disabled { opacity:.45; cursor:not-allowed; }
+.btn.full { width:100%; }
+.stripe { flex-wrap:wrap; }
+.stripe .tx { flex:1 1 220px; }
+@container (max-width:520px) { .stripe .btn { flex:1 1 100%; } }
+.addbar { padding:12px 20px; border-top:1px solid var(--rowline); }
+/* suggestions */
+.tiles { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; padding:16px; }
+.tile { border:1px solid var(--line); background:var(--card); border-radius:12px; padding:12px; display:flex; gap:10px; align-items:center; font-size:15px; font-weight:500; text-align:left; min-height:56px; }
+.tile:hover { background:#FAFAF8; border-color:#D9D9D4; } .tile .ic { width:32px; height:32px; border-radius:10px; } .tile .ic svg { width:18px; height:18px; }
+.tilesub { padding:0 16px 14px; font-size:14px; color:var(--t3); }
+/* panel */
+.scrim { position:fixed; inset:0; background:rgba(17,17,17,.25); z-index:60; display:none; }
+.panel { position:fixed; top:0; right:0; bottom:0; width:440px; max-width:100vw; background:var(--card); z-index:61; box-shadow:-8px 0 32px rgba(0,0,0,.12); display:none; flex-direction:column; }
+.open .scrim { display:block; } .open .panel { display:flex; }
+.phone .panel { width:100vw; top:auto; height:92vh; border-radius:20px 20px 0 0; }
+.ph { display:flex; align-items:center; gap:10px; padding:16px 20px; border-bottom:1px solid var(--line); }
+.ph h3 { margin:0; font-size:20px; font-weight:700; flex:1; }
+.x { width:36px; height:36px; border-radius:10px; border:0; background:var(--fill); font-size:18px; }
+.pb { flex:1; overflow:auto; padding:20px; display:flex; flex-direction:column; gap:18px; }
+.pf { padding:16px 20px; border-top:1px solid var(--line); display:flex; gap:8px; }
+.pf .btn { flex:1; height:44px; border-radius:12px; font-size:16px; }
+.fld label { display:block; font-size:14px; font-weight:600; margin-bottom:6px; }
+.fld .hint { font-size:13px; color:var(--t3); margin-top:6px; }
+.fld .warn { font-size:13px; color:var(--red); margin-top:6px; }
+input[type=text], textarea { width:100%; border:1px solid var(--line); border-radius:12px; padding:0 14px; height:44px; font-size:16px; background:#fff; color:var(--ink); }
+textarea { height:96px; padding:12px 14px; resize:vertical; line-height:1.4; }
+input:focus, textarea:focus { outline:2px solid var(--ink); outline-offset:-1px; border-color:transparent; }
+.ac { border:1px solid var(--line); border-radius:12px; margin-top:6px; overflow:hidden; }
+.ac button { display:flex; width:100%; gap:10px; align-items:center; border:0; background:#fff; padding:10px 12px; font-size:15px; text-align:left; border-top:1px solid var(--rowline); }
+.ac button:first-child { border-top:0; } .ac button:hover { background:#FAFAF8; } .ac .ic { width:28px; height:28px; border-radius:8px; } .ac .ic svg { width:16px; height:16px; }
+.ac small { margin-left:auto; color:var(--t3); font-size:13px; }
+.sw { display:flex; align-items:center; gap:12px; justify-content:space-between; }
+.sw .t b { display:block; font-size:15px; font-weight:600; } .sw .t span { font-size:13px; color:var(--t3); }
+.tog { width:48px; height:28px; border-radius:14px; background:#CFCFCA; border:0; position:relative; flex:none; }
+.tog::after { content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:left .15s; }
+.tog.on { background:var(--ink); } .tog.on::after { left:23px; }
+.danger { border-top:1px solid var(--line); padding-top:18px; display:flex; flex-direction:column; gap:10px; }
+.blocked { background:var(--warnbg); border:1px solid var(--warnline); border-radius:12px; padding:12px 14px; font-size:14px; display:flex; flex-direction:column; gap:8px; }
+.blocked b { color:var(--red); }
+.prow { display:flex; align-items:center; gap:10px; background:#fff; border-radius:10px; padding:8px 10px; }
+.prow .av { width:28px; height:28px; border-radius:50%; background:var(--fill); display:grid; place-items:center; font-size:11px; font-weight:600; color:var(--t2); }
+.prow span { flex:1; font-size:14px; }
+.fold { padding:14px 20px; border-top:1px solid var(--rowline); font-size:14px; font-weight:500; color:var(--t2); display:flex; justify-content:space-between; cursor:pointer; }
+.toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; padding:12px 16px; font-size:14px; z-index:80; max-width:92vw; }
+/* Daniel 2026-11-06: names only, no generic icons on hand-taken methods */
+.mrow .ic, .tile .ic, .ac .ic, .rec .ic { display:none; }
+.tile { min-height:52px; justify-content:center; text-align:center; -webkit-appearance:none; appearance:none; color:var(--ink)!important; -webkit-text-fill-color:var(--ink); font-size:15px; font-weight:500; line-height:1.3; }
+.desknote { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:24px; color:var(--t2); font-size:15px; line-height:1.5; }
+.rec { display:flex; align-items:center; gap:10px; margin-top:8px; background:var(--grey); border-radius:10px; padding:8px 10px; font-size:14px; color:var(--t2); }
+.rec .ic { width:28px; height:28px; border-radius:8px; background:#fff; } .rec .ic svg { width:16px; height:16px; }
+.rec b { color:var(--ink); font-weight:600; } .rec small { margin-left:auto; color:var(--t3); font-size:12px; }
+
+/* Real phones: adapt to the screen, not only the switch */
+html, body { max-width:100%; overflow-x:hidden; }
+.frame > .appmain { min-width:0; }
+.tabs { max-width:100%; }
+@media (max-width: 720px) {
+  .frame { grid-template-columns:1fr; } .band { display:none; }
+  .appmain { padding:20px 16px 80px; max-width:none; }
+  h1 { font-size:28px; }
+  .tabs { overflow-x:auto; gap:16px; -webkit-overflow-scrolling:touch; }
+  .test { position:static; }
+  .panel { width:100vw; top:auto; height:94vh; border-radius:20px 20px 0 0; }
+}
+.mh { font-size:17px!important; } .sec h2.mh + p { font-size:14px; color:var(--t2); max-width:560px; line-height:1.45; }
+.tog { width:48px; height:28px; border-radius:14px; background:#CFCFCA; border:0; position:relative; flex:none; -webkit-appearance:none; appearance:none; }
+.tog::after { content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; }
+.otherways { padding:14px 16px 16px; border-top:1px solid var(--rowline); } .owl { font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); margin-bottom:10px; }
+.owc { display:flex; flex-wrap:wrap; gap:6px; } .chipw { height:34px; padding:0 12px; border-radius:17px; border:1px solid var(--line); background:#fff; font-size:14px; font-weight:500; color:var(--t2)!important; -webkit-text-fill-color:var(--t2); -webkit-appearance:none; appearance:none; }
+.chipw:hover { background:#FAFAF8; }
+</style>
+</head>
+<body>
+<div class="test">
+  <b>Gym</b><span class="seg" id="g1"></span>
+  <b>Stripe</b><span class="seg" id="g2"></span>
+  <b>Seen as</b><span class="seg" id="g3"></span>
+  <b>Width</b><span class="seg" id="g4"></span>
+</div>
+<div class="case" id="case"></div>
+<div class="wrap"><div class="frame"><div class="band"></div><div class="appmain" id="main"></div></div></div>
+<div class="scrim" data-a="close"></div>
+<div class="panel" id="panel" role="dialog" aria-modal="true"></div>
+<script>
+// ---- the config file (one list per country), as it would live in code ----
+var ICON={
+ cash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg>',
+ phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg>',
+ at:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.6"/><path d="M15.6 12v1.4a2.6 2.6 0 0 0 5.2 0V12a8.8 8.8 0 1 0-3.4 6.9"/></svg>',
+ dollar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M16.5 7.5c-.8-1.3-2.4-2-4.5-2-2.6 0-4.3 1.3-4.3 3.2 0 4.4 9 2.4 9 6.8 0 2-1.9 3.3-4.7 3.3-2.2 0-3.9-.8-4.8-2.2"/></svg>',
+ bank:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9.5 12 4l9 5.5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20.5h18"/></svg>',
+ card:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 10h19M6 15h4"/></svg>',
+ link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+ check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 14.5h6M15 11h3M6 10h3"/></svg>',
+ other:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg>'
+};
+// preset: key · names · icon · is_cash · pay-to label/placeholder/check · starter instructions (to the member) · QR
+var PR=[
+ {preset:'cash', en:'Cash', es:'Efectivo', icon:'cash', cash:true, ins:'Pay at the front desk.'},
+ {preset:'ath_movil', en:'ATH Móvil', es:'ATH Móvil', icon:'phone', to:'Phone or ATH Business name (pATH)', ph:'787-555-0100 or /barriofitness', chk:'athp', ins:'Send to {to} from ATH Móvil. Put your name in the message.', qr:'upload'},
+ {preset:'zelle', en:'Zelle', es:'Zelle', icon:'bank', to:'Email or phone', ph:'pagos@barriofitness.com', chk:'emailphone', ins:'Send by Zelle to {to}. Write your name in the memo.', qr:'upload'},
+ {preset:'venmo', en:'Venmo', es:'Venmo', icon:'at', to:'@username', ph:'@barriofitness', chk:'handle', ins:'Pay {to} on Venmo. Add your name in the note.', qr:'make'},
+ {preset:'paypal', en:'PayPal', es:'PayPal', icon:'at', to:'Email or paypal.me link', ph:'paypal.me/barriofitness', chk:'emaillink', ins:'Pay {to} on PayPal. Add your name in the note.', qr:'make'},
+ {preset:'cash_app', en:'Cash App', es:'Cash App', icon:'dollar', to:'$cashtag', ph:'$barriofitness', chk:'cashtag', ins:'Pay {to} on Cash App. Add your name in the note.', qr:'make'},
+ {preset:'check', en:'Check', es:'Cheque', icon:'check', to:'Payable to', ph:'Barrio Fitness LLC', ins:'Make checks payable to {to}.'},
+ {preset:'bank_transfer', en:'Bank transfer', es:'Transferencia', icon:'bank', ins:'Ask at the front desk for our bank details.'},
+ {preset:'own_terminal', en:'Card on your own terminal', es:'Tarjeta en tu terminal', icon:'card', ins:'We take cards at the front desk.'},
+ {preset:'payment_link', en:'Payment link', es:'Enlace de pago', icon:'link', to:'Link', ph:'https://square.link/u/…', chk:'url', ins:'Pay online at {to}.'}
+];
+function preset(k){ return PR.filter(function(p){ return p.preset===k; })[0]; }
+function warnFor(chk,v){ v=(v||'').trim(); if(!v||!chk) return '';
+  if(chk==='handle'&&!/^@[A-Za-z0-9_-]{2,}$/.test(v)) return 'A Venmo username starts with @ and has no spaces. Saving anyway is fine.';
+  if(chk==='cashtag'&&!/^\$[A-Za-z0-9_]{1,}$/.test(v)) return 'A $cashtag starts with $. Saving anyway is fine.';
+  if(chk==='url'&&!/^https?:\/\//.test(v)) return 'This doesn\'t look like a link (https://…). Saving anyway is fine.';
+  if(chk==='emailphone'&&!(/@/.test(v)||/^[\d\s()+-]{10,}$/.test(v))) return 'Zelle needs an email or a phone number. Saving anyway is fine.';
+  if(chk==='emaillink'&&!(/@/.test(v)||/paypal\.me/.test(v))) return 'An email or a paypal.me link. Saving anyway is fine.';
+  if(chk==='athp'&&!(/^[\d\s()+-]{10,}$/.test(v)||/^\/?[a-z0-9]+$/i.test(v))) return 'A phone number, or your ATH Business name. Saving anyway is fine.';
+  return ''; }
+
+// ---- state ----
+var S={gym:'set', stripe:'ready', role:'owner', wid:'desk', methods:[], stoppedOpen:false, edit:null, draft:null, ac:''};
+function seed(){
+  S.methods = S.gym==='empty' ? [] : [
+   {id:1, preset:'cash', name:'Efectivo', cash:true, to:'', ins:'Pay at the front desk.', hidden:false, stopped:false, plans:0},
+   {id:2, preset:'ath_movil', name:'ATH Móvil', cash:false, to:'787-555-0100', ins:'Send to 787-555-0100 from ATH Móvil. Put your name in the message.', hidden:false, stopped:false, plans:5},
+   {id:3, preset:'zelle', name:'Zelle', cash:false, to:'pagos@barriofitness.com', ins:'Send by Zelle to pagos@barriofitness.com. Write your name in the memo.', hidden:true, stopped:false, plans:3},
+   {id:4, preset:'own_terminal', name:'Card on our terminal', cash:false, to:'', ins:'We take cards at the front desk.', hidden:false, stopped:false, plans:0},
+   {id:5, preset:'venmo', name:'Venmo', cash:false, to:'@barriofitness', ins:'Pay @barriofitness on Venmo. Add your name in the note.', hidden:false, stopped:true, plans:0}
+  ];
+}
+var PLANS={2:[['CO','Carmen Ortiz','Unlimited monthly'],['JR','José Rivera','Unlimited monthly'],['AM','Ana Martínez','3x a week'],['KM','Kevin Méndez','Unlimited monthly'],['SR','Sofía Ramos','10-pack monthly']],3:[['LV','Laura Vélez','Unlimited monthly'],['RT','Rafael Torres','Unlimited monthly'],['MD','Marta Díaz','3x a week']]};
+
+var CASES={
+ empty:'<b>A new gym, no methods yet.</b> Credit card leads; <b>Manual payments</b> carries the helper text (Daniel 2026-11-07); Cash is a switch, the rest are quiet chips (Daniel: "the hand pays shouldn\'t have prominence"). Tap one: its fields come pre-shaped (ATH Móvil asks for a phone or pATH, Venmo for an @username). Nothing exists until saved.',
+ set:'<b>Barrio, set up.</b> Credit card leads; Manual payments below with its helper text; rows in the order added. Zelle is <b>hidden from new sales</b> while 3 plans still renew by it; Venmo is stopped and folded away. Tap a row to edit; <b>+ Add a way</b> autocompletes from the list.'
+};
+
+function stripeCard(){
+  var h='';
+  if(S.stripe==='test') h+='<div class="banner">Test mode · no real money moves. Cards here are Stripe\'s test cards.</div>';
+  var st={none:['Not connected','grey','Take cards in the app, online and at the desk. Plans renew and charge on their own.','Connect','main'],
+          notready:['Not ready','red','Stripe needs a few more details before you can take cards.','Finish setup','main'],
+          ready:['Ready','green','Cards on · payouts to bank •• 6789','Open Stripe',''],
+          test:['Test mode','blue','Cards on, test keys · payouts to bank •• 6789','Open Stripe','']}[S.stripe];
+  h+='<div class="card"><div class="stripe"><div class="ic">'+ICON.card+'</div><div class="tx"><div class="nm">Stripe <span class="pill '+st[1]+'">'+st[0]+'</span></div><div class="st">'+st[2]+'</div>'+(S.stripe==='ready'||S.stripe==='test'?'<div class="fee">Plans renew and charge on their own · Stripe\'s card fee and Zana\'s per-payment fee apply</div>':'')+'</div><button class="btn '+st[4]+'" data-a="stripe">'+st[3]+'</button></div></div>';
+  return h;
+}
+function row(m){
+  var p=preset(m.preset)||{icon:'other'};
+  var fact = m.cash ? '<span class="kl">Cash</span>' : (m.to?'<span class="f">'+m.to+'</span>':'<span class="f" style="color:var(--t3)">'+(m.ins||'')+'</span>');
+  var lab = m.stopped?'<span class="kl">Stopped</span>':(m.hidden?'<span class="kl">Hidden from new sales</span>':'');
+  var plans = m.plans? '<span class="f" style="color:var(--t3)">· '+m.plans+' plans</span>':'';
+  return '<div class="mrow'+(m.stopped?' stopped':'')+'" data-a="edit" data-x="'+m.id+'"><div class="ic">'+ICON[p.icon]+'</div><div class="tx"><div class="nm">'+m.name+'</div><div class="why">'+(lab?lab:'')+fact+plans+'</div></div><span class="chev">›</span></div>';
+}
+function render(){
+  document.body.className=(S.wid==='phone'?'phone ':'')+(S.edit!==null?'open':'');
+  document.getElementById('case').innerHTML=CASES[S.gym];
+  var h='<h1>Settings</h1><div class="tabs"><span>Business</span><span>Look</span><span class="on">Payments</span><span>Documents</span><span>Tracks</span><span>Tax</span></div>';
+  if(S.role==='desk'){ document.getElementById('main').innerHTML=h.replace('<span class="on">Payments</span>','')+'<div class="desknote">The front desk doesn\'t see Payments. The methods show up where the desk uses them: on <b>Collect</b>.</div>'; panel(); return; }
+  h+='<div class="sec"><div class="sech"><div><h2>Credit card</h2><p>Powered by Stripe.</p></div></div>'+stripeCard()+'</div>';
+  var live=S.methods.filter(function(m){ return !m.stopped; }), stopped=S.methods.filter(function(m){ return m.stopped; });
+  h+='<div class="sec"><div class="sech"><div><h2 class="mh">Manual payments</h2><p>You mark each one as paid yourself. Plans don’t renew on their own: when one is due, it shows on Owed to you.</p></div></div><div class="card">';
+  if(!live.length){
+    h+='<div class="mrow" style="cursor:default"><div class="tx"><div class="nm">Cash</div><div class="why"><span class="f" style="color:var(--t3)">Taken at the desk</span></div></div><button class="tog" data-a="cashon" aria-label="Accept cash"></button></div>'+
+     '<div class="otherways"><div class="owl">Other ways you track</div><div class="owc">'+PR.filter(function(p){ return !p.cash; }).map(function(p){ return '<button class="chipw" data-a="pick" data-x="'+p.preset+'">+ '+p.en+'</button>'; }).join('')+'<button class="chipw" data-a="add">+ Something else</button></div></div>';
+  } else {
+    h+=live.map(row).join('')+'<div class="addbar"><button class="btn sm" data-a="add">+ Add a way</button></div>';
+    if(stopped.length) h+='<div class="fold" data-a="fold"><span>No longer accepted ('+stopped.length+')</span><span>'+(S.stoppedOpen?'⌃':'⌄')+'</span></div>'+(S.stoppedOpen?stopped.map(row).join(''):'');
+  }
+  h+='</div></div>';
+  document.getElementById('main').innerHTML=h; panel();
+}
+function panel(){
+  var el=document.getElementById('panel'); if(S.edit===null){ el.innerHTML=''; return; }
+  var d=S.draft, p=preset(d.preset)||{}, isNew=!d.id, h='';
+  h+='<div class="ph"><h3>'+(isNew?'Add a method':d.name)+'</h3><button class="x" data-a="close" aria-label="Close">✕</button></div><div class="pb">';
+  h+='<div class="fld"><label for="nm">Name</label><input type="text" id="nm" value="'+(d.name||'')+'" placeholder="Start typing: Cash, ATH Móvil, Venmo…" autocomplete="off">';
+  if(isNew&&S.ac){ var q=S.ac.toLowerCase(), list=PR.filter(function(x){ return (x.en+' '+x.es).toLowerCase().indexOf(q)>=0; });
+    h+='<div class="ac">'+list.map(function(x){ return '<button data-a="acpick" data-x="'+x.preset+'"><span class="ic">'+ICON[x.icon]+'</span>'+x.en+(x.es!==x.en?' <span style="color:var(--t3)">· '+x.es+'</span>':'')+'<small>'+(x.cash?'Cash':(x.to||''))+'</small></button>'; }).join('')+'<button data-a="acother"><span class="ic">'+ICON.other+'</span>Use “'+S.ac+'”<small>Other</small></button></div>'; }
+  h+=(d.preset&&d.preset!=='other'?'<div class="rec"><span class="ic">'+ICON[p.icon]+'</span><span><b>'+p.en+'</b> · '+(p.cash?'cash':(p.to?'asks for '+p.to.replace(/^@/,'an @').replace(/^\$/,'a $'):'no pay to needed'))+'</span>'+(!isNew?'<small>Renaming keeps this</small>':'')+'</div>':(isNew&&!S.ac&&d.name?'<div class="hint">Not on the list. That\'s fine: it gets a plain "Pay to" field.</div>':''))+'</div>';
+  h+='<div class="sw"><div class="t"><b>This is cash</b><span>Collect shows Amount tendered and Change due.</span></div><button class="tog'+(d.cash?' on':'')+'" data-a="cash" aria-pressed="'+d.cash+'"></button></div>';
+  if(!d.cash){ var lbl=p.to?('Your '+p.en+' '+p.to.replace(/^Phone or ATH Business name/,'phone or ATH Business name')):'Pay to (optional)';
+    h+='<div class="fld"><label for="to">'+lbl+(p.to?' <span style="color:var(--t3);font-weight:400">(optional)</span>':'')+'</label><input type="text" id="to" value="'+(d.to||'')+'" placeholder="'+(p.ph||'A phone, an email, a handle or a link')+'">'+(warnFor(p.chk,d.to)?'<div class="warn">'+warnFor(p.chk,d.to)+'</div>':'<div class="hint">Shown on its own line at the desk and to the member.'+(p.qr==='make'?' Zana can make a QR code from it later.':p.qr==='upload'?' Later you can upload your '+p.en+' QR code.':'')+'</div>')+'</div>'; }
+  h+='<div class="fld"><label for="ins">Instructions for the member</label><textarea id="ins">'+(d.ins||'')+'</textarea><div class="hint">Shown at the desk, in the window turned to the member, and in payment reminder emails.</div></div>';
+  if(!isNew){
+    h+='<div class="sw"><div class="t"><b>Hidden from new sales</b><span>Off Collect and member choices. Plans already paid by it keep renewing.</span></div><button class="tog'+(d.hidden?' on':'')+'" data-a="hide" aria-pressed="'+d.hidden+'"></button></div>';
+    h+='<div class="danger">';
+    if(d.stopped) h+='<div style="font-size:14px;color:var(--t2)">Stopped. Every past payment by '+d.name+' keeps its history.</div><button class="btn full" data-a="again">Accept again</button>';
+    else if(d.plans){ h+='<div class="blocked"><b>'+d.plans+' plans are still paid by '+d.name+'.</b><span>Switch each one to another method before you stop accepting it. Until then, hide it from new sales.</span>'+(PLANS[d.id]||[]).map(function(r){ return '<div class="prow"><div class="av">'+r[0]+'</div><span>'+r[1]+' · '+r[2]+'</span><button class="btn sm" data-a="switch" data-x="'+r[1]+'">Switch</button></div>'; }).join('')+'</div><button class="btn risk full" disabled>Stop accepting</button>'; }
+    else h+='<button class="btn risk full" data-a="stop">Stop accepting</button><div class="hint" style="font-size:13px;color:var(--t3)">Past payments keep their history. You can accept it again later.</div>';
+    h+='</div>';
+  }
+  h+='</div><div class="pf"><button class="btn" data-a="close">Cancel</button><button class="btn main" data-a="save">'+(isNew?'Add':'Save')+'</button></div>';
+  el.innerHTML=h;
+  var nm=document.getElementById('nm'); if(nm){ nm.oninput=function(){ d.name=nm.value; if(isNew){ S.ac=nm.value.trim(); var hit=PR.filter(function(x){ return x.en.toLowerCase()===S.ac.toLowerCase()||x.es.toLowerCase()===S.ac.toLowerCase(); })[0]; if(hit){ var nmv=nm.value; S.draft=fromPreset(hit.preset); S.draft.name=nmv; d=S.draft; S.ac=''; } var pos=nm.selectionStart; panel(); var n2=document.getElementById('nm'); n2.focus(); n2.setSelectionRange(pos,pos);} }; }
+  var to=document.getElementById('to'); if(to){ to.oninput=function(){ var old=d.to; d.to=to.value; var p2=preset(d.preset); if(p2&&p2.ins&&p2.ins.indexOf('{to}')>=0){ var o=p2.ins.replace('{to}',old||'…'); if(!d.ins||d.ins===o) d.ins=p2.ins.replace('{to}',d.to||'…'); } var pos=to.selectionStart; panel(); var t2=document.getElementById('to'); t2.focus(); t2.setSelectionRange(pos,pos); }; }
+  var ins=document.getElementById('ins'); if(ins){ ins.oninput=function(){ d.ins=ins.value; }; }
+}
+function fromPreset(k){ var p=preset(k); return {preset:k, name:p.en, cash:!!p.cash, to:'', ins:(p.ins||'').replace('{to}','…'), hidden:false, stopped:false, plans:0}; }
+function toast(m){ var t=document.createElement('div'); t.className='toast'; t.innerHTML=m; document.body.appendChild(t); setTimeout(function(){ t.remove(); },2600); }
+function seg(id,list,key){ document.getElementById(id).innerHTML=list.map(function(o){ return '<button data-k="'+key+'" data-v="'+o[0]+'" aria-pressed="'+(S[key]===o[0])+'">'+o[1]+'</button>'; }).join(''); }
+function bar(){ seg('g1',[['empty','New, nothing set'],['set','Barrio, set up']],'gym'); seg('g2',[['none','Not connected'],['notready','Not ready'],['ready','Ready'],['test','Test mode']],'stripe'); seg('g3',[['owner','Owner'],['desk','Front desk']],'role'); seg('g4',[['desk','Laptop'],['phone','Phone']],'wid'); }
+document.addEventListener('click',function(e){
+  var k=e.target.closest('[data-k]'); if(k){ S[k.dataset.k]=k.dataset.v; if(k.dataset.k==='gym'){ seed(); if(S.gym==='empty') S.stripe='none'; bar(); } S.edit=null; bar(); render(); return; }
+  var b=e.target.closest('[data-a]'); if(!b) return; var a=b.dataset.a, x=b.dataset.x;
+  if(a==='edit'){ var m=S.methods.filter(function(m){ return m.id==x; })[0]; S.edit=m.id; S.draft=JSON.parse(JSON.stringify(m)); render(); }
+  else if(a==='pick'){ S.edit=0; S.draft=fromPreset(x); S.draft._picked=true; render(); setTimeout(function(){ var t=document.getElementById('to'); if(t) t.focus(); },50); }
+  else if(a==='add'){ S.edit=0; S.draft={preset:'other', name:'', cash:false, to:'', ins:'', plans:0}; S.ac=''; render(); setTimeout(function(){ document.getElementById('nm').focus(); },50); }
+  else if(a==='acpick'){ S.draft=fromPreset(x); S.ac=''; render(); setTimeout(function(){ var t=document.getElementById('to'); if(t) t.focus(); },50); }
+  else if(a==='acother'){ S.draft.preset='other'; S.ac=''; render(); }
+  else if(a==='cashon'){ var c=fromPreset('cash'); c.id=Date.now(); S.methods.unshift(c); render(); toast('Cash is on. It shows on Collect now.'); }
+  else if(a==='close'){ S.edit=null; S.ac=''; render(); }
+  else if(a==='cash'){ S.draft.cash=!S.draft.cash; panel(); }
+  else if(a==='hide'){ S.draft.hidden=!S.draft.hidden; panel(); }
+  else if(a==='save'){ var d=S.draft; if(!d.name.trim()){ toast('A method needs a name.'); return; } if(!d.id){ d.id=Date.now(); d.stopped=false; d.hidden=false; S.methods.push(d); toast(d.name+' added. It shows on Collect now.'); } else { S.methods=S.methods.map(function(m){ return m.id===d.id?d:m; }); toast('Saved. Past receipts keep the name they were taken under.'); } S.edit=null; render(); }
+  else if(a==='stop'){ S.draft.stopped=true; S.draft.hidden=false; S.methods=S.methods.map(function(m){ return m.id===S.draft.id?S.draft:m; }); S.edit=null; render(); toast(S.draft.name+' stopped. It\'s under No longer accepted.'); }
+  else if(a==='again'){ S.draft.stopped=false; S.methods=S.methods.map(function(m){ return m.id===S.draft.id?S.draft:m; }); S.edit=null; render(); toast(S.draft.name+' accepted again.'); }
+  else if(a==='switch'){ toast('Opens '+x+'\'s plan with Manage plan › Pay by, to pick another method.'); }
+  else if(a==='fold'){ S.stoppedOpen=!S.stoppedOpen; render(); }
+  else if(a==='stripe'){ toast({none:'Opens Stripe\'s own form in a new tab.',notready:'Opens Stripe\'s form where you left off.',ready:'Opens your Stripe dashboard.',test:'Opens your Stripe dashboard (test).'}[S.stripe]); }
+});
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&S.edit!==null){ S.edit=null; render(); } });
+seed(); bar(); render();
+</script>
+</body>
+</html>
+
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}html,body{margin:0}</style>
+</head>
+<body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Products Wizard</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --ink:#111; --t2:#4A4A48; --t3:#5C5C59; --line:#E8E8E5; --rowline:#F0F0ED; --page:#F5F5F3; --card:#fff; --fill:#F0F0ED; --fillh:#E4E4E0; --grey:#F3F3F0; --red:#A8261B; --redbg:#FDE8E6; --green:#17663A; --greenbg:#E4F5E8; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--page); color:var(--ink); font-family:'Geist',system-ui,sans-serif; }
+button, input { font-family:inherit; color:var(--ink); -webkit-text-fill-color:currentColor; }
+button { cursor:pointer; -webkit-appearance:none; appearance:none; }
+.test { background:#111; color:#ddd; font-size:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:8px 16px; position:sticky; top:0; z-index:50; }
+.test b { color:#fff; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:11px; }
+.seg { display:inline-flex; gap:2px; background:#2a2a2a; padding:2px; border-radius:8px; flex-wrap:wrap; }
+.seg button { border:0; background:none; color:#ccc; -webkit-text-fill-color:#ccc; height:28px; padding:0 10px; border-radius:6px; font-size:12px; }
+.seg button[aria-pressed="true"] { background:#fff; color:#111; -webkit-text-fill-color:#111; }
+.case { background:#1d1d1c; color:#e9e9e6; font-size:13px; padding:8px 16px; line-height:1.45; } .case b { color:#fff; }
+.frame { display:grid; grid-template-columns:96px 1fr; min-height:calc(100vh - 80px); }
+.band { background:#0E0E0E; }
+.appmain { padding:32px 40px 80px; max-width:880px; }
+.phone .frame { grid-template-columns:1fr; } .phone .band { display:none; }
+.phone .wrap { background:#ddd; padding:16px 0; } .phone .appmain { max-width:390px; margin:0 auto; padding:20px 16px 80px; background:var(--page); min-height:800px; }
+.lab { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }
+.titlerow { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
+h1 { margin:4px 0 16px; font-size:40px; font-weight:700; letter-spacing:-.03em; } .phone h1 { font-size:28px; }
+.tabs { display:flex; gap:20px; border-bottom:1px solid var(--line); margin-bottom:24px; }
+.tabs span { padding:10px 0; font-size:15px; color:var(--t3); } .tabs span.on { color:var(--ink); font-weight:600; border-bottom:2px solid var(--ink); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+.prow { display:flex; align-items:center; gap:12px; padding:12px 20px; border-top:1px solid var(--rowline); min-height:68px; cursor:pointer; }
+.prow:first-child { border-top:0; } .prow:hover { background:#FAFAF8; }
+.prow .tx { flex:1; min-width:0; } .prow .nm { font-size:16px; font-weight:500; }
+.prow .why { font-size:14px; color:var(--t2); margin-top:3px; display:flex; gap:8px; align-items:center; white-space:nowrap; overflow:hidden; }
+.prow .price { font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; }
+.kl { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); flex:none; }
+.chev { color:var(--t3); font-size:20px; }
+.btn { height:36px; padding:0 14px; border-radius:10px; border:0; background:var(--fill); font-size:15px; font-weight:500; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+.btn:hover { background:var(--fillh); } .btn.main { background:var(--ink); color:#fff; -webkit-text-fill-color:#fff; } .btn.risk { background:var(--redbg); color:var(--red); -webkit-text-fill-color:var(--red); }
+.btn:disabled { opacity:.4; cursor:not-allowed; }
+/* panel */
+.scrim { position:fixed; inset:0; background:rgba(17,17,17,.25); z-index:60; display:none; }
+.panel { position:fixed; top:0; right:0; bottom:0; width:460px; max-width:100vw; background:var(--card); z-index:61; box-shadow:-8px 0 32px rgba(0,0,0,.12); display:none; flex-direction:column; }
+.open .scrim { display:block; } .open .panel { display:flex; }
+.phone .panel { width:100vw; top:auto; height:94vh; border-radius:20px 20px 0 0; }
+.ph { display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--line); min-height:64px; }
+.ph h3 { margin:0; font-size:20px; font-weight:700; flex:1; }
+.ib { width:36px; height:36px; border-radius:10px; border:0; background:var(--fill); font-size:18px; display:grid; place-items:center; flex:none; }
+.pb { flex:1; overflow:auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+.pb .q { font-size:17px; font-weight:600; margin:0; }
+.pf { padding:16px 20px; border-top:1px solid var(--line); display:flex; gap:8px; flex-direction:column; }
+.pf .btn { height:44px; border-radius:12px; font-size:16px; width:100%; }
+.pf .why { font-size:13px; color:var(--t3); text-align:center; }
+/* choice cards (kit: 72 tall, radio) */
+.choice { display:flex; gap:12px; align-items:flex-start; border:1px solid var(--line); border-radius:14px; padding:14px 16px; background:#fff; text-align:left; width:100%; min-height:72px; }
+.choice:hover { background:#FAFAF8; }
+.choice.on { border-color:var(--ink); box-shadow:inset 0 0 0 1px var(--ink); }
+.radio { width:20px; height:20px; border-radius:50%; border:2px solid #BDBDB8; flex:none; margin-top:2px; position:relative; }
+.choice.on .radio { border-color:var(--ink); } .choice.on .radio::after { content:''; position:absolute; inset:3px; border-radius:50%; background:var(--ink); }
+.choice b { display:block; font-size:16px; font-weight:600; } .choice span { display:block; font-size:14px; color:var(--t2); margin-top:3px; } .choice small { display:block; font-size:13px; color:var(--t3); margin-top:6px; }
+/* fields */
+.fld label { display:block; font-size:14px; font-weight:600; margin-bottom:6px; }
+.fld .hint { font-size:13px; color:var(--t3); margin-top:6px; }
+input[type=text] { width:100%; border:1px solid var(--line); border-radius:12px; padding:0 14px; height:44px; font-size:16px; background:#fff; }
+input:focus { outline:2px solid var(--ink); outline-offset:-1px; border-color:transparent; }
+.money { position:relative; } .money span { position:absolute; left:14px; top:12px; font-size:16px; color:var(--t3); } .money input { padding-left:26px; font-variant-numeric:tabular-nums; }
+.row2 { display:flex; gap:12px; } .row2 .fld { flex:1; }
+.net { background:var(--grey); border-radius:12px; padding:12px 14px; font-size:14px; color:var(--t2); display:flex; flex-direction:column; gap:4px; }
+.net .l1 { display:flex; justify-content:space-between; gap:12px; } .net b { color:var(--ink); font-variant-numeric:tabular-nums; } .net small { color:var(--t3); font-size:12px; }
+.cnt { display:flex; align-items:center; gap:0; border:1px solid var(--line); border-radius:12px; width:max-content; overflow:hidden; }
+.cnt button { width:44px; height:44px; border:0; background:var(--fill); font-size:20px; } .cnt span { min-width:56px; text-align:center; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
+.checks { border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.ck { display:flex; align-items:center; gap:12px; padding:12px 14px; border-top:1px solid var(--rowline); background:#fff; width:100%; border-left:0; border-right:0; border-bottom:0; text-align:left; font-size:15px; }
+.ck:first-child { border-top:0; } .box { width:22px; height:22px; border-radius:6px; border:2px solid #BDBDB8; display:grid; place-items:center; font-size:13px; color:#fff; flex:none; }
+.ck.on .box { background:var(--ink); border-color:var(--ink); }
+.ck small { margin-left:auto; color:var(--t3); font-size:13px; }
+/* summary / setting rows (label · value · ›) */
+.srows { border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.srow { display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid var(--rowline); background:#fff; width:100%; border-left:0; border-right:0; border-bottom:0; text-align:left; }
+.srow:first-child { border-top:0; } .srow:hover { background:#FAFAF8; }
+.srow .k { font-size:15px; font-weight:500; flex:none; width:120px; } .srow .v { flex:1; font-size:15px; color:var(--t2); }
+.hero { background:var(--grey); border-radius:14px; padding:16px; } .hero .kl { margin-bottom:4px; } .hero .t { font-size:22px; font-weight:700; } .hero .p { font-size:16px; color:var(--t2); margin-top:4px; font-variant-numeric:tabular-nums; }
+.archive { margin-top:8px; }
+.toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; padding:12px 16px; font-size:14px; z-index:80; max-width:92vw; }
+
+/* Real phones: adapt to the screen, not only the switch */
+html, body { max-width:100%; overflow-x:hidden; }
+.frame > .appmain { min-width:0; }
+.tabs { max-width:100%; }
+@media (max-width: 720px) {
+  .frame { grid-template-columns:1fr; } .band { display:none; }
+  .appmain { padding:20px 16px 80px; max-width:none; }
+  h1 { font-size:28px; }
+  .tabs { overflow-x:auto; gap:16px; -webkit-overflow-scrolling:touch; }
+  .test { position:static; }
+  .panel { width:100vw; top:auto; height:94vh; border-radius:20px 20px 0 0; }
+}
+.titlerow { flex-wrap:nowrap!important; align-items:center!important; margin:4px 0 16px; }
+.titlerow h1 { margin:0; }
+.titlerow .btn { height:36px!important; flex:none; align-self:center; }
+.tools { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; }
+.chips { display:flex; gap:6px; flex-wrap:wrap; }
+.chip { height:34px; padding:0 12px; border-radius:17px; border:1px solid var(--line); background:#fff; font-size:14px; font-weight:500; }
+.chip span { color:var(--t3); -webkit-text-fill-color:var(--t3); margin-left:2px; font-variant-numeric:tabular-nums; }
+.chip.on { background:var(--ink); border-color:var(--ink); color:#fff; -webkit-text-fill-color:#fff; } .chip.on span { color:#ccc; -webkit-text-fill-color:#ccc; }
+.search { width:220px!important; height:36px!important; border-radius:10px!important; font-size:14px!important; }
+table.pt { width:100%; border-collapse:collapse; font-size:15px; }
+.pt th { text-align:left; font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); padding:12px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+.pt th:first-child, .pt td:first-child { padding-left:20px; }
+.pt th.r, .pt td.r { text-align:right; } .pt th.c, .pt td.c { text-align:center; }
+.sortb { border:0; background:none; padding:0; font:inherit; letter-spacing:inherit; text-transform:inherit; color:var(--t3); -webkit-text-fill-color:var(--t3); }
+.sortb.on { color:var(--ink); -webkit-text-fill-color:var(--ink); }
+.pt td { padding:12px; border-top:1px solid var(--rowline); height:56px; vertical-align:middle; }
+.pt tbody tr:first-child td { border-top:0; } .pt tbody tr { cursor:pointer; } .pt tbody tr:hover { background:#FAFAF8; }
+.pn { display:flex; align-items:center; gap:10px; font-weight:500; }
+.ki { width:28px; height:28px; border-radius:8px; background:var(--fill); display:grid; place-items:center; color:var(--t2); flex:none; } .ki svg { width:16px; height:16px; }
+.num { font-variant-numeric:tabular-nums; } .mut { color:var(--t3); font-weight:400; } .tr { color:var(--t2); }
+.mrows { display:none; } .mrows .prow .ki { width:36px; height:36px; border-radius:10px; } .mrows .prow .ki svg { width:20px; height:20px; }
+.mrows .pr { font-weight:600; font-size:15px; white-space:nowrap; }
+@media (max-width: 720px) { table.pt { display:none; } .mrows { display:block; } .search { width:100%!important; } .chips { flex-wrap:nowrap; overflow-x:auto; width:100%; padding-bottom:2px; } .chip { flex:none; } }
+.phone table.pt { display:none; } .phone .mrows { display:block; } .phone .search { width:100%!important; }
+.seg2 { display:inline-flex; background:var(--fill); border-radius:10px; padding:3px; gap:2px; }
+.seg2 button { border:0; background:none; height:38px; padding:0 14px; border-radius:8px; font-size:15px; font-weight:500; }
+.seg2 button.on { background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.08); }
+.sw2 { display:flex; align-items:center; justify-content:space-between; gap:12px; border-top:1px solid var(--line); padding-top:16px; }
+.sw2 b { display:block; font-size:15px; font-weight:600; } .sw2 span { font-size:13px; color:var(--t3); }
+.tog { width:48px; height:28px; border-radius:14px; background:#CFCFCA; border:0; position:relative; flex:none; }
+.tog::after { content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:left .15s; }
+.tog.on { background:var(--ink); } .tog.on::after { left:23px; }
+.pn .kl { margin-left:4px; }
+.appmain { max-width:1080px; }
+.pt td { white-space:nowrap; } .pt td, .pt th { padding-left:10px; padding-right:10px; }
+.pt td.tr { max-width:170px; overflow:hidden; text-overflow:ellipsis; }
+.pt td:first-child { max-width:260px; } .pn { overflow:hidden; } .pn > span:not(.ki):not(.kl) { overflow:hidden; text-overflow:ellipsis; }
+.lab { font-size:13px!important; } .kl { font-size:13px!important; }
+.titlerow .btn { height:40px!important; }
+.panel { width:520px!important; }
+.lab2 { font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }
+.sum { border:1px solid var(--line); border-radius:14px; padding:6px 16px; }
+.sum > div { display:flex; gap:12px; padding:10px 0; border-top:1px solid var(--rowline); font-size:15px; } .sum > div:first-child { border-top:0; }
+.sum .k { width:110px; flex:none; font-weight:500; } .sum .v { color:var(--t2); }
+.srow.lone { border:1px solid var(--line); border-radius:14px; }
+.ck.dim { color:var(--t3); -webkit-text-fill-color:var(--t3); } .ck.dim .box { background:#BDBDB8; border-color:#BDBDB8; }
+.undo { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; height:52px; padding:0 8px 0 16px; display:flex; align-items:center; gap:16px; font-size:14px; z-index:90; max-width:92vw; }
+.undo button { border:0; background:none; color:#fff; -webkit-text-fill-color:#fff; font-weight:600; font-size:14px; height:40px; padding:0 10px; border-radius:8px; } .undo button:hover { background:#2a2a2a; }
+.blast { background:#FDF1EF; border:1px solid #F6D3CE; border-radius:12px; padding:10px 12px; font-size:13px; display:flex; flex-direction:column; gap:3px; text-align:left; } .blast b { font-size:14px; } .blast small { color:var(--t3); margin-top:3px; }
+</style>
+</head>
+<body>
+<div class="test"><b>Start</b><span class="seg" id="g1"></span><b>Width</b><span class="seg" id="g2"></span></div>
+<div class="case" id="case"></div>
+<div class="wrap"><div class="frame"><div class="band"></div><div class="appmain" id="main"></div></div></div>
+<div class="scrim" data-a="close"></div>
+<div class="panel" id="panel" role="dialog" aria-modal="true"></div>
+<script>
+// Grounded at main 32de857: PlanIn / PackIn. A Product is a Plan (renews every N weeks or months) or a Pack (expires after N days);
+// credits per cycle or per pack (empty = unlimited); member_granting required, no default; one or more Tracks; tax from the business, overridable.
+var IVU=0.115, ZANA=0.50, SPCT=0.029, SFIX=0.30;
+var TRACKS=[['crossfit','CrossFit'],['yoga','Yoga'],['kids','Kids'],['open','Open Gym'],['pt','Personal Training']];
+var KICON={plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/></svg>',pack:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="8" width="15" height="11" rx="2"/><path d="M6 5h13a2 2 0 0 1 2 2v9"/></svg>',single:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/></svg>'};
+var SHAPES={
+ plan:{t:'Plan', d:'Renews on a schedule until they stop it.', ex:'Unlimited monthly · $89 · or 3 classes a week · $39 weekly', tpl:{name:'Unlimited monthly', price:'89', every:1, unit:'month', credits:null, member:true}},
+ pack:{t:'Pack of visits', d:'A number of visits, used before it expires.', ex:'10 classes in 6 months · $150', tpl:{name:'10-class pack', price:'150', credits:10, exp:6, expUnit:'month', member:null}},
+ single:{t:'Single visit', d:'A drop-in or a day pass. Saved as a one-day pack.', ex:'Day pass · $15', tpl:{name:'Day pass', price:'15', credits:null, exp:1, expUnit:'day', member:false}}
+};
+var UNIT={day:['day','days'],week:['week','weeks'],month:['month','months'],year:['year','years']};
+var SHORT={day:'d',week:'wk',month:'mo',year:'yr'};
+function us(n,k){ return n+' '+SHORT[k]; }
+function u(n,k){ return n+' '+UNIT[k][n===1?0:1]; }
+var S={start:'list', wid:'desk', step:0, d:null, edit:null, chip:'all', sort:'kind', dir:1, q:'', sheet:null, list:[
+ {id:1, shape:'plan', name:'Unlimited monthly', price:'89', every:1, unit:'month', credits:null, tracks:'all', member:true, tax:'default', active:48},
+ {id:2, shape:'plan', name:'8 classes a month', price:'69', every:1, unit:'month', credits:8, tracks:['crossfit','open'], member:true, tax:'default', active:19},
+ {id:3, shape:'plan', name:'Kids club', price:'60', every:1, unit:'month', credits:8, tracks:['kids'], member:true, tax:'exempt', active:12},
+ {id:16, shape:'plan', name:'3 classes a week', price:'39', every:1, unit:'week', credits:3, tracks:['crossfit'], member:true, tax:'default', active:11},
+ {id:4, shape:'plan', name:'Yoga unlimited', price:'75', every:1, unit:'month', credits:null, tracks:['yoga'], member:true, tax:'default', active:9},
+ {id:5, shape:'plan', name:'Couples unlimited', price:'150', every:1, unit:'month', credits:null, tracks:'all', member:true, tax:'default', active:3, hidden:true},
+ {id:6, shape:'plan', name:'Personal training 4x', price:'240', every:4, unit:'week', credits:4, tracks:['pt'], member:false, tax:'default', active:6},
+ {id:7, shape:'pack', name:'10-class pack', price:'150', credits:10, exp:6, expUnit:'month', tracks:['crossfit','open'], member:false, tax:'default', active:21},
+ {id:8, shape:'pack', name:'20-class pack', price:'270', credits:20, exp:12, expUnit:'month', tracks:['crossfit','open'], member:true, tax:'default', active:7},
+ {id:9, shape:'pack', name:'Intro 3-pack', price:'45', credits:3, exp:1, expUnit:'month', tracks:'all', member:false, tax:'default', active:4},
+ {id:10, shape:'pack', name:'PT 5 sessions', price:'325', credits:5, exp:3, expUnit:'month', tracks:['pt'], member:false, tax:'default', active:2},
+ {id:11, shape:'single', name:'Day pass', price:'15', credits:null, exp:1, expUnit:'day', tracks:'all', member:false, tax:'default', active:0},
+ {id:12, shape:'single', name:'Drop-in yoga', price:'18', credits:1, exp:1, expUnit:'day', tracks:['yoga'], member:false, tax:'default', active:0},
+ {id:13, shape:'single', name:'Week pass', price:'45', credits:null, exp:7, expUnit:'day', tracks:'all', member:false, tax:'default', active:2},
+ {id:14, shape:'plan', name:'Unlimited monthly (2025 price)', price:'79', every:1, unit:'month', credits:null, tracks:'all', member:true, tax:'default', active:14, stopped:true},
+ {id:15, shape:'pack', name:'Summer 8-pack', price:'99', credits:8, exp:2, expUnit:'month', tracks:'all', member:false, tax:'default', active:1, stopped:true}
+]};
+function m(n){ return '$'+(Math.round(n*100)/100).toFixed(2); }
+function net(p,tax){ p=parseFloat(p)||0; var base=tax==='exempt'?p:p/(1+IVU); return {base:base, card:base-(p*SPCT+SFIX)-ZANA}; }
+function tracksText(t){ if(t==='all') return 'All'; return t.map(function(k){ return TRACKS.filter(function(x){ return x[0]===k; })[0][1]; }).join(', ')||'None picked'; }
+function visitsText(x){ var v=x.credits==null?'Unlimited':x.credits; if(x.shape==='plan') return v+(x.credits==null?'':' / '+(x.every===1?SHORT[x.unit]:us(x.every,x.unit))); return v+' <span class="mut">· '+us(x.exp,x.expUnit)+'</span>'; }
+function priceText(x){ return m(parseFloat(x.price)||0)+(x.shape==='plan'?'<span class="mut"> / '+(x.every===1?SHORT[x.unit]:us(x.every,x.unit))+'</span>':''); }
+function taxText(t){ return {default:'IVU 11.5%, included (your settings)', exempt:'No tax on this product', own:'Its own rates'}[t]; }
+var CASES={
+ list:'<b>Money › Products, grounded in the code.</b> Product · Price · Visits (per cycle or per pack; empty = unlimited) · Tracks · <b>Member</b> (does buying it make them one) · Active. <b>HIDDEN</b> = off new sales, holders keep it. Online is gone until the business page exists.',
+ wizard:'<b>New product.</b> 1 what are you selling · 2 name, price, how it renews or expires, visits · 3 tracks · 4 <b>does it make them a Member</b> (required, no default) · 5 check (tax row, You get) and create.',
+ edit:'<b>Editing, one page.</b> A real form: required fields are fields, Tax is the one setting row. <b>Hidden from new sales</b> (same words as Payments) vs <b>Stop selling</b> (archive).'
+};
+function render(){
+  document.body.className=(S.wid==='phone'?'phone ':'')+(S.edit!==null||S.step?'open':'');
+  document.getElementById('case').innerHTML=CASES[S.start];
+  var h='<div class="lab">Money</div><div class="titlerow"><h1>Products</h1><button class="btn main" data-a="new">New product</button></div><div class="tabs"><span>Payments</span><span>Owed to you</span><span class="on">Products</span></div>';
+  var live=S.list.filter(function(x){ return !x.stopped; }), cnt={plan:0,pack:0,single:0}; live.forEach(function(x){ cnt[x.shape]++; });
+  var chips=[['all','All',live.length],['plan','Plans',cnt.plan],['pack','Packs',cnt.pack],['single','Single visits',cnt.single],['stopped','No longer sold',S.list.length-live.length]];
+  h+='<div class="tools"><div class="chips">'+chips.map(function(c){ return '<button class="chip'+(S.chip===c[0]?' on':'')+'" data-a="chip" data-x="'+c[0]+'">'+c[1]+' <span>'+c[2]+'</span></button>'; }).join('')+'</div><input type="text" id="q" class="search" placeholder="Search products" value="'+S.q+'"></div>';
+  var rows=S.list.filter(function(x){ if(S.chip==='stopped') return x.stopped; if(x.stopped) return false; return S.chip==='all'||x.shape===S.chip; }).filter(function(x){ return !S.q||x.name.toLowerCase().indexOf(S.q.toLowerCase())>=0; });
+  var ord={plan:0,pack:1,single:2};
+  rows.sort(function(a,b){ var r; if(S.sort==='name') r=a.name.localeCompare(b.name); else if(S.sort==='price') r=parseFloat(a.price)-parseFloat(b.price); else if(S.sort==='active') r=a.active-b.active; else r=(ord[a.shape]-ord[b.shape])||(b.active-a.active); return r*(S.sort==='kind'?1:S.dir); });
+  function th(k,label,cls){ var on=S.sort===k; return '<th class="'+(cls||'')+'"><button class="sortb'+(on?' on':'')+'" data-a="sort" data-x="'+k+'">'+label+(on&&k!=='kind'?(S.dir>0?' ↑':' ↓'):'')+'</button></th>'; }
+  h+='<div class="card"><table class="pt"><thead><tr>'+th('name','Product')+th('price','Price','r')+'<th>Visits</th><th>Tracks</th><th class="c">Member</th>'+th('active','Active','r')+'<th></th></tr></thead><tbody>';
+  h+=rows.map(function(x){ return '<tr data-a="edit" data-x="'+x.id+'"><td><span class="pn"><span class="ki" title="'+SHAPES[x.shape].t+'">'+KICON[x.shape]+'</span>'+x.name+(x.hidden?' <span class="kl">Hidden</span>':'')+'</span></td><td class="r num">'+priceText(x)+'</td><td class="num">'+visitsText(x)+'</td><td class="tr">'+tracksText(x.tracks)+'</td><td class="c">'+(x.member?'✓':'<span class="mut">–</span>')+'</td><td class="r num">'+(x.active||'<span class="mut">—</span>')+'</td><td class="c chev">›</td></tr>'; }).join('');
+  h+='</tbody></table><div class="mrows">'+rows.map(function(x){ return '<div class="prow" data-a="edit" data-x="'+x.id+'"><span class="ki">'+KICON[x.shape]+'</span><div class="tx"><div class="nm">'+x.name+'</div><div class="why">'+(x.hidden?'<span class="kl">Hidden</span>':'')+'<span>'+visitsText(x)+' · '+tracksText(x.tracks)+(x.active?' · '+x.active+' active':'')+'</span></div></div><span class="pr num">'+priceText(x)+'</span></div>'; }).join('')+'</div>'+(rows.length?'':'<div style="padding:20px;color:var(--t3)">No products match.</div>')+'</div>';
+  document.getElementById('main').innerHTML=h; panel();
+  var q=document.getElementById('q'); if(q) q.oninput=function(){ S.q=q.value; var pos=q.selectionStart; render(); var q2=document.getElementById('q'); q2.focus(); q2.setSelectionRange(pos,pos); };
+}
+function head(title, back){ return '<div class="ph">'+(back?'<button class="ib" data-a="back" aria-label="Back">‹</button>':'')+'<h3>'+title+'</h3><button class="ib" data-a="close" aria-label="Close">✕</button></div>'; }
+function netBox(x){ var n=net(x.price,x.tax); return '<div class="net"><div class="l1"><span>You get by card</span><b>'+m(n.card)+'</b></div><div class="l1"><span>You get hand-taken</span><b>'+m(n.base)+'</b></div><small>'+(x.tax==='exempt'?'No tax on this product':'After IVU (11.5%, included in the price)')+', Zana\'s $0.50 per card payment and Stripe\'s card fee (estimate).</small></div>'; }
+function stepper(label,val,dec,inc,suffix){ return '<div class="fld"><label>'+label+'</label><div class="cnt"><button data-a="'+dec+'">−</button><span>'+val+'</span><button data-a="'+inc+'">+</button></div>'+(suffix||'')+'</div>'; }
+function unitPick(key,cur,opts){ return '<div class="seg2">'+opts.map(function(o){ return '<button class="'+(cur===o?'on':'')+'" data-a="'+key+'" data-x="'+o+'">'+UNIT[o][1]+'</button>'; }).join('')+'</div>'; }
+function visitsBlock(d){
+  var unl=d.credits==null;
+  return '<div class="fld"><label>Visits'+(d.shape==='plan'?' each time it renews':' in the '+(d.shape==='single'?'pass':'pack'))+'</label><div class="seg2" style="margin-bottom:8px"><button class="'+(unl?'on':'')+'" data-a="unl">Unlimited</button><button class="'+(!unl?'on':'')+'" data-a="lim">A number</button></div>'+(!unl?'<div class="cnt"><button data-a="cm">−</button><span>'+d.credits+'</span><button data-a="cp">+</button></div>':'')+'</div>';
+}
+function coreFields(d){
+  var h='<div class="fld"><label for="nm">Name members see</label><input type="text" id="nm" value="'+d.name+'"></div>';
+  h+='<div class="fld"><label for="pr">Price</label><div class="money"><span>$</span><input type="text" id="pr" inputmode="decimal" value="'+d.price+'"></div><div class="hint">'+(d.tax==='exempt'?'No tax on this product.':'Includes IVU (your tax setting). $0 is fine for a free product.')+'</div></div>';
+  if(d.shape==='plan') h+='<div class="fld"><label>Renews every</label><div class="row2" style="align-items:center"><div class="cnt"><button data-a="em">−</button><span>'+d.every+'</span><button data-a="ep">+</button></div>'+unitPick('unit',d.unit,['week','month','year'])+'</div><div class="hint">'+(d.every===1?'Every '+d.unit:'Every '+u(d.every,d.unit))+'.</div></div>';
+  else h+='<div class="fld"><label>Expires after</label><div class="row2" style="align-items:center"><div class="cnt"><button data-a="xm">−</button><span>'+d.exp+'</span><button data-a="xp">+</button></div>'+unitPick('xunit',d.expUnit,['day','week','month'])+'</div><div class="hint">Counted from the day they buy it. A pack always expires.</div></div>';
+  return h+visitsBlock(d);
+}
+function trackList(d){
+  var all=d.tracks==='all';
+  return '<div class="fld"><label>Tracks it covers</label><div class="checks"><button class="ck'+(all?' on':'')+'" data-a="tall"><span class="box">'+(all?'✓':'')+'</span>All tracks<small>and any added later ⚑</small></button>'+TRACKS.map(function(c){ var on=!all&&d.tracks.indexOf(c[0])>=0; return '<button class="ck'+(on?' on':'')+(all?' dim':'')+'" data-a="ck" data-x="'+c[0]+'"><span class="box">'+(on||all?'✓':'')+'</span>'+c[1]+'</button>'; }).join('')+'</div></div>';
+}
+function summary(x){
+  var r=[];
+  if(x.shape==='plan') r.push(['Renews','Every '+(x.every===1?x.unit:u(x.every,x.unit))]); else r.push(['Expires','After '+u(x.exp,x.expUnit)]);
+  r.push(['Visits',x.credits==null?'Unlimited':x.credits+(x.shape==='plan'?' each time it renews':'')],['Tracks',tracksText(x.tracks)],['Member',x.member?'Buying it makes them a Member':'Buying it doesn\'t make them a Member']);
+  return '<div class="sum">'+r.map(function(z){ return '<div><span class="k">'+z[0]+'</span><span class="v">'+z[1]+'</span></div>'; }).join('')+'</div>';
+}
+function taxRow(x){ return '<button class="srow lone" data-a="sheet" data-x="Tax"><span class="k">Tax</span><span class="v">'+taxText(x.tax)+'</span><span class="chev">›</span></button>'; }
+function panel(){
+  var el=document.getElementById('panel'), d=S.d, h='';
+  if(S.step===1){
+    h+=head('New product',false)+'<div class="pb"><p class="q">What are you selling?</p>'+['plan','pack','single'].map(function(k){ var s=SHAPES[k]; return '<button class="choice'+(d&&d.shape===k?' on':'')+'" data-a="shape" data-x="'+k+'"><span class="radio"></span><span><b>'+s.t+'</b><span>'+s.d+'</span><small>For example: '+s.ex+'</small></span></button>'; }).join('')+'</div><div class="pf"><button class="btn main" data-a="next"'+(d?'':' disabled')+'>Next</button>'+(d?'':'<div class="why">Pick one to go on</div>')+'</div>';
+  } else if(S.step===2){
+    h+=head(SHAPES[d.shape].t,true)+'<div class="pb">'+coreFields(d);
+    h+=netBox(d)+'</div><div class="pf"><button class="btn main" data-a="next"'+(d.name.trim()&&d.price!==''&&parseFloat(d.price)>=0?'':' disabled')+'>Next</button></div>';
+  } else if(S.step===3){
+    h+=head('Tracks',true)+'<div class="pb"><p class="q">Which tracks does '+d.name+' cover?</p>';
+    h+='<button class="choice'+(d.tracks==='all'?' on':'')+'" data-a="tall"><span class="radio"></span><span><b>All tracks</b><span>Everything you run, and any track you add later.</span><small>⚑ Adding later tracks automatically is a proposed rule, not in the code yet.</small></span></button>';
+    h+='<button class="choice'+(d.tracks!=='all'?' on':'')+'" data-a="tsome"><span class="radio"></span><span><b>Only some</b><span>Pick one or more.</span></span></button>';
+    if(d.tracks!=='all') h+='<div class="checks">'+TRACKS.map(function(c){ var on=d.tracks.indexOf(c[0])>=0; return '<button class="ck'+(on?' on':'')+'" data-a="ck" data-x="'+c[0]+'"><span class="box">'+(on?'✓':'')+'</span>'+c[1]+'</button>'; }).join('')+'</div>';
+    h+='</div><div class="pf"><button class="btn main" data-a="next"'+(d.tracks==='all'||d.tracks.length?'':' disabled')+'>Next</button>'+(d.tracks!=='all'&&!d.tracks.length?'<div class="why">Pick at least one track</div>':'')+'</div>';
+  } else if(S.step===4){
+    h+=head('Member or not',true)+'<div class="pb"><p class="q">Does buying '+d.name+' make them a Member?</p>';
+    h+='<button class="choice'+(d.member===true?' on':'')+'" data-a="mem" data-x="1"><span class="radio"></span><span><b>Yes, a Member</b><span>They show as a Member on People and count in your members.</span><small>Usually: monthly plans, long packs.</small></span></button>';
+    h+='<button class="choice'+(d.member===false?' on':'')+'" data-a="mem" data-x="0"><span class="radio"></span><span><b>No</b><span>They can book what it covers, but stay a Client.</span><small>Usually: day passes, drop-ins, intro packs.</small></span></button>';
+    h+='</div><div class="pf"><button class="btn main" data-a="next"'+(d.member===null?' disabled':'')+'>Next</button>'+(d.member===null?'<div class="why">Pick one: there\'s no default</div>':'')+'</div>';
+  } else if(S.step===5){
+    h+=head('Check and create',true)+'<div class="pb"><div class="hero"><div class="kl">'+SHAPES[d.shape].t+'</div><div class="t">'+d.name+'</div><div class="p">'+priceText(d)+'</div></div>'+summary(d)+taxRow(d)+netBox(d)+'<div class="hint" style="font-size:13px;color:var(--t3)">‹ goes back to change anything.</div></div><div class="pf"><button class="btn main" data-a="create">Create '+d.name+'</button></div>';
+  } else if(S.edit!==null){
+    var x=S.list.filter(function(p){ return p.id===S.edit; })[0]; if(!S.d||S.d.id!==x.id) S.d=JSON.parse(JSON.stringify(x)); d=S.d;
+    var changed=JSON.stringify(d)!==JSON.stringify(x);
+    h+=head(x.name,false)+'<div class="pb"><div class="lab2">'+SHAPES[x.shape].t+(x.hidden?' · Hidden':'')+(x.stopped?' · No longer sold':'')+(x.active?' · '+x.active+' active':'')+'</div>'+coreFields(d)+trackList(d);
+    h+='<div class="fld"><label>Buying it makes them a Member</label><div class="seg2"><button class="'+(d.member?'on':'')+'" data-a="mem" data-x="1">Yes</button><button class="'+(!d.member?'on':'')+'" data-a="mem" data-x="0">No</button></div></div>';
+    h+=taxRow(d)+netBox(d);
+    if(!x.stopped) h+='<div class="sw2"><div><b>Hidden from new sales</b><span>Off Collect (and your business page, later). The '+(x.active||'')+' people who hold it keep it'+(x.shape==='plan'?', and it keeps renewing':'')+'.</span></div><button class="tog'+(x.hidden?' on':'')+'" data-a="hide" data-x="'+x.id+'"></button></div><button class="btn risk" data-a="arch" data-x="'+x.id+'">Stop selling</button><div style="font-size:13px;color:var(--t3);margin-top:-8px">Moves it to No longer sold. People who bought it keep it.</div>';
+    else h+='<button class="btn" data-a="unarch" data-x="'+x.id+'">Sell again</button>';
+    h+='</div><div class="pf">'+(changed&&x.active?'<div class="blast"><b>Before you save</b>'+(d.price!==x.price?'<span>The '+x.active+' who hold it pay $'+d.price+' from their next renewal.</span>':'')+(JSON.stringify(d.tracks)!==JSON.stringify(x.tracks)?'<span>Holders lose or gain tracks right away.</span>':'')+(d.credits!==x.credits?'<span>Their visits refill at '+(d.credits==null?'unlimited':d.credits)+' next cycle.</span>':'')+'<small>To keep their price, create a new product and stop selling this one: holders keep it.</small></div>':'')+'<button class="btn main" data-a="save"'+(changed?'':' disabled')+'>Save</button>'+'</div>';
+  }
+  el.innerHTML=h;
+  var nm=document.getElementById('nm'); if(nm) nm.oninput=function(){ d.name=nm.value; foot(); };
+  var pr=document.getElementById('pr'); if(pr) pr.oninput=function(){ d.price=pr.value.replace(/[^0-9.]/g,''); var nb=document.querySelector('.net'); if(nb) nb.outerHTML=netBox(d); if(S.edit!==null){ var pos=pr.selectionStart; panel(); var p2=document.getElementById('pr'); p2.focus(); p2.setSelectionRange(pos,pos); } else foot(); };
+}
+function foot(){ var b=document.querySelector('.pf .btn.main'); if(!b) return; if(S.step===2) b.disabled=!(S.d.name.trim()&&S.d.price!==''&&parseFloat(S.d.price)>=0); if(S.edit!==null){ var x=S.list.filter(function(p){ return p.id===S.edit; })[0]; b.disabled=JSON.stringify(S.d)===JSON.stringify(x)||!S.d.name.trim()||S.d.price===''; } }
+function setRows(x){
+  var r=[['Name',x.name],['Price',priceText(x).replace(/<[^>]+>/g,'')]];
+  if(x.shape==='plan') r.push(['Renews','Every '+(x.every===1?x.unit:u(x.every,x.unit))]); else r.push(['Expires','After '+u(x.exp,x.expUnit)]);
+  r.push(['Visits',x.credits==null?'Unlimited':x.credits+(x.shape==='plan'?' each time it renews':'')],['Tracks',tracksText(x.tracks)],['Member','Buying it '+(x.member?'makes them a Member':'doesn\'t make them a Member')],['Tax',taxText(x.tax)]);
+  return r.map(function(z){ return '<button class="srow" data-a="sheet" data-x="'+z[0]+'"><span class="k">'+z[0]+'</span><span class="v">'+z[1]+'</span><span class="chev">›</span></button>'; }).join('');
+}
+function undo(t,fn){ var o=document.querySelector('.undo'); if(o) o.remove(); window._undo=fn; var e=document.createElement('div'); e.className='undo'; e.innerHTML='<span>'+t+'</span><button data-a="undo">Undo</button>'; document.body.appendChild(e); setTimeout(function(){ if(e.parentNode) e.remove(); },5000); }
+function toast(t){ var e=document.createElement('div'); e.className='toast'; e.innerHTML=t; document.body.appendChild(e); setTimeout(function(){ e.remove(); },2800); }
+function seg(id,list,key){ document.getElementById(id).innerHTML=list.map(function(o){ return '<button data-k="'+key+'" data-v="'+o[0]+'" aria-pressed="'+(S[key]===o[0])+'">'+o[1]+'</button>'; }).join(''); }
+function bar(){ seg('g1',[['list','Products list'],['wizard','New product'],['edit','Edit a product']],'start'); seg('g2',[['desk','Laptop'],['phone','Phone']],'wid'); }
+function go(start){ S.start=start; S.step=0; S.edit=null; S.d=null; if(start==='wizard') S.step=1; if(start==='edit') S.edit=1; bar(); render(); }
+function byId(id){ return S.list.filter(function(p){ return p.id==id; })[0]; }
+document.addEventListener('click',function(e){
+  var k=e.target.closest('[data-k]'); if(k){ if(k.dataset.k==='start') go(k.dataset.v); else { S.wid=k.dataset.v; bar(); render(); } return; }
+  var b=e.target.closest('[data-a]'); if(!b) return; var a=b.dataset.a, x=b.dataset.x, d=S.d;
+  if(a==='new'){ S.start='wizard'; S.step=1; S.d=null; bar(); render(); }
+  else if(a==='close'){ go('list'); }
+  else if(a==='shape'){ var t=SHAPES[x].tpl; S.d=Object.assign({shape:x, tracks:'all', tax:'default', every:1, unit:'month', exp:1, expUnit:'day'}, JSON.parse(JSON.stringify(t))); panel(); }
+  else if(a==='next'){ S.step++; panel(); } else if(a==='back'){ S.step--; panel(); }
+  else if(a==='em'){ d.every=Math.max(1,d.every-1); panel(); } else if(a==='ep'){ d.every++; panel(); }
+  else if(a==='xm'){ d.exp=Math.max(1,d.exp-1); panel(); } else if(a==='xp'){ d.exp++; panel(); }
+  else if(a==='unit'){ d.unit=x; panel(); } else if(a==='xunit'){ d.expUnit=x; panel(); }
+  else if(a==='unl'){ d.credits=null; panel(); } else if(a==='lim'){ if(d.credits==null) d.credits=d.shape==='plan'?8:10; panel(); }
+  else if(a==='cm'){ d.credits=Math.max(1,d.credits-1); panel(); } else if(a==='cp'){ d.credits++; panel(); }
+  else if(a==='tall'){ d.tracks=d.tracks==='all'?[]:'all'; panel(); } else if(a==='tsome'){ if(d.tracks==='all') d.tracks=[]; panel(); }
+  else if(a==='ck'){ if(d.tracks==='all') d.tracks=TRACKS.map(function(t){ return t[0]; }); var i=d.tracks.indexOf(x); if(i>=0) d.tracks.splice(i,1); else d.tracks.push(x); panel(); }
+  else if(a==='mem'){ d.member=x==='1'; panel(); }
+  else if(a==='create'){ d.id=Date.now(); d.active=0; S.list.push(d); go('list'); toast(d.name+' is on sale. It shows on Collect now.'); }
+  else if(a==='edit'){ S.edit=+x; S.start='edit'; bar(); render(); }
+  else if(a==='chip'){ S.chip=x; render(); }
+  else if(a==='sort'){ if(S.sort===x) S.dir=-S.dir; else { S.sort=x; S.dir=(x==='active'?-1:1); } render(); }
+  else if(a==='hide'){ var p=byId(x); p.hidden=!p.hidden; if(S.d) S.d.hidden=p.hidden; render(); undo(p.name+(p.hidden?' hidden from new sales':' on sale again'), function(){ p.hidden=!p.hidden; if(S.d) S.d.hidden=p.hidden; render(); }); }
+  else if(a==='arch'){ var p2=byId(x); p2.stopped=true; p2.hidden=false; go('list'); undo(p2.name+' moved to No longer sold', function(){ p2.stopped=false; render(); }); }
+  else if(a==='save'){ var i2=S.list.findIndex(function(p){ return p.id===S.d.id; }); S.list[i2]=JSON.parse(JSON.stringify(S.d)); go('list'); toast('Saved.'); }
+  else if(a==='undo'){ if(window._undo) window._undo(); var ub=document.querySelector('.undo'); if(ub) ub.remove(); }
+  else if(a==='unarch'){ var p3=byId(x); p3.stopped=false; render(); toast(p3.name+' is on sale again.'); }
+  else if(a==='sheet'){ toast(x==='Price'?'Opens a sheet for the price.':x==='Tax'?'Opens: Your settings (IVU 11.5%) · No tax · Its own rates.':'Opens a small sheet to change '+x.toLowerCase()+'.'); }
+});
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') go('list'); });
+bar(); render();
+</script>
+</body>
+</html>
+
+</body>
+</html>

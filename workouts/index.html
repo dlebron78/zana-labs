@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="labs-version" content="v1">
+<title>Workout Writer · Zana Labs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../kit/zana.css">
+<style>[hidden]{display:none!important}html,body{margin:0}</style>
+<script src="../kit/config.js"></script>
+<script src="../kit/labs.js"></script>
+<script>
+labs.test({
+  name: 'workouts',
+  question: 'Can a coach write a day and make it ready without help?',
+  kpis: [
+    { name: 'Marked a day ready',        from: 'opened',    to: 'day_ready',  target: 0.80 },
+    { name: 'Set how members log',       from: 'opened',    to: 'log_set',    target: 0.70 },
+    { name: 'Came back to edit a day',   from: 'day_ready', to: 'day_edited', target: 0.30 },
+    { name: 'Minutes from open to ready', time: ['opened', 'day_ready'],      target: 5 },
+    { name: 'Sent feedback',             from: 'opened',    to: 'feedback_sent', target: 0.40 }
+  ]
+});
+</script>
+</head>
+<body>
+
+
+<nav class="band" aria-label="Sections">
+  <div class="tile">BS</div>
+  <div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Today</div>
+  <div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Schedule</div>
+  <div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="9" r="3.2"/><path d="M3.5 19c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5"/><circle cx="17" cy="8" r="2.5"/><path d="M16 13.2c2.3 0 4 1.3 4.6 3.8"/></svg>People</div>
+  <div class="bi on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12h2M19 12h2M6 8v8M18 8v8M8.5 10v4M15.5 10v4M8.5 12h7"/></svg>Training</div>
+  <div class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>Money</div>
+</nav>
+<header class="ph"><div class="tile">BS</div><b>Training ▾</b><button class="phhelp" id="help2">Examples &amp; help</button></header>
+
+<div class="page">
+<div id="weekv" class="wrap" hidden></div>
+<div id="dayv">
+<div class="wrap">
+  <div class="phd">
+    <div class="t">
+      <button class="back" id="back" type="button" data-track="back_to_week">‹ This week</button>
+      <div class="cap" id="date">Tomorrow</div>
+      <h1 id="dtitle">CrossFit · all classes</h1>
+      <div class="meta"><span class="state" id="pill">Draft · only you can see it</span><span id="sum"></span></div>
+    </div>
+    <div class="acts"><button class="btn" id="help">Examples &amp; help</button><span id="fb" style="display:contents"></span></div>
+  </div>
+  <div id="confirm" hidden></div>
+  <div class="tabs" id="tabs"><button data-tab="write" class="on" id="tw">Write</button><button data-tab="check" id="tc">Members see (0)</button></div>
+</div>
+
+<main class="wrap">
+  <div class="cols" id="cols" data-tab="write">
+    <section class="wcol">
+      <p class="lab">Write the day</p>
+      <div class="board">
+        <div class="fhead"><div class="fh-t"><span class="cap">Writing</span><b id="fpart">Part</b></div><button class="btn pri sm" id="fdone" type="button">Done</button></div>
+        <div id="bar" role="toolbar" aria-label="Writing help"></div>
+        <button id="fab" class="fab" type="button" aria-label="Writing help" aria-expanded="false" hidden></button>
+        <textarea id="text" spellcheck="false" autocapitalize="sentences" aria-label="The day's workout" placeholder="Back squat&#10;5-5-5-5-5 @ 75%&#10;log: each set&#10;&#10;Leave an empty line to start the next part."></textarea>
+        <div class="bfoot">First line is the part’s name. An empty line starts the next part. Optional lines: <code>log:</code> <code>target:</code> <code>scaled:</code> <code>time:</code></div>
+      </div>
+    </section>
+    <section class="ccol">
+      <p class="lab">What members get</p>
+      <div class="check" id="check"></div>
+    </section>
+  </div>
+</main>
+</div>
+</div>
+<div class="mbar" id="mbar"><div id="confirm2" hidden></div><div class="mrow"><span class="msum" id="sum2"></span><span id="fb2"></span></div></div>
+<div id="sheet" hidden></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var LOGS=[
+ {k:'sets',w:'each set',t:'weight',h:'weight × reps, set by set'},
+ {k:'time',w:'time',t:'time',h:'one finish time'},
+ {k:'rounds',w:'rounds',t:'rounds',h:'rounds + reps'},
+ {k:'weight',w:'weight',t:'weight',h:'one number'},
+ {k:'done',w:'done',t:null,h:'a tick'},
+ {k:'none',w:'nothing',t:null,h:'members just read it'}];
+var KEYS=['log','target','scaled','time'];
+var EX={
+ CrossFit:'Warm-up\n3 rounds, easy pace:\n200 m run, 10 air squats, 10 ring rows\nlog: done\ntime: 10\n\nBack squat\n5-5-5-5-5 @ 70-80%\nRest 2 min between sets\nlog: each set\ntarget: 80%\ntime: 20\n\nFran\n21-15-9 for time\nThrusters 95/65\nPull-ups\nlog: time\ntarget: 6:00\nscaled: 65/45, banded pull-ups\ntime: 12',
+ Bodybuilding:'Bench press\n4 x 6-8, leave 1-2 reps in the tank\nRest 2:30\nlog: each set\ntarget: 185 lb\ntime: 18\n\nIncline dumbbell press\n3 x 10-12, 2-second pause at the bottom\nlog: each set\nscaled: Machine chest press 3 x 12\ntime: 12\n\nCable fly + triceps pushdown\nSuperset, 3 x 15 each\nlog: done\ntime: 10',
+ Yoga:'Arrival\nSeated, slow nasal breathing, 4 counts in, 6 out\ntime: 5\n\nSun salutations\nSurya Namaskar A x 5, then B x 3\nOne breath, one movement\nlog: done\nscaled: Knees down in chaturanga, step back instead of jumping\ntime: 15\n\nCrow pose\nThree attempts, hold as long as you stay steady\nlog: time\ntarget: 0:30\nscaled: Toes on a block, lift one foot at a time\ntime: 8\n\nSavasana\nLie back. Nothing to do.\ntime: 7',
+ Blank:''};
+var TITLES={CrossFit:'CrossFit · all classes',Bodybuilding:'Push day · chest and triceps',Yoga:'Vinyasa flow · 60 min',Blank:'New day'};
+var S={status:'draft',tab:'write',more:false,pick:null,confirm:false};
+var ta=$('text'),bar=$('bar');
+var narrow=function(){return window.matchMedia('(max-width:759px)').matches;};
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null;}}
+
+/* ---------- reading the text ---------- */
+function logOf(v){v=(v||'').toLowerCase().trim();
+ if(!v)return null;
+ if(/set/.test(v))return 'sets';if(/round|amrap/.test(v))return 'rounds';if(/time|clock/.test(v))return 'time';
+ if(/weight|load|heav/.test(v))return 'weight';if(/done|tick|check|yes/.test(v))return 'done';if(/noth|none|^no$/.test(v))return 'none';return '?';}
+function L(k){for(var i=0;i<LOGS.length;i++)if(LOGS[i].k===k)return LOGS[i];return LOGS[5];}
+function blocks(t){var out=[],lines=t.split('\n'),cur=null;
+ lines.forEach(function(l,n){if(!l.trim()){cur=null;return;}if(!cur){cur={start:n,end:n,lines:[]};out.push(cur);}cur.lines.push(l);cur.end=n;});return out;}
+function parse(t){return blocks(t).map(function(b){
+  var p={name:b.lines[0].trim(),desc:[],log:null,logRaw:'',target:'',scaled:[],time:'',warn:[],start:b.start,end:b.end};var inS=false;
+  b.lines.slice(1).forEach(function(l){var m=l.match(/^\s*(log|target|scaled|time)\s*:\s*(.*)$/i);
+   if(!m){(inS?p.scaled:p.desc).push(l);return;}
+   var k=m[1].toLowerCase(),v=m[2].trim();inS=(k==='scaled');
+   if(k==='log'){p.logRaw=v;p.log=logOf(v);}else if(k==='target')p.target=v;else if(k==='scaled'){if(v)p.scaled.push(v);}else p.time=v;});
+  p.desc=p.desc.join('\n').trim();p.scaled=p.scaled.join('\n').trim();
+  if(p.log==='?'){p.warn.push('“log: '+p.logRaw+'” isn’t one of the choices. Tap the button below to pick one.');p.log=null;}
+  var kind=p.log?L(p.log).t:null;
+  if(p.target){
+   if(!p.log)p.warn.push('There’s a target but no log: line, so members have nothing to compare it with.');
+   else if(!kind)p.warn.push('Members log '+L(p.log).w+', so a target can’t be checked. Remove it or change the log.');
+   else if(kind==='time'&&!/^\d{1,2}:\d{2}$/.test(p.target))p.warn.push('Write the target as minutes:seconds, e.g. 6:00.');
+   else if(kind==='rounds'&&!/^\d+/.test(p.target))p.warn.push('Write the target as a number of rounds, e.g. 5.');
+   else if(kind==='weight'&&!/^\d+(\.\d+)?\s*(lb|lbs|kg|%)$/i.test(p.target))p.warn.push('Write the target as a weight with its unit: 185 lb, 80 kg or 80%.');}
+  if(p.time&&!/^\d{1,3}$/.test(p.time.replace(/\s*min.*$/i,'')))p.warn.push('Write time as minutes, e.g. time: 12');
+  return p;});}
+function fmtTarget(p){var k=p.log?L(p.log).t:null;if(!p.target||!k)return '';
+ if(k==='time')return 'Target: under '+p.target;
+ if(k==='rounds')return 'Target: at least '+parseInt(p.target,10)+' rounds';
+ var m=p.target.match(/^([\d.]+)\s*(lb|lbs|kg|%)$/i);if(!m)return '';
+ return m[2]==='%'?'Target: '+m[1]+'% of your max':'Target: '+m[1]+' '+m[2].toLowerCase().replace('lbs','lb');}
+function mins(p){var n=parseInt(p.time,10);return n>0?n:0;}
+
+
+/* ---------- movements (a small sample of the exercise library) ---------- */
+var MOVES=[
+ ['Back squat',['back squat','back squats']],['Front squat',['front squat','front squats']],['Goblet squat',['goblet squat','goblet squats']],['Air squat',['air squat','air squats']],
+ ['Deadlift',['deadlift','deadlifts']],['Bench press',['bench press']],['Incline dumbbell press',['incline dumbbell press','incline db press']],['Chest press',['chest press']],
+ ['Overhead press',['overhead press','strict press']],['Push press',['push press']],['Thruster',['thruster','thrusters']],['Clean',['power clean','squat clean','clean']],['Snatch',['snatch']],
+ ['Pull-up',['pull-up','pull-ups','pullup','pullups','pull up','pull ups']],['Ring row',['ring row','ring rows']],['Push-up',['push-up','push-ups','pushup','pushups']],
+ ['Burpee',['burpee','burpees','burpee box jump']],['Kettlebell swing',['kettlebell swing','kettlebell swings','kb swings','swings','russian swing','russian swings']],
+ ['Box jump',['box jump','box jumps']],['Wall ball',['wall ball','wall balls']],['Double-under',['double-under','double-unders','double under','double unders']],
+ ['Toes-to-bar',['toes-to-bar','toes to bar','t2b']],['Lunge',['lunge','lunges']],['Inchworm',['inchworm','inchworms']],['Run',['run','running']],['Row',['row','rowing']],
+ ['Cable fly',['cable fly','cable flies']],['Triceps pushdown',['triceps pushdown','tricep pushdown']],['Lateral raise',['lateral raise','lateral raises']],
+ ['Hanging knee raise',['hanging knee raise','hanging knee raises']],['Plank',['plank']],
+ ['Sun salutation A',['surya namaskar a','sun salutation a']],['Sun salutation B',['surya namaskar b','sun salutation b']],['Chaturanga',['chaturanga']],
+ ['Warrior II',['warrior ii','warrior 2']],['Reverse warrior',['reverse warrior']],['Extended side angle',['extended side angle']],['Half moon',['half moon']],
+ ['Crow pose',['crow pose','bakasana','crow']],['Savasana',['savasana']]];
+var ALIASES=[];MOVES.forEach(function(m){m[1].forEach(function(a){ALIASES.push([a,m[0]]);});});
+ALIASES.sort(function(x,y){return y[0].length-x[0].length;});
+function movesIn(text){var t=' '+text.toLowerCase().replace(/[^a-z0-9\- ]+/g,' ')+' ',found=[];
+ ALIASES.forEach(function(a){var re=new RegExp('(^|[^a-z0-9-])'+a[0].replace(/[-]/g,'\\-')+'(?=[^a-z0-9-]|$)');var m=t.match(re);
+  if(m){t=t.replace(re,function(x,pre){return pre+' '.repeat(a[0].length);});if(found.indexOf(a[1])<0)found.push(a[1]);}});
+ return found;}
+/* ---------- members' cards ---------- */
+function card(p,i){var t=fmtTarget(p),lg=p.log?L(p.log):null;
+ return '<article class="card"><div class="ch"><span class="ix">'+String.fromCharCode(65+i%26)+'</span><b>'+esc(p.name)+'</b>'+(mins(p)?'<span class="mins">'+mins(p)+' min</span>':'')+'</div>'+
+  (p.desc?'<p class="desc">'+esc(p.desc)+'</p>':'')+
+  (function(){var mv=movesIn(p.name+'\n'+p.desc);return mv.length?'<div class="mv"><span class="mvl">Movements</span><span class="mvs">'+mv.map(esc).join(' · ')+'</span></div>':'';})()+
+  (p.scaled?'<div class="scl"><span>Scaled</span>'+esc(p.scaled)+'</div>':'')+
+  '<div class="cf"><label class="logsel"><span>Members log</span><select data-logi="'+i+'" aria-label="How members log '+esc(p.name)+'">'+(lg?'':'<option value="" selected>not set</option>')+LOGS.map(function(o){return '<option value="'+o.k+'"'+(p.log===o.k?' selected':'')+'>'+o.w+'</option>';}).join('')+'</select></label>'+(t?'<span class="tgt"><span aria-hidden="true">◎</span> '+esc(t)+'</span>':'')+'</div>'+
+  p.warn.map(function(w){return '<div class="warn">'+esc(w)+'</div>';}).join('')+'</article>';}
+function renderCheck(){var ps=parse(ta.value);
+ $('check').innerHTML=ps.length?ps.map(card).join(''):'<div class="empty">Start writing on the left. Each part you write shows up here as members will see it.</div>';
+ $('tc').textContent='Members see ('+ps.length+')';
+ var m=ps.reduce(function(a,p){return a+mins(p);},0),w=ps.filter(function(p){return p.warn.length;}).length;
+ $('sum').textContent=ps.length+' part'+(ps.length===1?'':'s')+(m?' · '+m+' min':'')+(w?' · '+w+' to fix':'');$('sum2').textContent=$('sum').textContent;
+ return ps;}
+
+/* ---------- the help bar ---------- */
+function caretInfo(){var v=ta.value,pos=ta.selectionStart,ls=v.lastIndexOf('\n',pos-1)+1,le=v.indexOf('\n',pos);if(le<0)le=v.length;
+ return {pos:pos,ls:ls,le:le,pre:v.slice(ls,pos),line:v.slice(ls,le)};}
+function partAt(pos){var row=ta.value.slice(0,pos).split('\n').length-1,ps=parse(ta.value);
+ for(var i=0;i<ps.length;i++)if(row>=ps[i].start&&row<=ps[i].end+1)return ps[i];return null;}
+function chip(cls,data,label){var c=cls==='sug'?'sug key':cls==='part'?'':cls==='ghost'?'':'key';return '<button class="btn sm '+c+'" '+data+'>'+label+'</button>';}
+function renderBar(){var c=caretInfo(),pre=document.activeElement===ta?c.pre:'@',h='',m;
+ if((m=pre.match(/^\s*log:\s*([a-z ]*)$/i))){var q=m[1].trim().toLowerCase();
+  var gp=partAt(c.pos),gg=!q&&gp?guessLog(gp):null,done=LOGS.some(function(o){return o.w===q;});if(!done)LOGS.filter(function(o){return !q||o.w.indexOf(q)===0;}).forEach(function(o){h+=chip(gg&&o.k!==gg?'':'sug','data-log="'+o.w+'"',o.w);});
+  if(!h&&!done)h='<span class="bhint">Pick one: each set, time, rounds, weight, done, nothing</span>';}
+ else if((m=pre.match(/^\s*target:\s*([\d.:]*)\s*$/i))){var p=partAt(c.pos),k=p&&p.log?L(p.log).t:null,val=m[1];
+  if(!p||!p.log)h='<span class="bhint">Add a log: line first, so the target has a unit</span>';
+  else if(!k)h='<span class="bhint">Members log '+L(p.log).w+', so there’s nothing to aim for</span>';
+  else if(k==='time')h='<span class="bhint">Finish time to beat, e.g. 6:00</span>';
+  else if(k==='rounds')h='<span class="bhint">Rounds to reach, e.g. 5</span>';
+  else if(val&&/^\d/.test(val))h=['lb','kg','%'].map(function(u){return chip('sug','data-unit="'+u+'"',u==='%'?'% of max':u);}).join('');
+  else h='<span class="bhint">A weight, then lb, kg or %</span>';}
+ else if((m=pre.match(/^\s*time:\s*(\d*)\s*$/i))){h=m[1]?'':['5','10','15','20'].map(function(n){return chip('sug','data-min="'+n+'"',n+' min');}).join('');}
+ else if((m=pre.match(/^\s*([a-z]{1,6})$/i))&&c.pre.length===c.line.length&&c.ls!==blockStart(c.pos)){var q2=m[1].toLowerCase();
+  KEYS.filter(function(k){return k.indexOf(q2)===0&&k!==q2+':';}).forEach(function(k){h+=chip('sug','data-key="'+k+'"',k+':');});}
+ S.hasSug=/btn sm sug/.test(h);
+ if(!h){h=chip('part','data-act="part"','+ Part');
+  if(!S.more)h+=chip('','data-key="log"','log:')+chip('','data-key="target"','target:')+chip('ghost','data-act="more"','more…');
+  else h+=chip('','data-key="scaled"','scaled:')+chip('','data-key="time"','time:')+chip('ghost','data-act="less"','‹ back');}
+ bar.innerHTML=h;}
+function blockStart(pos){var v=ta.value,i=pos;while(true){var p=v.lastIndexOf('\n',i-1);if(p<0)return 0;var prevStart=v.lastIndexOf('\n',p-1)+1;if(!v.slice(prevStart,p).trim())return p+1;i=prevStart;if(i<=0)return 0;}}
+
+/* ---------- editing helpers ---------- */
+function setText(v,a,b){ta.value=v;ta.focus();try{ta.setSelectionRange(a,b==null?a:b);}catch(e){}changed();}
+function replaceLine(c,newLine,caretAtEnd){var v=ta.value;setText(v.slice(0,c.ls)+newLine+v.slice(c.le),c.ls+newLine.length);}
+function ensureKey(key){var v=ta.value,pos=ta.selectionStart,lines=v.split('\n'),row=v.slice(0,pos).split('\n').length-1;
+ if(!v.trim()){setText(key+': ',key.length+2);return;}
+ var s=row,e=row;if(!lines[row].trim()){s=e=row-1;while(s>=0&&!lines[s].trim())s--;e=s;}
+ if(s<0){setText(v+(v.endsWith('\n')?'':'\n')+key+': ',(v+(v.endsWith('\n')?'':'\n')+key+': ').length);return;}
+ while(s>0&&lines[s-1].trim())s--;while(e<lines.length-1&&lines[e+1].trim())e++;
+ var re=new RegExp('^\\s*'+key+'\\s*:','i');
+ for(var i=s;i<=e;i++)if(re.test(lines[i])){var off=lines.slice(0,i).join('\n').length+(i?1:0),c0=off+lines[i].indexOf(':')+1;
+   lines[i]=key+': '+lines[i].slice(lines[i].indexOf(':')+1).trim();var st=off+key.length+2;setText(lines.join('\n'),st,off+lines[i].length);return;}
+ lines.splice(e+1,0,key+': ');var at=lines.slice(0,e+1).join('\n').length+1+key.length+2;setText(lines.join('\n'),at);}
+function newPart(){var v=ta.value.replace(/\s+$/,'');var nv=v+(v?'\n\n':'');setText(nv,nv.length);}
+function setLogFor(i,k){var ps=parse(ta.value),p=ps[i];if(!p)return;var lines=ta.value.split('\n'),w=L(k).w;
+ for(var r=p.start;r<=p.end;r++)if(/^\s*log\s*:/i.test(lines[r])){lines[r]='log: '+w;ta.value=lines.join('\n');S.pick=null;changed();labs.track('log_set',{via:'members_see_menu',log:k});return;}
+ lines.splice(p.end+1,0,'log: '+w);ta.value=lines.join('\n');S.pick=null;changed();labs.track('log_set',{via:'members_see_menu',log:k});}
+
+/* ---------- events ---------- */
+function grow(){if(document.body.classList.contains('focus')){ta.style.height='';return;}ta.style.height='auto';ta.style.height=(ta.scrollHeight+4)+'px';}
+function changed(){grow();renderCheck();renderBar();if(S.loading)return;if(S.status==='ready'){S.status='draft';labs.track('day_edited');footer();}saveDay();}
+var saveT=null;ta.addEventListener('input',function(){hideConfirm();changed();clearTimeout(saveT);saveT=setTimeout(function(){S.saved=savedAt();footer();},700);});
+['keyup','click','focus'].forEach(function(ev){ta.addEventListener(ev,function(){renderBar();placeBar();});});
+ta.addEventListener('focus',function(){document.body.classList.add('typing');placeBar();});
+$('fdone').addEventListener('click',function(){document.body.classList.remove('typing');ta.blur();placeBar();renderBar();});
+ta.addEventListener('blur',function(){setTimeout(function(){if(document.activeElement!==ta&&!bar.contains(document.activeElement)){document.body.classList.remove('typing');placeBar();renderBar();}},150);});
+['mousedown','pointerdown','touchstart'].forEach(function(ev){bar.addEventListener(ev,function(e){if(e.cancelable)e.preventDefault();},{passive:false});$('fab').addEventListener(ev,function(e){if(e.cancelable)e.preventDefault();},{passive:false});});
+bar.addEventListener('touchend',function(e){var b=e.target.closest('button');if(!b)return;e.preventDefault();b.click();});
+function pillTap(){var n=S.next;S.open=true;
+ if(!S.hasSug&&n){if(n.key){S.guess=n.guess||null;ensureKey(n.key);}else if(n.act==='part'){newPart();}}
+ renderBar();placeBar();ta.focus();}
+$('fab').addEventListener('click',pillTap);
+$('fab').addEventListener('touchend',function(e){e.preventDefault();pillTap();});
+ta.addEventListener('click',function(){if(S.open){S.open=false;placeBar();}});
+bar.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var d=b.dataset,c=caretInfo();
+ if(d.act==='part'){S.more=false;newPart();}
+ else if(d.act==='more'){S.more=true;renderBar();ta.focus();}
+ else if(d.act==='less'){S.more=false;renderBar();ta.focus();}
+ else if(d.key){var typed=c.pre.match(/^\s*[a-z]{1,6}$/i)&&c.pre.length===c.line.length&&c.line.trim()&&!/:/.test(c.line);
+  if(typed)replaceLine(c,d.key+': ');else ensureKey(d.key);}
+ else if(d.log){replaceLine(c,'log: '+d.log);labs.track('log_set',{via:'helper',log:d.log});}
+ else if(d.unit){var u=d.unit==='%'?'%':' '+d.unit;replaceLine(c,c.line.replace(/\s+$/,'')+u);}
+ else if(d.min)replaceLine(c,'time: '+d.min);
+ else if(d.act==='close'){S.open=false;}
+ if(narrow()){if(d.act!=='more'&&d.act!=='less')S.open=d.act==='close'?false:!!S.hasSug;placeBar();}
+});
+var mirror=null;
+function caretY(){ if(!mirror){mirror=document.createElement('div');mirror.setAttribute('aria-hidden','true');document.body.appendChild(mirror);}
+ var cs=getComputedStyle(ta);['fontFamily','fontSize','fontWeight','lineHeight','letterSpacing','paddingTop','paddingRight','paddingBottom','paddingLeft','borderTopWidth','borderLeftWidth','borderRightWidth','boxSizing','tabSize'].forEach(function(k){mirror.style[k]=cs[k];});
+ mirror.style.position='absolute';mirror.style.visibility='hidden';mirror.style.top='0';mirror.style.left='-9999px';mirror.style.whiteSpace='pre-wrap';mirror.style.overflowWrap='break-word';mirror.style.width=ta.clientWidth+'px';
+ mirror.textContent=ta.value.slice(0,ta.selectionStart);var m=document.createElement('span');m.textContent='​';mirror.appendChild(m);
+ return m.offsetTop+parseFloat(cs.lineHeight||'26');}
+function guessLog(p){var t=(p.name+'\n'+p.desc).toLowerCase();
+ if(/amrap|as many rounds/.test(t))return 'rounds';if(/for time|time cap/.test(t))return 'time';
+ if(/\d+\s*[x×]\s*\d+|\d+(\s*-\s*\d+){2,}/.test(t))return 'sets';if(/emom|flow|savasana|stretch|mobility|warm-?up|breath/.test(t))return 'done';return null;}
+function nextStep(){var c=caretInfo(),p=partAt(c.pos);
+ if(!p||!c.line.trim()&&c.ls===blockStart(c.pos)&&!p)return {label:'+ Part',act:'part'};
+ if(!p.log&&!/^\s*log\s*:/im.test(ta.value.split('\n').slice(p.start,p.end+1).join('\n'))){var g=guessLog(p);return {label:g?'log: '+L(g).w+'?':'log:',key:'log',guess:g};}
+ var k=p.log?L(p.log).t:null;
+ if(k&&!p.target)return {label:'target:',key:'target'};
+ if(!p.time)return {label:'time:',key:'time'};
+ return {label:'+ Part',act:'part'};}
+function pillLabel(){if(S.hasSug){var b=bar.querySelectorAll('button.sug');if(b.length===1)return b[0].textContent;
+  if(b.length>1)return b[0].textContent+' · '+b[1].textContent+(b.length>2?' · …':'');}
+ S.next=nextStep();return S.next.label;}
+function placeBar(){var fab=$('fab'),board=document.querySelector('.board');fab.hidden=true;bar.hidden=false;bar.classList.remove('float');bar.style.top='';
+ /* phone only: tapping into the text opens a focus mode. The whiteboard takes the whole screen, above the app's header, sized to the part of the screen the keyboard leaves free, with the help bar on top */
+ var focus=document.body.classList.contains('typing')&&narrow();
+ document.body.classList.toggle('focus',focus);
+ if(!focus){board.style.top='';board.style.height='';grow();return;}
+ var vv=window.visualViewport;board.style.top=(vv?vv.offsetTop:0)+'px';board.style.height=(vv?vv.height:window.innerHeight)+'px';
+ ta.style.height='';$('fpart').textContent=(function(){var p=partAt(ta.selectionStart);return p?p.name:'New part';})();}
+if(window.visualViewport){window.visualViewport.addEventListener('resize',placeBar);window.visualViewport.addEventListener('scroll',placeBar);}
+window.addEventListener('resize',function(){placeBar();grow();});
+
+$('check').addEventListener('change',function(e){var t=e.target;if(t.dataset.logi!=null&&t.value)setLogFor(+t.dataset.logi,t.value);});
+$('tabs').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;S.tab=b.dataset.tab;$('cols').dataset.tab=S.tab;
+ [].forEach.call($('tabs').children,function(x){x.classList.toggle('on',x===b);});window.scrollTo(0,0);});
+
+function savedAt(){var d=new Date();return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
+S.saved='';
+function footer(){var r=S.status==='ready';$('pill').textContent=r?'Ready · members can see it':'Draft'+(S.saved?' · saved '+S.saved:' · only you can see it');$('pill').className='state'+(r?' ready':'');
+ var h=r?'<button class="btn" data-st="draft">Back to draft</button>':'<button class="btn pri" data-st="ready">Mark ready</button>';$('fb').innerHTML=h;$('fb2').innerHTML=h;}
+function showConfirm(w){var t='<span>'+w+' part'+(w>1?'s need':' needs')+' a look before members see '+(w>1?'them':'it')+'.</span><button class="btn" data-st="ready">Mark ready anyway</button>';
+ ['confirm','confirm2'].forEach(function(id){var c=$(id);c.hidden=false;c.innerHTML=t;});}
+function hideConfirm(){S.confirm=false;$('confirm').hidden=true;$('confirm2').hidden=true;}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-st]');if(!b)return;var st=b.dataset.st;
+ if(st==='ready'){var ps=parse(ta.value),w=ps.filter(function(p){return p.warn.length;}).length;
+  if(!ps.length){$('sum').textContent='Write at least one part first.';return;}
+  if(w&&!S.confirm){S.confirm=true;showConfirm(w);return;}}
+ var was=S.status;S.status=st==='ready'?'ready':'draft';hideConfirm();footer();saveDay();
+ if(S.status==='ready'&&was!=='ready'){var ps=parse(ta.value);labs.track('day_ready',{day:S.cur,parts:ps.length,with_log:ps.filter(function(p){return p.log;}).length,with_target:ps.filter(function(p){return fmtTarget(p);}).length,minutes:ps.reduce(function(a,p){return a+mins(p);},0),text:ta.value});}});
+
+/* ---------- help sheet ---------- */
+function sheet(first){var s=$('sheet');s.hidden=false;
+ s.innerHTML='<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh">'+
+ '<h2 id="sh">'+(first?'Try writing a workout':'How it works')+'</h2>'+
+ (first?'<p>You’re testing a new way for gym coaches to write the day’s workout. Write it like on a whiteboard. Members get it as cards on their phone.</p>':'')+
+ '<p>The first line of each part is its name. Leave an empty line before the next part. Four optional lines tell the app what to do:</p>'+
+ '<div class="words"><div><code>log:</code><span>what members record: each set, time, rounds, weight, done or nothing</span></div>'+
+ '<div><code>target:</code><span>the result you want, in that unit: 6:00, 5 rounds, 185 lb, 80 kg or 80%</span></div>'+
+ '<div><code>scaled:</code><span>an easier version members can choose</span></div>'+
+ '<div><code>time:</code><span>minutes this part should take</span></div></div>'+
+ '<p>The bar above the text suggests these as you type, so you don’t need to remember them.</p>'+
+ '<p class="lab" style="margin:4px 0 0">Start from</p><div class="ex">'+Object.keys(EX).map(function(k){return '<button class="btn" data-ex="'+k+'">'+(k==='Blank'?'A blank day':k+' example')+'</button>';}).join('')+'</div>'+
+ (first?'':'<button class="btn pri lg" data-close="1">Close</button>')+'</div></div>';}
+$('sheet').addEventListener('click',function(e){var b=e.target.closest('button');
+ if(e.target.id==='scrim'&&store('ww-seen')){$('sheet').hidden=true;return;}
+ if(!b)return;if(b.dataset.ex!=null){ta.value=EX[b.dataset.ex];$('dtitle').textContent=TITLES[b.dataset.ex];store('ww-title',TITLES[b.dataset.ex]);S.status='draft';footer();changed();window.scrollTo(0,0);}
+ store('ww-seen','1');$('sheet').hidden=true;$('sheet').innerHTML='';});
+$('help').addEventListener('click',function(){sheet(false);});$('help2').addEventListener('click',function(){sheet(false);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('sheet').hidden&&store('ww-seen')){$('sheet').hidden=true;}});
+
+/* ---------- start ---------- */
+/* ---------- the week (saved in the tester's browser by labs.store) ---------- */
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function weekDays(){var t=new Date(),m=new Date(t);m.setDate(t.getDate()-((t.getDay()+6)%7));var out=[];for(var k=0;k<7;k++){var d=new Date(m);d.setDate(m.getDate()+k);out.push(d);}return out;}
+var DAYS=labs.store.get('days',null);
+if(!DAYS){DAYS={};weekDays().forEach(function(d,k){DAYS[iso(d)]={title:'CrossFit · all classes',status:k===0?'ready':k===1?'draft':'empty',text:k===0?EX.CrossFit:k===1?'Deadlift\n5 x 3 @ 80%\nlog: each set\ntime: 20':''};});labs.store.set('days',DAYS);}
+function saveDay(){if(!S.cur)return;var dd=DAYS[S.cur]||(DAYS[S.cur]={title:'CrossFit · all classes'});dd.text=ta.value;dd.status=S.status==='ready'?'ready':(ta.value.trim()?'draft':'empty');dd.title=$('dtitle').textContent;labs.store.set('days',DAYS);}
+function dayLine(dd){var ps=parse(dd.text||''),m=ps.reduce(function(a,p){return a+mins(p);},0),bits=ps.length+' part'+(ps.length===1?'':'s')+(m?' · '+m+' min':'');
+ if(!ps.length)return '<span class="wst"><i class="wst-e">Not written yet</i></span>';return dd.status==='ready'?'<span class="wst"><i class="wst-r">Ready</i> · '+bits+'</span>':'<span class="wst">Draft · '+bits+'</span>';}
+function showWeek(){S.cur=null;$('dayv').hidden=true;$('mbar').hidden=true;var w=$('weekv');w.hidden=false;
+ w.innerHTML='<div class="phd"><div class="t"><div class="cap">Training · CrossFit · all classes</div><h1>This week</h1><div class="meta">Tap a day to write or edit it</div></div></div><div class="week">'+
+ weekDays().map(function(d){var id=iso(d),dd=DAYS[id]||{text:'',status:'empty'};return '<button class="wrow" data-day="'+id+'" data-track="day_opened"><span class="wd"><small>'+d.toLocaleDateString('en-US',{weekday:'short'}).toUpperCase()+'</small><b>'+d.getDate()+'</b></span><span class="wt"><b>'+esc(dd.title||'CrossFit · all classes')+'</b>'+dayLine(dd)+'</span><span class="wgo" aria-hidden="true">›</span></button>';}).join('')+'</div>';
+ window.scrollTo(0,0);}
+function openDay(id){var dd=DAYS[id]||{text:'',status:'empty',title:'CrossFit · all classes'};S.cur=id;S.loading=true;S.saved='';
+ $('weekv').hidden=true;$('dayv').hidden=false;$('mbar').hidden=false;ta.value=dd.text||'';S.status=dd.status==='ready'?'ready':'draft';$('dtitle').textContent=dd.title||'CrossFit · all classes';
+ var p=id.split('-');$('date').textContent=new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+ hideConfirm();footer();changed();S.loading=false;placeBar();window.scrollTo(0,0);}
+$('weekv').addEventListener('click',function(e){var b=e.target.closest('[data-day]');if(b)openDay(b.dataset.day);});
+$('back').addEventListener('click',function(){saveDay();showWeek();});
+showWeek();
+if(!store('ww-seen'))sheet(true);
+
+})();
+</script>
+
+</body>
+</html>

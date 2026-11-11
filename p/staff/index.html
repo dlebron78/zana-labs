@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}html,body{margin:0}</style>
+</head>
+<body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add Staff</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --ink:#111; --t2:#4A4A48; --t3:#5C5C59; --line:#E8E8E5; --rowline:#F0F0ED; --page:#F5F5F3; --card:#fff; --fill:#F0F0ED; --fillh:#E4E4E0; --grey:#F3F3F0; --red:#A8261B; --redbg:#FDE8E6; --green:#17663A; --greenbg:#E4F5E8; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--page); color:var(--ink); font-family:'Geist',system-ui,sans-serif; }
+button, input { font-family:inherit; color:var(--ink); -webkit-text-fill-color:currentColor; }
+button { cursor:pointer; -webkit-appearance:none; appearance:none; }
+.test { background:#111; color:#ddd; font-size:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:8px 16px; position:sticky; top:0; z-index:50; }
+.test b { color:#fff; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:11px; }
+.seg { display:inline-flex; gap:2px; background:#2a2a2a; padding:2px; border-radius:8px; flex-wrap:wrap; }
+.seg button { border:0; background:none; color:#ccc; -webkit-text-fill-color:#ccc; height:28px; padding:0 10px; border-radius:6px; font-size:12px; }
+.seg button[aria-pressed="true"] { background:#fff; color:#111; -webkit-text-fill-color:#111; }
+.case { background:#1d1d1c; color:#e9e9e6; font-size:13px; padding:8px 16px; line-height:1.45; } .case b { color:#fff; }
+.frame { display:grid; grid-template-columns:96px 1fr; min-height:calc(100vh - 80px); }
+.band { background:#0E0E0E; }
+.appmain { padding:32px 40px 80px; max-width:880px; }
+.phone .frame { grid-template-columns:1fr; } .phone .band { display:none; }
+.phone .wrap { background:#ddd; padding:16px 0; } .phone .appmain { max-width:390px; margin:0 auto; padding:20px 16px 80px; background:var(--page); min-height:800px; }
+.lab { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }
+.titlerow { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
+h1 { margin:4px 0 16px; font-size:40px; font-weight:700; letter-spacing:-.03em; } .phone h1 { font-size:28px; }
+.tabs { display:flex; gap:20px; border-bottom:1px solid var(--line); margin-bottom:24px; }
+.tabs span { padding:10px 0; font-size:15px; color:var(--t3); } .tabs span.on { color:var(--ink); font-weight:600; border-bottom:2px solid var(--ink); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+.prow { display:flex; align-items:center; gap:12px; padding:12px 20px; border-top:1px solid var(--rowline); min-height:68px; cursor:pointer; }
+.prow:first-child { border-top:0; } .prow:hover { background:#FAFAF8; }
+.prow .tx { flex:1; min-width:0; } .prow .nm { font-size:16px; font-weight:500; }
+.prow .why { font-size:14px; color:var(--t2); margin-top:3px; display:flex; gap:8px; align-items:center; white-space:nowrap; overflow:hidden; }
+.prow .price { font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; }
+.kl { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); flex:none; }
+.chev { color:var(--t3); font-size:20px; }
+.btn { height:36px; padding:0 14px; border-radius:10px; border:0; background:var(--fill); font-size:15px; font-weight:500; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+.btn:hover { background:var(--fillh); } .btn.main { background:var(--ink); color:#fff; -webkit-text-fill-color:#fff; } .btn.risk { background:var(--redbg); color:var(--red); -webkit-text-fill-color:var(--red); }
+.btn:disabled { opacity:.4; cursor:not-allowed; }
+/* panel */
+.scrim { position:fixed; inset:0; background:rgba(17,17,17,.25); z-index:60; display:none; }
+.panel { position:fixed; top:0; right:0; bottom:0; width:460px; max-width:100vw; background:var(--card); z-index:61; box-shadow:-8px 0 32px rgba(0,0,0,.12); display:none; flex-direction:column; }
+.open .scrim { display:block; } .open .panel { display:flex; }
+.phone .panel { width:100vw; top:auto; height:94vh; border-radius:20px 20px 0 0; }
+.ph { display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--line); min-height:64px; }
+.ph h3 { margin:0; font-size:20px; font-weight:700; flex:1; }
+.ib { width:36px; height:36px; border-radius:10px; border:0; background:var(--fill); font-size:18px; display:grid; place-items:center; flex:none; }
+.pb { flex:1; overflow:auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+.pb .q { font-size:17px; font-weight:600; margin:0; }
+.pf { padding:16px 20px; border-top:1px solid var(--line); display:flex; gap:8px; flex-direction:column; }
+.pf .btn { height:44px; border-radius:12px; font-size:16px; width:100%; }
+.pf .why { font-size:13px; color:var(--t3); text-align:center; }
+/* choice cards (kit: 72 tall, radio) */
+.choice { display:flex; gap:12px; align-items:flex-start; border:1px solid var(--line); border-radius:14px; padding:14px 16px; background:#fff; text-align:left; width:100%; min-height:72px; }
+.choice:hover { background:#FAFAF8; }
+.choice.on { border-color:var(--ink); box-shadow:inset 0 0 0 1px var(--ink); }
+.radio { width:20px; height:20px; border-radius:50%; border:2px solid #BDBDB8; flex:none; margin-top:2px; position:relative; }
+.choice.on .radio { border-color:var(--ink); } .choice.on .radio::after { content:''; position:absolute; inset:3px; border-radius:50%; background:var(--ink); }
+.choice b { display:block; font-size:16px; font-weight:600; } .choice span { display:block; font-size:14px; color:var(--t2); margin-top:3px; } .choice small { display:block; font-size:13px; color:var(--t3); margin-top:6px; }
+/* fields */
+.fld label { display:block; font-size:14px; font-weight:600; margin-bottom:6px; }
+.fld .hint { font-size:13px; color:var(--t3); margin-top:6px; }
+input[type=text] { width:100%; border:1px solid var(--line); border-radius:12px; padding:0 14px; height:44px; font-size:16px; background:#fff; }
+input:focus { outline:2px solid var(--ink); outline-offset:-1px; border-color:transparent; }
+.money { position:relative; } .money span { position:absolute; left:14px; top:12px; font-size:16px; color:var(--t3); } .money input { padding-left:26px; font-variant-numeric:tabular-nums; }
+.row2 { display:flex; gap:12px; } .row2 .fld { flex:1; }
+.net { background:var(--grey); border-radius:12px; padding:12px 14px; font-size:14px; color:var(--t2); display:flex; flex-direction:column; gap:4px; }
+.net .l1 { display:flex; justify-content:space-between; gap:12px; } .net b { color:var(--ink); font-variant-numeric:tabular-nums; } .net small { color:var(--t3); font-size:12px; }
+.cnt { display:flex; align-items:center; gap:0; border:1px solid var(--line); border-radius:12px; width:max-content; overflow:hidden; }
+.cnt button { width:44px; height:44px; border:0; background:var(--fill); font-size:20px; } .cnt span { min-width:56px; text-align:center; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
+.checks { border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.ck { display:flex; align-items:center; gap:12px; padding:12px 14px; border-top:1px solid var(--rowline); background:#fff; width:100%; border-left:0; border-right:0; border-bottom:0; text-align:left; font-size:15px; }
+.ck:first-child { border-top:0; } .box { width:22px; height:22px; border-radius:6px; border:2px solid #BDBDB8; display:grid; place-items:center; font-size:13px; color:#fff; flex:none; }
+.ck.on .box { background:var(--ink); border-color:var(--ink); }
+.ck small { margin-left:auto; color:var(--t3); font-size:13px; }
+/* summary / setting rows (label · value · ›) */
+.srows { border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.srow { display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid var(--rowline); background:#fff; width:100%; border-left:0; border-right:0; border-bottom:0; text-align:left; }
+.srow:first-child { border-top:0; } .srow:hover { background:#FAFAF8; }
+.srow .k { font-size:15px; font-weight:500; flex:none; width:120px; } .srow .v { flex:1; font-size:15px; color:var(--t2); }
+.hero { background:var(--grey); border-radius:14px; padding:16px; } .hero .kl { margin-bottom:4px; } .hero .t { font-size:22px; font-weight:700; } .hero .p { font-size:16px; color:var(--t2); margin-top:4px; font-variant-numeric:tabular-nums; }
+.archive { margin-top:8px; }
+.toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; padding:12px 16px; font-size:14px; z-index:80; max-width:92vw; }
+
+/* Real phones: adapt to the screen, not only the switch */
+html, body { max-width:100%; overflow-x:hidden; }
+.frame > .appmain { min-width:0; }
+.tabs { max-width:100%; }
+@media (max-width: 720px) {
+  .frame { grid-template-columns:1fr; } .band { display:none; }
+  .appmain { padding:20px 16px 80px; max-width:none; }
+  h1 { font-size:28px; }
+  .tabs { overflow-x:auto; gap:16px; -webkit-overflow-scrolling:touch; }
+  .test { position:static; }
+  .panel { width:100vw; top:auto; height:94vh; border-radius:20px 20px 0 0; }
+}
+.titlerow { flex-wrap:nowrap!important; align-items:center!important; margin:4px 0 16px; }
+.titlerow h1 { margin:0; }
+.titlerow .btn { height:36px!important; flex:none; align-self:center; }
+.tools { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; }
+.chips { display:flex; gap:6px; flex-wrap:wrap; }
+.chip { height:34px; padding:0 12px; border-radius:17px; border:1px solid var(--line); background:#fff; font-size:14px; font-weight:500; }
+.chip span { color:var(--t3); -webkit-text-fill-color:var(--t3); margin-left:2px; font-variant-numeric:tabular-nums; }
+.chip.on { background:var(--ink); border-color:var(--ink); color:#fff; -webkit-text-fill-color:#fff; } .chip.on span { color:#ccc; -webkit-text-fill-color:#ccc; }
+.search { width:220px!important; height:36px!important; border-radius:10px!important; font-size:14px!important; }
+table.pt { width:100%; border-collapse:collapse; font-size:15px; }
+.pt th { text-align:left; font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); padding:12px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+.pt th:first-child, .pt td:first-child { padding-left:20px; }
+.pt th.r, .pt td.r { text-align:right; } .pt th.c, .pt td.c { text-align:center; }
+.sortb { border:0; background:none; padding:0; font:inherit; letter-spacing:inherit; text-transform:inherit; color:var(--t3); -webkit-text-fill-color:var(--t3); }
+.sortb.on { color:var(--ink); -webkit-text-fill-color:var(--ink); }
+.pt td { padding:12px; border-top:1px solid var(--rowline); height:56px; vertical-align:middle; }
+.pt tbody tr:first-child td { border-top:0; } .pt tbody tr { cursor:pointer; } .pt tbody tr:hover { background:#FAFAF8; }
+.pn { display:flex; align-items:center; gap:10px; font-weight:500; }
+.ki { width:28px; height:28px; border-radius:8px; background:var(--fill); display:grid; place-items:center; color:var(--t2); flex:none; } .ki svg { width:16px; height:16px; }
+.num { font-variant-numeric:tabular-nums; } .mut { color:var(--t3); font-weight:400; } .tr { color:var(--t2); }
+.mrows { display:none; } .mrows .prow .ki { width:36px; height:36px; border-radius:10px; } .mrows .prow .ki svg { width:20px; height:20px; }
+.mrows .pr { font-weight:600; font-size:15px; white-space:nowrap; }
+@media (max-width: 720px) { table.pt { display:none; } .mrows { display:block; } .search { width:100%!important; } .chips { flex-wrap:nowrap; overflow-x:auto; width:100%; padding-bottom:2px; } .chip { flex:none; } }
+.phone table.pt { display:none; } .phone .mrows { display:block; } .phone .search { width:100%!important; }
+.seg2 { display:inline-flex; background:var(--fill); border-radius:10px; padding:3px; gap:2px; }
+.seg2 button { border:0; background:none; height:38px; padding:0 14px; border-radius:8px; font-size:15px; font-weight:500; }
+.seg2 button.on { background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.08); }
+.sw2 { display:flex; align-items:center; justify-content:space-between; gap:12px; border-top:1px solid var(--line); padding-top:16px; }
+.sw2 b { display:block; font-size:15px; font-weight:600; } .sw2 span { font-size:13px; color:var(--t3); }
+.tog { width:48px; height:28px; border-radius:14px; background:#CFCFCA; border:0; position:relative; flex:none; }
+.tog::after { content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:left .15s; }
+.tog.on { background:var(--ink); } .tog.on::after { left:23px; }
+.pn .kl { margin-left:4px; }
+.appmain { max-width:1080px; }
+.phone .tabs { flex-wrap:wrap; column-gap:18px; row-gap:2px; overflow:visible; } @media (max-width:720px){ .tabs { flex-wrap:wrap; column-gap:18px; row-gap:2px; } }
+.pt td { white-space:nowrap; } .pt td, .pt th { padding-left:10px; padding-right:10px; }
+.pt td.tr { max-width:170px; overflow:hidden; text-overflow:ellipsis; }
+.pt td:first-child { max-width:260px; } .pn { overflow:hidden; } .pn > span:not(.ki):not(.kl) { overflow:hidden; text-overflow:ellipsis; }
+.lab { font-size:13px!important; } .kl { font-size:13px!important; }
+.titlerow .btn { height:40px!important; }
+.panel { width:520px!important; }
+.lab2 { font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }
+.sum { border:1px solid var(--line); border-radius:14px; padding:6px 16px; }
+.sum > div { display:flex; gap:12px; padding:10px 0; border-top:1px solid var(--rowline); font-size:15px; } .sum > div:first-child { border-top:0; }
+.sum .k { width:110px; flex:none; font-weight:500; } .sum .v { color:var(--t2); }
+.srow.lone { border:1px solid var(--line); border-radius:14px; }
+.ck.dim { color:var(--t3); -webkit-text-fill-color:var(--t3); } .ck.dim .box { background:#BDBDB8; border-color:#BDBDB8; }
+.undo { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; height:52px; padding:0 8px 0 16px; display:flex; align-items:center; gap:16px; font-size:14px; z-index:90; max-width:92vw; }
+.undo button { border:0; background:none; color:#fff; -webkit-text-fill-color:#fff; font-weight:600; font-size:14px; height:40px; padding:0 10px; border-radius:8px; } .undo button:hover { background:#2a2a2a; }
+.blast { background:#FDF1EF; border:1px solid #F6D3CE; border-radius:12px; padding:10px 12px; font-size:13px; display:flex; flex-direction:column; gap:3px; text-align:left; } .blast b { font-size:14px; } .blast small { color:var(--t3); margin-top:3px; }
+.test { z-index:70!important; position:relative; } .scrim { z-index:72!important; } .panel { z-index:75!important; }
+.st { font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
+.st.ok { color:var(--green); -webkit-text-fill-color:var(--green); } .st.old { color:#8A5A00; -webkit-text-fill-color:#8A5A00; } .st.mute { color:var(--t3); -webkit-text-fill-color:var(--t3); }
+.rolep { font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:6px; background:#111; color:#fff; -webkit-text-fill-color:#fff; margin-right:4px; white-space:nowrap; }
+.ini { width:32px; height:32px; border-radius:50%; background:var(--fill); display:grid; place-items:center; font-size:12px; font-weight:600; color:var(--t2); flex:none; }
+.prow .ini { width:36px; height:36px; font-size:13px; }
+.prow .when { font-size:13px; color:var(--t3); margin-top:2px; }
+.tiles { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.ptabs { display:flex; gap:20px; border-bottom:1px solid var(--line); margin-bottom:20px; } .ptabs span { padding:10px 0; font-size:15px; color:var(--t3); } .ptabs span.on { color:var(--ink); font-weight:600; border-bottom:2px solid var(--ink); }
+.pick { border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.pick .prow { min-height:60px; padding:10px 14px; }
+.pick .prow.on { background:#F6F6F3; box-shadow:inset 3px 0 0 var(--ink); }
+.addp { display:flex; align-items:center; gap:12px; padding:14px; border-top:1px solid var(--rowline); background:#fff; width:100%; border-left:0; border-right:0; border-bottom:0; text-align:left; font-size:15px; font-weight:500; }
+.addp .plus { width:36px; height:36px; border-radius:50%; border:1.5px dashed #BDBDB8; display:grid; place-items:center; font-size:18px; color:var(--t2); }
+.who { display:flex; align-items:center; gap:12px; background:var(--grey); border-radius:14px; padding:12px 14px; }
+.who b { display:block; font-size:16px; } .who span { font-size:13px; color:var(--t3); }
+.ck .cap { display:block; font-size:13px; color:var(--t3); margin-top:2px; font-weight:400; }
+.ck { align-items:flex-start; } .ck .box { margin-top:2px; }
+.consq { background:var(--grey); border-radius:12px; padding:10px 12px; font-size:13px; color:var(--t2); line-height:1.45; }
+.planwall { background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px; display:flex; gap:16px; align-items:center; margin-bottom:16px; }
+.planwall div { flex:1; } .planwall b { display:block; font-size:16px; } .planwall span { font-size:14px; color:var(--t2); }
+@media (max-width:720px){ .pt.staff { display:none; } }
+</style>
+</head>
+<body>
+<div class="test"><b>Start</b><span class="seg" id="g1"></span><b>Width</b><span class="seg" id="g2"></span></div>
+<div class="case" id="case"></div>
+<div class="wrap"><div class="frame"><div class="band"></div><div class="appmain" id="main"></div></div></div>
+<div class="scrim" data-a="close"></div>
+<div class="panel" id="panel" role="dialog" aria-modal="true"></div>
+<script>
+// Grounded at phoenix main 5b23e7d: apps/identity/staff.py. A role is given to a Relationship this business already holds, picked from its own list (PR #144 call 3);
+// roles admin · coach · front desk (owner not grantable); several roles per person; revoke ends the role and keeps the row; last owner can't be revoked;
+// staff roles work only on the Business Zana plan (req 1). Granted/revoked by identity.staff.invite / identity.staff.revoke: owner and admin.
+var ROLES=[['admin','Admin','Everything but the business’s name, its billing rules, writing off what’s owed and special prices. Adds and removes staff.'],['coach','Coach','Runs the schedule, classes and programs, checks people in, reads the client record. Doesn’t sell or see money.'],['desk','Front desk','Adds people, checks them in, sells and collects, saves cards. Doesn’t change products or the schedule.']];
+var RN={owner:'Owner',admin:'Admin',coach:'Coach',desk:'Front desk'};
+var S={start:'list', wid:'desk', plan:'business', step:0, pick:null, roles:[], q:'', add:null, toast:null, sheet:null,
+ staff:[['Daniela Ruiz',['owner'],'Today','—'],['Marta López',['admin','coach'],'Today','12 classes'],['Luis Ortiz',['coach'],'Yesterday','8 classes'],['Rosa Pérez',['desk'],'Today','—'],['Pedro Santos',['coach','desk'],'Never signed in','4 classes']],
+ people:[['Ana Rivera','Member','Unlimited monthly'],['José Vega','Member','8 classes a month'],['Carmen Díaz','Prospect','Joined Nov 4 · no purchase yet'],['Diego Morales','Lapsed','Plan ended Aug 30'],['Elena Torres','Member','10-class pack'],['Kevin Ramos','Prospect','Joined by link Nov 6'],['Sofia Méndez','Member','Kids club']]};
+function ini(n){ return n.split(' ').map(function(w){return w[0];}).join('').slice(0,2); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+var CASES={
+ list:'<b>People › Staff.</b> The main button is <b>Add staff</b> (was “Invite staff”). Staff are people the gym already has: a role is added to someone in its list (canon, PR #144).',
+ pick:'<b>Add staff, step 1: who.</b> Search everyone the gym has (members, prospects, lapsed). Not there? <b>Add person</b> first (name and email; they get the usual sign-in email), then come straight back.',
+ roles:'<b>Step 2: what they do.</b> Pick one or more roles; each says in plain words what it can do. Owner is never offered here.',
+ plan:'<b>Not on the Business plan.</b> Staff work only on Business (req 1). The list stays; Add staff says why.'
+};
+function setStart(v){ S.start=v; S.step=0; S.pick=null; S.roles=[]; S.add=null; S.sheet=null; S.toast=null; S.plan='business';
+  if(v==='pick') S.step=1; if(v==='roles'){ S.step=2; S.pick=['Carmen Díaz','Prospect','Joined Nov 4 · no purchase yet']; S.roles=['coach']; } if(v==='plan') S.plan='pro'; render(); }
+function list(){
+  var h='<div class="lab">People</div><div class="titlerow"><h1>People</h1>'+(S.plan==='business'?'<button class="btn main" data-a="addstaff">Add staff</button>':'')+'</div><div class="ptabs"><span>Community</span><span>Leads</span><span class="on">Staff</span></div>';
+  if(S.plan!=='business') h+='<div class="planwall"><div><b>Staff need the Business plan</b><span>Your staff keep their roles and get them back the moment you upgrade.</span></div><button class="btn main" style="height:40px">See plans</button></div>';
+  h+='<div class="card"><table class="pt staff"><thead><tr><th>Person</th><th>Role</th><th>This week</th><th>Last seen</th></tr></thead><tbody>';
+  S.staff.forEach(function(p){ h+='<tr data-a="person" data-n="'+p[0]+'"><td><div class="pn"><span class="ini">'+ini(p[0])+'</span><span>'+p[0]+'</span></div></td><td>'+p[1].map(function(r){return '<span class="rolep">'+RN[r]+'</span>';}).join('')+'</td><td class="tr">'+p[3]+'</td><td>'+(p[2]==='Never signed in'?'<span class="st old">Never signed in</span>':'<span class="tr">'+p[2]+'</span>')+'</td></tr>'; });
+  h+='</tbody></table><div class="mrows">';
+  S.staff.forEach(function(p){ h+='<div class="prow" data-a="person" data-n="'+p[0]+'"><span class="ini">'+ini(p[0])+'</span><div class="tx"><div class="nm">'+p[0]+'</div><div class="when">'+p[1].map(function(r){return RN[r];}).join(' · ')+' · '+(p[2]==='Never signed in'?'<span class="st old">Never signed in</span>':'seen '+p[2].toLowerCase())+'</div></div><span class="chev">›</span></div>'; });
+  return h+'</div></div>';
+}
+function panel(){
+  var h, ok=false, cta='Next';
+  if(S.add){ var a=S.add; h='<div class="ph"><button class="ib" data-a="unadd">‹</button><h3>Add person</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><div class="fld"><label>Name</label><input type="text" data-f="name" value="'+esc(a.name)+'" placeholder="Luis Ortiz"></div><div class="fld"><label>Email</label><input type="text" data-f="email" value="'+esc(a.email)+'" placeholder="luis@email.com"><div class="hint">They get the usual email to sign in to Barrio. Phone and the rest can wait.</div></div></div><div class="pf"><button class="btn main" data-a="addsave" '+(a.name.trim()?'':'disabled')+'>Add and continue</button></div>'; return h; }
+  if(S.sheet){ var p=S.staff.filter(function(x){return x[0]===S.sheet;})[0], own=p[1].indexOf('owner')>=0;
+    h='<div class="ph"><h3>'+p[0]+'</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><div class="who"><span class="ini">'+ini(p[0])+'</span><div><b>'+p[0]+'</b><span>'+(p[2]==='Never signed in'?'Hasn’t signed in yet':'Last seen '+p[2].toLowerCase())+'</span></div></div>';
+    if(own) h+='<div class="consq">The owner’s role isn’t changed here.</div>';
+    else { h+='<p class="q">Roles</p><div class="checks">'; ROLES.forEach(function(r){ var on=p[1].indexOf(r[0])>=0; h+='<button class="ck '+(on?'on':'')+'" data-a="srole" data-v="'+r[0]+'"><span class="box">'+(on?'✓':'')+'</span><span><b style="font-weight:600">'+r[1]+'</b><span class="cap">'+r[2]+'</span></span></button>'; }); h+='</div>';
+      if(p[2]==='Never signed in') h+='<button class="btn" data-a="resend" style="align-self:flex-start">Resend sign-in email</button>';
+      h+='<button class="btn risk" data-a="remove" style="align-self:flex-start">Remove from staff</button><div class="consq">Their roles end; they stay in your People with everything else. The record of what they could do, and when, is kept.</div>'; }
+    return h+'</div>'; }
+  if(S.step===1){ var q=S.q.toLowerCase(), ppl=S.people.filter(function(p){return !q||p[0].toLowerCase().indexOf(q)>=0;});
+    h='<div class="ph"><h3>Add staff</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><p class="q">Who?</p><input type="text" data-f="q" value="'+esc(S.q)+'" placeholder="Search your people">';
+    h+='<div class="pick">'; ppl.forEach(function(p){ var on=S.pick&&S.pick[0]===p[0]; h+='<div class="prow '+(on?'on':'')+'" data-a="pick" data-n="'+p[0]+'"><span class="ini">'+ini(p[0])+'</span><div class="tx"><div class="nm">'+p[0]+'</div><div class="when">'+p[2]+'</div></div><span class="st mute">'+p[1]+'</span></div>'; });
+    if(!ppl.length) h+='<div class="prow" style="cursor:default"><div class="tx"><div class="when">Nobody called “'+esc(S.q)+'” yet.</div></div></div>';
+    h+='<button class="addp" data-a="addperson"><span class="plus">+</span><span>Not in your list? <b>Add person</b></span></button></div>';
+    h+='</div><div class="pf"><button class="btn main" data-a="next" '+(S.pick?'':'disabled')+'>Next</button></div>'; return h; }
+  if(S.step===2){ var pk=S.pick; ok=S.roles.length>0; var first=pk[0].split(' ')[0];
+    cta=ok?'Make '+first+' '+(S.roles.length>1?'staff':(S.roles[0]==='admin'?'an admin':S.roles[0]==='coach'?'a coach':'front desk')):'Pick a role';
+    h='<div class="ph"><button class="ib" data-a="prev">‹</button><h3>Add staff</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><div class="who"><span class="ini">'+ini(pk[0])+'</span><div><b>'+pk[0]+'</b><span>'+pk[1]+' · '+pk[2]+'</span></div></div><p class="q">What will '+first+' do?</p><div class="checks">';
+    ROLES.forEach(function(r){ var on=S.roles.indexOf(r[0])>=0; h+='<button class="ck '+(on?'on':'')+'" data-a="role" data-v="'+r[0]+'"><span class="box">'+(on?'✓':'')+'</span><span><b style="font-weight:600">'+r[1]+'</b><span class="cap">'+r[2]+'</span></span></button>'; });
+    h+='</div><div class="consq">Nothing else changes for '+first+': bookings, plans and payments stay as they are. Next time '+first+' opens Barrio, it asks <b>Work</b> or <b>Train</b>.</div></div><div class="pf"><button class="btn main" data-a="make" '+(ok?'':'disabled')+'>'+cta+'</button></div>'; return h; }
+  return '';
+}
+function render(){
+  var open=S.step||S.add||S.sheet;
+  document.body.className=(S.wid==='phone'?'phone ':'')+(open?'open':'');
+  document.getElementById('g1').innerHTML=[['list','Staff tab'],['pick','Add staff: who'],['roles','Add staff: roles'],['plan','Not on Business']].map(function(x){return '<button data-a="start" data-v="'+x[0]+'" aria-pressed="'+(S.start===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('g2').innerHTML=[['desk','Laptop'],['phone','Phone']].map(function(x){return '<button data-a="wid" data-v="'+x[0]+'" aria-pressed="'+(S.wid===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('case').innerHTML=CASES[S.plan!=='business'?'plan':S.step===1||S.add?'pick':S.step===2?'roles':'list'];
+  document.getElementById('main').innerHTML=list();
+  document.getElementById('panel').innerHTML=panel();
+  var old=document.querySelector('.undo'); if(old) old.remove();
+  if(S.toast){ var t=document.createElement('div'); t.className='undo'; t.innerHTML='<span>'+S.toast+'</span><button data-a="untoast">Undo</button>'; document.body.appendChild(t); }
+}
+document.addEventListener('click',function(ev){
+  var el=ev.target.closest('[data-a]'); if(!el) return; var a=el.dataset.a, v=el.dataset.v; ev.preventDefault();
+  if(a!=='untoast') S.toast=null;
+  if(a==='start') return setStart(v);
+  if(a==='wid') S.wid=v;
+  if(a==='addstaff'){ S.step=1; S.q=''; S.pick=null; S.roles=[]; }
+  if(a==='close'){ S.step=0; S.add=null; S.sheet=null; }
+  if(a==='pick') S.pick=S.people.filter(function(p){return p[0]===el.dataset.n;})[0];
+  if(a==='next') S.step=2; if(a==='prev') S.step=1;
+  if(a==='role'){ var i=S.roles.indexOf(v); if(i>=0) S.roles.splice(i,1); else S.roles.push(v); }
+  if(a==='make'){ S.staff.push([S.pick[0],S.roles.slice(),'Never signed in','—']); S.people=S.people.filter(function(p){return p[0]!==S.pick[0];}); S.toast=S.pick[0]+' is now staff.'; S.step=0; }
+  if(a==='addperson') S.add={name:S.q,email:''};
+  if(a==='unadd') S.add=null;
+  if(a==='addsave'){ var np=[S.add.name.trim(),'Prospect','Added just now']; S.people.unshift(np); S.pick=np; S.add=null; S.step=2; S.roles=[]; }
+  if(a==='person') S.sheet=el.dataset.n;
+  if(a==='srole'){ var p=S.staff.filter(function(x){return x[0]===S.sheet;})[0], j=p[1].indexOf(v); if(j>=0){ if(p[1].length>1) p[1].splice(j,1); } else p[1].push(v); }
+  if(a==='resend'){ S.toast='Sign-in email sent again.'; S.sheet=null; }
+  if(a==='remove'){ var n=S.sheet; S.staff=S.staff.filter(function(x){return x[0]!==n;}); S.toast=n+' removed from staff.'; S.sheet=null; }
+  if(a==='untoast') S.toast=null;
+  render();
+});
+document.addEventListener('input',function(ev){ var f=ev.target.dataset.f; if(!f) return;
+  if(f==='q'){ S.q=ev.target.value; var pos=ev.target.selectionStart; render(); var i=document.querySelector('[data-f=q]'); i.focus(); i.setSelectionRange(pos,pos); return; }
+  S.add[f]=ev.target.value; var b=document.querySelector('[data-a=addsave]'); if(b) b.disabled=!S.add.name.trim(); });
+render();
+</script>
+</body>
+</html>
+
+</body>
+</html>

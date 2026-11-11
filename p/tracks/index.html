@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}html,body{margin:0}</style>
+</head>
+<body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tracks</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --ink:#111; --t2:#4A4A48; --t3:#5C5C59; --line:#E8E8E5; --rowline:#F0F0ED; --page:#F5F5F3; --card:#fff; --fill:#F0F0ED; --fillh:#E4E4E0; --grey:#F3F3F0; --red:#A8261B; --redbg:#FDE8E6; --green:#17663A; --greenbg:#E4F5E8; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--page); color:var(--ink); font-family:'Geist',system-ui,sans-serif; }
+button, input { font-family:inherit; color:var(--ink); -webkit-text-fill-color:currentColor; }
+button { cursor:pointer; -webkit-appearance:none; appearance:none; }
+.test { background:#111; color:#ddd; font-size:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:8px 16px; position:sticky; top:0; z-index:50; }
+.test b { color:#fff; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:11px; }
+.seg { display:inline-flex; gap:2px; background:#2a2a2a; padding:2px; border-radius:8px; flex-wrap:wrap; }
+.seg button { border:0; background:none; color:#ccc; -webkit-text-fill-color:#ccc; height:28px; padding:0 10px; border-radius:6px; font-size:12px; }
+.seg button[aria-pressed="true"] { background:#fff; color:#111; -webkit-text-fill-color:#111; }
+.case { background:#1d1d1c; color:#e9e9e6; font-size:13px; padding:8px 16px; line-height:1.45; } .case b { color:#fff; }
+.frame { display:grid; grid-template-columns:96px 1fr; min-height:calc(100vh - 80px); }
+.band { background:#0E0E0E; }
+.appmain { padding:32px 40px 80px; max-width:880px; }
+.phone .frame { grid-template-columns:1fr; } .phone .band { display:none; }
+.phone .wrap { background:#ddd; padding:16px 0; } .phone .appmain { max-width:390px; margin:0 auto; padding:20px 16px 80px; background:var(--page); min-height:800px; }
+.lab { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }
+.titlerow { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
+h1 { margin:4px 0 16px; font-size:40px; font-weight:700; letter-spacing:-.03em; } .phone h1 { font-size:28px; }
+.tabs { display:flex; gap:20px; border-bottom:1px solid var(--line); margin-bottom:24px; }
+.tabs span { padding:10px 0; font-size:15px; color:var(--t3); } .tabs span.on { color:var(--ink); font-weight:600; border-bottom:2px solid var(--ink); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+.prow { display:flex; align-items:center; gap:12px; padding:12px 20px; border-top:1px solid var(--rowline); min-height:68px; cursor:pointer; }
+.prow:first-child { border-top:0; } .prow:hover { background:#FAFAF8; }
+.prow .tx { flex:1; min-width:0; } .prow .nm { font-size:16px; font-weight:500; }
+.prow .why { font-size:14px; color:var(--t2); margin-top:3px; display:flex; gap:8px; align-items:center; white-space:nowrap; overflow:hidden; }
+.prow .price { font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; }
+.kl { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); flex:none; }
+.chev { color:var(--t3); font-size:20px; }
+.btn { height:36px; padding:0 14px; border-radius:10px; border:0; background:var(--fill); font-size:15px; font-weight:500; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+.btn:hover { background:var(--fillh); } .btn.main { background:var(--ink); color:#fff; -webkit-text-fill-color:#fff; } .btn.risk { background:var(--redbg); color:var(--red); -webkit-text-fill-color:var(--red); }
+.btn:disabled { opacity:.4; cursor:not-allowed; }
+/* panel */
+.scrim { position:fixed; inset:0; background:rgba(17,17,17,.25); z-index:60; display:none; }
+.panel { position:fixed; top:0; right:0; bottom:0; width:460px; max-width:100vw; background:var(--card); z-index:61; box-shadow:-8px 0 32px rgba(0,0,0,.12); display:none; flex-direction:column; }
+.open .scrim { display:block; } .open .panel { display:flex; }
+.phone .panel { width:100vw; top:auto; height:94vh; border-radius:20px 20px 0 0; }
+.ph { display:flex; align-items:center; gap:10px; padding:14px 20px; border-bottom:1px solid var(--line); min-height:64px; }
+.ph h3 { margin:0; font-size:20px; font-weight:700; flex:1; }
+.ib { width:36px; height:36px; border-radius:10px; border:0; background:var(--fill); font-size:18px; display:grid; place-items:center; flex:none; }
+.pb { flex:1; overflow:auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+.pb .q { font-size:17px; font-weight:600; margin:0; }
+.pf { padding:16px 20px; border-top:1px solid var(--line); display:flex; gap:8px; flex-direction:column; }
+.pf .btn { height:44px; border-radius:12px; font-size:16px; width:100%; }
+.pf .why { font-size:13px; color:var(--t3); text-align:center; }
+/* choice cards (kit: 72 tall, radio) */
+.choice { display:flex; gap:12px; align-items:flex-start; border:1px solid var(--line); border-radius:14px; padding:14px 16px; background:#fff; text-align:left; width:100%; min-height:72px; }
+.choice:hover { background:#FAFAF8; }
+.choice.on { border-color:var(--ink); box-shadow:inset 0 0 0 1px var(--ink); }
+.radio { width:20px; height:20px; border-radius:50%; border:2px solid #BDBDB8; flex:none; margin-top:2px; position:relative; }
+.choice.on .radio { border-color:var(--ink); } .choice.on .radio::after { content:''; position:absolute; inset:3px; border-radius:50%; background:var(--ink); }
+.choice b { display:block; font-size:16px; font-weight:600; } .choice span { display:block; font-size:14px; color:var(--t2); margin-top:3px; } .choice small { display:block; font-size:13px; color:var(--t3); margin-top:6px; }
+/* fields */
+.fld label { display:block; font-size:14px; font-weight:600; margin-bottom:6px; }
+.fld .hint { font-size:13px; color:var(--t3); margin-top:6px; }
+input[type=text] { width:100%; border:1px solid var(--line); border-radius:12px; padding:0 14px; height:44px; font-size:16px; background:#fff; }
+input:focus { outline:2px solid var(--ink); outline-offset:-1px; border-color:transparent; }
+.money { position:relative; } .money span { position:absolute; left:14px; top:12px; font-size:16px; color:var(--t3); } .money input { padding-left:26px; font-variant-numeric:tabular-nums; }
+.row2 { display:flex; gap:12px; } .row2 .fld { flex:1; }
+.net { background:var(--grey); border-radius:12px; padding:12px 14px; font-size:14px; color:var(--t2); display:flex; flex-direction:column; gap:4px; }
+.net .l1 { display:flex; justify-content:space-between; gap:12px; } .net b { color:var(--ink); font-variant-numeric:tabular-nums; } .net small { color:var(--t3); font-size:12px; }
+.cnt { display:flex; align-items:center; gap:0; border:1px solid var(--line); border-radius:12px; width:max-content; overflow:hidden; }
+.cnt button { width:44px; height:44px; border:0; background:var(--fill); font-size:20px; } .cnt span { min-width:56px; text-align:center; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
+.checks { border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.ck { display:flex; align-items:center; gap:12px; padding:12px 14px; border-top:1px solid var(--rowline); background:#fff; width:100%; border-left:0; border-right:0; border-bottom:0; text-align:left; font-size:15px; }
+.ck:first-child { border-top:0; } .box { width:22px; height:22px; border-radius:6px; border:2px solid #BDBDB8; display:grid; place-items:center; font-size:13px; color:#fff; flex:none; }
+.ck.on .box { background:var(--ink); border-color:var(--ink); }
+.ck small { margin-left:auto; color:var(--t3); font-size:13px; }
+/* summary / setting rows (label · value · ›) */
+.srows { border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.srow { display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid var(--rowline); background:#fff; width:100%; border-left:0; border-right:0; border-bottom:0; text-align:left; }
+.srow:first-child { border-top:0; } .srow:hover { background:#FAFAF8; }
+.srow .k { font-size:15px; font-weight:500; flex:none; width:120px; } .srow .v { flex:1; font-size:15px; color:var(--t2); }
+.hero { background:var(--grey); border-radius:14px; padding:16px; } .hero .kl { margin-bottom:4px; } .hero .t { font-size:22px; font-weight:700; } .hero .p { font-size:16px; color:var(--t2); margin-top:4px; font-variant-numeric:tabular-nums; }
+.archive { margin-top:8px; }
+.toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; padding:12px 16px; font-size:14px; z-index:80; max-width:92vw; }
+
+/* Real phones: adapt to the screen, not only the switch */
+html, body { max-width:100%; overflow-x:hidden; }
+.frame > .appmain { min-width:0; }
+.tabs { max-width:100%; }
+@media (max-width: 720px) {
+  .frame { grid-template-columns:1fr; } .band { display:none; }
+  .appmain { padding:20px 16px 80px; max-width:none; }
+  h1 { font-size:28px; }
+  .tabs { overflow-x:auto; gap:16px; -webkit-overflow-scrolling:touch; }
+  .test { position:static; }
+  .panel { width:100vw; top:auto; height:94vh; border-radius:20px 20px 0 0; }
+}
+.titlerow { flex-wrap:nowrap!important; align-items:center!important; margin:4px 0 16px; }
+.titlerow h1 { margin:0; }
+.titlerow .btn { height:36px!important; flex:none; align-self:center; }
+.tools { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; }
+.chips { display:flex; gap:6px; flex-wrap:wrap; }
+.chip { height:34px; padding:0 12px; border-radius:17px; border:1px solid var(--line); background:#fff; font-size:14px; font-weight:500; }
+.chip span { color:var(--t3); -webkit-text-fill-color:var(--t3); margin-left:2px; font-variant-numeric:tabular-nums; }
+.chip.on { background:var(--ink); border-color:var(--ink); color:#fff; -webkit-text-fill-color:#fff; } .chip.on span { color:#ccc; -webkit-text-fill-color:#ccc; }
+.search { width:220px!important; height:36px!important; border-radius:10px!important; font-size:14px!important; }
+table.pt { width:100%; border-collapse:collapse; font-size:15px; }
+.pt th { text-align:left; font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); padding:12px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+.pt th:first-child, .pt td:first-child { padding-left:20px; }
+.pt th.r, .pt td.r { text-align:right; } .pt th.c, .pt td.c { text-align:center; }
+.sortb { border:0; background:none; padding:0; font:inherit; letter-spacing:inherit; text-transform:inherit; color:var(--t3); -webkit-text-fill-color:var(--t3); }
+.sortb.on { color:var(--ink); -webkit-text-fill-color:var(--ink); }
+.pt td { padding:12px; border-top:1px solid var(--rowline); height:56px; vertical-align:middle; }
+.pt tbody tr:first-child td { border-top:0; } .pt tbody tr { cursor:pointer; } .pt tbody tr:hover { background:#FAFAF8; }
+.pn { display:flex; align-items:center; gap:10px; font-weight:500; }
+.ki { width:28px; height:28px; border-radius:8px; background:var(--fill); display:grid; place-items:center; color:var(--t2); flex:none; } .ki svg { width:16px; height:16px; }
+.num { font-variant-numeric:tabular-nums; } .mut { color:var(--t3); font-weight:400; } .tr { color:var(--t2); }
+.mrows { display:none; } .mrows .prow .ki { width:36px; height:36px; border-radius:10px; } .mrows .prow .ki svg { width:20px; height:20px; }
+.mrows .pr { font-weight:600; font-size:15px; white-space:nowrap; }
+@media (max-width: 720px) { table.pt { display:none; } .mrows { display:block; } .search { width:100%!important; } .chips { flex-wrap:nowrap; overflow-x:auto; width:100%; padding-bottom:2px; } .chip { flex:none; } }
+.phone table.pt { display:none; } .phone .mrows { display:block; } .phone .search { width:100%!important; }
+.seg2 { display:inline-flex; background:var(--fill); border-radius:10px; padding:3px; gap:2px; }
+.seg2 button { border:0; background:none; height:38px; padding:0 14px; border-radius:8px; font-size:15px; font-weight:500; }
+.seg2 button.on { background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.08); }
+.sw2 { display:flex; align-items:center; justify-content:space-between; gap:12px; border-top:1px solid var(--line); padding-top:16px; }
+.sw2 b { display:block; font-size:15px; font-weight:600; } .sw2 span { font-size:13px; color:var(--t3); }
+.tog { width:48px; height:28px; border-radius:14px; background:#CFCFCA; border:0; position:relative; flex:none; }
+.tog::after { content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:left .15s; }
+.tog.on { background:var(--ink); } .tog.on::after { left:23px; }
+.pn .kl { margin-left:4px; }
+.appmain { max-width:1080px; }
+.phone .tabs { flex-wrap:wrap; column-gap:18px; row-gap:2px; overflow:visible; } @media (max-width:720px){ .tabs { flex-wrap:wrap; column-gap:18px; row-gap:2px; } }
+.pt td { white-space:nowrap; } .pt td, .pt th { padding-left:10px; padding-right:10px; }
+.pt td.tr { max-width:170px; overflow:hidden; text-overflow:ellipsis; }
+.pt td:first-child { max-width:260px; } .pn { overflow:hidden; } .pn > span:not(.ki):not(.kl) { overflow:hidden; text-overflow:ellipsis; }
+.lab { font-size:13px!important; } .kl { font-size:13px!important; }
+.titlerow .btn { height:40px!important; }
+.panel { width:520px!important; }
+.lab2 { font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }
+.sum { border:1px solid var(--line); border-radius:14px; padding:6px 16px; }
+.sum > div { display:flex; gap:12px; padding:10px 0; border-top:1px solid var(--rowline); font-size:15px; } .sum > div:first-child { border-top:0; }
+.sum .k { width:110px; flex:none; font-weight:500; } .sum .v { color:var(--t2); }
+.srow.lone { border:1px solid var(--line); border-radius:14px; }
+.ck.dim { color:var(--t3); -webkit-text-fill-color:var(--t3); } .ck.dim .box { background:#BDBDB8; border-color:#BDBDB8; }
+.undo { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; height:52px; padding:0 8px 0 16px; display:flex; align-items:center; gap:16px; font-size:14px; z-index:90; max-width:92vw; }
+.undo button { border:0; background:none; color:#fff; -webkit-text-fill-color:#fff; font-weight:600; font-size:14px; height:40px; padding:0 10px; border-radius:8px; } .undo button:hover { background:#2a2a2a; }
+.blast { background:#FDF1EF; border:1px solid #F6D3CE; border-radius:12px; padding:10px 12px; font-size:13px; display:flex; flex-direction:column; gap:3px; text-align:left; } .blast b { font-size:14px; } .blast small { color:var(--t3); margin-top:3px; }
+.test { z-index:70!important; position:relative; } .scrim { z-index:72!important; } .panel { z-index:75!important; }
+.tag { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:6px; background:var(--fill); color:var(--t2); -webkit-text-fill-color:var(--t2); margin-left:6px; white-space:nowrap; }
+.warnc { color:var(--red); -webkit-text-fill-color:var(--red); font-weight:600; }
+.sect { margin-top:28px; } .sect > .lab2 { margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.prow .when { font-size:13px; color:var(--t3); margin-top:2px; }
+.prow .btn { height:34px; font-size:14px; }
+.okline { background:var(--grey); border-radius:12px; padding:10px 12px; font-size:14px; color:var(--t2); line-height:1.45; }
+.okline b { color:var(--ink); }
+.warnbox { background:#FDF1EF; border:1px solid #F6D3CE; border-radius:12px; padding:10px 12px; font-size:14px; line-height:1.45; }
+.ck small { margin-left:auto; color:var(--t3); font-size:13px; }
+.ck.dis { opacity:.55; cursor:default; }
+.newt { display:flex; gap:8px; align-items:center; padding:8px 0; }
+.newt input { flex:1; height:44px; }
+.addrow { display:flex; align-items:center; gap:10px; padding:12px 14px; border:1px dashed #BDBDB8; border-radius:12px; background:#fff; width:100%; text-align:left; font-size:15px; font-weight:500; color:var(--t2); -webkit-text-fill-color:var(--t2); }
+.hero2 { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+.rn { border:0; background:none; font-size:14px; font-weight:600; text-decoration:underline; padding:0; }
+.disnote { font-size:13px; color:var(--t3); margin-top:8px; }
+.panel .checks { max-height:none!important; overflow:visible!important; }
+.typesel { border:1px solid var(--line); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; background:#fff; }
+.typesel b { font-size:16px; } .typesel span { font-size:13px; color:var(--t3); display:block; }
+</style>
+</head>
+<body>
+<div class="test"><b>Start</b><span class="seg" id="g1"></span><b>Width</b><span class="seg" id="g2"></span></div>
+<div class="case" id="case"></div>
+<div class="wrap"><div class="frame"><div class="band"></div><div class="appmain" id="main"></div></div></div>
+<div class="scrim" data-a="close"></div>
+<div class="panel" id="panel" role="dialog" aria-modal="true"></div>
+<script>
+// Grounded at phoenix main ccea861: scheduling Track (name, is_default; create + rename exist; no retire), Activity.track (required FK; edit may change it;
+// absent on create = the default track), money Product → Track grants (track_ids; covers_all_tracks since #324), In use count (#324).
+var PRODS=[['p1','Unlimited monthly',true,48],['p2','8 classes a month',false,19],['p3','10-class pack',false,21],['p4','Open gym monthly',false,9],['p5','Personal training 4x',false,6],['p6','PT 5 sessions',false,2],['p7','Kids club',false,12]];
+var S={view:'list', wid:'desk', open:null, panel:null, toast:null, nt:'', d:{}, tracks:[
+ {id:'t1',name:'CrossFit',def:false,types:[['CrossFit','60 min · 20 spots','Mon–Fri 6 AM, 5:30 PM'],['Gymnastics','60 min · 14 spots','Sat 9 AM'],['Olympic lifting','75 min · 10 spots','Tue, Thu 7 PM']],prog:'CrossFit WODs',cover:['p2','p3'],inuse:61,upcoming:46},
+ {id:'t2',name:'Open Gym',def:false,types:[['Open Gym','2 h · no limit','Every day 10 AM']],prog:'',cover:['p4'],inuse:57,upcoming:14},
+ {id:'t3',name:'Hyrox',def:false,types:[['Hyrox','60 min · 16 spots','Sat 8 AM, from Nov 14']],prog:'Hyrox Prep',cover:[],inuse:0,upcoming:4},
+ {id:'t4',name:'Personal Training',def:false,types:[['1:1 Personal training','60 min · 1 spot','By booking']],prog:'',cover:['p5','p6'],inuse:8,upcoming:9},
+ {id:'t5',name:'Kids',def:false,types:[['Kids club','45 min · 12 spots','Tue, Thu 4 PM']],prog:'',cover:['p7'],inuse:12,upcoming:8},
+ {id:'t0',name:'General',def:true,types:[],prog:'',cover:[],inuse:48,upcoming:0}]};
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function pn(id){ return PRODS.filter(function(p){return p[0]===id;})[0]; }
+function T(id){ return S.tracks.filter(function(t){return t.id===id;})[0]; }
+function canBook(t){ var n=0; PRODS.forEach(function(p){ if(p[2]||t.cover.indexOf(p[0])>=0) n+=p[3]; }); return n; }
+function whoCan(t){ var all=PRODS.filter(function(p){return p[2];}).map(function(p){return p[1];}); return all.concat(t.cover.map(function(c){return pn(c)[1];})); }
+function only(t){ return t.cover.length===0; }
+function listJoin(a){ if(a.length<=1) return a.join(''); return a.slice(0,-1).join(', ')+' and '+a[a.length-1]; }
+var CASES={
+ list:'<b>Settings › Tracks.</b> A quiet tidy-up page: who can get into what. Tracks are mostly made inline (class type, product, program). A track no product covers is flagged.',
+ page:'<b>A track’s page.</b> Rename, its class types (move one to another track), its program (read-only here; Workouts edits it), the products that cover it (the same link as the product’s own list), <b>Stop offering</b> once nothing is scheduled.',
+ newclass:'<b>New class, existing class type.</b> The track shows right under the class type with who can book; <b>Change ›</b> moves the class type, so all its classes follow (⚑ the track on New class).',
+ newtype:'<b>New class type.</b> Track is required, nothing preselected; <b>+ New track</b> is pre-named from the class type. If no product covers the track: the warning, and the products to tick right there.',
+ product:'<b>New product › Tracks it covers.</b> All tracks at the top; <b>+ New track</b> at the bottom, for a product sold before its classes exist.',
+ program:'<b>New program › Which track?</b> The program shows to everyone the track covers. <b>+ New track</b> pre-named from the program.',
+ stop:'<b>Stop offering.</b> Allowed only with no upcoming classes; products keep the link harmlessly; history stays. The Undo bar, never “Are you sure?”.'
+};
+function header(btn){ return '<div class="titlerow"><h1>Settings</h1>'+(btn||'')+'</div><div class="tabs"><span>Business</span><span>Look</span><span>Payments</span><span>Documents</span><span class="on">Tracks</span><span>Tax</span></div>'; }
+function list(){
+  var h=header('<button class="btn main" data-a="newtrack">New track</button>');
+  h+='<div class="card"><table class="pt"><thead><tr><th>Track</th><th>Class types</th><th>Program</th><th>Products</th><th class="r">Can book</th></tr></thead><tbody>';
+  S.tracks.forEach(function(t){ var w=whoCan(t);
+    h+='<tr data-a="open" data-id="'+t.id+'"><td><div class="pn"><span>'+esc(t.name)+'</span>'+(t.def?'<span class="tag">Default</span>':'')+'</div></td><td class="tr">'+(t.types.length?t.types.map(function(x){return x[0];}).join(', '):'<span class="mut">None</span>')+'</td><td class="tr">'+(t.prog||'<span class="mut">—</span>')+'</td><td class="tr">'+(only(t)&&t.types.length?'<span class="warnc">Only all-tracks products</span>':w[0]+(w.length>1?' <span class="mut">+'+(w.length-1)+'</span>':''))+'</td><td class="r num">'+canBook(t)+'</td></tr>'; });
+  h+='</tbody></table><div class="mrows">';
+  S.tracks.forEach(function(t){ h+='<div class="prow" data-a="open" data-id="'+t.id+'"><div class="tx"><div class="nm">'+esc(t.name)+(t.def?'<span class="tag">Default</span>':'')+'</div><div class="why">'+(t.types.length?t.types.map(function(x){return x[0];}).join(', '):'No class types')+' · '+(only(t)&&t.types.length?'<span class="warnc">only all-tracks products</span>':canBook(t)+' can book')+'</div></div><span class="chev">›</span></div>'; });
+  return h+'</div></div><p class="mut" style="font-size:13px;margin-top:12px">Unlimited monthly covers every track, so it can book all of these. Tracks are usually made where you need them: a class type, a product or a program.</p>';
+}
+function page(){
+  var t=T(S.open), w=whoCan(t);
+  var h='<div class="lab"><a href="#" data-a="back" style="color:inherit">Settings › Tracks</a></div><div class="titlerow"><h1>'+esc(t.name)+'</h1><button class="btn" data-a="rename">Rename</button></div>';
+  if(t.def) h+='<p class="mut" style="margin-top:-8px">The default track: a class type made without picking one lands here. It can be renamed, never stopped.</p>';
+  h+='<div class="sect"><div class="lab2"><span>Class types in it</span><button class="btn" data-a="newtype" style="height:34px;font-size:14px;text-transform:none;letter-spacing:0">+ New class type</button></div><div class="card">';
+  if(!t.types.length) h+='<div class="prow" style="cursor:default"><div class="tx"><div class="when">None yet.</div></div></div>';
+  t.types.forEach(function(x){ h+='<div class="prow"><div class="tx"><div class="nm">'+x[0]+'</div><div class="when">'+x[1]+' · '+x[2]+'</div></div><button class="btn" data-a="move" data-n="'+x[0]+'">Move</button></div>'; });
+  h+='</div></div>';
+  h+='<div class="sect"><div class="lab2"><span>Program</span></div><div class="card"><div class="prow" style="cursor:default"><div class="tx"><div class="nm">'+(t.prog||'No program')+'</div><div class="when">'+(t.prog?'Group program · each class shows its workout of the day':'Classes in this track show no workout')+'</div></div>'+(t.prog?'<button class="btn">Open in Workouts</button>':'')+'</div></div></div>';
+  h+='<div class="sect"><div class="lab2"><span>Who can book</span><span class="mut" style="font-size:14px;text-transform:none;letter-spacing:0;font-weight:400">'+canBook(t)+' people can book it now</span></div>';
+  if(only(t)&&t.types.length) h+='<div class="warnbox" style="margin-bottom:10px"><b>Only products that cover every track can book '+esc(t.name)+'.</b> Tick the products that should.</div>';
+  h+='<div class="card" style="padding:6px 0"><div class="checks" style="padding:0 12px">';
+  PRODS.forEach(function(p){ if(p[2]) h+='<div class="ck on dis"><span class="box">✓</span>'+p[1]+'<small>Covers every track</small></div>'; else { var on=t.cover.indexOf(p[0])>=0; h+='<button class="ck '+(on?'on':'')+'" data-a="cov" data-v="'+p[0]+'"><span class="box">'+(on?'✓':'')+'</span>'+p[1]+'<small>'+p[3]+' hold it</small></button>'; } });
+  h+='</div></div><p class="disnote">The same link as each product’s “Tracks it covers”. Changing it here changes the product. Owner and admin.</p></div>';
+  h+='<div class="sect"><div class="lab2"><span>Stop offering</span></div>';
+  if(t.def) h+='<p class="mut">The default track is never stopped.</p>';
+  else if(t.upcoming) h+='<button class="btn risk" disabled>Stop offering '+esc(t.name)+'</button><p class="disnote">Possible once no classes are scheduled in it. '+t.upcoming+' upcoming; cancel or end their repeats first.</p>';
+  else h+='<button class="btn risk" data-a="stopt">Stop offering '+esc(t.name)+'</button><p class="disnote">It leaves the pickers. Products that covered it keep the link; history stays.</p>';
+  return h+'</div>';
+}
+function trackChoices(sel,prefill,a){
+  var h='<div class="checks">';
+  S.tracks.filter(function(t){return !t.stopped;}).forEach(function(t){ var on=sel===t.id; h+='<button class="choice '+(on?'on':'')+'" data-a="'+a+'" data-v="'+t.id+'" style="padding:12px 14px"><span class="radio"></span><span style="flex:1"><b>'+esc(t.name)+'</b><span>'+(t.types.length?t.types.map(function(x){return x[0];}).join(', '):'No class types yet')+'</span></span></button>'; });
+  if(S.d.newT===undefined) h+='<button class="addrow" data-a="ntopen" data-v="'+esc(prefill)+'">+ New track'+(prefill?' “'+esc(prefill)+'”':'')+'</button>';
+  else h+='<div class="newt"><input type="text" data-f="newT" value="'+esc(S.d.newT)+'" placeholder="Track name"><button class="btn main" data-a="ntadd" data-x="'+a+'" style="height:44px">Add</button></div>';
+  return h+'</div>';
+}
+function coverAfter(tid){
+  var t=T(tid); if(!t) return '';
+  if(!only(t)) return '<div class="okline"><b>'+listJoin(whoCan(t))+'</b> can book '+esc(t.name)+'.</div>';
+  var h='<div class="warnbox"><b>No product covers '+esc(t.name)+' yet</b> (only Unlimited monthly, which covers every track). Tick who else should book it:</div><div class="checks">';
+  PRODS.filter(function(p){return !p[2];}).forEach(function(p){ h+='<button class="ck" data-a="covq" data-t="'+tid+'" data-v="'+p[0]+'"><span class="box"></span>'+p[1]+'<small>'+p[3]+' hold it</small></button>'; });
+  return h+'</div>';
+}
+function panel(){
+  var p=S.panel, d=S.d, h;
+  if(p==='newclass'){ var t=T('t1');
+    h='<div class="ph"><h3>New class</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><div class="fld"><label>Class type</label><div class="typesel"><div><b>Gymnastics</b><span>60 min · 14 spots</span></div><span class="chev">▾</span></div></div>'+
+      '<div class="okline">Track <b>'+t.name+'</b>. <b>'+listJoin(whoCan(t))+'</b> can book it. <button class="rn" data-a="go" data-v="newtype">Change ›</button></div>'+
+      '<div class="fld"><label>When</label><div class="typesel"><div><b>Sat, Nov 14 · 9:00 AM</b><span>Repeats every Saturday</span></div><span class="chev">›</span></div></div><div class="fld"><label>Coach</label><div class="typesel"><div><b>Luis Ortiz</b></div><span class="chev">▾</span></div></div></div><div class="pf"><button class="btn main">Add class</button></div>'; return h; }
+  if(p==='newtype'){ var ok=d.name&&d.track;
+    h='<div class="ph"><h3>New class type</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><div class="fld"><label>Name</label><input type="text" data-f="name" value="'+esc(d.name||'')+'" placeholder="Spin"></div>'+
+      '<div class="fld"><label>Length</label><div class="cnt"><button>−</button><span>60 min</span><button>+</button></div></div>'+
+      '<p class="q">Which track?</p><p class="mut" style="margin:-10px 0 0;font-size:14px">The track decides who can book it. Every class of this type follows it.</p>'+trackChoices(d.track,d.name||'','tsel')+(d.track?coverAfter(d.track):'')+
+      '</div><div class="pf"><button class="btn main" data-a="savetype" '+(ok?'':'disabled')+'>'+(ok?'Create '+esc(d.name):'Pick a track')+'</button></div>'; return h; }
+  if(p==='product'){ var all=d.all;
+    h='<div class="ph"><button class="ib">‹</button><h3>New product</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><p class="q">Tracks it covers</p><p class="mut" style="margin:-10px 0 0;font-size:14px">Hyrox 8-pack: who can use it to book.</p><div class="checks">'+
+      '<button class="ck '+(all?'on':'')+'" data-a="pall"><span class="box">'+(all?'✓':'')+'</span><b style="font-weight:600">All tracks</b><small>including ones added later</small></button>';
+    S.tracks.filter(function(t){return !t.def&&!t.stopped;}).forEach(function(t){ var on=!all&&(d.ptr||[]).indexOf(t.id)>=0; h+='<button class="ck '+(on?'on':'')+(all?' dis':'')+'" data-a="ptr" data-v="'+t.id+'"><span class="box">'+(on||all?'✓':'')+'</span>'+esc(t.name)+'<small>'+t.types.map(function(x){return x[0];}).join(', ')+'</small></button>'; });
+    h+='</div>'+(all?'':(S.d.newT===undefined?'<button class="addrow" data-a="ntopen" data-v="">+ New track</button>':'<div class="newt"><input type="text" data-f="newT" value="'+esc(S.d.newT)+'" placeholder="Track name"><button class="btn main" data-a="ntadd" data-x="ptr" style="height:44px">Add</button></div>'))+
+      '<p class="mut" style="font-size:13px">A new track starts empty. Its classes join it when you make their class type.</p></div><div class="pf"><button class="btn main" '+(all||(d.ptr||[]).length?'':'disabled')+'>Next</button></div>'; return h; }
+  if(p==='program'){ var ok2=!!d.track;
+    h='<div class="ph"><button class="ib">‹</button><h3>New program</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><div class="typesel"><div><b>Hyrox Prep</b><span>Group · everyone on the same day</span></div></div><p class="q">Which track?</p><p class="mut" style="margin:-10px 0 0;font-size:14px">Everyone the track covers sees its workouts, and its classes show the day’s workout.</p>'+trackChoices(d.track,'Hyrox','psel')+(d.track?coverAfter(d.track):'')+
+      '</div><div class="pf"><button class="btn main" '+(ok2?'':'disabled')+'>Create Hyrox Prep</button></div>'; return h; }
+  if(p==='move'){ var cur=T(S.open);
+    h='<div class="ph"><h3>Move '+esc(S.d.type)+'</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><p class="mut" style="margin:0;font-size:14px">Every '+esc(S.d.type)+' class moves with it. Bookings already made stay.</p>'+trackChoices(d.track||cur.id,'','msel')+(d.track&&d.track!==cur.id?coverAfter(d.track):'')+'</div><div class="pf"><button class="btn main" data-a="domove" '+(d.track&&d.track!==cur.id?'':'disabled')+'>Move</button></div>'; return h; }
+  if(p==='rename'){ var t2=T(S.open); h='<div class="ph"><h3>Rename track</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><div class="fld"><label>Name</label><input type="text" data-f="rn" value="'+esc(d.rn===undefined?t2.name:d.rn)+'"></div><p class="mut" style="font-size:13px">Products, class types and programs follow the new name.</p></div><div class="pf"><button class="btn main" data-a="dorename">Save</button></div>'; return h; }
+  if(p==='newtrack'){ h='<div class="ph"><h3>New track</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><div class="fld"><label>Name</label><input type="text" data-f="nn" value="'+esc(d.nn||'')+'" placeholder="Hyrox"></div><p class="mut" style="font-size:13px">Then add class types to it, and tick the products that cover it.</p></div><div class="pf"><button class="btn main" data-a="donew" '+(d.nn?'':'disabled')+'>Create track</button></div>'; return h; }
+  return '';
+}
+function render(){
+  document.body.className=(S.wid==='phone'?'phone ':'')+(S.panel?'open':'');
+  document.getElementById('g1').innerHTML=[['list','Settings › Tracks'],['page','A track'],['newclass','New class'],['newtype','New class type'],['product','Product: tracks'],['program','Program: track'],['stop','Stop offering']].map(function(x){return '<button data-a="start" data-v="'+x[0]+'" aria-pressed="'+(S.view===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('g2').innerHTML=[['desk','Laptop'],['phone','Phone']].map(function(x){return '<button data-a="wid" data-v="'+x[0]+'" aria-pressed="'+(S.wid===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('case').innerHTML=CASES[S.view]||CASES.list;
+  document.getElementById('main').innerHTML=S.open?page():list();
+  var tb=document.querySelector('.tabs'), on=tb&&tb.querySelector('.on'); if(on) tb.scrollLeft=Math.max(0,on.offsetLeft-tb.offsetLeft-16);
+  document.getElementById('panel').innerHTML=panel();
+  var old=document.querySelector('.undo'); if(old) old.remove();
+  if(S.toast){ var u=document.createElement('div'); u.className='undo'; u.innerHTML='<span>'+S.toast+'</span><button data-a="untoast">Undo</button>'; document.body.appendChild(u); }
+}
+function setStart(v){ S.view=v; S.panel=null; S.d={}; S.toast=null; S.open=null;
+  if(v==='page') S.open='t1'; if(v==='stop'){ S.open='t2'; T('t2').upcoming=0; } else T('t2').upcoming=14;
+  if(['newclass','newtype','product','program'].indexOf(v)>=0) S.panel=v;
+  if(v==='newtype') S.d={name:'Spin'}; if(v==='product') S.d={ptr:[]};
+  render(); }
+document.addEventListener('click',function(ev){ var el=ev.target.closest('[data-a]'); if(!el) return; var a=el.dataset.a, v=el.dataset.v; ev.preventDefault();
+  if(a!=='untoast') S.toast=null;
+  if(a==='start') return setStart(v);
+  if(a==='wid') S.wid=v;
+  if(a==='open'){ S.open=el.dataset.id; S.view='page'; }
+  if(a==='back'){ S.open=null; S.view='list'; }
+  if(a==='close'){ S.panel=null; S.d={}; }
+  if(a==='go'){ S.panel=v; S.view=v; S.d=v==='newtype'?{name:'Gymnastics',track:'t1'}:{}; }
+  if(a==='newtype'){ S.panel='newtype'; S.d={track:S.open}; }
+  if(a==='newtrack'){ S.panel='newtrack'; S.d={}; }
+  if(a==='rename'){ S.panel='rename'; S.d={}; }
+  if(a==='move'){ S.panel='move'; S.d={type:el.dataset.n}; }
+  if(a==='tsel'||a==='psel'||a==='msel'){ S.d.track=v; }
+  if(a==='ntopen') S.d.newT=v||'';
+  if(a==='ntadd'){ var nm=(S.d.newT||'').trim(); if(nm){ var id='n'+Date.now(); S.tracks.splice(S.tracks.length-1,0,{id:id,name:nm,def:false,types:[],prog:'',cover:[],inuse:0,upcoming:0}); delete S.d.newT; if(el.dataset.x==='ptr'){ S.d.ptr=(S.d.ptr||[]).concat([id]); } else S.d.track=id; } }
+  if(a==='cov'){ var t=T(S.open), i=t.cover.indexOf(v); if(i>=0) t.cover.splice(i,1); else t.cover.push(v); }
+  if(a==='covq'){ var t3=T(el.dataset.t); if(t3.cover.indexOf(v)<0) t3.cover.push(v); }
+  if(a==='pall') S.d.all=!S.d.all;
+  if(a==='ptr'&&!S.d.all){ var j=S.d.ptr.indexOf(v); if(j>=0) S.d.ptr.splice(j,1); else S.d.ptr.push(v); }
+  if(a==='savetype'){ var tt=T(S.d.track); tt.types.push([S.d.name,'60 min · 16 spots','Not scheduled yet']); S.toast='Created '+esc(S.d.name)+' in '+esc(tt.name)+'.'; S.panel=null; S.d={}; }
+  if(a==='domove'){ var from=T(S.open), to=T(S.d.track), idx=from.types.map(function(x){return x[0];}).indexOf(S.d.type); to.types.push(from.types.splice(idx,1)[0]); S.toast='Moved '+esc(S.d.type)+' to '+esc(to.name)+'.'; S.panel=null; S.d={}; }
+  if(a==='dorename'){ if(S.d.rn) T(S.open).name=S.d.rn; S.panel=null; S.d={}; }
+  if(a==='donew'){ S.tracks.splice(S.tracks.length-1,0,{id:'n'+Date.now(),name:S.d.nn,def:false,types:[],prog:'',cover:[],inuse:0,upcoming:0}); S.toast='Created track '+esc(S.d.nn)+'.'; S.panel=null; S.d={}; }
+  if(a==='stopt'){ var ts=T(S.open); ts.stopped=true; S.toast=esc(ts.name)+' is no longer offered.'; S.tracks=S.tracks.filter(function(x){return x!==ts;}); S.removed=ts; S.open=null; S.view='list'; }
+  if(a==='untoast'){ if(S.removed){ S.tracks.splice(1,0,S.removed); S.removed.stopped=false; S.removed=null; } S.toast=null; }
+  render(); });
+document.addEventListener('input',function(ev){ var f=ev.target.dataset.f; if(!f) return; S.d[f]=ev.target.value;
+  if(f==='name'){ var b=document.querySelector('[data-a=savetype]'); if(b){ b.disabled=!(S.d.name&&S.d.track); b.textContent=S.d.name&&S.d.track?'Create '+S.d.name:'Pick a track'; } var ad=document.querySelector('.addrow[data-a=ntopen]'); if(ad){ ad.dataset.v=S.d.name; ad.textContent='+ New track'+(S.d.name?' “'+S.d.name+'”':''); } }
+  if(f==='nn'){ var b2=document.querySelector('[data-a=donew]'); if(b2) b2.disabled=!S.d.nn; } });
+render();
+</script>
+</body>
+</html>
+
+</body>
+</html>
