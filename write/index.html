@@ -117,6 +117,7 @@ main{padding-bottom:64px}
 .sent input::placeholder{color:#B5B5B0;font-weight:500}
 .guessn{font-size:12px;color:var(--text3);font-style:italic}
 .extras{display:flex;flex-wrap:wrap;gap:6px 16px;padding:0 18px 14px;font-size:14px;color:var(--text2)}
+.link.rm{margin-left:auto;color:var(--text3);font-weight:500}
 .extras input{border:0;border-bottom:1px solid var(--line);background:none;font-size:14px;padding:2px 2px;min-width:0}
 .scl-in{flex:1 1 220px}
 .min-in{width:44px;text-align:center}
@@ -300,7 +301,7 @@ function edSentence(){$('ed').innerHTML='<div class="parts">'+P.map(function(p,i
  return '<div class="pc"><textarea data-i="'+i+'" data-f="text" rows="3" spellcheck="false" placeholder="Part name&#10;The workout" aria-label="Part '+(i+1)+'">'+esc(p.name+(p.body?'\n'+p.body:''))+'</textarea>'+
  '<div class="sent">Members log <select data-i="'+i+'" data-f="log" class="'+(g?'guess':'')+'" aria-label="How members log">'+(lk?'':'<option value="" selected>choose</option>')+LOGS.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===lk?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>'+tgt+(g?' <span class="guessn">guessed</span>':'')+'</div>'+
  '<div class="extras">'+(p.scaled||p.scOpen?'<span style="display:flex;gap:6px;align-items:center;flex:1 1 260px">Scaled: <input class="scl-in" data-i="'+i+'" data-f="scaled" value="'+esc(p.scaled)+'" placeholder="an easier version"></span>':'<button class="link" data-add="sc" data-i="'+i+'">+ Scaled version</button>')+
- '<span>Takes <input class="min-in" data-i="'+i+'" data-f="time" value="'+esc(p.time)+'" placeholder="–" inputmode="numeric" aria-label="Minutes"> min</span></div></div>';}).join('')+
+ '<span>Takes <input class="min-in" data-i="'+i+'" data-f="time" value="'+esc(p.time)+'" placeholder="–" inputmode="numeric" aria-label="Minutes"> min</span><button class="link rm" data-add="rm" data-i="'+i+'" type="button">Remove part</button></div></div>';}).join('')+
  '<button class="btn" data-add="part" style="justify-self:start">+ Part</button></div>';
  $('ed').querySelectorAll('textarea').forEach(grow);}
 
@@ -312,7 +313,7 @@ function edStack(){$('ed').innerHTML='<div class="parts">'+P.map(function(p,i){v
  (unit?'<div class="fr"><label for="t'+i+'">Target</label><div class="unit">'+(unit[0]?'<span>'+unit[0]+'</span>':'')+'<input id="t'+i+'" data-i="'+i+'" data-f="target" value="'+esc(p.target)+'" placeholder="'+unit[1]+'">'+(unit[2]?'<span>'+unit[2]+'</span>':'')+'</div></div>':'')+
  (p.scaled||p.scOpen?'<div class="fr"><label for="s'+i+'">Scaled</label><input id="s'+i+'" data-i="'+i+'" data-f="scaled" value="'+esc(p.scaled)+'"></div>':'')+
  (p.time||p.tmOpen?'<div class="fr"><label for="m'+i+'">Minutes</label><input id="m'+i+'" data-i="'+i+'" data-f="time" value="'+esc(p.time)+'" inputmode="numeric" style="width:96px"></div>':'')+
- ((p.scaled||p.scOpen)&&(p.time||p.tmOpen)?'':'<div class="adds">'+(p.scaled||p.scOpen?'':'<button class="link" data-add="sc" data-i="'+i+'">+ Scaled</button>')+(p.time||p.tmOpen?'':'<button class="link" data-add="tm" data-i="'+i+'">+ Time</button>')+'</div>')+'</div>';}).join('')+
+ '<div class="adds">'+(p.scaled||p.scOpen?'':'<button class="link" data-add="sc" data-i="'+i+'">+ Scaled</button>')+(p.time||p.tmOpen?'':'<button class="link" data-add="tm" data-i="'+i+'">+ Time</button>')+'<button class="link rm" data-add="rm" data-i="'+i+'" type="button">Remove part</button></div></div>';}).join('')+
  '<button class="btn" data-add="part" style="justify-self:start">+ Part</button></div>';}
 
 /* ---------- shared editing ---------- */
@@ -325,6 +326,7 @@ $('ed').addEventListener('input',function(e){var t=e.target,i=+t.dataset.i,f=t.d
 $('ed').addEventListener('change',function(e){var t=e.target;if(t.dataset.f!=='log')return;var p=P[+t.dataset.i];p.log=t.value||null;p.target='';draw();afterChange();});
 $('ed').addEventListener('click',function(e){var b=e.target.closest('[data-add]');if(!b)return;var a=b.dataset.add;
  if(a==='part'){P.push({name:'',body:'',log:null,target:'',scaled:'',time:''});labs.track('part_added');draw();save();var all=$('ed').querySelectorAll(M==='stack'?'.fname':'textarea');var last=all[all.length-1];if(last){last.focus();last.select&&last.select();}return;}
+ if(a==='rm'){P.splice(+b.dataset.i,1);if(!P.length)P=blank();labs.track('part_removed');draw();afterChange();return;}
  var p=P[+b.dataset.i];if(a==='sc')p.scOpen=true;if(a==='tm')p.tmOpen=true;draw();
  var f=$('ed').querySelector('[data-i="'+b.dataset.i+'"][data-f="'+(a==='sc'?'scaled':'time')+'"]');if(f)f.focus();});
 $('seg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;M=b.dataset.m;labs.track('switched',{to:VN[M]});[].forEach.call($('seg').children,function(x){x.classList.toggle('on',x===b);});draw();});
