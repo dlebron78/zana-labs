@@ -63,6 +63,21 @@
     reset: function () { try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf(ns()) === 0) localStorage.removeItem(k); }); } catch (e) {} }
   };
 
+  /* ---------- feel like an app on a phone ----------
+     - no sideways drift or rubber-band: the page is locked to the screen width
+     - no zoom-in when tapping a field (iPhones zoom into any field with text under 16px, then the page slides sideways)
+     - no grey flash when tapping */
+  (function appFeel() {
+    var vp = document.querySelector('meta[name="viewport"]');
+    if (vp && !/maximum-scale/.test(vp.content)) vp.content += ', maximum-scale=1';
+    var st = document.createElement('style');
+    st.textContent = 'html,body{max-width:100%;overflow-x:hidden;overflow-x:clip;overscroll-behavior-x:none}' +
+      'html{-webkit-text-size-adjust:100%;text-size-adjust:100%}' +
+      '*{-webkit-tap-highlight-color:transparent}' +
+      '@media (pointer:coarse){input,select,textarea{font-size:16px!important}}';
+    document.head.appendChild(st);
+  })();
+
   /* ---------- the test strip, feedback and start over ---------- */
   var css = '.labs-strip{display:flex;align-items:center;gap:14px;padding:6px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px));background:#2A2A28;color:#D8D8D3;font:500 12px/1.3 "Geist",-apple-system,system-ui,sans-serif;position:relative;z-index:40;height:32px;box-sizing:border-box}' +
     '.labs-strip b{color:#FFF;font-weight:600}.labs-strip span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
