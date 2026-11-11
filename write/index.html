@@ -18,7 +18,8 @@ labs.test({
     { name: 'Minutes from open to ready',       time: ['opened', 'day_ready'],       target: 5 },
     { name: 'Set how members log',              from: 'opened', to: 'log_set',       target: 0.70 },
     { name: 'Wrote it without loading the example', from: 'day_ready', to: 'example_loaded', target: 0.20, lower_is_better: true },
-    { name: 'Would use it (feedback)',          from: 'opened', to: 'feedback_sent', target: 0.40 }
+    { name: 'Answered the after-ready questions', from: 'day_ready', to: 'feedback_sent', target: 0.50 },
+    { name: 'Picked the version they used',     from: 'favorite_picked', where: 'picked_own', target: null, note: 'compare with each version’s speed' }
   ]
 });
 </script>
@@ -45,6 +46,23 @@ h1{margin:0;font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1
 .seg{display:inline-flex;background:var(--fill);border-radius:12px;padding:4px;gap:4px;width:fit-content;max-width:100%}
 .seg button{border:0;background:none;border-radius:9px;min-height:36px;padding:4px 14px;line-height:1.2;font-size:15px;font-weight:600;color:var(--text2)}
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(17,17,17,.12)}
+.after{margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:grid;gap:16px}
+.after h2{margin:0;font-size:20px;font-weight:700}
+.after p{margin:0;color:var(--text2)}
+.picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.pick{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:12px;display:grid;gap:10px;text-align:left;cursor:pointer;font:inherit;color:inherit;align-content:start}
+.pick:hover{border-color:#CFCFCA}
+.pick.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.pick .ph{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;font-weight:600}
+.pick .ph small{font-size:12px;font-weight:500;color:var(--text3)}
+.mini{font:13px/1.55 var(--mono);white-space:pre-wrap;color:var(--ink);background:#FAFAF8;border:1px solid var(--rowline);border-radius:10px;padding:10px;pointer-events:none}
+.mini .sl{font-family:var(--sans);font-size:13px;color:var(--text2);border-top:1px solid var(--rowline);margin-top:8px;padding-top:8px;white-space:normal}
+.mini .sl b{color:var(--ink);border-bottom:2px solid var(--ink)}
+.mini .fl{display:grid;grid-template-columns:62px 1fr;gap:6px;font-family:var(--sans);font-size:12px;color:var(--text3);align-items:center;white-space:normal}
+.mini .fl span{background:#FFF;border:1px solid var(--line);border-radius:6px;padding:3px 6px;color:var(--ink);font-family:var(--mono);font-size:12px;white-space:pre-wrap}
+.after textarea{font:15px/1.45 var(--sans);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:84px;resize:vertical;width:100%}
+.after .row2{display:flex;justify-content:flex-end;gap:8px}
+@media (max-width:759px){.picks{grid-template-columns:minmax(0,1fr)}}
 .task{margin:0;font-size:16px;max-width:60ch}
 .fin{display:flex;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap}
 .fin #state{flex:1;font-size:14px;color:var(--text2)}
@@ -138,6 +156,7 @@ main{padding-bottom:64px}
     <section><p class="lab">Write the day</p><div id="ed"></div><div class="fin"><span id="state">Draft</span><span class="exl" id="exl" hidden><button class="link" id="ex" type="button">See an example</button></span><button class="btn pri" id="ready" type="button">Mark ready</button></div></section>
     <section><p class="lab">Preview</p><div class="check" id="check"></div></section>
   </div>
+  <div id="after"></div>
 </main>
 </div>
 
@@ -262,10 +281,23 @@ $('ed').addEventListener('click',function(e){var b=e.target.closest('[data-add]'
  var p=P[+b.dataset.i];if(a==='sc')p.scOpen=true;if(a==='tm')p.tmOpen=true;draw();
  var f=$('ed').querySelector('[data-i="'+b.dataset.i+'"][data-f="'+(a==='sc'?'scaled':'time')+'"]');if(f)f.focus();});
 $('seg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;M=b.dataset.m;labs.track('switched',{to:VN[M]});[].forEach.call($('seg').children,function(x){x.classList.toggle('on',x===b);});draw();});
+function miniFor(m){var f='Fran\n21-15-9 for time\nThrusters 95/65\nPull-ups';
+ if(m==='write')return '<div class="mini">'+f+'\nlog: time\ntarget: 6:00\nscaled: 65/45, banded</div>';
+ if(m==='sentence')return '<div class="mini">'+f+'<div class="sl">Members log <b>time</b>, aiming for under <b>6:00</b> · + Scaled version</div></div>';
+ return '<div class="mini"><div class="fl">Name<span>Fran</span>Workout<span>21-15-9 for time\nThrusters 95/65\nPull-ups</span>Log<span>time ▾</span>Target<span>under 6:00</span>Scaled<span>65/45, banded</span></div></div>';}
+function showAfter(){if(!ONE)return;var shapes=['Circle','Square','Triangle'],order=['write','sentence','stack'].sort(function(){return Math.random()-.5;}),pick=null;
+ var a=$('after');a.innerHTML='<div class="after"><h2>Thanks. Two quick questions.</h2><p>Here is the same part written three ways. One is the way you just used. <b>Which would you use?</b></p><div class="picks">'+
+ order.map(function(m,k){return '<button class="pick" type="button" data-m="'+m+'"><span class="ph">'+shapes[k]+(m===M?' <small>the one you used</small>':'')+'</span>'+miniFor(m)+'</button>';}).join('')+
+ '</div><label style="display:grid;gap:6px;font-size:14px;color:var(--text2)"><b style="color:var(--ink);font-size:15px">What did we miss?</b><textarea id="missed" placeholder="Anything you’d need that isn’t here, or anything that got in your way"></textarea></label><div class="row2"><button class="btn pri" type="button" id="send">Send</button></div></div>';
+ a.querySelector('.picks').addEventListener('click',function(e){var b=e.target.closest('.pick');if(!b)return;pick=b.dataset.m;[].forEach.call(a.querySelectorAll('.pick'),function(x){x.classList.toggle('on',x===b);});});
+ $('send').addEventListener('click',function(){labs.track('favorite_picked',{pick:pick?VN[pick]:null,used:VN[M],picked_own:pick===M,order:order.map(function(m){return VN[m];}).join(',')});
+  labs.track('feedback_sent',{missed:$('missed').value,pick:pick?VN[pick]:null,source:'after_ready'});
+  a.innerHTML='<div class="after"><h2>Thank you</h2><p>That helps a lot. You can keep editing Thursday, or close this page.</p></div>';});
+ a.scrollIntoView({behavior:'smooth',block:'start'});}
 $('ready').addEventListener('click',function(){if(READY)return;var named=P.filter(function(p){return (p.name||p.body).trim();});
  if(!named.length){$('state').textContent='Write at least one part first.';return;}
  READY=true;save();showState();
- labs.track('day_ready',{parts:named.length,with_log:named.filter(function(p){return p.log;}).length,with_target:named.filter(function(p){return p.target;}).length,with_scaled:named.filter(function(p){return p.scaled;}).length,minutes:named.reduce(function(a,p){return a+(parseInt(p.time,10)||0);},0),from_example:!!S_EX,day:JSON.stringify(named)});});
+ labs.track('day_ready',{parts:named.length,with_log:named.filter(function(p){return p.log;}).length,with_target:named.filter(function(p){return p.target;}).length,with_scaled:named.filter(function(p){return p.scaled;}).length,minutes:named.reduce(function(a,p){return a+(parseInt(p.time,10)||0);},0),from_example:!!S_EX,day:JSON.stringify(named)});$('exl').hidden=true;showAfter();});
 var S_EX=false;
 $('ex').addEventListener('click',function(){P=JSON.parse(JSON.stringify(FILLED));S_EX=true;labs.track('example_loaded');draw();save();$('exl').hidden=true;});
 if(M!=='write')[].forEach.call($('seg').children,function(x){x.classList.toggle('on',x.dataset.m===M);});
