@@ -26,3 +26,9 @@ Nothing here touches the real app or real data.
 - `/write/` all three with the switch, filled with an example (for review)
 - `?v=day` One board per day · `?v=part` One board per part · `?v=field` One field per item: one version, no switch, blank day, the tester task
 - `&start=filled` or `&start=blank` overrides the starting day; `&t=leo` names the tester
+
+## Guided test (`/write/try/`)
+
+The link to send coaches: `zana-labs.onrender.com/write/try/?t=leo` (or without `?t=` for anonymous).
+Three rounds; each round the coach writes one part she'd really program, in her own words, a different way each round (order random per coach). After each round: "How natural did that feel?" (1 to 5) and an optional note. At the end: "Which way would you use?" with her own three parts as reminders, and "What did we miss?"
+Speed is only ever compared within one coach, never across coaches. `&restart` starts over.

@@ -10,7 +10,19 @@
 <script src="../kit/config.js"></script>
 <script src="../kit/labs.js"></script>
 <script>
-labs.test({
+var GUIDED=new URLSearchParams(location.search).has('guided');
+if(GUIDED) labs.test({
+  name: 'write-guided',
+  question: 'Writing their own real workouts, which of the three ways feels most natural to each coach?',
+  kpis: [
+    { name: 'Finished all three rounds',      from: 'opened', to: 'all_rounds_done', target: 0.70 },
+    { name: 'Answered the last questions',    from: 'all_rounds_done', to: 'feedback_sent', target: 0.80 },
+    { name: 'Picked as the one they would use', from: 'favorite_picked', by: 'pick', target: null, note: 'share per version' },
+    { name: 'How natural it felt (1 to 5)',   from: 'round_done', by: 'version', average: 'natural', target: null },
+    { name: 'Quickest of their own three',    from: 'round_done', by: 'version', within_tester: 'seconds', target: null, note: 'never compared across coaches' }
+  ]
+});
+else labs.test({
   name: 'write',
   question: 'Which way of writing gets a coach from a blank day to Ready fastest, without help?',
   kpis: [
@@ -63,6 +75,11 @@ h1{margin:0;font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1
 .after textarea{font:15px/1.45 var(--sans);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:84px;resize:vertical;width:100%}
 .after .row2{display:flex;justify-content:flex-end;gap:8px}
 @media (max-width:759px){.picks{grid-template-columns:minmax(0,1fr)}}
+.rnd{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.dots{display:flex;gap:6px}.dots i{width:28px;height:4px;border-radius:2px;background:var(--line)}.dots i.on{background:var(--ink)}
+.rate{display:flex;gap:8px;flex-wrap:wrap}.rate button{border:1px solid var(--line);background:var(--card);border-radius:10px;min-width:52px;height:44px;font-weight:600;font-size:16px}
+.rate button.on{background:var(--ink);color:#FFF;border-color:var(--ink)}
+.rlab{display:flex;justify-content:space-between;font-size:13px;color:var(--text3);max-width:320px}
 .task{margin:0;font-size:16px;max-width:60ch}
 .fin{display:flex;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap}
 .fin #state{flex:1;font-size:14px;color:var(--text2)}
@@ -194,9 +211,39 @@ function save(){labs.store.set('day-'+(ONE?VN[M]:'all'),{P:P,ready:READY});}
 function logCount(){return P.filter(function(p){return p.log;}).length;}
 var lastLogs=logCount();
 function afterChange(){save();var n=logCount();if(n>lastLogs)labs.track('log_set',{via:M==='write'?'typed':'picked',count:n});lastLogs=n;
- if(READY){READY=false;labs.track('day_edited');}showState();}
-function showState(){var st=$('state');st.textContent=READY?'Ready':'Draft · saved';st.className=READY?'r':'';$('ready').textContent=READY?'Ready ✓':'Mark ready';}
-if(ONE){$('seg').hidden=true;$('task').hidden=false;$('h1').textContent='Write Thursday';$('idea').hidden=true;if(START==='blank')$('exl').hidden=false;}
+ if(READY&&!GUIDED){READY=false;labs.track('day_edited');}showState();}
+function showState(){var st=$('state');if(GUIDED){st.textContent=READY?'':'';st.className='';$('ready').textContent=READY?'Done ✓':'Done with this round';return;}st.textContent=READY?'Ready':'Draft · saved';st.className=READY?'r':'';$('ready').textContent=READY?'Ready ✓':'Mark ready';}
+/* ---------- guided: three rounds, each coach writes her own real workout, a different way each round ---------- */
+var G=null;
+if(GUIDED){G=labs.store.get('guided',null);
+ if(!G||Q.get('restart')!==null){var o=['write','sentence','stack'].sort(function(){return Math.random()-.5;});G={order:o,round:0,started:Date.now(),done:[],finished:false};labs.store.set('guided',G);}
+ ONE=G.order[Math.min(G.round,2)];M=ONE;START='blank';P=blank();READY=false;labs.store.set('day-'+VN[M],null);}
+function saveG(){labs.store.set('guided',G);}
+function roundHeader(){document.querySelector('header .cap').textContent='Zana test · about 10 minutes';$('seg').hidden=true;$('idea').hidden=false;$('exl').hidden=true;
+ $('h1').innerHTML='Round '+(G.round+1)+' of 3';
+ $('task').hidden=false;$('task').innerHTML='Write one part you’d actually program this week, in your own words. Set it up so your members can record it the way you want. Then tap <b>Done with this round</b>.'+
+  '<span class="dots" style="margin-top:12px" aria-hidden="true">'+[0,1,2].map(function(k){return '<i class="'+(k<=G.round?'on':'')+'"></i>';}).join('')+'</span>';
+ $('idea').innerHTML='This round: '+({write:'You type the part on one board, settings included, as labelled lines (<code>log:</code>, <code>target:</code>, <code>scaled:</code>, <code>time:</code>).',sentence:'You type the part on a board, and choose its settings on the line under the board.',stack:'You fill in the part’s name, workout and settings in separate fields.'})[M];}
+function nextRound(){G.round++;G.started=Date.now();saveG();
+ if(G.round>2){showFinal();return;}
+ ONE=G.order[G.round];M=ONE;P=blank();READY=false;lastLogs=0;$('after').innerHTML='';roundHeader();draw();showState();window.scrollTo(0,0);}
+function rateRound(meta){var a=$('after'),val=null;
+ a.innerHTML='<div class="after"><h2>How natural did that feel?</h2><p>Compared with how you write workouts today.</p><div class="rate" role="radiogroup">'+[1,2,3,4,5].map(function(n){return '<button type="button" data-n="'+n+'">'+n+'</button>';}).join('')+'</div><div class="rlab"><span>1 · Awkward</span><span>5 · Natural</span></div>'+
+ '<label style="display:grid;gap:6px;font-size:14px;color:var(--text2)">Anything that got in the way? (optional)<textarea id="rnote"></textarea></label><div class="row2"><button class="btn pri" type="button" id="rnext" disabled>'+(G.round<2?'Next round':'Last questions')+'</button></div></div>';
+ a.querySelector('.rate').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;val=+b.dataset.n;[].forEach.call(a.querySelectorAll('.rate button'),function(x){x.classList.toggle('on',x===b);});$('rnext').disabled=false;});
+ $('rnext').addEventListener('click',function(){if(!val)return;meta.natural=val;meta.note=$('rnote').value;labs.track('round_done',meta);G.done.push({version:meta.version,natural:val,p:(JSON.parse(meta.text)||[])[0]||null});saveG();nextRound();});
+ a.scrollIntoView({behavior:'smooth',block:'start'});}
+function showFinal(){G.finished=true;saveG();labs.track('all_rounds_done');
+ document.querySelector('.cols').hidden=true;$('task').hidden=true;$('idea').hidden=true;$('h1').textContent='Last two questions';
+ var pick=null,a=$('after');
+ a.innerHTML='<div class="after"><h2>Which way would you use?</h2><p>Your three rounds, as you wrote them.</p><div class="picks">'+G.order.map(function(m,k){var d=G.done[k]||{};return '<button class="pick" type="button" data-m="'+m+'"><span class="ph">Round '+(k+1)+(d.natural?' <small>you rated it '+d.natural+' of 5</small>':'')+'</span>'+miniFor(m,d.p)+'</button>';}).join('')+
+ '</div><label style="display:grid;gap:6px;font-size:14px;color:var(--text2)"><b style="color:var(--ink);font-size:15px">What did we miss?</b><textarea id="missed" placeholder="Anything you’d need that isn’t here, or anything that got in your way"></textarea></label><div class="row2"><button class="btn pri" type="button" id="send">Send</button></div></div>';
+ a.querySelector('.picks').addEventListener('click',function(e){var b=e.target.closest('.pick');if(!b)return;pick=b.dataset.m;[].forEach.call(a.querySelectorAll('.pick'),function(x){x.classList.toggle('on',x===b);});});
+ $('send').addEventListener('click',function(){labs.track('favorite_picked',{pick:pick?VN[pick]:null,round:pick?G.order.indexOf(pick)+1:null,order:G.order.map(function(m){return VN[m];}).join(',')});
+  labs.track('feedback_sent',{missed:$('missed').value,pick:pick?VN[pick]:null,source:'guided_end'});
+  a.innerHTML='<div class="after"><h2>Thank you</h2><p>That helps a lot. You can close this page.</p></div>';});
+ window.scrollTo(0,0);}
+if(ONE&&!GUIDED){$('seg').hidden=true;$('task').hidden=false;$('h1').textContent='Write Thursday';$('idea').hidden=true;if(START==='blank')$('exl').hidden=false;}
 
 
 var MOVES=[
@@ -281,10 +328,14 @@ $('ed').addEventListener('click',function(e){var b=e.target.closest('[data-add]'
  var p=P[+b.dataset.i];if(a==='sc')p.scOpen=true;if(a==='tm')p.tmOpen=true;draw();
  var f=$('ed').querySelector('[data-i="'+b.dataset.i+'"][data-f="'+(a==='sc'?'scaled':'time')+'"]');if(f)f.focus();});
 $('seg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;M=b.dataset.m;labs.track('switched',{to:VN[M]});[].forEach.call($('seg').children,function(x){x.classList.toggle('on',x===b);});draw();});
-function miniFor(m){var f='Fran\n21-15-9 for time\nThrusters 95/65\nPull-ups';
+function miniFor(m,pt){if(pt)return miniOwn(m,pt);var f='Fran\n21-15-9 for time\nThrusters 95/65\nPull-ups';
  if(m==='write')return '<div class="mini">'+f+'\nlog: time\ntarget: 6:00\nscaled: 65/45, banded</div>';
  if(m==='sentence')return '<div class="mini">'+f+'<div class="sl">Members log <b>time</b>, aiming for under <b>6:00</b> · + Scaled version</div></div>';
  return '<div class="mini"><div class="fl">Name<span>Fran</span>Workout<span>21-15-9 for time\nThrusters 95/65\nPull-ups</span>Log<span>time ▾</span>Target<span>under 6:00</span>Scaled<span>65/45, banded</span></div></div>';}
+function miniOwn(m,p){var f=esc((p.name||'')+(p.body?'\n'+p.body:'')),lg=p.log?L(p.log)[1]:'',t=p.target||'';
+ if(m==='write')return '<div class="mini">'+f+(lg?'\nlog: '+lg:'')+(t?'\ntarget: '+esc(t):'')+(p.scaled?'\nscaled: '+esc(p.scaled):'')+(p.time?'\ntime: '+esc(p.time):'')+'</div>';
+ if(m==='sentence')return '<div class="mini">'+f+'<div class="sl">Members log <b>'+(lg||'…')+'</b>'+(t?', aiming for <b>'+esc(t)+'</b>':'')+(p.time?' · Takes <b>'+esc(p.time)+'</b> min':'')+'</div></div>';
+ return '<div class="mini"><div class="fl">Name<span>'+esc(p.name||'')+'</span>Workout<span>'+esc(p.body||'')+'</span>Log<span>'+(lg||'…')+' ▾</span>'+(t?'Target<span>'+esc(t)+'</span>':'')+(p.scaled?'Scaled<span>'+esc(p.scaled)+'</span>':'')+'</div></div>';}
 function showAfter(){if(!ONE)return;var shapes=['Circle','Square','Triangle'],order=['write','sentence','stack'].sort(function(){return Math.random()-.5;}),pick=null;
  var a=$('after');a.innerHTML='<div class="after"><h2>Thanks. Two quick questions.</h2><p>Here is the same part written three ways. One is the way you just used. <b>Which would you use?</b></p><div class="picks">'+
  order.map(function(m,k){return '<button class="pick" type="button" data-m="'+m+'"><span class="ph">'+shapes[k]+(m===M?' <small>the one you used</small>':'')+'</span>'+miniFor(m)+'</button>';}).join('')+
@@ -294,14 +345,16 @@ function showAfter(){if(!ONE)return;var shapes=['Circle','Square','Triangle'],or
   labs.track('feedback_sent',{missed:$('missed').value,pick:pick?VN[pick]:null,source:'after_ready'});
   a.innerHTML='<div class="after"><h2>Thank you</h2><p>That helps a lot. You can keep editing Thursday, or close this page.</p></div>';});
  a.scrollIntoView({behavior:'smooth',block:'start'});}
-$('ready').addEventListener('click',function(){if(READY)return;var named=P.filter(function(p){return (p.name||p.body).trim();});
+$('ready').addEventListener('click',function(){if(GUIDED){var nm=P.filter(function(p){return (p.name||p.body).trim();});if(!nm.length){$('state').textContent='Write at least one part first.';return;}
+ READY=true;showState();$('ready').textContent='Done ✓';rateRound({round:G.round+1,version:VN[M],seconds:Math.round((Date.now()-G.started)/1000),parts:nm.length,with_log:nm.filter(function(p){return p.log;}).length,with_target:nm.filter(function(p){return p.target;}).length,with_scaled:nm.filter(function(p){return p.scaled;}).length,with_time:nm.filter(function(p){return p.time;}).length,text:JSON.stringify(nm)});return;}
+ if(READY)return;var named=P.filter(function(p){return (p.name||p.body).trim();});
  if(!named.length){$('state').textContent='Write at least one part first.';return;}
  READY=true;save();showState();
  labs.track('day_ready',{parts:named.length,with_log:named.filter(function(p){return p.log;}).length,with_target:named.filter(function(p){return p.target;}).length,with_scaled:named.filter(function(p){return p.scaled;}).length,minutes:named.reduce(function(a,p){return a+(parseInt(p.time,10)||0);},0),from_example:!!S_EX,day:JSON.stringify(named)});$('exl').hidden=true;showAfter();});
 var S_EX=false;
 $('ex').addEventListener('click',function(){P=JSON.parse(JSON.stringify(FILLED));S_EX=true;labs.track('example_loaded');draw();save();$('exl').hidden=true;});
 if(M!=='write')[].forEach.call($('seg').children,function(x){x.classList.toggle('on',x.dataset.m===M);});
-draw();showState();
+if(GUIDED){if(G.finished||G.round>2)showFinal();else{roundHeader();draw();showState();}}else{draw();showState();}
 })();
 </script>
 
