@@ -328,8 +328,16 @@ function openDay(id){var dd=DAYS[id]||{text:'',status:'empty',title:'CrossFit ·
  hideConfirm();footer();changed();S.loading=false;placeBar();window.scrollTo(0,0);}
 $('weekv').addEventListener('click',function(e){var b=e.target.closest('[data-day]');if(b)openDay(b.dataset.day);});
 $('back').addEventListener('click',function(){saveDay();showWeek();});
-showWeek();
-if(!store('ww-seen'))sheet(true);
+/* deep links: ?day=thu|today|2026-11-12  &start=blank|crossfit|bodybuilding|yoga  &tab=members  &intro=0  (&t=leo names the tester) */
+var Q=new URLSearchParams(location.search),QD=(Q.get('day')||'').toLowerCase();
+function dayFromQuery(){if(!QD)return null;var ws=weekDays();if(QD==='today')return iso(new Date());if(/^\d{4}-\d{2}-\d{2}$/.test(QD))return QD;
+ for(var k=0;k<ws.length;k++)if(ws[k].toLocaleDateString('en-US',{weekday:'short'}).toLowerCase().indexOf(QD.slice(0,3))===0)return iso(ws[k]);return null;}
+var dq=dayFromQuery();
+if(dq){var stq=(Q.get('start')||'').toLowerCase(),exk={blank:'Blank',crossfit:'CrossFit',bodybuilding:'Bodybuilding',yoga:'Yoga'}[stq];
+ if(exk!=null){DAYS[dq]={title:TITLES[exk],status:'draft',text:EX[exk]};labs.store.set('days',DAYS);}
+ openDay(dq);if(Q.get('tab')==='members'){var tcb=$('tc');if(tcb)tcb.click();}}
+else showWeek();
+if(!store('ww-seen')&&Q.get('intro')!=='0')sheet(true);
 
 })();
 </script>
