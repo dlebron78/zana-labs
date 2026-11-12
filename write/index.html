@@ -253,16 +253,19 @@ function showFinal(){G.finished=true;saveG();labs.track('all_rounds_done');
  var pick=null,a=$('after');
  a.innerHTML='<div class="after"><h2>Which way would you use?</h2><p>Your three rounds, as you wrote them.</p><div class="picks">'+G.order.map(function(m,k){var d=G.done[k]||{};return '<button class="pick" type="button" data-m="'+m+'"><span class="ph">Round '+(k+1)+(d.natural?' <small>you rated it '+d.natural+' of 5</small>':'')+'</span>'+miniFor(m,d.p)+'</button>';}).join('')+
  '</div>'+tapQ('coach','What do you mostly coach?',['Group classes','1-on-1 / personal training','Online programming','A mix'])+
- tapQ('writes','Where do you write workouts today?',['Whiteboard','Notes or Sheets','An app','Paper','Other'])+
+ tapQ('writes','Where do you write workouts today? <span style="font-weight:400;color:var(--text2);font-size:14px">Pick all that apply.</span>',['Whiteboard','Notes or Sheets','An app','Paper','Other'])+
  '<label id="appq" hidden style="display:grid;gap:6px;font-size:14px;color:var(--text2)"><b style="color:var(--ink);font-size:15px">Which app? <span style="font-weight:400;color:var(--text2)">(optional)</span></b><input id="appname" type="text" autocomplete="off" style="font:16px/1.4 var(--sans);border:1px solid var(--line);border-radius:12px;padding:10px 12px"></label>'+
  '<label style="display:grid;gap:6px;font-size:14px;color:var(--text2)"><b style="color:var(--ink);font-size:15px">What did we miss?</b><textarea id="missed" placeholder="Anything you’d need that isn’t here, or anything that got in your way"></textarea></label><div class="row2"><button class="btn pri" type="button" id="send">Send</button></div></div>';
  a.querySelector('.picks').addEventListener('click',function(e){var b=e.target.closest('.pick');if(!b)return;pick=b.dataset.m;[].forEach.call(a.querySelectorAll('.pick'),function(x){x.classList.toggle('on',x===b);});});
- var ans={coach:null,writes:null};
- [].forEach.call(a.querySelectorAll('.opts'),function(g){g.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;ans[g.dataset.q]=b.textContent;[].forEach.call(g.children,function(x){x.classList.toggle('on',x===b);});if(g.dataset.q==='writes')$('appq').hidden=b.textContent!=='An app';});});
+ var ans={coach:null,writes:[]};
+ /* "what do you coach" takes one answer; "where do you write" takes several (many program in an app and copy it to the whiteboard) */
+ [].forEach.call(a.querySelectorAll('.opts'),function(g){g.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  if(g.dataset.q==='writes'){b.classList.toggle('on');ans.writes=[].filter.call(g.children,function(x){return x.classList.contains('on');}).map(function(x){return x.textContent;});$('appq').hidden=ans.writes.indexOf('An app')<0;}
+  else{ans[g.dataset.q]=b.textContent;[].forEach.call(g.children,function(x){x.classList.toggle('on',x===b);});}});});
  $('send').addEventListener('click',function(){labs.track('favorite_picked',{pick:pick?VN[pick]:null,round:pick?G.order.indexOf(pick)+1:null,order:G.order.map(function(m){return VN[m];}).join(',')});
-  var app=ans.writes==='An app'?$('appname').value.trim():'';
-  labs.track('about_coach',{coach:ans.coach,writes_in:ans.writes,app:app||null});
-  labs.track('feedback_sent',{missed:$('missed').value,pick:pick?VN[pick]:null,coach:ans.coach,writes_in:ans.writes,app:app||null,source:'guided_end'});
+  var app=ans.writes.indexOf('An app')>=0?$('appname').value.trim():'',w=ans.writes.length?ans.writes.join(', '):null;
+  labs.track('about_coach',{coach:ans.coach,writes_in:w,writes_count:ans.writes.length,app:app||null});
+  labs.track('feedback_sent',{missed:$('missed').value,pick:pick?VN[pick]:null,coach:ans.coach,writes_in:w,app:app||null,source:'guided_end'});
   a.innerHTML='<div class="after"><h2>Thank you</h2><p>That helps a lot. You can close this page.</p></div>';});
  window.scrollTo(0,0);}
 if(ONE&&!GUIDED){$('seg').hidden=true;$('task').hidden=false;$('h1').textContent='Write Thursday';$('idea').hidden=true;if(START==='blank')$('exl').hidden=false;}
@@ -364,8 +367,6 @@ function showAfter(){if(!ONE)return;var shapes=['Circle','Square','Triangle'],or
  order.map(function(m,k){return '<button class="pick" type="button" data-m="'+m+'"><span class="ph">'+shapes[k]+(m===M?' <small>the one you used</small>':'')+'</span>'+miniFor(m)+'</button>';}).join('')+
  '</div><label style="display:grid;gap:6px;font-size:14px;color:var(--text2)"><b style="color:var(--ink);font-size:15px">What did we miss?</b><textarea id="missed" placeholder="Anything you’d need that isn’t here, or anything that got in your way"></textarea></label><div class="row2"><button class="btn pri" type="button" id="send">Send</button></div></div>';
  a.querySelector('.picks').addEventListener('click',function(e){var b=e.target.closest('.pick');if(!b)return;pick=b.dataset.m;[].forEach.call(a.querySelectorAll('.pick'),function(x){x.classList.toggle('on',x===b);});});
- var ans={coach:null,writes:null};
- [].forEach.call(a.querySelectorAll('.opts'),function(g){g.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;ans[g.dataset.q]=b.textContent;[].forEach.call(g.children,function(x){x.classList.toggle('on',x===b);});if(g.dataset.q==='writes')$('appq').hidden=b.textContent!=='An app';});});
  $('send').addEventListener('click',function(){labs.track('favorite_picked',{pick:pick?VN[pick]:null,used:VN[M],picked_own:pick===M,order:order.map(function(m){return VN[m];}).join(',')});
   labs.track('feedback_sent',{missed:$('missed').value,pick:pick?VN[pick]:null,source:'after_ready'});
   a.innerHTML='<div class="after"><h2>Thank you</h2><p>That helps a lot. You can keep editing Thursday, or close this page.</p></div>';});
