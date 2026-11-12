@@ -218,8 +218,14 @@ function afterChange(){save();var n=logCount();if(n>lastLogs)labs.track('log_set
 function showState(){var st=$('state');if(GUIDED){st.textContent=READY?'':'';st.className='';$('ready').textContent=READY?'Done ✓':'Done with this round';return;}st.textContent=READY?'Ready':'Draft · saved';st.className=READY?'r':'';$('ready').textContent=READY?'Ready ✓':'Mark ready';}
 /* ---------- guided: three rounds, each coach writes her own real workout, a different way each round ---------- */
 var G=null;
+/* the order of the three ways: shuffled so no way always comes last, but fixed per coach.
+   With a name in the link (?t=jason) the same name always gets the same order, on any phone or browser.
+   Without a name it is shuffled once and kept in this browser only. */
+function orderFor(name){var all=[['write','sentence','stack'],['write','stack','sentence'],['sentence','write','stack'],['sentence','stack','write'],['stack','write','sentence'],['stack','sentence','write']];
+ if(!name)return all[Math.floor(Math.random()*6)].slice();
+ var h=0,s=String(name).trim().toLowerCase();for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return all[h%6].slice();}
 if(GUIDED){G=labs.store.get('guided',null);
- if(!G||Q.get('restart')!==null){var o=['write','sentence','stack'].sort(function(){return Math.random()-.5;});G={order:o,round:0,started:Date.now(),done:[],finished:false};labs.store.set('guided',G);}
+ if(!G||Q.get('restart')!==null){var o=orderFor(labs.tester);G={order:o,round:0,started:Date.now(),done:[],finished:false};labs.store.set('guided',G);}
  ONE=G.order[Math.min(G.round,2)];M=ONE;START='blank';P=blank();READY=false;labs.store.set('day-'+VN[M],null);}
 function saveG(){labs.store.set('guided',G);}
 /* testers from before tracking was on: send their saved rounds once, the first time they reopen the link with tracking on */
