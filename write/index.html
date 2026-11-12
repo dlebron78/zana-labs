@@ -17,6 +17,7 @@ if(GUIDED) labs.test({
   kpis: [
     { name: 'Finished all three rounds',      from: 'opened', to: 'all_rounds_done', target: 0.70 },
     { name: 'Answered the last questions',    from: 'all_rounds_done', to: 'feedback_sent', target: 0.80 },
+    { name: 'Said what they coach and where they write', from: 'all_rounds_done', to: 'about_coach', where: 'coach and writes_in set', target: 0.80 },
     { name: 'Picked as the one they would use', from: 'favorite_picked', by: 'pick', target: null, note: 'share per version' },
     { name: 'How natural it felt (1 to 5)',   from: 'round_done', by: 'version', average: 'natural', target: null },
     { name: 'Quickest of their own three',    from: 'round_done', by: 'version', within_tester: 'seconds', target: null, note: 'never compared across coaches' }
@@ -79,6 +80,7 @@ h1{margin:0;font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1
 .dots{display:flex;gap:6px}.dots i{width:28px;height:4px;border-radius:2px;background:var(--line)}.dots i.on{background:var(--ink)}
 .rate{display:flex;gap:8px;flex-wrap:wrap}.rate button{border:1px solid var(--line);background:var(--card);border-radius:10px;min-width:52px;height:44px;font-weight:600;font-size:16px}
 .rate button.on{background:var(--ink);color:#FFF;border-color:var(--ink)}
+.rate.opts button{min-width:0;height:auto;min-height:44px;padding:8px 14px;font-size:15px}
 .rlab{display:flex;justify-content:space-between;font-size:13px;color:var(--text3);max-width:320px}
 .task{margin:0;font-size:16px;max-width:60ch}
 .fin{display:flex;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap}
@@ -245,14 +247,22 @@ function rateRound(meta){var a=$('after'),val=null;
  a.querySelector('.rate').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;val=+b.dataset.n;[].forEach.call(a.querySelectorAll('.rate button'),function(x){x.classList.toggle('on',x===b);});$('rnext').disabled=false;});
  $('rnext').addEventListener('click',function(){if(!val)return;meta.natural=val;meta.note=$('rnote').value;labs.track('round_done',meta);G.done.push({version:meta.version,natural:val,p:(JSON.parse(meta.text)||[])[0]||null});saveG();nextRound();});
  a.scrollIntoView({behavior:'smooth',block:'start'});}
+function tapQ(key,q,opts){return '<div style="display:grid;gap:8px"><b style="font-size:15px">'+q+' <span style="font-weight:400;color:var(--text2);font-size:14px">(optional)</span></b><div class="rate opts" data-q="'+key+'">'+opts.map(function(o){return '<button type="button">'+o+'</button>';}).join('')+'</div></div>';}
 function showFinal(){G.finished=true;saveG();labs.track('all_rounds_done');
- document.querySelector('.cols').hidden=true;$('task').hidden=true;$('idea').hidden=true;$('h1').textContent='Last two questions';
+ document.querySelector('.cols').hidden=true;$('task').hidden=true;$('idea').hidden=true;$('h1').textContent='Last few questions';
  var pick=null,a=$('after');
  a.innerHTML='<div class="after"><h2>Which way would you use?</h2><p>Your three rounds, as you wrote them.</p><div class="picks">'+G.order.map(function(m,k){var d=G.done[k]||{};return '<button class="pick" type="button" data-m="'+m+'"><span class="ph">Round '+(k+1)+(d.natural?' <small>you rated it '+d.natural+' of 5</small>':'')+'</span>'+miniFor(m,d.p)+'</button>';}).join('')+
- '</div><label style="display:grid;gap:6px;font-size:14px;color:var(--text2)"><b style="color:var(--ink);font-size:15px">What did we miss?</b><textarea id="missed" placeholder="Anything you’d need that isn’t here, or anything that got in your way"></textarea></label><div class="row2"><button class="btn pri" type="button" id="send">Send</button></div></div>';
+ '</div>'+tapQ('coach','What do you mostly coach?',['Group classes','1-on-1 / personal training','Online programming','A mix'])+
+ tapQ('writes','Where do you write workouts today?',['Whiteboard','Notes or Sheets','An app','Paper','Other'])+
+ '<label id="appq" hidden style="display:grid;gap:6px;font-size:14px;color:var(--text2)"><b style="color:var(--ink);font-size:15px">Which app? <span style="font-weight:400;color:var(--text2)">(optional)</span></b><input id="appname" type="text" autocomplete="off" style="font:16px/1.4 var(--sans);border:1px solid var(--line);border-radius:12px;padding:10px 12px"></label>'+
+ '<label style="display:grid;gap:6px;font-size:14px;color:var(--text2)"><b style="color:var(--ink);font-size:15px">What did we miss?</b><textarea id="missed" placeholder="Anything you’d need that isn’t here, or anything that got in your way"></textarea></label><div class="row2"><button class="btn pri" type="button" id="send">Send</button></div></div>';
  a.querySelector('.picks').addEventListener('click',function(e){var b=e.target.closest('.pick');if(!b)return;pick=b.dataset.m;[].forEach.call(a.querySelectorAll('.pick'),function(x){x.classList.toggle('on',x===b);});});
+ var ans={coach:null,writes:null};
+ [].forEach.call(a.querySelectorAll('.opts'),function(g){g.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;ans[g.dataset.q]=b.textContent;[].forEach.call(g.children,function(x){x.classList.toggle('on',x===b);});if(g.dataset.q==='writes')$('appq').hidden=b.textContent!=='An app';});});
  $('send').addEventListener('click',function(){labs.track('favorite_picked',{pick:pick?VN[pick]:null,round:pick?G.order.indexOf(pick)+1:null,order:G.order.map(function(m){return VN[m];}).join(',')});
-  labs.track('feedback_sent',{missed:$('missed').value,pick:pick?VN[pick]:null,source:'guided_end'});
+  var app=ans.writes==='An app'?$('appname').value.trim():'';
+  labs.track('about_coach',{coach:ans.coach,writes_in:ans.writes,app:app||null});
+  labs.track('feedback_sent',{missed:$('missed').value,pick:pick?VN[pick]:null,coach:ans.coach,writes_in:ans.writes,app:app||null,source:'guided_end'});
   a.innerHTML='<div class="after"><h2>Thank you</h2><p>That helps a lot. You can close this page.</p></div>';});
  window.scrollTo(0,0);}
 if(ONE&&!GUIDED){$('seg').hidden=true;$('task').hidden=false;$('h1').textContent='Write Thursday';$('idea').hidden=true;if(START==='blank')$('exl').hidden=false;}
@@ -354,6 +364,8 @@ function showAfter(){if(!ONE)return;var shapes=['Circle','Square','Triangle'],or
  order.map(function(m,k){return '<button class="pick" type="button" data-m="'+m+'"><span class="ph">'+shapes[k]+(m===M?' <small>the one you used</small>':'')+'</span>'+miniFor(m)+'</button>';}).join('')+
  '</div><label style="display:grid;gap:6px;font-size:14px;color:var(--text2)"><b style="color:var(--ink);font-size:15px">What did we miss?</b><textarea id="missed" placeholder="Anything you’d need that isn’t here, or anything that got in your way"></textarea></label><div class="row2"><button class="btn pri" type="button" id="send">Send</button></div></div>';
  a.querySelector('.picks').addEventListener('click',function(e){var b=e.target.closest('.pick');if(!b)return;pick=b.dataset.m;[].forEach.call(a.querySelectorAll('.pick'),function(x){x.classList.toggle('on',x===b);});});
+ var ans={coach:null,writes:null};
+ [].forEach.call(a.querySelectorAll('.opts'),function(g){g.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;ans[g.dataset.q]=b.textContent;[].forEach.call(g.children,function(x){x.classList.toggle('on',x===b);});if(g.dataset.q==='writes')$('appq').hidden=b.textContent!=='An app';});});
  $('send').addEventListener('click',function(){labs.track('favorite_picked',{pick:pick?VN[pick]:null,used:VN[M],picked_own:pick===M,order:order.map(function(m){return VN[m];}).join(',')});
   labs.track('feedback_sent',{missed:$('missed').value,pick:pick?VN[pick]:null,source:'after_ready'});
   a.innerHTML='<div class="after"><h2>Thank you</h2><p>That helps a lot. You can keep editing Thursday, or close this page.</p></div>';});
