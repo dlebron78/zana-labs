@@ -23,11 +23,25 @@ img{display:block;max-width:100%}
 .tabs button{background:transparent;border:1px solid #444;color:#ccc;border-radius:999px;padding:7px 13px;font-size:14px;white-space:nowrap;min-height:36px}
 .tabs button.on{background:#fff;color:#111;border-color:#fff;font-weight:600}
 .ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.pals{display:flex;gap:6px;align-items:center}
-.pals button{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid #444;color:#ccc;border-radius:999px;padding:4px 10px 4px 5px;font-size:13px;min-height:32px}
-.pals button.on{border-color:#fff;color:#fff}
-.pals i{display:inline-flex;border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.35)}
-.pals i b{display:block;width:10px;height:18px}
+.cols{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cols .sw{width:30px;height:30px;border-radius:50%;border:2px solid #444;padding:0;min-height:0}
+.cols .sw.on{border-color:#fff;box-shadow:0 0 0 2px #111 inset}
+.cols label{display:flex;align-items:center;gap:6px;font-size:13px;color:#ccc;border:1px solid #444;border-radius:999px;padding:3px 10px 3px 4px;cursor:pointer}
+.cols input[type=color]{width:24px;height:24px;border:0;padding:0;background:none;border-radius:50%;cursor:pointer}
+.cols .hex{font-size:13px;color:#999;font-variant-numeric:tabular-nums;min-width:62px}
+.view{display:flex;border:1px solid #444;border-radius:999px;overflow:hidden}
+.view button{background:transparent;border:0;color:#ccc;padding:5px 12px;font-size:13px;min-height:32px;white-space:nowrap}
+.view button.on{background:#fff;color:#111;font-weight:600}
+.grid{max-width:1280px;margin:0 auto;display:grid;gap:28px 20px}
+.grid.g3{grid-template-columns:repeat(3,1fr)}
+.cell .lbl{margin:0 0 8px;padding:0}
+.cell .lbl b{font-size:17px}
+.cell .lbl span{font-size:13px}
+.cell button.open{all:unset;display:block;cursor:pointer;width:100%}
+.mini-wrap{position:relative;overflow:hidden;border-radius:10px;border:1px solid #c9c9c6;box-shadow:0 6px 20px rgba(0,0,0,.10);background:#fff}
+.mini{width:1280px;transform-origin:top left;pointer-events:none}
+.cell .dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:6px;border:1px solid rgba(0,0,0,.2)}
+@media (max-width:999px){.grid.g3{grid-template-columns:1fr}.mini{width:auto;transform:none!important}.mini-wrap{height:auto!important;border-radius:0;border-left:0;border-right:0}.cell .lbl{padding:0 16px}}
 .lang{display:flex;border:1px solid #444;border-radius:999px;overflow:hidden}
 .lang button{background:transparent;border:0;color:#ccc;padding:5px 12px;font-size:13px;min-height:32px}
 .lang button.on{background:#fff;color:#111;font-weight:600}
@@ -45,8 +59,7 @@ img{display:block;max-width:100%}
   .lbl{padding:0 16px}
   .top .t{display:none}
   .top{position:static}
-  .pals button span{display:none}
-  .pals button{padding:4px}
+  .cols label span{display:none}
   .about{font-size:12px}
 }
 
@@ -245,7 +258,8 @@ img{display:block;max-width:100%}
     <span class="t">Six styles</span>
     <div class="tabs" id="tabs"></div>
     <div class="ctl">
-      <div class="pals" id="pals"></div>
+      <div class="cols" id="cols"></div>
+      <div class="view" id="view"></div>
       <div class="lang" id="lang"><button data-l="en">EN</button><button data-l="es">ES</button></div>
     </div>
   </div>
@@ -257,36 +271,57 @@ img{display:block;max-width:100%}
 const IMG = '../gym-page/img/';
 const STYLES = [
   {id:'serene', name:'Serene', who:{en:'Yoga, meditation, spa and recovery',es:'Yoga, meditación, spa y recuperación'}, fonts:'Newsreader + Figtree', like:'Yoga Off East, Othership',
-   pals:[
-    {n:'Sand and sage', bg:'#F4EFE6', ink:'#2F3A2F', acc:'#6F8060', accInk:'#FFFFFF', band:'#E8E1D3', mut:'#5d655b'},
-    {n:'Clay', bg:'#F6EEE7', ink:'#3B2A23', acc:'#B35F40', accInk:'#FFFFFF', band:'#ECDFD2', mut:'#6b5a52'},
-    {n:'Night swim', bg:'#0F1E2E', ink:'#EDE6DA', acc:'#C9E265', accInk:'#0F1E2E', band:'#172A3E', mut:'#a9b3bd'}]},
+   how:{en:'light warm base tinted with your color; your color on buttons and accent words',es:'base clara y cálida teñida con tu color; tu color en botones y palabras destacadas'}},
   {id:'atelier', name:'Atelier', who:{en:'Boutique pilates, reformer and barre',es:'Pilates boutique, reformer y barre'}, fonts:'Marcellus + Hanken Grotesk', like:'House of Sculpt, Concept Barre',
-   pals:[
-    {n:'Periwinkle and sand', bg:'#EFE6D6', ink:'#1C1C1C', acc:'#1C1C1C', accInk:'#EFE6D6', band:'#B9C3E8', bandInk0:'#1C1C1C', mut:'#555'},
-    {n:'Forest and cream', bg:'#F3EDE1', ink:'#1F2A22', acc:'#1F3B2D', accInk:'#F3EDE1', band:'#1F3B2D', bandInk0:'#F3EDE1', bandBtn:'#D9A441', bandBtnInk:'#1F2A22', mut:'#555'},
-    {n:'Chocolate and cherry', bg:'#F4E9DA', ink:'#3A2318', acc:'#C8322B', accInk:'#FFFFFF', band:'#3A2318', bandInk0:'#F4E9DA', mut:'#6b5548'}]},
+   how:{en:'cream base with black type; your color fills whole sections as color blocks',es:'base crema con letra negra; tu color llena secciones enteras'}},
   {id:'studio', name:'Studio', who:{en:'Reformer studios, personal trainers and coaches',es:'Estudios de reformer, entrenadores y coaches'}, fonts:'Inter Tight + Inter', like:'Pilates Republic, Carve Studio',
-   pals:[
-    {n:'Ink and paper', bg:'#FFFFFF', ink:'#111111', acc:'#111111', accInk:'#FFFFFF', band:'#F3F3F1', mut:'#555'},
-    {n:'Khaki', bg:'#F2EFE8', ink:'#2B2B26', acc:'#6F6941', accInk:'#FFFFFF', band:'#E6E1D5', mut:'#5e5d55'},
-    {n:'Blush', bg:'#FBF3F0', ink:'#1E1E1E', acc:'#D9967F', accInk:'#1E1E1E', band:'#F3E3DC', mut:'#5c5452'}]},
+   how:{en:'white page and black type; your color only on buttons and highlights',es:'página blanca y letra negra; tu color solo en botones y detalles'}},
   {id:'noir', name:'Noir', who:{en:'Upscale gyms, strength clubs and recovery lounges',es:'Gimnasios premium, clubes de fuerza y recuperación'}, fonts:'Archivo (light capitals)', like:'Equinox, TMPL',
-   pals:[
-    {n:'Black and bone', bg:'#0B0B0B', ink:'#EDE9E3', acc:'#EDE9E3', accInk:'#0B0B0B', band:'#141414', mut:'#a8a49e'},
-    {n:'Black and volt', bg:'#0A0A0A', ink:'#F2F2F2', acc:'#E4FF3A', accInk:'#0A0A0A', band:'#141414', mut:'#a3a3a3'},
-    {n:'Graphite and bronze', bg:'#1A1A1A', ink:'#E8E2D8', acc:'#B08D57', accInk:'#111111', band:'#222222', mut:'#a8a196'}]},
+   how:{en:'always black; your color as a thin accent, lightened if needed to show on black',es:'siempre negro; tu color como acento fino, aclarado si hace falta'}},
   {id:'power', name:'Power', who:{en:'CrossFit, HIIT, boxing and bootcamp',es:'CrossFit, HIIT, boxeo y bootcamp'}, fonts:'Barlow Condensed + Barlow', like:'Solidcore, Barry’s',
-   pals:[
-    {n:'Black and electric blue', bg:'#0A0A0A', ink:'#FFFFFF', acc:'#0057FF', accInk:'#FFFFFF', accTxt:'#4D8BFF', band:'#161616', mut:'#b5b5b5'},
-    {n:'Black and red', bg:'#0D0D0D', ink:'#F5F5F5', acc:'#E3262E', accInk:'#FFFFFF', accTxt:'#FF4A51', band:'#181818', mut:'#b5b5b5'},
-    {n:'Concrete and orange', bg:'#E9E7E2', ink:'#111111', acc:'#FF5A1F', accInk:'#111111', accTxt:'#FF6A33', band:'#DBD8D1', mut:'#4f4f4f'}]},
+   how:{en:'black base; your color at full strength on the offer bar, strip, buttons and featured plan',es:'base negra; tu color a toda fuerza en la barra, la franja, los botones y el plan destacado'}},
   {id:'barrio', name:'Barrio', who:{en:'Neighborhood gyms, community boxes, dance and kids',es:'Gimnasios de barrio, boxes, baile y niños'}, fonts:'Bricolage Grotesque + DM Sans', like:'Native Pilates, Kink Pilates',
-   pals:[
-    {n:'Peach and cream', bg:'#FFF7F1', ink:'#2A1A12', acc:'#FF7A45', accInk:'#2A1A12', band:'#FFE3D3', mark:'#FFB08F', mut:'#6b5a50'},
-    {n:'Sky and bubblegum', bg:'#F5F9FF', ink:'#1B2340', acc:'#FF8FB1', accInk:'#1B2340', band:'#DCE9FF', mark:'#FFC2D5', mut:'#4f5670'},
-    {n:'Sun and teal', bg:'#FFFBEF', ink:'#10302E', acc:'#1F8A70', accInk:'#FFFFFF', band:'#FFF0C7', mark:'#FFD866', mut:'#4b5f5d'}]}
+   how:{en:'soft tints of your color everywhere, with highlighter marks and stickers',es:'tonos suaves de tu color por todas partes, con resaltados y stickers'}}
 ];
+const COLORS = [
+  {n:{en:'Terracotta',es:'Terracota'}, c:'#C8553D'},
+  {n:{en:'Navy',es:'Azul marino'}, c:'#1F3A5F'},
+  {n:{en:'Neon green',es:'Verde neón'}, c:'#39FF14'},
+  {n:{en:'Fuerza red',es:'Rojo Fuerza'}, c:'#E8452C'},
+  {n:{en:'Lilac',es:'Lila'}, c:'#9B7BD4'}
+];
+
+/* ---- color math: one brand color in, a full set of readable colors out ---- */
+const hx = h => { h=h.replace('#',''); if(h.length===3) h=h.split('').map(x=>x+x).join(''); const n=parseInt(h,16); return [n>>16,(n>>8)&255,n&255]; };
+const toHex = a => '#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+const mix = (a,b,t) => { const A=hx(a),B=hx(b); return toHex(A.map((v,i)=>v+(B[i]-v)*t)); };
+const lum = c => { const v=hx(c).map(x=>{x/=255;return x<=.03928?x/12.92:Math.pow((x+.055)/1.055,2.4)}); return .2126*v[0]+.7152*v[1]+.0722*v[2]; };
+const contrast = (a,b) => { const A=lum(a),B=lum(b); return (Math.max(A,B)+.05)/(Math.min(A,B)+.05); };
+const textOn = c => contrast(c,'#FFFFFF') >= contrast(c,'#111111') ? '#FFFFFF' : '#111111';
+// nudge a color toward black or white (whichever helps) until it reaches the ratio against bg
+function readable(c,bg,ratio){
+  if (contrast(c,bg)>=ratio) return c;
+  const to = lum(bg) > .3 ? '#000000' : '#FFFFFF';
+  for (let t=.05;t<=1;t+=.05){ const m=mix(c,to,t); if (contrast(m,bg)>=ratio) return m; }
+  return to;
+}
+function recipe(st,c){
+  const cream='#F6F2EA';
+  switch(st){
+    case 'serene': { const bg=mix(cream,c,.07); const ink=readable(mix(c,'#000000',.72),bg,9); const acc=readable(c,bg,3);
+      return {bg,ink,acc,accInk:textOn(acc),band:mix(cream,c,.15),mut:mix(ink,bg,.3)}; }
+    case 'atelier': { const bg=mix('#F1EBE0',c,.05), ink='#1A1A1A', bandInk=textOn(c);
+      return {bg,ink,acc:ink,accInk:bg,band:c,bandInk0:bandInk,bandBtn:bandInk==='#FFFFFF'?bg:ink,bandBtnInk:bandInk==='#FFFFFF'?ink:bg,mut:'#555555'}; }
+    case 'studio': { const bg='#FFFFFF', acc=readable(c,bg,3);
+      return {bg,ink:'#111111',acc,accInk:textOn(acc),band:mix('#F4F4F2',c,.05),mut:'#555555'}; }
+    case 'noir': { const bg='#0B0B0B', acc=readable(c,bg,4.5);
+      return {bg,ink:'#EDE9E3',acc,accInk:textOn(acc),band:'#151515',mut:'#A8A49E'}; }
+    case 'power': { const bg='#0A0A0A';
+      return {bg,ink:'#FFFFFF',acc:c,accInk:textOn(c),accTxt:readable(c,bg,3),band:'#161616',mut:'#B5B5B5'}; }
+    case 'barrio': { const bg=mix('#FFFFFF',c,.05); const ink=readable(mix(c,'#000000',.78),bg,10);
+      return {bg,ink,acc:c,accInk:textOn(c),band:mix('#FFFFFF',c,.17),mark:mix('#FFFFFF',c,.45),mut:mix(ink,bg,.3)}; }
+  }
+}
 
 const T = {
  en:{offer:'New here? Your first class is free',nav:['Classes','Schedule','Pricing','Coaches'],book:'Book a class',bookS:'Book',
@@ -319,12 +354,13 @@ const T = {
   findE:'Encuéntranos',addr:'Calle Loíza, Santurce\nSan Juan, Puerto Rico',hoursE:'Horario',hours:'Lun a vie, 6 a. m. a 8 p. m.\nSáb y dom, 8 a. m. a 1 p. m.',contactE:'Contacto',contact:'hola@marea.studio\nInstagram @mareastudio'}
 };
 
-const state = {s:'serene', p:{}, l:'en'};
+const state = {s:'serene', c:'#C8553D', l:'en', v:'one'};
 try{
   const q = new URLSearchParams(location.search);
   if (q.get('s') && (STYLES.some(x=>x.id===q.get('s')) || q.get('s')==='all')) state.s = q.get('s');
   if (q.get('lang')==='es') state.l = 'es';
-  if (q.get('p')) state.p[state.s] = Math.max(0,Math.min(2,+q.get('p')-1||0));
+  if (/^[0-9a-fA-F]{6}$/.test(q.get('c')||'')) state.c = '#'+q.get('c').toUpperCase();
+  if (q.get('v')==='three') state.v = 'three';
 }catch(e){}
 
 const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -356,9 +392,9 @@ function head2(st,eb,pair){
 }
 function marq(t){ const seq = t.marq.map(w=>`<span>${esc(w)}</span><span>${'×'}</span>`).join(''); return `<div class="marq" aria-hidden="true"><div>${seq.repeat(6)}</div></div>`; }
 
-function page(st,pi,l){
-  const t = T[l], S = STYLES.find(x=>x.id===st), P = S.pals[pi];
-  const line = P.line || (isDark(P.bg) ? 'rgba(255,255,255,.16)' : 'rgba(0,0,0,.14)');
+function page(st,color,l){
+  const t = T[l], P = recipe(st,color);
+  const line = isDark(P.bg) ? 'rgba(255,255,255,.16)' : 'rgba(0,0,0,.14)';
   const vars = `--bg:${P.bg};--ink:${P.ink};--acc:${P.acc};--accInk:${P.accInk};--band:${P.band};--line:${line};--mut:${P.mut};`+
     (P.bandInk0?`--bandInk:${P.bandInk0};--bandInk0:${P.bandInk0};`:'')+(P.bandBtn?`--bandBtn:${P.bandBtn};--bandBtnInk:${P.bandBtnInk};`:'')+
     (P.mark?`--mark:${P.mark};`:'')+(P.accTxt?`--accTxt:${P.accTxt};`:'');
@@ -381,32 +417,68 @@ function page(st,pi,l){
 }
 function isDark(hex){ const n=parseInt(hex.slice(1),16); const r=n>>16,g=(n>>8)&255,b=n&255; return (0.299*r+0.587*g+0.114*b) < 128; }
 
-const tabs = document.getElementById('tabs'), pals = document.getElementById('pals'), about = document.getElementById('about'), stage = document.getElementById('stage');
+const tabs = document.getElementById('tabs'), cols = document.getElementById('cols'), view = document.getElementById('view'), about = document.getElementById('about'), stage = document.getElementById('stage');
+const L = k => ({one:{en:'This color',es:'Este color'},three:{en:'Three gym colors',es:'Tres colores'},all:{en:'All six',es:'Los seis'},any:{en:'Any color',es:'Otro color'}})[k][state.l];
+const nameOf = c => { const m = COLORS.find(x=>x.c.toUpperCase()===c.toUpperCase()); return m ? m.n[state.l] : c; };
+
+function cell(st,color,label,sub){
+  return `<div class="cell"><div class="lbl"><b>${label}</b><span>${sub}</span></div><button class="open" data-open="${st}" data-c="${color}"><div class="mini-wrap"><div class="mini">${page(st,color,state.l)}</div></div></button></div>`;
+}
+function fitMinis(){
+  document.querySelectorAll('.mini-wrap').forEach(w=>{
+    const m = w.firstElementChild;
+    if (window.innerWidth < 1000){ m.style.transform=''; w.style.height=''; return; }
+    const k = w.clientWidth / 1280;
+    m.style.transform = `scale(${k})`;
+    w.style.height = Math.min(m.scrollHeight*k, 1150*k*1.6) + 'px';
+  });
+}
 function render(){
-  tabs.innerHTML = STYLES.map(s=>`<button data-s="${s.id}" class="${state.s===s.id?'on':''}">${s.name}</button>`).join('') + `<button data-s="all" class="${state.s==='all'?'on':''}">${state.l==='es'?'Los seis':'All six'}</button>`;
+  tabs.innerHTML = STYLES.map(s=>`<button data-s="${s.id}" class="${state.s===s.id?'on':''}">${s.name}</button>`).join('') + `<button data-s="all" class="${state.s==='all'?'on':''}">${L('all')}</button>`;
+  cols.innerHTML = COLORS.map(x=>`<button class="sw ${x.c.toUpperCase()===state.c.toUpperCase()?'on':''}" data-c="${x.c}" title="${esc(x.n[state.l])}" style="background:${x.c}"></button>`).join('') +
+    `<label title="${L('any')}"><input type="color" id="pick" value="${state.c.toLowerCase()}"><span>${L('any')}</span></label><span class="hex">${esc(nameOf(state.c))}</span>`;
+  view.style.display = state.s==='all' ? 'none' : '';
+  view.innerHTML = ['one','three'].map(v=>`<button data-v="${v}" class="${state.v===v?'on':''}">${L(v)}</button>`).join('');
   document.querySelectorAll('#lang button').forEach(b=>b.classList.toggle('on', b.dataset.l===state.l));
   document.documentElement.lang = state.l;
+  const es = state.l==='es';
   if (state.s==='all'){
-    pals.style.display='none';
-    about.innerHTML = state.l==='es' ? 'El mismo gimnasio en los seis estilos, uno debajo del otro. Elige un estilo arriba para cambiar sus colores.' : 'The same gym in all six styles, one after another. Pick a single style above to try its other palettes.';
-    stage.innerHTML = STYLES.map(s=>`<div class="lbl"><b>${s.name}</b><span>${esc(s.who[state.l])} · ${esc(s.fonts)}</span></div><div class="frame">${page(s.id, state.p[s.id]||0, state.l)}</div>`).join('');
+    about.innerHTML = es ? `Los seis estilos con el mismo color de gimnasio (${esc(nameOf(state.c))}). Cambia el color arriba. Toca uno para verlo completo.` : `All six styles with the same gym color (${esc(nameOf(state.c))}). Change the color above. Tap one to open it full size.`;
+    stage.innerHTML = `<div class="grid g3">${STYLES.map(s=>cell(s.id,state.c,s.name,esc(s.who[state.l]))).join('')}</div>`;
   } else {
-    const S = STYLES.find(x=>x.id===state.s), pi = state.p[S.id]||0;
-    pals.style.display='';
-    pals.innerHTML = S.pals.map((p,i)=>`<button data-p="${i}" class="${i===pi?'on':''}" title="${esc(p.n)}"><i><b style="background:${p.bg}"></b><b style="background:${p.acc}"></b><b style="background:${p.band}"></b></i><span>${esc(p.n)}</span></button>`).join('');
-    about.innerHTML = `<b>${S.name}</b> · ${esc(S.who[state.l])} · ${state.l==='es'?'Fuentes':'Fonts'}: ${esc(S.fonts)} · ${state.l==='es'?'Inspirado en':'Inspired by'} ${esc(S.like)}`;
-    stage.innerHTML = `<div class="frame">${page(S.id, pi, state.l)}</div>`;
+    const S = STYLES.find(x=>x.id===state.s);
+    about.innerHTML = `<b>${S.name}</b> · ${esc(S.who[state.l])} · ${es?'Fuentes':'Fonts'}: ${esc(S.fonts)} · ${es?'Color':'Color'}: ${esc(S.how[state.l])}`;
+    if (state.v==='three'){
+      const three = [state.c, ...COLORS.map(x=>x.c).filter(c=>c.toUpperCase()!==state.c.toUpperCase())].slice(0,3);
+      stage.innerHTML = `<div class="grid g3">${three.map(c=>cell(S.id,c,`<span class="dot" style="background:${c}"></span>${esc(nameOf(c))}`,'')).join('')}</div>`;
+    } else {
+      stage.innerHTML = `<div class="frame">${page(S.id, state.c, state.l)}</div>`;
+    }
   }
+  requestAnimationFrame(fitMinis);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitMinis);
   try{
     const q = new URLSearchParams();
-    q.set('s', state.s); if (state.s!=='all' && (state.p[state.s]||0)) q.set('p', (state.p[state.s]||0)+1); if (state.l==='es') q.set('lang','es');
+    q.set('s', state.s); q.set('c', state.c.replace('#','')); if (state.v==='three' && state.s!=='all') q.set('v','three'); if (state.l==='es') q.set('lang','es');
     history.replaceState(null,'','?'+q.toString());
   }catch(e){}
 }
 tabs.addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; state.s=b.dataset.s; render(); window.scrollTo({top:0});});
-pals.addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; state.p[state.s]=+b.dataset.p; render();});
+cols.addEventListener('click',e=>{const b=e.target.closest('button.sw'); if(!b) return; state.c=b.dataset.c; render();});
+cols.addEventListener('input',e=>{ if(e.target.id!=='pick') return; state.c=e.target.value.toUpperCase();
+  // live update without rebuilding the picker
+  document.querySelectorAll('#cols .sw').forEach(b=>b.classList.remove('on')); document.querySelector('#cols .hex').textContent=state.c;
+  clearTimeout(window.__t); window.__t=setTimeout(()=>{ const keep=document.activeElement&&document.activeElement.id==='pick'; renderStageOnly(); },60);
+});
+cols.addEventListener('change',e=>{ if(e.target.id==='pick') render(); });
+function renderStageOnly(){ const y=window.scrollY; const v=state.v; render(); window.scrollTo(0,y); }
+view.addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; state.v=b.dataset.v; render();});
 document.getElementById('lang').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; state.l=b.dataset.l; render();});
-stage.addEventListener('click',e=>{ if(e.target.closest('a[href="#"]')) e.preventDefault(); });
+stage.addEventListener('click',e=>{
+  const o=e.target.closest('button.open'); if(o){ state.s=o.dataset.open; state.c=o.dataset.c; state.v='one'; render(); window.scrollTo({top:0}); return; }
+  if(e.target.closest('a[href="#"]')) e.preventDefault();
+});
+window.addEventListener('resize',()=>{clearTimeout(window.__r); window.__r=setTimeout(fitMinis,120);});
 render();
 </script>
 </body>
