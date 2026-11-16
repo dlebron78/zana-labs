@@ -374,6 +374,10 @@ h1{margin:4px 0 16px;font-size:36px;font-weight:700;letter-spacing:-.03em}
 .g .coaches{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
 .g .coach .ci{aspect-ratio:3/4;border-radius:var(--rad);overflow:hidden;background:var(--sf);margin-bottom:14px}
 .g .coach .ci .ph{object-position:50% 20%}
+.g .coach .ci.noph,.g.s-calm .coach .ci.noph{aspect-ratio:1;width:76px;border-radius:50%;margin-bottom:16px}
+.g.s-calm .coach .ci.noph{margin-inline:auto}
+.g .coach .ci.noph .ini{background:color-mix(in srgb,var(--ac) 16%,var(--bg));color:var(--act);font-size:24px}
+.g .coaches:has(.noph){row-gap:36px}
 .g .coach b{display:block;font:500 22px/1.2 var(--hf)}
 .g .coach span{display:block;font-size:13px;color:var(--act);font-weight:600;margin:2px 0 6px}
 .g .coach p{font-size:14px;color:var(--mu)}
@@ -584,10 +588,11 @@ h1{margin:4px 0 16px;font-size:36px;font-weight:700;letter-spacing:-.03em}
 .g.s-editorial .hx-ed .dateline{display:flex;justify-content:space-between;gap:20px;font:500 12px var(--bf);letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--ink);padding-bottom:12px;flex-wrap:wrap}
 .g.s-editorial .hx-ed h1{font-size:200px;line-height:.82;letter-spacing:-.045em;margin:28px 0 36px;overflow-wrap:anywhere}
 .g.s-editorial .hx-ed h1 em{font-style:italic}
-.g.s-editorial .hx-ed .grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:40px;align-items:end}
-.g.s-editorial .hx-ed .p1{height:560px;overflow:hidden;background:var(--sf)}
-.g.s-editorial .hx-ed .side{display:grid;gap:24px}
-.g.s-editorial .hx-ed .p2{aspect-ratio:4/5;overflow:hidden;background:var(--sf)}
+.g.s-editorial .hx-ed .grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:40px;align-items:stretch}
+.g.s-editorial .hx-ed .p1{position:relative;min-height:560px;overflow:hidden;background:var(--sf)}
+.g.s-editorial .hx-ed .p1 img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.g.s-editorial .hx-ed .side{display:flex;flex-direction:column;gap:22px;justify-content:flex-start}
+.g.s-editorial .hx-ed .p2{aspect-ratio:4/3;overflow:hidden;background:var(--sf)}
 .g.s-editorial .hx-ed .tag{font:400 30px/1.2 var(--hf);font-style:italic;color:var(--ink)}
 .g.s-editorial .hx-ed .cap{font-size:12px;color:var(--mu);letter-spacing:.04em}
 .g.s-editorial .joinb{background:var(--ink);color:var(--bg)}
@@ -715,7 +720,7 @@ h1{margin:4px 0 16px;font-size:36px;font-weight:700;letter-spacing:-.03em}
   /* editorial */
   .g.s-editorial .hx-ed h1{font-size:84px;margin:20px 0 24px}
   .g.s-editorial .hx-ed .grid{grid-template-columns:1fr;gap:24px}
-  .g.s-editorial .hx-ed .p1{height:380px}
+  .g.s-editorial .hx-ed .p1{min-height:380px}
   .g.s-editorial .hx-ed .p2{display:none}
   .g.s-editorial .hx-ed .tag{font-size:25px}
   .g.s-editorial .sh{grid-template-columns:1fr;gap:6px}
@@ -1007,7 +1012,7 @@ const W={
  hiddenaddr:['You get the address when your first session is set.','Recibes la dirección cuando se fija tu primera sesión.'],
  requested:['Requested','Solicitado'],pz:['Powered by Zana','Con Zana'],terms:['Terms','Términos'],privacy:['Privacy','Privacidad'],
  free:['Free','Gratis'],coaches:['Coaches','Coaches'],reviews:['What members say','Lo que dicen'],reviewsc:['What clients say','Lo que dicen'],faq:['Questions','Preguntas'],how:['How it works','Cómo funciona'],
- wod:['Today’s workout','El entreno de hoy'],classes:['classes a day','clases al día'],areas2:['areas','áreas'],opens:['Opens','Abre'],today:['Today','Hoy'],
+ wod:['Today’s workout','El entreno de hoy'],classes:['classes a day','clases al día'],class1:['class a day','clase al día'],areas2:['areas','áreas'],opens:['Opens','Abre'],today:['Today','Hoy'],
  more:['Also in memberships','También en membresías'],onlyhere:['Prices','Precios'],todayin:['Today','Hoy'],open:['Open today','Abierto hoy'],
  book_cta:['Book a class','Reserva una clase'],trial_cta:['Start a free trial','Empieza gratis'],intro_cta:['Get the intro offer','Oferta de bienvenida'],call_cta:['Book a free call','Agenda una llamada'],join_cta:['Join','Únete'],
  seesched:['See the schedule','Ver horario'],seeprices:['See prices','Ver precios'],from:['from','desde'],session:['1:1','1:1'],coachline:['Personal trainer','Entrenadora personal'],onlinecoach:['Online coach','Coach en línea']
@@ -1117,8 +1122,8 @@ function heroHtml(g,C){
     const chips=[];
     if(g.mode==='Online')chips.push([t('online'),g.type==='coach'?'1:1 coaching':'']);
     else if(g.hours&&g.hours.length&&g.showHours)chips.push([t('open'),'until '+openToday(g)]);
-    if(sp)chips.push([sp.n,priceTxt(sp)]);
-    const va=visibleAreas(g); if(va.length>1)chips.push([va.length+' '+t('areas2'),va.slice(0,3).map(a=>a.n).join(', ')]);
+    if(sp)chips.push([sp.n,isFree(sp)&&/free|grat/i.test(sp.n)?(S.lang==='es'?'Para gente nueva':'For new members'):priceTxt(sp)]);
+    const va=visibleAreas(g); if(va.length>1)chips.push([va.length+' '+t('areas2'),va.slice(0,3).map(a=>a.n).join(', ')+(va.length>3?(S.lang==='es'?` y ${va.length-3} más`:` and ${va.length-3} more`):'')]);
     return `<section class="hx hx-clean"><div class="in"><span class="where"><i></i>${esc(fl)}</span><h1>${emLast(head)}</h1>${acts}
       <div class="pic">${img(ph[0])}${chips.length?`<div class="chips">${chips.slice(0,3).map(c=>`<div class="chip"><b>${esc(c[0])}</b>${esc(c[1])}</div>`).join('')}</div>`:''}</div></div></section><div class="hxpad"></div>`;}
   case 'warm': {
@@ -1134,7 +1139,7 @@ function heroHtml(g,C){
   case 'sport': {
     let stats=[];
     if(g.type==='coach'){const pr=shownProducts(g).map(p=>p.p).filter(x=>/\$/.test(x)).sort((a,b)=>parseFloat(a.slice(1))-parseFloat(b.slice(1)))[0];stats=[['1:1',g.mode==='Online'?t('online'):g.where],[g.reviews.length?'★ 5.0':'',g.reviews.length?g.reviews.length+' reviews':''],[pr||'',pr?t('from'):'']];}
-    else stats=[[g.classes.length||'',g.classes.length?t('classes'):''],[visibleAreas(g).length,t('areas2')],[opensAt(g).replace(':00',''),opensAt(g)?t('opens'):'']];
+    else stats=[[g.classes.length||'',g.classes.length?t(g.classes.length===1?'class1':'classes'):''],[visibleAreas(g).length,t('areas2')],[opensAt(g).replace(':00',''),opensAt(g)?t('opens'):'']];
     stats=stats.filter(s=>s[0]!==''&&s[0]!==0);
     return `<section class="hx hx-sport"><div class="tx"><span class="where">${esc(fl)}</span><h1>${esc(g.name)}</h1>${g.tag?`<p class="tag">${esc(g.tag)}</p>`:''}${acts}</div><div class="pic">${img(ph[0])}</div></section>
       ${stats.length?`<div class="stats" style="--act2:${C.ac}"><div class="in">${stats.map(s=>`<div><b>${esc(s[0])}</b><span>${esc(s[1])}</span></div>`).join('')}</div></div>`:''}`;}
@@ -1168,7 +1173,7 @@ function secAreas(g,n){
   if(g.type!=='multi'){
     return `<section class="sec" id="sec-areas"><div class="in">${secHead(g,n,t('offer'))}<div class="areas">${va.map(a=>{
       const c=g.classes.filter(x=>x.area===a.id).length;
-      return `<div class="area"><div class="ai">${a.ph?img(a.ph,a.n):''}</div><h3>${esc(a.n)}</h3>${a.d?`<p>${esc(a.d)}</p>`:''}${c?`<span class="am">${c} ${t('classes')}</span>`:''}</div>`;}).join('')}</div></div></section>`;
+      return `<div class="area"><div class="ai">${a.ph?img(a.ph,a.n):''}</div><h3>${esc(a.n)}</h3>${a.d?`<p>${esc(a.d)}</p>`:''}${c?`<span class="am">${c} ${t(c===1?'class1':'classes')}</span>`:''}</div>`;}).join('')}</div></div></section>`;
   }
   const cur=va.find(a=>a.id===S.tab[g.key])||va[0];
   const cls=g.classes.filter(c=>c.area===cur.id);
@@ -1183,7 +1188,7 @@ function secAreas(g,n){
     </div></div></div></section>`;
 }
 function secCoaches(g,n){
-  return `<section class="sec" id="sec-coaches"><div class="in">${secHead(g,n,t('coaches'))}<div class="coaches">${g.coaches.map(c=>`<div class="coach"><div class="ci">${c.ph?img(c.ph,c.n):`<div class="ini">${esc(c.n.split(' ').map(w=>w[0]).join('').slice(0,2))}</div>`}</div><b>${esc(c.n)}</b><span>${esc(c.r)}</span><p>${esc(c.b)}</p></div>`).join('')}</div></div></section>`;
+  return `<section class="sec" id="sec-coaches"><div class="in">${secHead(g,n,t('coaches'))}<div class="coaches">${g.coaches.map(c=>`<div class="coach"><div class="ci${c.ph?'':' noph'}">${c.ph?img(c.ph,c.n):`<div class="ini">${esc(c.n.split(' ').map(w=>w[0]).join('').slice(0,2))}</div>`}</div><b>${esc(c.n)}</b><span>${esc(c.r)}</span><p>${esc(c.b)}</p></div>`).join('')}</div></div></section>`;
 }
 function secHow(g,n){
   return `<section class="sec" id="sec-how"><div class="in">${secHead(g,n,t('how'))}<div class="how">${g.how.map(h=>`<div><b>${esc(h[0])}</b><p>${esc(h[1])}</p></div>`).join('')}</div></div></section>`;
