@@ -271,7 +271,7 @@ h1{margin:4px 0 16px;font-size:36px;font-weight:700;letter-spacing:-.03em}
 /* buttons */
 .g .b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 24px;border-radius:var(--brad);font:600 15px/1 var(--bf);border:0;cursor:pointer;text-decoration:none;white-space:nowrap;letter-spacing:.01em}
 .g .b.pri{background:var(--ac);color:var(--onac)}
-.g .b.sec{background:transparent;color:inherit;box-shadow:inset 0 0 0 1.5px currentColor}
+.g .b.alt{background:transparent;color:inherit;box-shadow:inset 0 0 0 1.5px currentColor}
 .g .b.sm{height:38px;padding:0 16px;font-size:14px}
 .g .b.ghost{background:transparent;color:var(--mu);box-shadow:inset 0 0 0 1px var(--ln);cursor:default}
 .g .b.done{background:transparent;color:var(--act);box-shadow:inset 0 0 0 1.5px var(--act)}
@@ -492,7 +492,7 @@ h1{margin:4px 0 16px;font-size:36px;font-weight:700;letter-spacing:-.03em}
 .g.s-bold .hx-bold h1{font-size:168px;line-height:.86;text-transform:uppercase;letter-spacing:-.01em;color:#fff;overflow-wrap:anywhere}
 .g.s-bold .hx-bold .tag{color:#E6E6E2;font-size:20px;font-weight:500}
 .g.s-bold .hx-bold .where{color:var(--act)}
-.g.s-bold .hx-bold .b.sec{color:#fff}
+.g.s-bold .hx-bold .b.alt{color:#fff}
 .g.s-bold .hx-bold .row2{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;flex-wrap:wrap}
 .g.s-bold .marq{background:var(--ac);color:var(--onac);overflow:hidden;white-space:nowrap;font:400 30px/1 var(--hf);text-transform:uppercase;padding:18px 0}
 .g.s-bold .marq span{display:inline-block;padding-right:28px}
@@ -619,7 +619,7 @@ h1{margin:4px 0 16px;font-size:36px;font-weight:700;letter-spacing:-.03em}
 .g.s-sport .hx-sport .where{color:inherit;opacity:.8}
 .g.s-sport .hx-sport .tag{color:inherit;opacity:.9;font-size:19px;font-weight:500}
 .g.s-sport .hx-sport .b.pri{background:var(--ink);color:#fff}
-.g.s-sport .hx-sport .b.sec{color:inherit}
+.g.s-sport .hx-sport .b.alt{color:inherit}
 .g.s-sport .hx-sport .pic{position:relative;min-height:100%}
 .g.s-sport .hx-sport .pic .ph{position:absolute;inset:0}
 .g.s-sport .stats{background:var(--ink);color:#fff}
@@ -1080,7 +1080,7 @@ function schedRows(g,lst,showArea){
     const k=S.day+'|'+c.id, mine=!!bk[k];
     const left=Math.max(0,Math.min(c.cap,c.left+S.day*2-(mine?1:0)));
     const sp=left===0?t('full'):`${left} ${t('of')} ${c.cap} ${t('left')}`;
-    const btn=mine?`<button class="b done sm" data-a="unbook" data-v="${c.id}">✓ ${t('booked')}</button>`:(left===0?`<span class="b ghost sm">${t('full')}</span>`:`<button class="b sec sm" data-a="book" data-v="${c.id}">${t('book')}</button>`);
+    const btn=mine?`<button class="b done sm" data-a="unbook" data-v="${c.id}">✓ ${t('booked')}</button>`:(left===0?`<span class="b ghost sm">${t('full')}</span>`:`<button class="b alt sm" data-a="book" data-v="${c.id}">${t('book')}</button>`);
     return `<div class="row"><span class="tm">${esc(c.t)}</span><div><div class="cn">${esc(c.n)}</div><div class="cm">${showArea?esc(aName(g,c.area))+' · ':''}${esc(c.coach)}<span class="spm"> · ${sp}</span></div></div>
       <span class="sp${left>0&&left<=3?' low':''}">${sp}</span>${btn}</div>`;}).join('')}</div>`;
 }
@@ -1090,7 +1090,7 @@ function card(g,p,o){
   const req=(S.requested[g.key]||{})[p.id];
   const st=o&&o.st;
   const cov=g.areas.length>1&&many(g,p)?`<div class="cov">${esc(coversTxt(g,p))}</div>`:(g.areas.length>1&&!isAll(p.a)&&g.type!=='coach'?`<div class="cov">${esc(list(p.a.map(id=>aName(g,id))))}</div>`:'');
-  const act=mine?`<span class="have">✓ ${t('have')}</span>`:(req?`<span class="have">${t('requested')}</span>`:`<button class="b ${st?'pri':'sec'}" data-a="buy" data-v="${p.id}">${isFree(p)?t('signup'):t('buy')}</button>`);
+  const act=mine?`<span class="have">✓ ${t('have')}</span>`:(req?`<span class="have">${t('requested')}</span>`:`<button class="b ${st?'pri':'alt'}" data-a="buy" data-v="${p.id}">${isFree(p)?t('signup'):t('buy')}</button>`);
   return `<div class="card${st?' st':''}${mine?' have':''}">${st?`<span class="tag">${t('newhere')}</span>`:''}<div class="cn">${esc(p.n)}</div><div class="pr">${esc(priceTxt(p))}${p.per?`<small>${esc(p.per)}</small>`:''}</div>${p.d?`<p>${esc(p.d)}</p>`:''}<div class="gap"></div>${cov}${act}</div>`;
 }
 function secHead(g,n,title,sd,o){
@@ -1101,7 +1101,7 @@ function secHead(g,n,title,sd,o){
 function heroHtml(g,C){
   const ph=g.photos, sp=startProd(g), cta=ctaUsed(g), sec=secondBtn(g);
   const main=S.member?'':`<button class="b pri" ${ctaAttr(g,cta)}>${esc(ctaLabel(g,cta))}</button>`;
-  const second=sec?`<button class="b sec" data-a="jump" data-v="${sec[1]}">${sec[0]}</button>`:'';
+  const second=sec?`<button class="b alt" data-a="jump" data-v="${sec[1]}">${sec[0]}</button>`:'';
   const acts=`<div class="acts">${main}${second}</div>`;
   const fl=factsLine(g);
   const head=g.tag||g.name;
@@ -1177,8 +1177,8 @@ function secAreas(g,n){
   return `<section class="sec" id="sec-areas"><div class="in">${secHead(g,n,t('offer'))}</div>
     <div class="atabs"><div class="in">${va.map(a=>`<button class="${a.id===cur.id?'on':''}" data-a="tab" data-v="${a.id}">${esc(a.n)}</button>`).join('')}</div></div>
     <div class="in" style="padding-top:36px"><div class="apanel"><div class="ai">${cur.ph?img(cur.ph,cur.n):''}</div><div><h3>${esc(cur.n)}</h3>${cur.d?`<p>${esc(cur.d)}</p>`:''}
-      ${cls.length?`<div class="alist"><h4>${t('todayin')}</h4><div class="mini">${cls.map(c=>`<div><span class="tm">${esc(c.t)}</span><span>${esc(c.n)} · ${esc(c.coach)}</span><button class="b sec sm" data-a="book" data-v="${c.id}">${t('book')}</button></div>`).join('')}</div></div>`:''}
-      ${only.length?`<div class="alist"><h4>${t('onlyhere')}</h4><div class="mini">${only.map(p=>`<div><span class="pr">${esc(priceTxt(p))}${esc(p.per||'')}</span><span>${esc(p.n)}</span><button class="b sec sm" data-a="buy" data-v="${p.id}">${t('buy')}</button></div>`).join('')}</div></div>`:''}
+      ${cls.length?`<div class="alist"><h4>${t('todayin')}</h4><div class="mini">${cls.map(c=>`<div><span class="tm">${esc(c.t)}</span><span>${esc(c.n)} · ${esc(c.coach)}</span><button class="b alt sm" data-a="book" data-v="${c.id}">${t('book')}</button></div>`).join('')}</div></div>`:''}
+      ${only.length?`<div class="alist"><h4>${t('onlyhere')}</h4><div class="mini">${only.map(p=>`<div><span class="pr">${esc(priceTxt(p))}${esc(p.per||'')}</span><span>${esc(p.n)}</span><button class="b alt sm" data-a="buy" data-v="${p.id}">${t('buy')}</button></div>`).join('')}</div></div>`:''}
       ${also.length?`<div class="alist"><h4>${t('more')}</h4><p style="color:var(--mu);font-size:14px">${esc(also.map(p=>p.n).join(', '))}. <button class="tlink" data-a="jump" data-v="sec-prices">${t('memberships')}</button></p></div>`:''}
     </div></div></div></section>`;
 }
