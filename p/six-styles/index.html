@@ -60,14 +60,15 @@ img{display:block;max-width:100%}
 .hd{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px var(--gut)}
 .logo{font-family:var(--hf);font-weight:var(--logow,var(--hw));font-size:24px;letter-spacing:var(--logotr,.04em);text-transform:uppercase;line-height:1;white-space:nowrap}
 .hd nav{display:flex;gap:28px;margin-left:auto;margin-right:12px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--acc);color:var(--accInk);border:1px solid var(--acc);border-radius:var(--br);padding:15px 26px;white-space:nowrap}
-.btn.ghost{background:transparent;color:inherit;border-color:currentColor}
-.btn.sm{padding:11px 18px}
+.gp .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--acc);color:var(--accInk);border:1px solid var(--acc);border-radius:var(--br);padding:15px 26px;white-space:nowrap}
+.gp .btn.ghost{background:transparent;color:inherit;border-color:currentColor}
+.gp .btn.sm{padding:11px 18px}
 .btns{display:flex;gap:12px;flex-wrap:wrap}
 .sub{font-size:calc(var(--body) + 1px);max-width:34em;opacity:.86}
 .sec{padding:var(--sp) var(--gut)}
 .band{background:var(--band);color:var(--bandInk,var(--ink))}
 .band .btn{background:var(--bandBtn,var(--acc));border-color:var(--bandBtn,var(--acc));color:var(--bandBtnInk,var(--accInk))}
+.gp .band .btn.ghost{background:transparent;color:inherit;border-color:currentColor}
 .shead{display:flex;flex-direction:column;gap:14px;margin-bottom:clamp(32px,4vw,56px)}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2.4vw,32px)}
 .card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--cr)}
@@ -131,12 +132,15 @@ img{display:block;max-width:100%}
 .st-atelier .plan{border-color:currentColor}
 .st-atelier .plan.feat{--featBg:var(--ink);--featInk:var(--bg)}
 .st-atelier .plan.feat .btn{background:var(--bg);color:var(--ink);border-color:var(--bg)}
+.st-atelier .plan.feat .tagx{background:var(--bg);color:var(--ink)}
+.st-atelier .marq{font-size:13px;letter-spacing:.2em;text-transform:uppercase;padding:16px 0}
 .st-atelier .card img{aspect-ratio:3/4}
 
 /* ---------- 3. Studio ---------- */
 .st-studio{--hf:'Inter Tight',system-ui,sans-serif;--bf:'Inter',system-ui,sans-serif;--hw:600;--hcase:none;--htr:-.03em;--hlh:1.02;
  --h1:clamp(42px,5.8vw,74px);--h2:clamp(32px,3.8vw,48px);--h3:22px;--lsz:12px;--ltr:.08em;--lcase:uppercase;--lw:600;
  --sp:clamp(64px,8vw,112px);--body:17px;--cr:4px;--br:4px;--rowsz:20px;--logotr:-.01em;--logow:700}
+.st-studio h1 em,.st-noir h1 em{font-style:normal}
 .st-studio .logo{text-transform:none;font-size:22px}
 .st-studio .hd{border-bottom:1px solid var(--line)}
 .st-studio .hd nav .lab{text-transform:none;letter-spacing:0;font-size:15px;font-weight:500}
@@ -203,7 +207,7 @@ img{display:block;max-width:100%}
 .st-barrio .card{background:var(--band);border-radius:var(--cr);padding:12px 12px 26px}
 .st-barrio .card h3,.st-barrio .card p{padding:0 10px}
 .st-barrio .plan{background:#fff8;border:2px solid var(--line)}
-.st-barrio .plan.feat{--featBg:var(--acc);--featInk:var(--accInk);border-color:var(--acc)}
+.st-barrio .plan.feat{background:var(--acc);color:var(--accInk);border-color:var(--acc)}
 .st-barrio .plan.feat .btn{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .st-barrio .plan.feat .tagx{background:var(--ink);color:var(--bg)}
 
