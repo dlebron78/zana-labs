@@ -44,6 +44,10 @@ img{display:block;max-width:100%}
   .frame{border-radius:0;border-left:0;border-right:0}
   .lbl{padding:0 16px}
   .top .t{display:none}
+  .top{position:static}
+  .pals button span{display:none}
+  .pals button{padding:4px}
+  .about{font-size:12px}
 }
 
 /* ---------- the gym page, shared structure ---------- */
@@ -389,7 +393,7 @@ function render(){
   } else {
     const S = STYLES.find(x=>x.id===state.s), pi = state.p[S.id]||0;
     pals.style.display='';
-    pals.innerHTML = S.pals.map((p,i)=>`<button data-p="${i}" class="${i===pi?'on':''}" title="${esc(p.n)}"><i><b style="background:${p.bg}"></b><b style="background:${p.acc}"></b><b style="background:${p.band}"></b></i>${esc(p.n)}</button>`).join('');
+    pals.innerHTML = S.pals.map((p,i)=>`<button data-p="${i}" class="${i===pi?'on':''}" title="${esc(p.n)}"><i><b style="background:${p.bg}"></b><b style="background:${p.acc}"></b><b style="background:${p.band}"></b></i><span>${esc(p.n)}</span></button>`).join('');
     about.innerHTML = `<b>${S.name}</b> · ${esc(S.who[state.l])} · ${state.l==='es'?'Fuentes':'Fonts'}: ${esc(S.fonts)} · ${state.l==='es'?'Inspirado en':'Inspired by'} ${esc(S.like)}`;
     stage.innerHTML = `<div class="frame">${page(S.id, pi, state.l)}</div>`;
   }
