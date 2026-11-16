@@ -194,7 +194,7 @@ h1{margin:4px 0 16px;font-size:36px;font-weight:700;letter-spacing:-.03em}
 .ttile.on .tpic{background:#111}
 .ttile.on .tpic svg *{stroke:#fff}
 .stygrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.stycard{border:1px solid var(--line);border-radius:16px;background:#fff;padding:0;text-align:left;overflow:hidden;display:flex;flex-direction:column}
+.stycard{cursor:pointer;border:1px solid var(--line);border-radius:16px;background:#fff;padding:0;text-align:left;overflow:hidden;display:flex;flex-direction:column}
 .stycard .sthumb{height:236px;overflow:hidden;position:relative;background:#eee;pointer-events:none}
 .stycard .sthumb>div{width:1180px;zoom:.3;transform-origin:top left}
 .stycard .stx{padding:12px 14px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-top:1px solid var(--line)}
@@ -1431,7 +1431,7 @@ function libGrid(g,ctx){
   return `<div class="lib">${items.map(l=>{const i=ctx==='area'?-1:g.photos.indexOf(l[0]);return `<button class="libph ${i>=0?'on':''} ${sug.includes(l[0])&&i<0?'sug':''}" data-a="libpick" data-v="${l[0]}" data-ctx="${ctx}" title="${esc(l[1])}"><img src="img/${l[0]}.jpg" alt="${esc(l[1])}" loading="lazy">${i>=0?`<span class="n">${i+1}</span>`:''}</button>`;}).join('')}</div>`;
 }
 function styleCards(g){
-  return `<div class="stygrid">${STYLES.map(s=>`<button class="stycard ${g.style===s.k?'on':''}" data-a="k" data-k="style" data-v="${s.k}"><div class="sthumb"><div>${render_page(asStyle(g,s.k),true)}</div></div><div class="stx"><b>${s.n}</b><span>${s.d}</span></div></button>`).join('')}</div>`;
+  return `<div class="stygrid">${STYLES.map(s=>`<div role="button" tabindex="0" class="stycard ${g.style===s.k?'on':''}" data-a="k" data-k="style" data-v="${s.k}"><div class="sthumb noact"><div>${render_page(asStyle(g,s.k),true)}</div></div><div class="stx"><b>${s.n}</b><span>${s.d}</span></div></div>`).join('')}</div>`;
 }
 function wordKnobs(g){
   const hl=(g.tag||'').length, dl=(g.desc||'').length;
@@ -1674,7 +1674,7 @@ function libToggle(g,name){
 
 document.addEventListener('click',ev=>{
   const el=ev.target.closest('[data-a]'); if(!el)return;
-  if(el.closest('.noact')){ev.preventDefault();return;}
+  {const na=el.closest('.noact');if(na){ev.preventDefault();const up=na.parentElement&&na.parentElement.closest('[data-a]');if(!up)return;return up.click();}}
   const a=el.dataset.a, v=el.dataset.v; const g=G();
   if(a==='scrim'){if(ev.target===el)closeModal();return;}
   if(el.tagName==='A'||a==='jump')ev.preventDefault();
@@ -1767,6 +1767,7 @@ document.addEventListener('click',ev=>{
     let area=ar; if(!area){if(!g.areas.length)g.areas=[{id:uid('a'),src:'general',n:'General',d:'',ph:null}];area=g.areas[0].id;}
     g.classes.push({id:uid('c'),area,t:tm,n,coach:co,left:cap,cap});closeModal();toast(`${n} added.`);return render();}
 });
+document.addEventListener('keydown',ev=>{const el=ev.target;if((ev.key==='Enter'||ev.key===' ')&&el.getAttribute&&el.getAttribute('role')==='button'&&el.dataset.a){ev.preventDefault();el.click();}});
 /* typing in knobs: update and refresh the preview without losing focus */
 let typT=null;
 document.addEventListener('input',ev=>{
