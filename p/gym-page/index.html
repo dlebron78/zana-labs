@@ -753,6 +753,8 @@ h1{margin:4px 0 16px;font-size:36px;font-weight:700;letter-spacing:-.03em}
 }
 .g .row .cm .spm{display:none}
 .pubwrap{min-height:100vh}
+.g .mbar{display:none}
+@container g (max-width:760px){.g .mbar{display:block;position:sticky;bottom:0;z-index:7;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--ln)}.g .mbar .b{width:100%}}
 /* intro line under the hero */
 .g .intro{padding:88px 0 8px}
 .g .intro p{max-width:900px;margin:0;font-family:var(--hf);font-size:32px;line-height:1.28;letter-spacing:-.01em;color:var(--ink)}
@@ -1235,6 +1237,7 @@ function pageHtml(g,prev){
       ${S.member?`<button class="me" data-a="signout" title="Sign out"><i>AR</i></button>`:`<button class="signin" data-a="signin">${t('signin')}</button><button class="b pri sm hcta" ${ctaAttr(g,cta)}>${esc(ctaLabel(g,cta))}</button>`}</nav></div></header>
     ${bannerOn(g)?`<div class="ban"><div class="in"><span class="dot"></span><span>${esc(g.banner.text)}</span></div></div>`:''}
     ${heroHtml(g,C)}${top}${intro}${body}
+    ${S.member?'':`<div class="mbar"><button class="b pri" ${ctaAttr(g,cta)}>${esc(ctaLabel(g,cta))}</button></div>`}
     <section class="joinb"><div class="in">${joinBox}</div></section>
     <footer class="ft"><div class="in"><span>© 2026 ${esc(g.name)}</span><span>${t('terms')}</span><span>${t('privacy')}</span>${g.plan==='Flex'?`<span class="pz">${t('pz')}</span>`:''}</div></footer>
   </div>`;
