@@ -135,7 +135,8 @@ img{display:block;max-width:100%}
 .st-atelier{--hf:'Marcellus',Georgia,serif;--bf:'Hanken Grotesk',system-ui,sans-serif;--hw:400;--hcase:uppercase;--htr:.02em;--hlh:.98;
  --h1:clamp(54px,9.4vw,128px);--h2:clamp(38px,5.2vw,68px);--h3:24px;--lsz:12px;--ltr:.18em;--lcase:uppercase;--lw:500;
  --sp:clamp(88px,11vw,160px);--body:17px;--cr:0;--br:0;--rowsz:22px;--logotr:.22em}
-.st-atelier .offer,.st-atelier .marq{background:var(--ink);color:var(--bg)}
+.st-atelier .offer{background:var(--ink);color:var(--bg)}
+.st-atelier .marq{background:var(--band);color:var(--bandInk0)}
 .st-atelier .hd{position:absolute;left:0;right:0;z-index:2;color:#fff}
 .st-atelier .hd .btn{background:#fff;border-color:#fff;color:#111}
 .st-atelier .hero{min-height:clamp(560px,78vh,820px);color:#fff;display:grid;grid-template-rows:1fr auto 1fr;padding:110px var(--gut) 48px}
@@ -431,7 +432,7 @@ function fitMinis(){
     if (window.innerWidth < 1000){ m.style.transform=''; w.style.height=''; return; }
     const k = w.clientWidth / 1280;
     m.style.transform = `scale(${k})`;
-    w.style.height = Math.min(m.scrollHeight*k, 1150*k*1.6) + 'px';
+    w.style.height = (m.scrollHeight*k) + 'px';
   });
 }
 function render(){
