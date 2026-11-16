@@ -1376,7 +1376,7 @@ function offerSuggestions(g){
   return sug;
 }
 function initPick(g){
-  if(g.areas.length)return g.areas.map(a=>({k:a.src||a.id,n:a.n,id:a.id}));
+  if(g.areas.length)return g.areas.map(a=>{const m=!a.src&&[...FOC,...EXTRA].find(y=>y[1].toLowerCase()===a.n.toLowerCase());return {k:a.src||(m?m[0]:a.id),n:a.n,id:a.id};});
   const f=g.focus||[], sv=g.services||[];
   const pre=f.filter(x=>x!=='other').map(k=>{const x=FOC.find(y=>y[0]===k);return {k,n:x[1]};});
   if(f.includes('other')&&g.other)pre.push({k:'other',n:g.other});
@@ -1813,10 +1813,10 @@ function fromHash(){
   const v=m[1], key=m[2];
   if(VIEWS.some(x=>x[0]===v))S.view=v;
   if(key&&S.gyms[key])S.gym=key;
+  if(v==='today'||v==='setup'){if(!S.newKey){ensureNew();S.su.addr=S.su.addr||'Calle Ejemplo 7, San Juan';if(!S.su.focus.length)S.su.focus=['strength'];if(!S.su.svc.length)S.su.svc=['one','prog'];if(S.su.staff==null)S.su.staff=false;createGym();S.view=v;}S.gym=S.newKey;S.setup=0;S.setupPick=null;S.reask=false;}
 }
 addEventListener('hashchange',()=>{fromHash();render();});
 fromHash();
-if(S.view==='setup'&&!S.newKey)S.view='page';
 render();
 </script>
 </body>
