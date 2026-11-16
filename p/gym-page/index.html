@@ -1,0 +1,1085 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Gym page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Prototype: a gym's own page (storefront, PHO-286), how a new gym gets there from sign-up, and the owner's Settings › Your page.
+   Everything is pretend: no server, no payments, no messages. Changes are saved in this browser only. */
+:root{--ink:#111;--t2:#4A4A48;--t3:#5C5C59;--line:#E8E8E5;--rowline:#F0F0ED;--page:#F5F5F3;--card:#fff;--fill:#F0F0ED;--fillh:#E4E4E0;--grey:#F3F3F0;--red:#A8261B;--redbg:#FDE8E6;--green:#17663A;--greenbg:#E4F5E8;--amber:#8A5A00;--amberbg:#FFF6E0;
+  --sans:"Geist",-apple-system,system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,Menlo,monospace;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;max-width:100%;overflow-x:clip}
+body{background:var(--page);color:var(--ink);font:15px/1.45 var(--sans)}
+[hidden]{display:none!important}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-appearance:none;appearance:none}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea,select{width:100%;border:1px solid var(--line);border-radius:12px;padding:0 14px;height:44px;font-size:16px;background:#fff;color:var(--ink)}
+textarea{padding:10px 14px;height:auto;min-height:88px;resize:vertical;line-height:1.45}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--ink);outline-offset:-1px;border-color:transparent}
+
+/* ---------- test strip ---------- */
+.test{background:#111;color:#ddd;font-size:12px;display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;padding:8px 16px;position:relative;z-index:70}
+.test b{color:#fff;font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:11px}
+.seg{display:inline-flex;gap:2px;background:#2a2a2a;padding:2px;border-radius:8px;flex-wrap:wrap}
+.seg button{border:0;background:none;color:#ccc;height:28px;padding:0 10px;border-radius:6px;font-size:12px}
+.seg button[aria-pressed="true"]{background:#fff;color:#111}
+.test .reset{margin-left:auto;border:0;background:none;color:#fff;text-decoration:underline;text-underline-offset:3px;font-size:12px;font-weight:600}
+.case{background:#1d1d1c;color:#e9e9e6;font-size:13px;padding:8px 16px;line-height:1.45}.case b{color:#fff}
+.bare .test,.bare .case{display:none}
+
+/* ---------- owner app frame ---------- */
+.frame{display:grid;grid-template-columns:96px minmax(0,1fr);min-height:calc(100vh - 80px)}
+.band{background:#0E0E0E;display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 0}
+.band .tl{width:40px;height:40px;border-radius:10px;background:#fff;color:#0E0E0E;font-weight:700;font-size:14px;display:grid;place-items:center;margin-bottom:14px;overflow:hidden}
+.band .tl img{width:100%;height:100%;object-fit:contain}
+.band .bi{width:76px;height:56px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#A3A3A0;font-size:12px;font-weight:500}
+.band .bi.on{background:rgba(255,255,255,.13);color:#fff;font-weight:600}
+.appmain{padding:28px 40px 80px;min-width:0}
+.mob{display:none;align-items:center;gap:12px;height:56px;background:#0E0E0E;color:#fff;padding:0 16px}
+.mob b{flex:1;font-size:17px}
+.lab{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+h1{margin:4px 0 16px;font-size:36px;font-weight:700;letter-spacing:-.03em}
+.tabs{display:flex;gap:20px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto;scrollbar-width:none}
+.tabs span{flex:none;padding:10px 0;font-size:15px;color:var(--t3)}.tabs span.on{color:var(--ink);font-weight:600;border-bottom:2px solid var(--ink)}
+.tabs .new,.new{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#1F6F78;margin-left:6px}
+.btn{height:36px;padding:0 14px;border-radius:10px;border:0;background:var(--fill);font-size:15px;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px;color:var(--ink);text-decoration:none}
+.btn:hover{background:var(--fillh)}.btn.main{background:var(--ink);color:#fff}.btn.sm{height:30px;font-size:13px;padding:0 10px;border-radius:8px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.linkb{border:0;background:none;padding:0;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;color:var(--ink)}
+.mut{color:var(--t3)}.note{font-size:13px;color:var(--t3);line-height:1.45;margin:0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;border-radius:12px;padding:12px 16px;font-size:14px;z-index:120;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+
+/* settings: two columns, knobs and a live preview */
+.ywrap{display:grid;grid-template-columns:minmax(0,560px) minmax(0,1fr);gap:28px;align-items:start}
+.pvcol{position:sticky;top:16px;display:grid;gap:10px;min-width:0}
+.pvhd{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.seg2{display:inline-flex;background:var(--fill);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg2 button{border:0;background:none;height:34px;padding:0 12px;border-radius:8px;font-size:14px;font-weight:500}
+.seg2 button.on{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08);font-weight:600}
+.pvbox{border:1px solid var(--line);border-radius:18px;background:#ddd;overflow:hidden;position:relative}
+.pvscale{transform-origin:top left;pointer-events:none}
+.pvbox.phonebox{width:390px;max-width:100%;margin:0 auto;border:8px solid #111;border-radius:34px}
+.pvbox .pvin{height:72vh;overflow:auto}
+.linkrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 16px}
+.linkrow .u{flex:1;min-width:180px;font:500 15px var(--mono)}
+.status{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 7px}
+.status.live{background:var(--greenbg);color:var(--green)}.status.thin{background:var(--amberbg);color:var(--amber)}
+.grp{margin-top:22px}.grp>.lab{margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:grid;gap:14px}
+.kn{display:grid;gap:6px}.kn>label,.kn>.kl{font-size:14px;font-weight:600}
+.kn .hint{font-size:13px;color:var(--t3)}
+.cnt{font-size:12px;color:var(--t3);text-align:right;font-variant-numeric:tabular-nums}.cnt.over{color:var(--red);font-weight:600}
+.tg{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.tg b{display:block;font-size:15px;font-weight:600}.tg span{font-size:13px;color:var(--t3)}
+.tog{width:48px;height:28px;border-radius:14px;background:#CFCFCA;border:0;position:relative;flex:none}
+.tog::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.tog.on{background:var(--ink)}.tog.on::after{left:23px}
+.dots{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dot2{width:32px;height:32px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);padding:0}
+.dot2.on{box-shadow:0 0 0 2px var(--ink)}
+.dot2.none{background:#fff;position:relative}.dot2.none::after{content:'';position:absolute;left:4px;right:4px;top:50%;height:2px;background:#C24;transform:rotate(-45deg)}
+.custom{display:flex;gap:8px;align-items:center}.custom input[type=color]{width:44px;height:36px;border:1px solid var(--line);border-radius:10px;padding:2px;background:#fff}
+.say{font-size:13px;border-radius:10px;padding:8px 12px;background:var(--grey);color:var(--t2)}
+.say.warn{background:var(--amberbg);color:var(--amber)}.say.bad{background:var(--redbg);color:var(--red)}
+.thumb{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:var(--fill);cursor:crosshair;border:1px solid var(--line)}
+.thumb .fp{position:absolute;width:26px;height:26px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #111,0 2px 8px rgba(0,0,0,.4);transform:translate(-50%,-50%);pointer-events:none}
+.thumb .cap{position:absolute;left:8px;bottom:8px;font:500 11px var(--mono);background:rgba(0,0,0,.55);color:#fff;border-radius:5px;padding:2px 6px}
+.samples{display:flex;gap:6px;flex-wrap:wrap}
+.samp{width:52px;height:36px;border-radius:8px;border:2px solid transparent;padding:0}
+.samp.on{border-color:var(--ink)}
+.filebtn{position:relative;overflow:hidden}.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.logobox{display:flex;gap:14px;align-items:center}
+.logobox .lg{width:56px;height:56px;border-radius:12px;background:var(--fill);display:grid;place-items:center;font-weight:700;font-size:18px;color:var(--t2);overflow:hidden;flex:none}
+.logobox .lg img{width:100%;height:100%;object-fit:contain}
+.arow{border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px}
+.arow .ah{display:flex;gap:8px;align-items:center}
+.arow .ah input{height:40px;font-weight:600}
+.mv{display:flex;flex-direction:column;gap:2px}.mv button{width:30px;height:19px;border:0;border-radius:6px;background:var(--fill);font-size:11px;line-height:1;padding:0}
+.mv button:disabled{opacity:.3}
+.ast{font-size:13px;color:var(--t3)}.ast b{color:var(--green)}.ast.hid b{color:var(--amber)}
+.prow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--rowline)}
+.prow:first-child{border-top:0;padding-top:0}
+.prow .pn b{font-size:15px;font-weight:600}.prow .pn small{display:block;font-size:13px;color:var(--t3)}
+.star{border:1px solid var(--line);background:#fff;border-radius:8px;height:30px;padding:0 10px;font-size:13px;font-weight:600;color:var(--t3);white-space:nowrap}
+.star.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.fixed{display:grid;gap:8px;font-size:14px;color:var(--t2)}.fixed div{display:grid;grid-template-columns:20px 1fr;gap:6px}
+.og{border:1px solid var(--line);border-radius:14px;overflow:hidden;max-width:420px;background:#fff}
+.og .oi{aspect-ratio:1.91/1;background:var(--fill)}
+.og .ot{padding:10px 12px;font-size:13px;color:var(--t3)}.og .ot b{display:block;color:var(--ink);font-size:15px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;border:0;background:none;padding:0;text-align:left}
+.cb{width:22px;height:22px;border-radius:6px;border:2px solid #BDBDB8;display:grid;place-items:center;font-size:13px;color:#fff;flex:none;margin-top:0}
+.chk.on .cb,.cb.on{background:var(--ink);border-color:var(--ink)}
+
+/* ---------- sign-up sheets ---------- */
+.stage{display:flex;justify-content:center;padding:32px 16px 80px}
+.sheet{width:520px;max-width:100%;background:#fff;border:1px solid var(--line);border-radius:20px;min-height:640px;display:flex;flex-direction:column;overflow:hidden}
+.top{display:flex;align-items:center;gap:10px;padding:14px 20px;min-height:60px}
+.brand{font-weight:700;font-size:18px;letter-spacing:-.02em;flex:1}
+.body{flex:1;padding:8px 20px 20px;display:flex;flex-direction:column;gap:16px}
+.body h2{margin:0;font-size:28px;letter-spacing:-.02em;line-height:1.15}.body .sub{margin:-8px 0 0;color:var(--t2);font-size:15px}
+.foot{padding:16px 20px 20px;display:flex;flex-direction:column;gap:10px}
+.foot .btn{height:48px;border-radius:12px;font-size:16px;width:100%}
+.fld label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}.fld .hint{font-size:13px;color:var(--t3);margin-top:6px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ftile{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;text-align:left;display:flex;flex-direction:column;gap:2px;min-height:56px}
+.ftile b{font-size:15px;font-weight:600}.ftile span{font-size:12px;color:var(--t3)}
+.ftile.on{background:#111;border-color:#111;color:#fff}.ftile.on span{color:#bbb}
+.chipsf{display:flex;flex-wrap:wrap;gap:8px}
+.chipf{height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:15px;font-weight:500}
+.chipf.on{background:#111;border-color:#111;color:#fff}
+.setfor{background:var(--grey);border-radius:12px;padding:10px 14px;font-size:14px;color:var(--t2)}.setfor b{color:var(--ink)}
+.mailv{padding:24px;display:flex;flex-direction:column;gap:14px;font-size:15px;line-height:1.55}
+.mailh{font-size:13px;color:var(--t3);border-bottom:1px solid var(--line);padding-bottom:12px}.mailh b{color:var(--ink)}
+.dotsprog{display:flex;gap:6px}.dotsprog i{width:28px;height:4px;border-radius:2px;background:var(--fill)}.dotsprog i.on{background:var(--ink)}
+.namerows{display:grid;gap:8px}
+.namerow{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;align-items:center;font-size:13px;color:var(--t3)}
+/* Today */
+.today{padding:8px 20px 24px;display:flex;flex-direction:column;gap:16px}
+.today h2{margin:0;font-size:28px}
+.trial{display:flex;justify-content:space-between;align-items:center;background:var(--grey);border-radius:12px;padding:10px 14px;font-size:14px}
+.gs{border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.gs .hd{padding:14px 16px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--rowline)}.gs .hd b{font-size:17px}.gs .hd span{font-size:13px;color:var(--t3)}
+.pbar{height:4px;background:var(--fill)}.pbar i{display:block;height:100%;background:var(--green)}
+.gr{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--rowline);min-height:60px}
+.gr:first-of-type{border-top:0}
+.gdot{width:22px;height:22px;border-radius:50%;border:2px solid #BDBDB8;flex:none;display:grid;place-items:center;font-size:12px;color:#fff}
+.gr.done .gdot{background:var(--green);border-color:var(--green)}.gr.done .t{color:var(--t3);text-decoration:line-through}
+.gr .t{flex:1;font-size:15px;font-weight:500}.gr .t small{display:block;font-size:13px;color:var(--t3);font-weight:400;text-decoration:none;margin-top:2px}
+.gr.hl{background:#F6FAF9}
+
+/* modal sheet */
+.scrim{position:fixed;inset:0;background:rgba(17,17,17,.4);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;color:#111;width:min(480px,100%);max-height:92vh;overflow:auto;border-radius:18px;padding:22px;display:grid;gap:14px;box-shadow:0 16px 40px rgba(17,17,17,.35)}
+.modal h3{margin:0;font-size:21px;font-weight:700;letter-spacing:-.01em}
+.modal p{margin:0;color:var(--t2);font-size:15px}
+.modal .acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.modal .acts .btn{height:44px;border-radius:12px;font-size:15px}
+.modal .big{width:100%;height:48px!important;font-size:16px!important}
+.modal .ok{display:flex;gap:12px;align-items:flex-start;background:var(--greenbg);border-radius:12px;padding:12px 14px;color:#0E4A29;font-size:14px}
+
+/* phone width (switch, and real phones) */
+.phone .wrap{background:#ddd;padding:16px 0}
+.phone .frame{grid-template-columns:1fr;max-width:390px;margin:0 auto;background:var(--page);min-height:800px}
+.phone .band{display:none}.phone .mob{display:flex}
+.phone .appmain{padding:20px 16px 80px}
+.phone h1{font-size:28px}
+.phone .ywrap{grid-template-columns:1fr}.phone .pvcol{display:none}
+.phone .stage{padding:16px 0;background:#ddd}.phone .sheet{width:390px;border-radius:28px;min-height:780px}
+.phone .pubwrap{max-width:390px;margin:0 auto;border-left:1px solid #ccc;border-right:1px solid #ccc}
+.pvmob{display:none}.phone .pvmob{display:flex}
+@media (max-width:760px){
+  .frame{grid-template-columns:1fr}.band{display:none}.mob{display:flex}
+  .appmain{padding:20px 16px 80px}h1{font-size:28px}
+  .ywrap{grid-template-columns:1fr}.pvcol{display:none}.pvmob{display:flex}
+  .stage{padding:0}.sheet{border-radius:0;border:0;min-height:100vh}
+  .phone .wrap{padding:0;background:var(--page)}.phone .pubwrap{border:0}
+  .namerow{grid-template-columns:1fr}
+}
+@media (max-width:1100px){.ywrap{grid-template-columns:minmax(0,1fr) minmax(0,400px)}}
+
+/* ===================== The gym's page =====================
+   Its colors come from the gym's own page look (Black or Light), not the visitor's phone. */
+.g{container-type:inline-size;font-family:var(--sans);--gb:#fff;--gs:#f5f5f4;--gi:#0b0b0b;--gm:#62625f;--gl:#e3e3e0;--gt:#ededeb;--hb:#fff;--hi:#0b0b0b;background:var(--gb);color:var(--gi);font-size:15px;line-height:1.5;min-height:100%}
+.g.black{--gb:#0d0d0d;--gs:#171717;--gi:#f4f4f2;--gm:#a6a6a2;--gl:#2a2a28;--gt:#232322;--hb:#000;--hi:#fff}
+.g *{box-sizing:border-box}
+.g .in{max-width:1040px;margin:0 auto;padding-inline:18px}
+.g header{background:var(--hb);color:var(--hi);border-bottom:1px solid var(--gl);position:sticky;top:0;z-index:5}
+.g header.line{border-bottom:3px solid var(--brand)}
+.g header .in{display:flex;align-items:center;gap:10px;height:56px}
+.g .mark{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font:800 12px var(--sans);background:var(--hi);color:var(--hb);flex:none;overflow:hidden}
+.g .mark img{width:100%;height:100%;object-fit:contain}
+.g .mark.img{background:transparent}
+.g .mark.tile-w{background:#fff;padding:3px}.g .mark.tile-k{background:#000;padding:3px}
+.g .gname{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.g header nav{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600}
+.g header nav .links{display:none;gap:16px;opacity:.85}
+.g header nav a{color:inherit;text-decoration:none;cursor:pointer}
+.g .lang{display:inline-flex;border:1px solid currentColor;border-radius:8px;overflow:hidden;opacity:.85}
+.g .lang button{border:0;background:none;color:inherit;font:600 12px var(--mono);padding:4px 7px}
+.g .lang button.on{background:var(--hi);color:var(--hb)}
+.g .signin{border:1px solid currentColor;border-radius:8px;padding:5px 10px;background:none;color:inherit;font:600 13px var(--sans)}
+.g .me{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:inherit;font:600 13px var(--sans);padding:0}
+.g .me i{width:28px;height:28px;border-radius:50%;background:var(--hi);color:var(--hb);display:grid;place-items:center;font-style:normal;font-size:12px}
+.g .banner{background:var(--gi);color:var(--gb);font-size:14px;font-weight:600}
+.g .banner .in{display:flex;gap:10px;align-items:center;min-height:42px;padding-block:8px}
+.g .banner small{font-weight:500;opacity:.7;margin-left:auto;white-space:nowrap}
+.g .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:700 14px var(--sans);border-radius:10px;padding:11px 16px;border:0;white-space:nowrap;height:auto;cursor:pointer;text-decoration:none}
+.g .btn.primary{background:var(--gi);color:var(--gb)}
+.g .btn.tonal{background:var(--gt);color:var(--gi)}
+.g .btn.sm{padding:7px 12px;font-size:13px;border-radius:8px}
+.g .btn.ghost{background:transparent;color:var(--gm);border:1px solid var(--gl);cursor:default}
+.g .btn.done{background:transparent;color:var(--gi);border:1px solid var(--gi)}
+.g .btn.onphoto{background:#fff;color:#0b0b0b}
+.g .btn.onphoto2{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.5)}
+.g .phl{position:absolute;right:10px;top:10px;font:500 11px var(--mono);color:#fff;background:rgba(0,0,0,.45);padding:2px 6px;border-radius:5px}
+.g .hero{padding-block:22px 26px;display:grid;gap:18px}
+.g .cover{border-radius:16px;aspect-ratio:16/10;max-width:100%;position:relative;overflow:hidden;background:var(--gs)}
+.g .htext{display:flex;flex-direction:column;gap:10px;min-width:0}
+.g .where{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--gm);display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.g .where .dt{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+.g h2.title{font-size:30px;line-height:1.08;letter-spacing:-.025em;font-weight:800;margin:0;text-wrap:balance;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.g .tag{margin:0;color:var(--gm);font-size:16px;max-width:46ch}
+.g .ctas{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.g .full{position:relative;min-height:440px;display:flex;align-items:flex-end;color:#fff;overflow:hidden;background:#222}
+.g .full .bgimg{position:absolute;inset:0;background-size:cover}
+.g .full .fade{position:relative;width:100%;background:linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,.72) 96px,rgba(0,0,0,.8) 100%)}
+.g .full .in{position:relative;width:100%;padding-block:104px 28px}
+.g .full .where{color:rgba(255,255,255,.85)}.g .full .tag{color:rgba(255,255,255,.88)}
+.g .plain{padding-block:30px 26px}
+.g .about{margin:0;color:var(--gm);font-size:15px;max-width:68ch;white-space:pre-line}
+.g .mine{background:var(--gs);border-radius:16px;padding:16px 18px;display:grid;gap:4px}
+.g .mine .kick,.g .kick{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--gm)}
+.g .mine b{font-size:18px}
+.g .mine span{color:var(--gm);font-size:14px}
+.g .areanav{display:flex;gap:8px;overflow-x:auto;padding-block:14px;border-top:1px solid var(--gl);scrollbar-width:none}
+.g .areanav a,.g .areanav button{flex:none;font:700 13px var(--sans);border:1px solid var(--gl);border-radius:999px;padding:6px 12px;color:var(--gi);background:none;text-decoration:none;cursor:pointer}
+.g .areanav a.on,.g .areanav button.on{background:var(--gi);color:var(--gb);border-color:var(--gi)}
+.g .areanav .lbl{border:0;padding-inline:0;color:var(--gm);font-weight:600;font-size:13px;align-self:center}
+.g section.blk{padding-block:24px;border-top:1px solid var(--gl);scroll-margin-top:60px}
+.g .bh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.g .bh h3{margin:0;font-size:19px;font-weight:800;letter-spacing:-.01em}
+.g .bh .aside{font-size:13px;color:var(--gm)}
+.g .ahead{display:grid;gap:12px;margin-bottom:6px}
+.g .ahead h3{margin:0;font-size:24px;font-weight:800;letter-spacing:-.02em}
+.g .ahead p{margin:0;color:var(--gm);max-width:60ch}
+.g .aphoto{border-radius:14px;aspect-ratio:21/9;position:relative;overflow:hidden;max-width:100%;background-size:cover}
+.g .sub{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--gm);margin:16px 0 8px;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.g .sub em{font-style:normal;text-transform:none;letter-spacing:0;font:600 12px var(--sans);color:var(--gi)}
+.g .days{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:8px}
+.g .days button{flex:none;border:1px solid var(--gl);background:none;color:var(--gi);border-radius:10px;padding:5px 9px;font:600 12px var(--sans);display:grid;line-height:1.2;text-align:center}
+.g .days button small{font-weight:500;color:var(--gm)}
+.g .days button.on{background:var(--gi);color:var(--gb);border-color:var(--gi)}.g .days button.on small{color:var(--gb);opacity:.75}
+.g .rows{display:flex;flex-direction:column;border:1px solid var(--gl);border-radius:14px;overflow:hidden}
+.g .row{display:grid;grid-template-columns:66px minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 14px;border-top:1px solid var(--gl)}
+.g .row:first-child{border-top:0}
+.g .time{font:500 13px var(--mono);font-variant-numeric:tabular-nums}
+.g .cname{font-weight:700;font-size:15px}.g .cmeta{font-size:13px;color:var(--gm)}
+.g .spots{display:none;font-size:12px;color:var(--gm)}
+.g .cards{display:grid;gap:10px;grid-template-columns:1fr}
+.g .card{border:1px solid var(--gl);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;background:var(--gb)}
+.g .card.have{border-color:var(--gi)}
+.g .card .ctop{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.g .card .pname{font-weight:700}
+.g .price{font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.g .price small{font-size:13px;font-weight:600;color:var(--gm)}
+.g .card p{margin:0;font-size:13px;color:var(--gm)}
+.g .card .covers{font:500 11px var(--mono);color:var(--gm);letter-spacing:.02em}
+.g .card .btn{margin-top:6px;align-self:flex-start}
+.g .havetag{font:700 12px var(--sans);color:var(--gi);display:inline-flex;gap:6px;align-items:center;margin-top:6px}
+.g .startbar{background:var(--gs);border-radius:16px;padding:18px;display:grid;gap:14px}
+.g .startbar .sl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.g .startbar .sn{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.g .startbar p{margin:0;font-size:14px;color:var(--gm)}
+.g .startbar .sr{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.g .startbar .price{font-size:24px}
+.g .tax{font-size:12px;color:var(--gm);margin-top:10px}
+.g .gnote{font-size:13px;font-weight:600;margin-top:10px}
+.g .photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.g .photo{aspect-ratio:1/1;border-radius:12px;position:relative;overflow:hidden;max-width:100%}
+.g .visit{display:grid;gap:14px}
+.g .map{border-radius:14px;aspect-ratio:16/9;max-width:100%;position:relative;overflow:hidden;border:1px solid var(--gl);background-color:var(--gs);background-image:linear-gradient(var(--gl) 1px,transparent 1px),linear-gradient(90deg,var(--gl) 1px,transparent 1px);background-size:28px 28px}
+.g .map:before{content:"";position:absolute;inset:38% -10% auto -10%;height:14px;background:var(--gt);transform:rotate(-8deg)}
+.g .map .pin{position:absolute;left:50%;top:44%;width:18px;height:18px;border-radius:50% 50% 50% 0;background:var(--gi);transform:translate(-50%,-50%) rotate(-45deg)}
+.g .facts{display:flex;flex-direction:column;gap:12px;font-size:14px}
+.g .fact .k{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--gm);margin-bottom:2px}
+.g .hours{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;font-variant-numeric:tabular-nums}
+.g .online{border:1px dashed var(--gl);border-radius:14px;padding:16px;font-size:14px;color:var(--gm)}.g .online b{color:var(--gi)}
+.g .join{background:var(--gs);border-radius:16px;padding:18px;display:grid;gap:12px}
+.g .join h3{margin:0;font-size:19px;font-weight:800}
+.g .join p{margin:0;font-size:14px;color:var(--gm)}
+.g .rules{font-size:14px;color:var(--gm);display:grid;gap:6px}.g .rules b{color:var(--gi)}
+.g footer{border-top:1px solid var(--gl);padding-block:18px 26px;font-size:12px;color:var(--gm)}
+.g footer .in{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.g .pz{margin-left:auto;font-weight:700;color:var(--gi);border:1px solid var(--gl);padding:4px 8px;border-radius:8px}
+.g .empty{border:1px dashed var(--gl);border-radius:14px;padding:18px;color:var(--gm);font-size:14px}
+@container (min-width:720px){
+  .g header nav .links{display:flex}
+  .g .hero{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:center;padding-block:34px 38px;gap:34px}
+  .g .htext{order:-1}
+  .g h2.title{font-size:46px}
+  .g .full{min-height:560px}.g .full h2.title{font-size:60px}
+  .g .full .in{padding-block:150px 48px}
+  .g .full .fade{background:linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,.72) 140px,rgba(0,0,0,.8) 100%)}
+  .g .cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .g .startbar{grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:24px 28px;gap:24px}
+  .g .ahead{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);align-items:center;gap:28px}
+  .g .ahead.nophoto{grid-template-columns:1fr}
+  .g .visit{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start}
+  .g .twocol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+  .g .photos{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .g .row{grid-template-columns:80px minmax(0,1fr) 110px auto}
+  .g .spots{display:block;text-align:right}
+}
+.pubwrap{min-height:100vh}
+</style>
+</head>
+<body>
+<div class="test" id="strip"></div>
+<div class="case" id="case"></div>
+<div class="wrap" id="app"></div>
+<div id="layer"></div>
+<script>
+'use strict';
+/* =========================================================================
+   Data. Areas are the business's Tracks (the code's word). Products list the
+   areas they cover ('all' = every area). Classes name their area.
+   ========================================================================= */
+const TODAY='2026-11-16'; /* a Monday */
+const DAYS=[['Mon','16'],['Tue','17'],['Wed','18'],['Thu','19'],['Fri','20'],['Sat','21'],['Sun','22']];
+const DAYS_ES=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const SAMPLES=[
+  ['Studio floor','linear-gradient(135deg,#1f1f1f,#7d7d79 55%,#d9d9d5)'],
+  ['Morning light','radial-gradient(circle at 70% 30%,#e6e6e2,#7a7a76 50%,#202020)'],
+  ['Machines','linear-gradient(200deg,#cfcfcb,#4a4a47 65%,#161616)'],
+  ['Rig and bars','repeating-linear-gradient(100deg,#2f2f2d 0 18px,#4d4d49 18px 36px)'],
+  ['Mats','radial-gradient(ellipse at 20% 80%,#bdbdb9,#5a5a57 55%,#1b1b1b)'],
+  ['Beach','linear-gradient(180deg,#9fb8c4 0,#d9cfb4 62%,#b8a77e 100%)'],
+  ['Teal wall','linear-gradient(135deg,#0f3d42,#1F6F78 50%,#8fc3c6)'],
+  ['Bright white','repeating-linear-gradient(45deg,#ffffff 0 16px,#f0f0ea 16px 32px)']
+];
+const FOC=[['functional','Functional fitness','CrossFit, Hyrox, F45-style'],['strength','Strength','Weightlifting, powerlifting'],['hiit','HIIT and bootcamp','Circuits, conditioning'],['yoga','Yoga',''],['pilates','Pilates','Mat, reformer'],['cycling','Cycling','Spin, indoor'],['dance','Dance and barre','Zumba, barre'],['martial','Martial arts and boxing','BJJ, kickboxing'],['endurance','Endurance','Running, triathlon'],['mobility','Mobility and recovery','Stretching, breathwork'],['other','Other','Type it']];
+const EXTRA=[['open','Open gym','Train on your own'],['pt','Personal training','1:1 with a coach'],['online','Online coaching','Programs in the app']];
+const SVN={group:'Group classes',one:'1:1 sessions',prog:'Programs (online)',open:'Open gym'};
+const SWATCH=['#1F6F78','#A86B0C','#8C4A62','#2F5BA8','#5E6B3A','#B23A2E','#6E4A8C','#F5E663'];
+
+let _id=0; const uid=p=>p+(++_id).toString(36)+Math.random().toString(36).slice(2,5);
+
+function mkGym(key,o){
+  const areaIds={}; const areas=o.areas.map(a=>{const id=uid('a');areaIds[a.n]=id;return {id,n:a.n,d:a.d||'',ph:a.ph==null?null:a.ph};});
+  const cov=x=>x==='all'?'all':x.map(n=>areaIds[n]);
+  const products=o.products.map(p=>({id:uid('p'),n:p[0],p:p[1],per:p[2],d:p[3],a:cov(p[4]),show:true}));
+  let start=null; if(o.start){const s={id:uid('p'),n:o.start.n,p:o.start.p,per:'',d:o.start.d,a:cov(o.start.a),show:true};products.unshift(s);start=s.id;}
+  const classes=o.classes.map(c=>({id:uid('c'),area:areaIds[c[0]],t:c[1],n:c[2],coach:c[3],left:c[4],cap:c[5]}));
+  const me=o.me?{owns:o.me.owns.map(n=>(products.find(p=>p.n===n)||{}).id).filter(Boolean),left:o.me.left,next:o.me.next}:null;
+  return Object.assign({key,look:'light',brand:null,logo:null,logoLum:null,hero:'full',heroPh:0,focal:[50,50],showAddress:true,showHours:true,
+    banner:{text:'',end:''},sched:'area',first:o.classes.length?'schedule':'prices',rules:'',mode:'In person',plan:'Pro',ivu:true,photos:[],desc:''},o,{areas,products,start,classes,me});
+}
+function seed(){
+  return {
+  pilates:mkGym('pilates',{label:'Pilates',name:'Núcleo Pilates',init:'NP',look:'light',brand:'#1F6F78',plan:'Pro',hero:'full',heroPh:6,
+    tag:'Reformer and mat classes in groups of 8.',desc:'Small classes, every move set up and corrected by your coach. New to Pilates? Start with Reformer Foundations.',
+    where:'Condado, San Juan',address:'Calle Ejemplo 12, Condado, San Juan',
+    hours:[['Mon to Fri','6:00 AM to 8:00 PM'],['Sat','8:00 AM to 12:00 PM']],phone:'WhatsApp (787) 555-0142',ig:'@nucleopilates',
+    banner:{text:'Closed Thursday, Nov 26 for Thanksgiving.',end:'2026-11-26'},
+    areas:[{n:'Reformer',d:'Spring-loaded machines, 8 per class. Every move is set up and corrected by your coach.',ph:2},{n:'Mat',d:'Pilates on the mat with small props. Good on its own, or between reformer days.',ph:4}],
+    classes:[['Reformer','6:30 AM','Reformer Foundations','Carla',3,8],['Reformer','8:00 AM','Reformer Flow','Carla',0,8],['Mat','12:15 PM','Mat Pilates','Sofía',6,12],['Reformer','5:30 PM','Reformer Strength','Sofía',1,8],['Mat','6:45 PM','Mat Core','Ana',7,12]],
+    start:{n:'Intro offer',p:'$59',d:'3 classes for new clients, any area, use within 30 days.',a:'all'},
+    products:[['10 Reformer classes','$250','','Use within 4 months.',['Reformer']],['10 Mat classes','$120','','Use within 4 months.',['Mat']],['Unlimited monthly','$199','/mo','Every class. Renews monthly, cancel any time.','all']],
+    photos:[0,2,4],focus:['pilates'],services:['group'],
+    me:{owns:['10 Reformer classes'],left:'6 of 10 classes left',next:'Reformer Flow, Tue 8:00 AM'},
+    rules:'Cancel up to 12 hours before class to keep your credit. Later cancels and no-shows use the class.'}),
+  yoga:mkGym('yoga',{label:'Yoga',name:'Casa Prana Yoga',init:'CP',look:'black',plan:'Pro',hero:'full',heroPh:5,
+    tag:'Vinyasa, yin and hatha by the beach, in English and Spanish.',
+    where:'Rincón',address:'Carr. Ejemplo 413, Rincón',hours:[['Every day','7:00 AM to 8:30 PM']],phone:'(787) 555-0175',ig:'@casapranayoga',
+    areas:[{n:'Yoga',d:'Daily classes for every level. Mats and props are here.',ph:1},{n:'Meditation',d:'Guided sits and sound baths, twice a week.',ph:4}],
+    classes:[['Yoga','7:00 AM','Vinyasa Flow','Ana',5,14],['Yoga','9:30 AM','Yin','Marisol',9,14],['Yoga','12:00 PM','Hatha (en español)','José',11,14],['Meditation','6:00 PM','Sound bath','Marisol',0,20],['Yoga','7:30 PM','Restorative','Marisol',8,14]],
+    start:{n:'First class',p:'Free',d:'One free class for new students.',a:'all'},
+    products:[['Drop-in','$20','','One yoga class.',['Yoga']],['10 classes','$150','','Use within 3 months.',['Yoga']],['Sound bath','$25','','One session.',['Meditation']],['Unlimited monthly','$120','/mo','Yoga and meditation. Renews monthly.','all']],
+    photos:[1,4,5,0],focus:['yoga','mobility'],services:['group'],
+    me:{owns:['10 classes'],left:'4 of 10 classes left',next:'Yin, Wed 9:30 AM'},
+    rules:'Cancel up to 2 hours before class to keep your credit.'}),
+  box:mkGym('box',{label:'CrossFit box',name:'Fuerza Box',init:'FB',look:'black',plan:'Business',hero:'full',heroPh:3,
+    tag:'Coached group WODs for every level. Visitors welcome.',
+    where:'Bayamón',address:'Ave. Ejemplo 88, Bayamón',hours:[['Mon to Fri','5:00 AM to 9:00 PM'],['Sat','7:00 AM to 12:00 PM']],phone:'(787) 555-0190',ig:'@fuerzabox',
+    banner:{text:'Murph on Saturday, Nov 28 at 7 AM. Free for members, bring a friend.',end:'2026-11-28'},
+    areas:[{n:'CrossFit',d:'The daily WOD, coached and scaled for you.',ph:3},{n:'Olympic lifting',d:'Snatch and clean and jerk, in small groups twice a week.',ph:0},{n:'Open gym',d:'Train on your own with the box\u2019s equipment.',ph:2}],
+    classes:[['CrossFit','5:30 AM','WOD','Héctor',4,16],['CrossFit','6:30 AM','WOD','Héctor',2,16],['CrossFit','12:00 PM','WOD','Gabi',9,16],['Olympic lifting','5:30 PM','Oly technique','Luis',3,8],['CrossFit','6:30 PM','WOD','Gabi',0,16],['Open gym','7:30 PM','Open gym','Staff',12,20]],
+    start:{n:'First WOD',p:'Free',d:'Your first class is on us.',a:['CrossFit']},
+    products:[['Drop-in','$25','','For visitors. One WOD.',['CrossFit']],['Competitor track','$40','/mo','Extra programming in the app, on top of a membership.',['CrossFit']],['Oly 8-class pack','$110','','Use within 2 months.',['Olympic lifting']],['Open gym only','$60','/mo','Renews monthly.',['Open gym']],['Unlimited','$150','/mo','Every area. Renews monthly.','all'],['3 times a week','$120','/mo','Every area. Renews monthly.','all']],
+    photos:[3,0,2,1],focus:['functional','strength'],services:['group','open'],
+    me:{owns:['Unlimited'],left:'Unlimited, renews Dec 1',next:'WOD, Tue 6:30 AM'},
+    rules:'Cancel up to 1 hour before class to free your spot.'}),
+  multi:mkGym('multi',{label:'Multi-discipline',name:'Centro Vida Fitness',init:'CV',look:'light',plan:'Business',hero:'full',heroPh:1,sched:'one',
+    tag:'Yoga, cycling, strength classes, open gym and personal training under one roof.',
+    where:'Guaynabo',address:'Ave. Ejemplo 200, Guaynabo',hours:[['Mon to Fri','5:00 AM to 10:00 PM'],['Sat and Sun','7:00 AM to 6:00 PM']],phone:'(787) 555-0156',ig:'@centrovida',
+    areas:[{n:'Strength classes',d:'Coached group strength, 45 minutes, every level.',ph:3},{n:'Cycling',d:'Indoor rides to music, 24 bikes.',ph:4},{n:'Yoga',d:'Vinyasa and yin in the quiet room.',ph:1},{n:'Open gym',d:'The full floor, any time we\u2019re open.',ph:2},{n:'Personal training',d:'One-on-one with a coach. Your coach sets your times with you.',ph:0}],
+    classes:[['Strength classes','6:00 AM','Total Strength','Ramón',5,20],['Cycling','7:00 AM','Morning Ride','Lucía',0,24],['Yoga','9:00 AM','Vinyasa','Ana',8,18],['Strength classes','12:00 PM','Lunch Lift','Ramón',11,20],['Cycling','6:00 PM','Rhythm Ride','Lucía',3,24],['Yoga','7:15 PM','Yin','Ana',12,18]],
+    start:{n:'First week free',p:'Free',d:'7 days of everything for new members.',a:'all'},
+    products:[['Cycling 10 rides','$150','','Use within 3 months.',['Cycling']],['Yoga 10 classes','$140','','Use within 3 months.',['Yoga']],['Open gym monthly','$39','/mo','Renews monthly.',['Open gym']],['4 PT sessions','$180','','Use within 1 month.',['Personal training']],['Classes only','$99','/mo','Strength, cycling and yoga classes. No open gym.',['Strength classes','Cycling','Yoga']],['All access','$129','/mo','Every class and the open gym. Personal training is extra.',['Strength classes','Cycling','Yoga','Open gym']]],
+    photos:[0,4,1,2],focus:['strength','cycling','yoga'],services:['group','one','open'],
+    me:{owns:['All access'],left:'All access, renews Dec 3',next:'Rhythm Ride, Mon 6:00 PM'},
+    rules:'Cancel up to 2 hours before class to free your spot.'}),
+  gym:mkGym('gym',{label:'Gym, no classes',name:'Hierro Gym',init:'HG',look:'light',brand:'#B23A2E',plan:'Pro',hero:'beside',heroPh:2,
+    tag:'Free weights, machines and cardio. Come in when it suits you.',
+    where:'Carolina',address:'Calle Ejemplo 5, Carolina',hours:[['Mon to Fri','5:00 AM to 11:00 PM'],['Sat and Sun','7:00 AM to 7:00 PM']],phone:'(787) 555-0133',ig:'@hierrogym',
+    areas:[{n:'Open gym',d:'The full floor, any time we\u2019re open.',ph:3},{n:'Personal training',d:'One-on-one with a coach. Your coach sets your times with you.',ph:0}],
+    classes:[],start:{n:'Day pass',p:'$10',d:'One visit, any day.',a:['Open gym']},
+    products:[['10 visits','$80','','Use within 6 months.',['Open gym']],['Monthly','$45','/mo','Renews monthly.',['Open gym']],['4 sessions','$140','','Use within 1 month.',['Personal training']]],
+    photos:[2,3,0],focus:['strength'],services:['open','one'],
+    me:{owns:['Monthly'],left:'Monthly, renews Dec 9',next:null},
+    rules:'Day passes are valid on the day you buy them.'}),
+  trainer:mkGym('trainer',{label:'Personal trainer',name:'Marta Rivera Training',init:'MR',look:'black',plan:'Flex',hero:'beside',heroPh:0,showAddress:false,showHours:false,
+    tag:'One-on-one strength training. You get a plan, and Marta coaches every rep.',
+    where:'Guaynabo and San Juan',address:'Calle Ejemplo 30, Guaynabo',hours:[],phone:'WhatsApp (787) 555-0168',ig:'@martarivera.fit',
+    areas:[{n:'Strength training',d:'',ph:0}],classes:[],
+    start:{n:'Single session',p:'$35',d:'Try one session before you commit.',a:'all'},
+    products:[['8 sessions','$240','','Use within 2 months.','all'],['12 sessions','$330','','Use within 3 months.','all']],
+    photos:[0,4],focus:['strength'],services:['one','prog'],
+    gnote:'After you sign up, Marta sets your session times with you.',
+    me:{owns:['8 sessions'],left:'5 of 8 sessions left',next:'Thu 6:00 PM with Marta'},
+    rules:'Reschedule up to 24 hours before a session to keep it.'}),
+  virtual:mkGym('virtual',{label:'Virtual coach',name:'Luis Ortiz Coaching',init:'LO',look:'light',plan:'Flex',hero:'none',heroPh:null,showAddress:false,showHours:false,mode:'Online',ivu:false,
+    tag:'Online strength and nutrition coaching. Your plan is in the app, and we meet by video.',
+    where:'Online',address:'',hours:[],phone:'WhatsApp (787) 555-0111',ig:'@luisortiz.coach',
+    areas:[{n:'Strength',d:'Programs you follow in the app, with video form checks.',ph:3},{n:'Nutrition',d:'A weekly plan and a check-in, built around how you already eat.',ph:1}],classes:[],
+    start:{n:'Intro call',p:'Free',d:'15 minutes by video. Luis contacts you after you sign up.',a:'all'},
+    products:[['12-week strength program','$180','','The whole program in the app. Start any Monday.',['Strength']],['Nutrition coaching','$59','/mo','Weekly plan and check-in.',['Nutrition']],['Full coaching','$129','/mo','Strength and nutrition, with a weekly video call.','all']],
+    photos:[],focus:['strength'],services:['prog'],
+    me:{owns:['Full coaching'],left:'Full coaching, renews Dec 2',next:'Video check-in, Fri 7:00 PM'},
+    rules:'Monthly coaching renews each month. Cancel before your renewal date and you won\u2019t be charged again.'})
+  };
+}
+const DEMO_ORDER=['pilates','yoga','box','multi','gym','trainer','virtual'];
+
+/* =========================================================================
+   State, saved in this browser
+   ========================================================================= */
+const KEY='zana-labs:gym-page:v1';
+let S=load();
+function fresh(){return {gyms:seed(),order:DEMO_ORDER.slice(),view:'page',gym:'pilates',member:false,lang:'en',wid:innerWidth<760?'phone':'desk',pv:'phone',
+  booked:{},requested:{},day:0,filt:'all',newKey:null,su:null,setup:0,setupPick:null,joined:{}};}
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.gyms&&v.order)return Object.assign(fresh(),v);}catch(e){}return fresh();}
+let saveT=null;
+function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('This browser is out of room for photos. Try a smaller one, or Start over.');}},150);}
+const G=()=>S.gyms[S.gym];
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const slug=n=>String(n).toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,'');
+const list=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+function fmtDate(d){if(!d)return '';const [y,m,dd]=d.split('-').map(Number);return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]+' '+dd;}
+
+/* =========================================================================
+   Words on the page: the fixed words switch with EN/ES. The gym's own words stay as the owner wrote them.
+   ========================================================================= */
+const W={
+ offer:['What we offer','Lo que ofrecemos'],memberships:['Memberships','Membresías'],prices:['Prices','Precios'],sched:['Schedule','Horario'],
+ week:['This week','Esta semana'],book:['Book','Reservar'],full:['Full','Lleno'],buy:['Buy','Comprar'],signup:['Sign up','Regístrate'],signin:['Sign in','Entrar'],
+ start:['New here? Start here','¿Nuevo? Empieza aquí'],visit:['Visit','Visítanos'],touch:['Get in touch','Contáctanos'],address:['Address','Dirección'],hours:['Hours','Horario'],
+ contact:['Contact','Contacto'],maps:['Open in Maps','Abrir en Mapas'],join:['Join','Únete a'],joinp:['Make your free account to book and buy.','Crea tu cuenta gratis para reservar y comprar.'],
+ good:['Good to know','Bueno saber'],cancel:['Cancelling.','Cancelaciones.'],waiver:['Waiver.','Relevo.'],waiverp:['You sign it once, when you sign up.','Lo firmas una vez, al registrarte.'],
+ agreement:['You sign the coaching agreement once, when you sign up.','Firmas el acuerdo de coaching una vez, al registrarte.'],
+ have:['You have this','Ya lo tienes'],ivu:['Prices include IVU.','Los precios incluyen IVU.'],left:['left','quedan'],of:['of','de'],booked:['Booked','Reservado'],
+ eachmore:['Each covers more than one area','Cada una cubre más de un área'],covers:['Covers','Cubre'],every:['Covers every area','Cubre todas las áreas'],
+ also1:['Also in 1 membership','También en 1 membresía'],alson:['Also in {n} memberships','También en {n} membresías'],incl:['Included in memberships','Incluido en membresías'],
+ seemem:['See memberships','Ver membresías'],all:['All','Todo'],see:['See what we offer','Ver lo que ofrecemos'],seesch:['See schedule','Ver horario'],seepr:['See prices','Ver precios'],
+ byvideo:['by video','por video'],plan:['Your plan','Tu plan'],next:['Your next class','Tu próxima clase'],nonext:['Nothing booked yet','Nada reservado aún'],
+ online:['Online only. Sessions are by video, so there\u2019s no address or opening hours.','Solo en línea. Las sesiones son por video, sin dirección ni horario.'],
+ hiddenaddr:['You get the address when your first session is set.','Recibes la dirección cuando se fija tu primera sesión.'],
+ requested:['Requested','Solicitado'],pz:['Powered by Zana','Con Zana'],terms:['Terms','Términos'],privacy:['Privacy','Privacidad'],
+ soon:['Classes and prices show here soon.','Pronto verás aquí clases y precios.'],free:['Free','Gratis'],today:['Today','Hoy'],
+ hi:['Hi','Hola'],welcome:['Welcome back','Bienvenido de vuelta']
+};
+const t=(k,n)=>{const w=(W[k]||[k,k])[S.lang==='es'?1:0];return n!=null?w.replace('{n}',n):w;};
+const isFree=p=>/^free$/i.test(p.p);
+const priceTxt=p=>isFree(p)?t('free'):p.p;
+
+/* =========================================================================
+   Page rules
+   ========================================================================= */
+const isAll=a=>a==='all';
+function shownProducts(g){return g.products.filter(p=>p.show&&p.id!==g.start);}
+function startProd(g){const p=g.products.find(x=>x.id===g.start);return p&&p.show?p:null;}
+function covers(p,aid){return isAll(p.a)||p.a.includes(aid);}
+function areaHas(g,a){return g.classes.some(c=>c.area===a.id)||shownProducts(g).some(p=>covers(p,a.id));}
+function visibleAreas(g){return g.areas.filter(a=>areaHas(g,a));}
+function onlyHere(p,aid){return !isAll(p.a)&&p.a.length===1&&p.a[0]===aid;}
+function many(g,p){return isAll(p.a)?g.areas.length>1:p.a.length>1;}
+function areasWithClasses(g){return visibleAreas(g).filter(a=>g.classes.some(c=>c.area===a.id));}
+function canAllInOne(g){return areasWithClasses(g).length>=2;}
+function bannerOn(g){return g.banner&&g.banner.text.trim()&&(!g.banner.end||g.banner.end>=TODAY);}
+function aName(g,id){const a=g.areas.find(x=>x.id===id);return a?a.n:'';}
+function coversTxt(g,p){if(isAll(p.a))return t('every');return t('covers')+' '+list(p.a.map(id=>aName(g,id)));}
+
+/* photos: a number is a sample, a string is an uploaded picture */
+function bgOf(ph,focal){if(ph==null)return '';if(typeof ph==='number')return SAMPLES[ph%SAMPLES.length][1];return `url("${ph}") ${focal?focal[0]+'% '+focal[1]+'%':'center'} / cover no-repeat`;}
+function phName(ph){return ph==null?'':(typeof ph==='number'?SAMPLES[ph%SAMPLES.length][0]:'Your photo');}
+
+/* readability: WCAG contrast */
+function lum(h){const c=[1,3,5].map(i=>{const v=parseInt(h.slice(i,i+2),16)/255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4});return .2126*c[0]+.7152*c[1]+.0722*c[2];}
+function ratioL(a,b){const x=[a,b].sort((p,q)=>q-p);return (x[0]+.05)/(x[1]+.05);}
+function barInk(brand){const w=ratioL(lum(brand),1),k=ratioL(lum(brand),lum('#0b0b0b'));const best=w>=k?['#ffffff',w]:['#0b0b0b',k];return best[1]>=4.5?best:null;}
+function barColor(g){if(g.brand&&barInk(g.brand))return g.brand;return g.look==='black'?'#000000':'#ffffff';}
+
+/* =========================================================================
+   The gym's page
+   ========================================================================= */
+function markHtml(g){
+  if(!g.logo)return `<span class="mark"><span>${esc(g.init||'')}</span></span>`;
+  let tile='';
+  if(g.logoLum!=null){const r=ratioL(g.logoLum,lum(barColor(g)));if(r<1.8)tile=g.logoLum<.4?' tile-w':' tile-k';}
+  return `<span class="mark img${tile}"><img src="${g.logo}" alt=""></span>`;
+}
+function schedRows(g,list,showArea,prev){
+  const bk=S.booked[g.key]||{};
+  return `<div class="rows">${list.map(c=>{
+    const k=S.day+'|'+c.id, mine=!!bk[k];
+    const left=Math.max(0,Math.min(c.cap,c.left+S.day*2-(mine?1:0)));
+    const btn=mine?`<button class="btn done sm" data-a="unbook" data-v="${c.id}">✓ ${t('booked')}</button>`:(left===0?`<span class="btn ghost sm">${t('full')}</span>`:`<button class="btn tonal sm" data-a="book" data-v="${c.id}">${t('book')}</button>`);
+    return `<div class="row"><span class="time">${esc(c.t)}</span><div><div class="cname">${esc(c.n)}</div><div class="cmeta">${showArea?esc(aName(g,c.area))+' · ':''}${esc(c.coach)}</div></div>
+      <span class="spots">${left===0?t('full'):`${left} ${t('of')} ${c.cap} ${t('left')}`}</span>${btn}</div>`;}).join('')}</div>`;
+}
+function dayStrip(){return `<div class="days">${DAYS.map((d,i)=>`<button class="${S.day===i?'on':''}" data-a="day" data-v="${i}">${S.lang==='es'?DAYS_ES[i]:d[0]}<small>${d[1]}</small></button>`).join('')}</div>`;}
+function card(g,p,multi){
+  const mine=S.member&&g.me&&g.me.owns.includes(p.id);
+  const req=(S.requested[g.key]||{})[p.id];
+  const cov=multi&&many(g,p)?`<span class="covers">${esc(coversTxt(g,p))}</span>`:'';
+  const act=mine?`<span class="havetag">✓ ${t('have')}</span>`:(req?`<span class="havetag">${t('requested')}</span>`:`<button class="btn tonal sm" data-a="buy" data-v="${p.id}">${isFree(p)?t('signup'):t('buy')}</button>`);
+  return `<div class="card${mine?' have':''}"><div class="ctop"><span class="pname">${esc(p.n)}</span><span class="price">${esc(priceTxt(p))}${p.per?`<small>${esc(p.per)}</small>`:''}</span></div>${p.d?`<p>${esc(p.d)}</p>`:''}${cov}${act}</div>`;
+}
+function heroHtml(g){
+  const vis=visibleAreas(g), sp=startProd(g);
+  let h=g.hero; const hasPh=g.heroPh!=null;
+  if(!hasPh&&h!=='none')h='none';
+  const where=`<div class="where"><span class="dt"></span>${esc(g.where)}${g.mode==='Online'?' · '+t('byvideo'):''}</div>`;
+  const second=vis.length>1?t('see'):(g.classes.length?t('seesch'):t('seepr'));
+  const mainLbl=S.member?null:(sp?`${esc(sp.n)} · ${esc(priceTxt(sp))}`:t('signup'));
+  const mainAct=sp?`data-a="buy" data-v="${sp.id}"`:`data-a="joinbtn"`;
+  if(h==='full')return `<div class="full"><div class="bgimg" style="background:${bgOf(g.heroPh,g.focal)}"></div>
+      <div class="fade"><div class="in htext">${where}<h2 class="title">${esc(g.name)}</h2>${g.tag?`<p class="tag">${esc(g.tag)}</p>`:''}
+      <div class="ctas">${mainLbl?`<button class="btn onphoto" ${mainAct}>${mainLbl}</button>`:''}<a class="btn onphoto2" href="#sec-offer" data-a="jump" data-v="sec-offer">${second}</a></div></div></div></div>`;
+  const text=`<div class="htext">${where}<h2 class="title">${esc(g.name)}</h2>${g.tag?`<p class="tag">${esc(g.tag)}</p>`:''}
+      <div class="ctas">${mainLbl?`<button class="btn primary" ${mainAct}>${mainLbl}</button>`:''}<a class="btn tonal" data-a="jump" data-v="sec-offer">${second}</a></div></div>`;
+  if(h==='beside')return `<div class="in hero"><div class="cover" style="background:${bgOf(g.heroPh,g.focal)}"></div>${text}</div>`;
+  return `<div class="in plain">${text}</div>`;
+}
+function pageHtml(g,prev){
+  const vis=visibleAreas(g), multi=vis.length>1, sp=startProd(g), prods=shownProducts(g);
+  const oneSched=multi&&g.sched==='one'&&canAllInOne(g);
+  const classFirst=g.first==='schedule';
+  const barc=barColor(g); let hs='',hc='';
+  if(g.brand){const ink=barInk(g.brand);if(ink)hs=` style="--hb:${g.brand};--hi:${ink[0]}"`;else{hc='line';hs=` style="--brand:${g.brand}"`;}}
+  const nav=multi?`<div class="in areanav"><span class="lbl">${t('offer')}</span>${vis.map(a=>`<a data-a="jump" data-v="ar-${a.id}">${esc(a.n)}</a>`).join('')}${prods.some(p=>many(g,p))?`<a data-a="jump" data-v="sec-mem">${t('memberships')}</a>`:''}</div>`:'';
+  /* signed in: your plan instead of Start here */
+  let top='';
+  if(S.member&&g.me){
+    top=`<section class="blk"><div class="in"><div class="mine"><span class="kick">${t('plan')}</span><b>${esc(g.me.left)}</b><span>${t('next')}: ${esc(g.me.next||t('nonext'))}</span></div></div></section>`;
+  } else if(sp){
+    const joined=S.joined[g.key]&&sp&&(S.requested[g.key]||{})[sp.id];
+    top=`<section class="blk"><div class="in"><div class="startbar">
+      <div class="sl"><span class="kick">${t('start')}</span><span class="sn">${esc(sp.n)}</span>${sp.d?`<p>${esc(sp.d)}</p>`:''}</div>
+      <div class="sr"><span class="price">${esc(priceTxt(sp))}</span>${joined?`<span class="havetag" style="font-weight:700">${t('requested')}</span>`:`<button class="btn primary" data-a="buy" data-v="${sp.id}">${isFree(sp)?t('signup'):t('buy')}</button>`}</div></div></div></section>`;
+  }
+  const schedBlockAll=(list,showArea,title)=>`${title}${dayStrip()}${schedRows(g,list,showArea,prev)}`;
+  let body='';
+  if(!vis.length){
+    body=`<section class="blk" id="sec-offer"><div class="in"><div class="empty">${t('soon')}</div></div></section>`;
+  } else if(multi){
+    let schedAll='';
+    if(oneSched){
+      const used=areasWithClasses(g);
+      const lst=g.classes.filter(c=>used.some(a=>a.id===c.area)&&(S.filt==='all'||c.area===S.filt));
+      schedAll=`<section class="blk" id="sec-sched"><div class="in"><div class="bh"><h3>${t('week')}</h3></div>
+        <div class="areanav" style="border-top:0;padding-top:0"><button class="${S.filt==='all'?'on':''}" data-a="filt" data-v="all">${t('all')}</button>${used.map(a=>`<button class="${S.filt===a.id?'on':''}" data-a="filt" data-v="${a.id}">${esc(a.n)}</button>`).join('')}</div>
+        ${dayStrip()}${schedRows(g,lst,true,prev)}</div></section>`;
+    }
+    let areas=vis.map((a,i)=>{
+      const cls=oneSched?[]:g.classes.filter(c=>c.area===a.id);
+      const only=prods.filter(p=>onlyHere(p,a.id));
+      const also=prods.filter(p=>many(g,p)&&covers(p,a.id)).length;
+      const clsH=cls.length?`<div class="sub"><span>${t('sched')}</span></div>${dayStrip()}${schedRows(g,cls,false,prev)}`:'';
+      const prH=only.length?`<div class="sub"><span>${esc(a.n)} · ${t('prices')}</span>${also?`<em>${also===1?t('also1'):t('alson',also)}</em>`:''}</div><div class="cards">${only.map(p=>card(g,p,true)).join('')}</div>`:(also?`<div class="sub"><span>${also===1?t('also1'):t('alson',also)}</span><em><a data-a="jump" data-v="sec-mem" style="color:inherit;cursor:pointer;text-decoration:underline">${t('seemem')}</a></em></div>`:'');
+      return `<section class="blk" id="ar-${a.id}"${i===0?' data-first="1"':''}><div class="in">
+        <div class="ahead${a.ph==null?' nophoto':''}"><div><h3>${esc(a.n)}</h3>${a.d?`<p>${esc(a.d)}</p>`:''}</div>${a.ph==null?'':`<div class="aphoto" style="background:${bgOf(a.ph,a.focal)}"></div>`}</div>
+        ${classFirst?clsH+prH:prH+clsH}</div></section>`;}).join('');
+    const mem=prods.filter(p=>many(g,p));
+    const memH=mem.length?`<section class="blk" id="sec-mem"><div class="in"><div class="bh"><h3>${t('memberships')}</h3><span class="aside">${t('eachmore')}</span></div><div class="cards">${mem.map(p=>card(g,p,true)).join('')}</div>${g.ivu?`<p class="tax">${t('ivu')}</p>`:''}</div></section>`:'';
+    body=`<div id="sec-offer"></div>`+(oneSched&&classFirst?schedAll+areas+memH:areas+memH+schedAll);
+  } else {
+    const pr=prods.filter(p=>vis.length?covers(p,vis[0].id):true);
+    const sH=g.classes.length?`<div class="bh"><h3>${t('week')}</h3></div>${dayStrip()}${schedRows(g,g.classes,false,prev)}`:'';
+    const pH=pr.length?`<div class="bh"><h3>${t('prices')}</h3></div><div class="cards">${pr.map(p=>card(g,p,false)).join('')}</div>${g.gnote?`<p class="gnote">${esc(g.gnote)}</p>`:''}${g.ivu?`<p class="tax">${t('ivu')}</p>`:''}`:'';
+    body=`<section class="blk" id="sec-offer"><div class="in" style="display:grid;gap:22px">${classFirst?sH+'<div>'+pH+'</div>':'<div>'+pH+'</div>'+sH}</div></section>`;
+  }
+  const photos=!g.photos.length?'':`<section class="blk"><div class="in"><div class="photos">${g.photos.map(p=>`<div class="photo" style="background:${bgOf(p)}"></div>`).join('')}</div></div></section>`;
+  const contact=[g.phone,g.ig].filter(Boolean).map(esc).join('<br>');
+  const hoursOn=g.showHours&&g.hours.length;
+  const visit=g.showAddress&&g.address?`<div class="map" role="img" aria-label="Map"><span class="pin"></span></div>
+      <div class="facts"><div class="fact"><div class="k">${t('address')}</div>${esc(g.address)}<br><span style="color:var(--gm);font-size:13px">${t('maps')}</span></div>
+      ${hoursOn?`<div class="fact"><div class="k">${t('hours')}</div><div class="hours">${g.hours.map(([d,h])=>`<span>${esc(d)}</span><span>${esc(h)}</span>`).join('')}</div></div>`:''}
+      ${contact?`<div class="fact"><div class="k">${t('contact')}</div>${contact}</div>`:''}</div>`
+    :`<div class="online">${g.mode==='Online'?`<b>${t('online')}</b>`:`<b>${esc(g.where)}.</b> ${t('hiddenaddr')}`}${hoursOn?`<div class="hours" style="margin-top:10px">${g.hours.map(([d,h])=>`<span>${esc(d)}</span><span>${esc(h)}</span>`).join('')}</div>`:''}</div>
+      ${contact?`<div class="facts"><div class="fact"><div class="k">${t('contact')}</div>${contact}</div></div>`:''}`;
+  const joinBox=S.member&&g.me?`<div class="join"><span class="kick">${t('next')}</span><h3>${esc(g.me.next||t('nonext'))}</h3><p>${esc(g.me.left)}</p></div>`
+    :`<div class="join" id="sec-join"><h3>${t('join')} ${esc(g.name)}</h3><p>${t('joinp')}</p><button class="btn primary" data-a="joinbtn" style="justify-self:start">${t('signup')}</button></div>`;
+  return `<div class="g ${g.look}">
+    <header class="${hc}"${hs}><div class="in">${markHtml(g)}<span class="gname">${esc(g.name)}</span>
+      <nav><span class="links"><a data-a="jump" data-v="sec-offer">${multi?t('offer'):(g.classes.length?t('sched'):t('prices'))}</a><a data-a="jump" data-v="sec-visit">${g.showAddress?t('visit'):t('contact')}</a></span>
+      <span class="lang"><button class="${S.lang==='en'?'on':''}" data-a="lang" data-v="en">EN</button><button class="${S.lang==='es'?'on':''}" data-a="lang" data-v="es">ES</button></span>
+      ${S.member?`<button class="me" data-a="signout"><i>AR</i></button>`:`<button class="signin" data-a="signin">${t('signin')}</button>`}</nav></div></header>
+    ${bannerOn(g)?`<div class="banner"><div class="in"><span>${esc(g.banner.text)}</span></div></div>`:''}
+    ${heroHtml(g)}
+    ${g.desc?`<div class="in" style="padding-bottom:22px"><p class="about">${esc(g.desc)}</p></div>`:''}
+    ${nav}${top}${body}${photos}
+    <section class="blk" id="sec-visit"><div class="in"><div class="bh"><h3>${g.showAddress&&g.address?t('visit'):t('touch')}</h3></div><div class="visit">${visit}</div></div></section>
+    <section class="blk"><div class="in twocol">${joinBox}
+      <div class="rules"><div class="bh" style="margin-bottom:4px"><h3>${t('good')}</h3></div>
+        ${g.rules?`<span><b>${t('cancel')}</b> ${esc(g.rules)}</span>`:''}
+        <span><b>${t('waiver')}</b> ${g.mode==='Online'?t('agreement'):t('waiverp')}</span></div></div></section>
+    <footer><div class="in"><span>© 2026 ${esc(g.name)}</span><span>${t('terms')}</span><span>${t('privacy')}</span>${g.plan==='Flex'?`<span class="pz">${t('pz')}</span>`:''}</div></footer>
+  </div>`;
+}
+
+/* =========================================================================
+   Owner side: sign-up, Today, page setup, Settings › Your page
+   ========================================================================= */
+function bandHtml(on,g){
+  const it=['Today','Schedule','People','Training','Money','Settings'];
+  return `<div class="band"><span class="tl">${g&&g.logo?`<img src="${g.logo}" alt="">`:esc(g?g.init:'Z')}</span>${it.map(x=>`<span class="bi${x===on?' on':''}">${x}</span>`).join('')}</div>`;
+}
+function mobHtml(g,title){return `<div class="mob"><span style="width:30px;height:30px;border-radius:8px;background:#fff;color:#111;display:grid;place-items:center;font-weight:700;font-size:12px">${esc(g?g.init:'Z')}</span><b>${esc(title)}</b><span>☰</span></div>`;}
+
+function ensureNew(){
+  if(S.newKey&&S.gyms[S.newKey])return S.gyms[S.newKey];
+  if(!S.su)S.su={biz:'Marta Fit',addr:'',focus:[],svc:[],other:'',staff:null};
+  return null;
+}
+function emailView(){
+  return `<div class="stage"><div class="sheet"><div class="mailv"><div class="mailh"><b>Zana</b> &lt;no-reply@mail.zana.fit&gt;<br>To: marta@example.com<br><b>Daniel invited you to set up Marta Fit on Zana</b></div>
+  <div>Hi Marta,</div><div>Daniel invited you to run <b>Marta Fit</b> on Zana: your schedule, your clients, your payments and your own page, in one place. It takes about a minute to start.</div>
+  <button class="btn main" style="height:48px;align-self:flex-start;padding:0 22px;border-radius:12px" data-a="go" data-v="signup">Set up my gym</button>
+  <div class="note">This button signs you in. It works once, for 7 days. Didn\u2019t expect this? Ignore it and nothing happens.</div></div></div></div>`;
+}
+function signupView(){
+  ensureNew(); const u=S.su;
+  const ok=u.biz.trim()&&u.addr.trim().length>5&&u.focus.length&&u.svc.length&&u.staff!==null;
+  let h=`<div class="stage"><div class="sheet"><div class="top"><span class="brand">zana</span></div><div class="body"><h2>Welcome, Marta</h2><p class="sub">One screen and you\u2019re in. Everything else can wait.</p>
+   <div class="fld"><label>Business name</label><input type="text" data-su="biz" value="${esc(u.biz)}"><div class="hint">What members see. A legal name for receipts can come later.</div></div>
+   <div class="fld"><label>Address</label><input type="text" data-su="addr" value="${esc(u.addr)}" placeholder="Street, town">${u.addr.trim().length>5?`<div class="setfor" style="margin-top:8px">Time <b>Atlantic</b> · members\u2019 language <b>Español</b> · tax <b>IVU 11.5%</b>. You choose later whether your page shows the address.</div>`:`<div class="hint">For receipts and IVU. Your page can hide it.</div>`}</div>
+   <div class="fld"><label>What\u2019s your focus?</label><div class="fgrid">${FOC.map(f=>`<button class="ftile ${u.focus.includes(f[0])?'on':''}" data-a="suf" data-v="${f[0]}"><b>${f[1]}</b>${f[2]?`<span>${f[2]}</span>`:''}</button>`).join('')}</div><div class="hint">For setting you up and for reports. Your page asks again what you offer.</div></div>`;
+  if(u.focus.includes('other'))h+=`<div class="fld"><input type="text" data-su="other" value="${esc(u.other)}" placeholder="What do you do? e.g. Hyrox, aerial, climbing"></div>`;
+  h+=`<div class="fld"><label>How do you work?</label><div class="chipsf">${Object.keys(SVN).map(k=>`<button class="chipf ${u.svc.includes(k)?'on':''}" data-a="sus" data-v="${k}">${SVN[k]}</button>`).join('')}</div></div>
+   <div class="fld"><label>Do you have staff?</label><div class="seg2"><button class="${u.staff===false?'on':''}" data-a="sust" data-v="0">Just me</button><button class="${u.staff===true?'on':''}" data-a="sust" data-v="1">I have staff</button></div></div>
+   </div><div class="foot"><button class="btn main" data-a="create" ${ok?'':'disabled'}>Create ${esc(u.biz||'my business')}</button>${ok?'':'<div class="note" style="text-align:center">Fill in every question to continue.</div>'}</div></div></div>`;
+  return h;
+}
+function createGym(){
+  const u=S.su, key='new-'+slug(u.biz||'gym').slice(0,24)+'-'+Date.now().toString(36).slice(-4);
+  const town=(u.addr.split(',').pop()||'').trim()||'Puerto Rico';
+  const g=mkGym(key,{label:u.biz,name:u.biz.trim(),init:u.biz.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase(),look:'light',plan:'Pro',hero:'full',heroPh:null,
+    tag:'',where:town,address:u.addr.trim(),hours:[['Mon to Fri','6:00 AM to 8:00 PM'],['Sat','8:00 AM to 12:00 PM']],showHours:false,phone:'',ig:'',
+    areas:[],classes:[],products:[],photos:[],focus:u.focus.slice(),services:u.svc.slice(),other:u.other,me:null,rules:'',isNew:true,done:{}});
+  g.first=u.svc.includes('group')?'schedule':'prices';
+  S.gyms[key]=g; S.order.push(key); S.newKey=key; S.gym=key; S.view='today';
+}
+function todayView(){
+  const g=S.newKey&&S.gyms[S.newKey]; if(!g){S.view='signup';return signupView();}
+  const d=g.done||(g.done={});
+  const steps=[
+    ['prod','Your first plan or pack','What you sell. It shows on your page under its area.'],
+    ...(g.services.includes('group')?[['cls','Add your first class','Your weekly schedule. It shows on your page too.']]:[]),
+    ['page','Set up your page','What you offer, your look, a photo and a few words.',true],
+    ['pay','How people pay you','Credit card, cash and the rest'],['biz','Your business','Description, legal name, affiliations'],['waiver','Write your waiver','Paste the one you use today'],
+    ['share','Share your page','Instagram bio, WhatsApp, Google'],['stripe','Connect Stripe','Take cards; plans charge on their own']];
+  d.prod=g.products.length>0; d.cls=g.classes.length>0; d.page=!!g.pageSet; d.share=!!g.shared;
+  const n=steps.filter(s=>d[s[0]]).length;
+  let h=`<div class="frame">${bandHtml('Today',g)}<div class="appmain">${mobHtml(g,'Today')}<div class="lab" style="margin-top:8px">Today</div><h1>Hi, Marta</h1>
+   <div style="display:grid;gap:16px;max-width:620px"><div class="trial"><span><b>Pro trial</b> · 30 days left</span><button class="btn sm">See plans</button></div>
+   <div class="gs"><div class="hd"><b>Get started</b><span>${n} of ${steps.length}</span></div><div class="pbar"><i style="width:${Math.round(n/steps.length*100)}%"></i></div>`;
+  steps.forEach(s=>{const done=d[s[0]];h+=`<div class="gr${done?' done':''}${s[3]&&!done?' hl':''}"><span class="gdot">${done?'✓':''}</span><span class="t">${s[1]}${s[3]?'<span class="new">New</span>':''}<small>${s[2]}</small></span>
+    <button class="btn${!done&&(s[0]==='page'||s[0]==='prod')?' main':''}" data-a="gs" data-v="${s[0]}">${done?(s[0]==='page'?'Open':'Add more'):'Start'}</button></div>`;});
+  h+=`</div><p class="note">The page shows an area once it has a class or a price in it, so the first two steps fill it.</p></div></div></div>`;
+  return h;
+}
+
+/* --- page setup (first time), 3 steps --- */
+function offerSuggestions(g){
+  const sug=FOC.filter(f=>f[0]!=='other').map(f=>({k:f[0],n:f[1],s:f[2]}));
+  if(g.other)sug.push({k:'other',n:g.other,s:'Your own'});
+  EXTRA.forEach(e=>sug.push({k:e[0],n:e[1],s:e[2]}));
+  return sug;
+}
+function initPick(g){
+  /* prefilled from sign-up focus picks, plus Open gym and 1:1 from How you work */
+  if(g.areas.length) return g.areas.map(a=>({k:a.src||a.id,n:a.n,id:a.id}));
+  const pre=g.focus.filter(f=>f!=='other').map(k=>{const f=FOC.find(x=>x[0]===k);return {k,n:f[1]};});
+  if(g.focus.includes('other')&&g.other)pre.push({k:'other',n:g.other});
+  if(g.services.includes('open'))pre.push({k:'open',n:'Open gym'});
+  if(g.services.includes('one'))pre.push({k:'pt',n:'Personal training'});
+  if(g.services.includes('prog')&&!g.services.includes('group'))pre.push({k:'online',n:'Online coaching'});
+  return pre;
+}
+function offerQuestion(g){
+  if(!S.setupPick)S.setupPick=initPick(g);
+  const pk=S.setupPick, sug=offerSuggestions(g);
+  const extraOwn=pk.filter(p=>!sug.some(s=>s.k===p.k));
+  return `<div class="fld"><label>What do you offer?</label><div class="hint" style="margin:0 0 10px">Ticked from your focus at sign-up. Each one you keep becomes a section of your page.</div>
+   <div class="fgrid">${sug.concat(extraOwn.map(p=>({k:p.k,n:p.n,s:'Your own'}))).map(s=>`<button class="ftile ${pk.some(p=>p.k===s.k)?'on':''}" data-a="opick" data-v="${esc(s.k)}" data-n="${esc(s.n)}"><b>${esc(s.n)}</b>${s.s?`<span>${esc(s.s)}</span>`:''}</button>`).join('')}</div></div>
+   <div class="fld"><label>Add your own</label><div style="display:flex;gap:8px"><input type="text" id="ownarea" placeholder="e.g. Hyrox, Aerial, Kids classes"><button class="btn" data-a="ownadd" style="height:44px">Add</button></div></div>
+   ${pk.length?`<div class="fld"><label>Call them what your members call them</label><div class="namerows">${pk.map((p,i)=>`<div class="namerow"><span>${esc((sug.find(s=>s.k===p.k)||{n:'Your own'}).n)}</span><input type="text" data-rn="${i}" value="${esc(p.n)}"></div>`).join('')}</div><div class="hint">Fuerza Box calls \u201cFunctional fitness\u201d CrossFit. These are your Tracks, so a rename shows everywhere in Zana.</div></div>`
+   :`<div class="setfor">Nothing ticked: your page has one section with no heading, which suits a coach who does one thing.</div>`}`;
+}
+function applyPick(g){
+  const pk=S.setupPick||[]; const keep=[];
+  pk.forEach(p=>{let a=p.id&&g.areas.find(x=>x.id===p.id);if(!a)a=g.areas.find(x=>x.src===p.k);
+    if(a){a.n=p.n.trim()||a.n;keep.push(a);}else keep.push({id:uid('a'),src:p.k,n:p.n.trim()||'Untitled',d:'',ph:null});});
+  /* an area that already has classes or prices is never dropped here: it stops through Tracks */
+  const blocked=g.areas.filter(a=>!keep.includes(a)&&(g.classes.some(c=>c.area===a.id)||g.products.some(p=>!isAll(p.a)&&p.a.includes(a.id))));
+  g.areas=keep.concat(blocked);
+  if(!g.areas.length)g.areas=[{id:uid('a'),src:'general',n:'General',d:'',ph:null}];
+  S.setupPick=null; return blocked;
+}
+function setupView(){
+  const g=G(); if(!g){S.view='signup';return signupView();}
+  const st=S.setup; let body='';
+  if(st===0) body=`<h2>What do you offer?</h2><p class="sub">Your page is built around this.</p>`+offerQuestion(g);
+  if(st===1) body=`<h2>How should it look?</h2><p class="sub">You can change all of it later in Settings › Your page.</p>`+lookKnobs(g,true)+photoKnobs(g,true);
+  if(st===2) body=`<h2>A few words</h2><p class="sub">What a visitor reads first.</p>`+aboutKnobs(g,true);
+  return `<div class="stage"><div class="sheet"><div class="top"><button class="btn sm" data-a="setback">‹ ${st?'Back':(S.reask?'Settings':'Today')}</button><span class="brand" style="text-align:center">Your page</span><span class="dotsprog">${[0,1,2].map(i=>`<i class="${i<=st?'on':''}"></i>`).join('')}</span></div>
+   <div class="body">${body}</div><div class="foot"><button class="btn main" data-a="setnext">${S.reask?'Save':(st<2?'Continue':'Finish and see my page')}</button>${st===0&&!S.reask?'<button class="linkb" style="align-self:center" data-a="setskip">Skip: one section, no headings</button>':''}</div></div></div>`;
+}
+
+/* --- knob groups, shared by setup and Settings --- */
+function lookKnobs(g,inSetup){
+  const ink=g.brand?barInk(g.brand):null;
+  return `<div class="kn"><span class="kl">Page look</span><div class="seg2"><button class="${g.look==='light'?'on':''}" data-a="k" data-k="look" data-v="light">Light</button><button class="${g.look==='black'?'on':''}" data-a="k" data-k="look" data-v="black">Black</button></div></div>
+   <div class="kn"><span class="kl">Top bar color</span><div class="dots"><button class="dot2 none ${!g.brand?'on':''}" title="No color" data-a="k" data-k="brand" data-v=""></button>${SWATCH.map(c=>`<button class="dot2 ${g.brand===c?'on':''}" style="background:${c}" data-a="k" data-k="brand" data-v="${c}"></button>`).join('')}
+     <span class="custom"><input type="color" data-kin="brand" value="${g.brand||'#1F6F78'}"></span></div>
+     ${g.brand?(ink?`<div class="say">The bar\u2019s words are ${ink[0]==='#ffffff'?'white':'black'} on this color (${ink[1].toFixed(1)}:1). Buttons stay black or white.</div>`:`<div class="say warn">Neither white nor black words read on this color, so it shows as a thin line under the bar.</div>`):`<div class="hint">No color: the bar follows the page look.</div>`}</div>
+   <div class="kn"><span class="kl">Logo</span><div class="logobox"><span class="lg">${g.logo?`<img src="${g.logo}" alt="">`:esc(g.init)}</span><div style="flex:1;font-size:13px;color:var(--t3)">${g.logo?'On a white or black square if it would vanish into the bar.':'PNG, JPEG or WebP, up to 512 KB. Until then, your initials show.'}</div>
+     <span class="btn filebtn sm">${g.logo?'Replace':'Upload'}<input type="file" accept="image/png,image/jpeg,image/webp" data-file="logo"></span>${g.logo?'<button class="btn sm" data-a="k" data-k="logo" data-v="">Remove</button>':''}</div></div>`;
+}
+function photoKnobs(g,inSetup){
+  const has=g.heroPh!=null;
+  return `<div class="kn"><span class="kl">Top photo</span><div class="seg2"><button class="${g.hero==='full'?'on':''}" data-a="k" data-k="hero" data-v="full">Full width</button><button class="${g.hero==='beside'?'on':''}" data-a="k" data-k="hero" data-v="beside">Beside the words</button><button class="${g.hero==='none'?'on':''}" data-a="k" data-k="hero" data-v="none">None</button></div>
+   ${g.hero==='full'?'<div class="hint">The words sit bottom-left over a dark fade, so any photo stays readable.</div>':''}</div>
+   ${g.hero!=='none'?`<div class="kn">${has?`<div class="thumb" data-a="focal" style="background:${bgOf(g.heroPh,g.focal)}">${typeof g.heroPh==='string'?`<span class="fp" style="left:${g.focal[0]}%;top:${g.focal[1]}%"></span><span class="cap">Tap the spot that must stay in view</span>`:`<span class="cap">Sample: ${esc(phName(g.heroPh))}</span>`}</div>`:'<div class="say">No photo yet, so the page shows the words only.</div>'}
+   ${g.heroSmall?`<div class="say warn">This photo is ${g.heroSmall} px wide, so it may look soft on a laptop. 1600 px or wider is best.</div>`:''}
+   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="btn filebtn sm">Upload a photo<input type="file" accept="image/png,image/jpeg,image/webp" data-file="hero"></span><span class="hint">or a sample:</span>
+   <span class="samples">${SAMPLES.map((s,i)=>`<button class="samp ${g.heroPh===i?'on':''}" title="${s[0]}" style="background:${s[1]}" data-a="k" data-k="heroPh" data-v="${i}"></button>`).join('')}</span></div></div>`:''}`;
+}
+function aboutKnobs(g,inSetup){
+  const dl=(g.desc||'').length;
+  return `<div class="kn"><label>One line under your name</label><input type="text" maxlength="90" data-kin="tag" value="${esc(g.tag)}" placeholder="Reformer and mat classes in groups of 8."></div>
+   <div class="kn"><label>About</label><textarea data-kin="desc" maxlength="400" placeholder="Who you are, who it\u2019s for, what to expect the first time.">${esc(g.desc)}</textarea><div class="cnt" id="desccnt">${dl} of 400</div></div>
+   <div class="tg"><div><b>Show my address</b><span>${g.address?esc(g.address):'No address set'}${g.showAddress?'':' · Off: visitors get it once a session is set'}</span></div><button class="tog ${g.showAddress?'on':''}" data-a="k" data-k="showAddress"></button></div>
+   <div class="tg"><div><b>Show my opening hours</b><span>${g.hours.length?g.hours.map(h=>h[0]+' '+h[1]).join(' · '):'No hours set'} · from Settings › Business</span></div><button class="tog ${g.showHours?'on':''}" data-a="k" data-k="showHours"></button></div>
+   <div class="kn"><label>Phone or WhatsApp</label><input type="tel" data-kin="phone" value="${esc(g.phone)}" placeholder="(787) 555-0100"></div>
+   <div class="kn"><label>Instagram</label><input type="text" data-kin="ig" value="${esc(g.ig)}" placeholder="@yourgym"></div>`;
+}
+function areasKnobs(g){
+  const n=g.areas.length;
+  return g.areas.map((a,i)=>{
+    const cl=g.classes.filter(c=>c.area===a.id).length, pr=shownProducts(g).filter(p=>covers(p,a.id)).length, vis=cl||pr;
+    return `<div class="arow"><div class="ah"><span class="mv"><button data-a="amv" data-v="${i}" data-d="-1" ${i===0?'disabled':''} title="Move up">▲</button><button data-a="amv" data-v="${i}" data-d="1" ${i===n-1?'disabled':''} title="Move down">▼</button></span>
+      <input type="text" data-ain="n" data-i="${i}" value="${esc(a.n)}"></div>
+      <div class="ast${vis?'':' hid'}">${vis?`<b>Shows</b> · ${cl} class${cl===1?'':'es'} a day, ${pr} price${pr===1?'':'s'}`:`<b>Hidden</b> until it has a class or a price`}${n===1?' · Only one, so the page shows no heading':''}</div>
+      ${n>1?`<textarea data-ain="d" data-i="${i}" maxlength="200" style="min-height:60px" placeholder="One or two lines about ${esc(a.n)}">${esc(a.d)}</textarea>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="hint" style="font-size:13px;color:var(--t3)">Photo:</span><button class="samp ${a.ph==null?'on':''}" style="background:#fff;border-color:${a.ph==null?'#111':'#E8E8E5'};font-size:11px" data-a="aph" data-i="${i}" data-v="">None</button>${SAMPLES.slice(0,7).map((s,j)=>`<button class="samp ${a.ph===j?'on':''}" style="background:${s[1]}" data-a="aph" data-i="${i}" data-v="${j}"></button>`).join('')}<span class="btn filebtn sm">Upload<input type="file" accept="image/png,image/jpeg,image/webp" data-file="area" data-i="${i}"></span></div>`:''}
+      ${!vis?`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-a="qadd" data-v="cls" data-i="${a.id}">Add a class here</button><button class="btn sm" data-a="qadd" data-v="prod" data-i="${a.id}">Add a price here</button></div>`:''}
+    </div>`;}).join('');
+}
+function productKnobs(g){
+  if(!g.products.length)return `<div class="say">No plans or packs yet.</div>`;
+  return g.products.map(p=>`<div class="prow"><button class="tog ${p.show?'on':''}" data-a="pshow" data-v="${p.id}" title="Show on page"></button>
+    <div class="pn"><b>${esc(p.n)} · ${esc(p.p)}${esc(p.per||'')}</b><small>${isAll(p.a)?'Every area':esc(list(p.a.map(id=>aName(g,id))))}${p.show?'':' · hidden'}</small></div>
+    <button class="star ${g.start===p.id?'on':''}" data-a="pstart" data-v="${p.id}">${g.start===p.id?'★ Start here':'Start here'}</button></div>`).join('');
+}
+function settingsView(){
+  const g=G(); const vis=visibleAreas(g); const live=vis.length>0;
+  const link='zana.fit/'+slug(g.name);
+  const b=g.banner||{text:'',end:''}, bOn=bannerOn(g), bEnded=b.text.trim()&&b.end&&b.end<TODAY;
+  let k=`<div class="linkrow"><span class="u">${esc(link)}</span><span class="status ${live?'live':'thin'}">${live?'Live':'Thin'}</span>
+     <button class="btn sm" data-a="copy">Copy link</button><button class="btn sm main" data-a="viewpage">View page</button><button class="btn sm pvmob" data-a="viewpage">Preview</button></div>
+     ${live?'':'<p class="note" style="margin-top:8px">Your page shows your name, a few words and Join. Add a class or a price and its area appears.</p>'}`;
+  k+=`<div class="grp"><div class="lab">Look</div><div class="box">${lookKnobs(g)}</div></div>`;
+  k+=`<div class="grp"><div class="lab">Top photo</div><div class="box">${photoKnobs(g)}</div></div>`;
+  k+=`<div class="grp"><div class="lab">About</div><div class="box">${aboutKnobs(g)}</div></div>`;
+  k+=`<div class="grp"><div class="lab">Announcement <span class="mut" style="text-transform:none;letter-spacing:0;font-weight:500">${bOn?'Showing'+(b.end?' until '+fmtDate(b.end):''):(bEnded?'Ended '+fmtDate(b.end)+', hidden':'Off')}</span></div><div class="box">
+     <div class="kn"><label>One line at the top of your page</label><input type="text" maxlength="120" data-ban="text" value="${esc(b.text)}" placeholder="Closed Thursday for the holiday."></div>
+     <div class="kn"><label>Hide it after</label><input type="date" data-ban="end" value="${esc(b.end)}" min="2026-01-01"><div class="hint">It disappears by itself after this day. Today is Nov 16.</div></div>
+     ${b.text?'<button class="btn sm" style="justify-self:start" data-a="banclear">Remove announcement</button>':''}</div></div>`;
+  k+=`<div class="grp"><div class="lab">What you offer <button class="linkb" data-a="reask">Ask me again</button></div><div class="box"><p class="note">Each area is one of your Tracks. Its section shows only when it has a class or a price.</p>${areasKnobs(g)}<button class="btn sm" style="justify-self:start" data-a="reask">Add or remove areas</button></div></div>`;
+  const aio=canAllInOne(g);
+  k+=`<div class="grp"><div class="lab">Layout</div><div class="box">
+     ${aio?`<div class="kn"><span class="kl">Schedule</span><div class="seg2"><button class="${g.sched==='area'?'on':''}" data-a="k" data-k="sched" data-v="area">By area</button><button class="${g.sched==='one'?'on':''}" data-a="k" data-k="sched" data-v="one">All in one</button></div><div class="hint">${g.sched==='one'?'One schedule with area filters. Each area keeps its description and prices.':'Each area shows its own classes.'}</div></div>`
+       :`<div class="hint">Schedule: one list. The choice between \u201cby area\u201d and \u201call in one\u201d appears once two areas have classes.</div>`}
+     <div class="kn"><span class="kl">What comes first</span><div class="seg2"><button class="${g.first==='schedule'?'on':''}" data-a="k" data-k="first" data-v="schedule">Schedule</button><button class="${g.first==='prices'?'on':''}" data-a="k" data-k="first" data-v="prices">Prices</button></div><div class="hint">Started as ${g.services&&g.services.includes('group')?'Schedule, since you teach group classes':'Prices, since you don\u2019t teach group classes'}.</div></div></div></div>`;
+  k+=`<div class="grp"><div class="lab">Plans and packs <button class="linkb" data-a="qadd" data-v="prod">Add one</button></div><div class="box"><p class="note">Switch off what you don\u2019t sell on the page. Star one as Start here for new people.</p>${productKnobs(g)}</div></div>`;
+  k+=`<div class="grp"><div class="lab">Cancelling</div><div class="box"><div class="kn"><label>Your cancellation rules, in your words</label><textarea data-kin="rules" maxlength="300" placeholder="Cancel up to 12 hours before class to keep your credit.">${esc(g.rules)}</textarea></div></div></div>`;
+  k+=`<div class="grp"><div class="lab">When you share your link</div><div class="og"><div class="oi" style="background:${g.heroPh!=null?bgOf(g.heroPh,g.focal):'#f3f3f0'}"></div><div class="ot">zana.fit<b>${esc(g.name)}</b>${esc(g.tag||'Book and buy online.')}</div></div><p class="note" style="margin-top:6px">WhatsApp, Instagram and texts show this. It comes from your name, line and top photo.</p></div>`;
+  k+=`<div class="grp"><div class="lab">Always on the page</div><div class="box fixed">${['Your name, line and About at the top','Join and Good to know at the bottom','Words always readable on your colors and photos','Photos sized for phones, cropped around your spot','English and Spanish switch','Your waiver, signed once at sign-up',g.plan==='Flex'?'Powered by Zana (on the Flex plan)':'No Powered by Zana on '+g.plan].map(x=>`<div><span>✓</span><span>${x}</span></div>`).join('')}</div></div>`;
+  k+=`<div class="grp"><div class="lab">Later, not at launch</div><div class="box fixed">${['Coach profiles','Reviews','Events and workshops section','Any color and font','Moving sections around freely','Paying online (today Buy sends a request to the desk)'].map(x=>`<div><span class="mut">·</span><span class="mut">${x}</span></div>`).join('')}</div></div>`;
+  const pvW=S.pv==='phone';
+  return `<div class="frame">${bandHtml('Settings',g)}<div class="appmain">${mobHtml(g,'Settings')}<h1 style="margin-top:8px">Settings</h1>
+    <div class="tabs">${['Business','Look','Payments','Documents','Tracks','Tax'].map(x=>`<span data-a="othertab">${x}</span>`).join('')}<span class="on">Your page<span class="new">New</span></span></div>
+    <div class="ywrap"><div>${k}</div>
+    <div class="pvcol"><div class="pvhd"><span class="lab">Preview</span><span class="seg2"><button class="${pvW?'on':''}" data-a="pv" data-v="phone">Phone</button><button class="${pvW?'':'on'}" data-a="pv" data-v="desk">Laptop</button></span></div>
+      <div class="pvbox ${pvW?'phonebox':''}" id="pvbox"><div class="pvin" id="pvin"><div class="pvscale" id="pvscale">${pageHtml(g,true)}</div></div></div>
+      <p class="note">What a new visitor sees. <button class="linkb" data-a="viewpage">Open the real page</button> to tap through it.</p></div></div>
+  </div></div>`;
+}
+
+/* =========================================================================
+   Modals: visitor sign-up, sign-in, buy request, quick add
+   ========================================================================= */
+let M=null;
+function modal(m){M=m;drawModal();}
+function closeModal(){M=null;document.getElementById('layer').innerHTML='';}
+function drawModal(){
+  const L=document.getElementById('layer'); if(!M){L.innerHTML='';return;}
+  const g=G(); let h='';
+  if(M.k==='join'){
+    const why=M.intent?(M.intent.t==='book'?`to book ${esc(M.intent.label)}`:`to get ${esc(M.intent.label)}`):'to book and buy';
+    h=`<h3>${S.lang==='es'?'Crea tu cuenta':'Make your account'}</h3><p>Free, ${why}. ${esc(g.name)} gets your name and contact.</p>
+     <div class="fld"><label>Full name</label><input type="text" id="jn" value="${esc(M.name||'')}" placeholder="Ana Rodríguez"></div>
+     <div class="fld"><label>Email</label><input type="email" id="je" value="${esc(M.email||'')}" placeholder="ana@example.com"></div>
+     <div class="fld"><label>Mobile <span class="mut" style="font-weight:400">(optional)</span></label><input type="tel" id="jm" placeholder="(787) 555-0100"></div>
+     <button class="chk ${M.sms?'on':''}" data-a="mtog" data-v="sms"><span class="cb">${M.sms?'✓':''}</span><span>Text me about my bookings. Message frequency varies. Reply STOP to stop or HELP for help. Message and data rates may apply.</span></button>
+     <button class="chk ${M.wv?'on':''}" data-a="mtog" data-v="wv"><span class="cb">${M.wv?'✓':''}</span><span>I\u2019ve read and agree to ${esc(g.name)}\u2019s ${g.mode==='Online'?'coaching agreement':'waiver'}. <u>Read it</u></span></button>
+     <div class="acts"><button class="btn" data-a="mclose">Cancel</button><button class="btn main" data-a="joingo">${M.intent?(M.intent.t==='book'?'Sign up and book':'Sign up and continue'):'Sign up'}</button></div>
+     <p class="note">Prototype: nothing is sent and no account is made.</p>`;
+  }
+  if(M.k==='signin'){
+    h=M.sent?`<h3>Check your email</h3><p>We sent a sign-in link to <b>${esc(M.email||'you')}</b>. It works for 10 minutes.</p><div class="acts"><button class="btn" data-a="mclose">Close</button><button class="btn main" data-a="signinok">Pretend I tapped the link</button></div>`
+      :`<h3>Sign in to ${esc(g.name)}</h3><p>We\u2019ll email you a link. No password.</p><div class="fld"><label>Email</label><input type="email" id="se" placeholder="ana@example.com"></div><div class="acts"><button class="btn" data-a="mclose">Cancel</button><button class="btn main" data-a="signinsend">Email me a link</button></div>`;
+  }
+  if(M.k==='done'){h=`<div class="ok"><span style="font-size:18px">✓</span><span>${M.msg}</span></div>${M.more?`<p>${M.more}</p>`:''}<div class="acts">${M.cta?`<button class="btn main big" data-a="${M.cta[1]}" data-v="${M.cta[2]||''}">${M.cta[0]}</button>`:''}<button class="btn ${M.cta?'':'main big'}" data-a="mclose">${M.cta?'Not now':'Back to the page'}</button></div>`;}
+  if(M.k==='qprod'){
+    const ar=g.areas;
+    h=`<h3>Add a plan or pack</h3><p>In Zana this lives in Money › Products. Here, a shortcut so the page fills.</p>
+     <div class="fld"><label>Name</label><input type="text" id="qn" value="${esc(M.n||'10 classes')}"></div>
+     <div style="display:flex;gap:10px"><div class="fld" style="flex:1"><label>Price</label><input type="text" id="qp" value="${esc(M.p||'$120')}"></div><div class="fld" style="flex:1"><label>Charged</label><select id="qper"><option value="">Once</option><option value="/mo">Every month</option></select></div></div>
+     <div class="fld"><label>What it covers</label><div class="chipsf">${ar.length>1?`<button class="chipf ${M.all?'on':''}" data-a="qall">Every area</button>`:''}${ar.map(a=>`<button class="chipf ${!M.all&&M.sel.includes(a.id)?'on':''}" data-a="qsel" data-v="${a.id}">${esc(a.n)}</button>`).join('')}</div>${!ar.length?'<div class="hint">Set up your page first to name your areas. Until then it covers everything.</div>':''}</div>
+     <div class="fld"><label>One line <span class="mut" style="font-weight:400">(optional)</span></label><input type="text" id="qd" value="${esc(M.d||'Use within 3 months.')}"></div>
+     <div class="acts"><button class="btn" data-a="mclose">Cancel</button><button class="btn main" data-a="qprodok">Add</button></div>`;
+  }
+  if(M.k==='qcls'){
+    const ar=g.areas;
+    h=`<h3>Add a class</h3><p>In Zana this lives in Schedule. Here, a shortcut so the page fills. It repeats every day this week.</p>
+     <div class="fld"><label>Class</label><input type="text" id="cn" value="${esc(M.n||'Morning class')}"></div>
+     <div class="fld"><label>Area</label><select id="ca">${ar.length?ar.map(a=>`<option value="${a.id}" ${M.area===a.id?'selected':''}>${esc(a.n)}</option>`).join(''):'<option value="">General</option>'}</select></div>
+     <div style="display:flex;gap:10px"><div class="fld" style="flex:1"><label>Time</label><input type="text" id="ct" value="7:00 AM"></div><div class="fld" style="flex:1"><label>Spots</label><input type="text" id="cc" value="12"></div></div>
+     <div class="fld"><label>Coach</label><input type="text" id="cco" value="Marta"></div>
+     <div class="acts"><button class="btn" data-a="mclose">Cancel</button><button class="btn main" data-a="qclsok">Add</button></div>`;
+  }
+  if(M.k==='msg'){h=`<h3>${M.title}</h3><p>${M.msg}</p><div class="acts"><button class="btn main" data-a="mclose">OK</button></div>`;}
+  L.innerHTML=`<div class="scrim" data-a="scrim"><div class="modal" role="dialog" aria-modal="true">${h}</div></div>`;
+}
+
+/* =========================================================================
+   Render
+   ========================================================================= */
+const VIEWS=[['email','The invite'],['signup','Sign-up'],['today','Today'],['setup','Page setup'],['settings','Settings › Your page'],['page','The page']];
+const CASES={
+ email:'<b>How a new gym starts.</b> Daniel invites the owner from Zana HQ. One email; its button signs her in and opens the one sign-up screen.',
+ signup:'<b>The one sign-up screen.</b> \u201cWhat\u2019s your focus?\u201d is for setting her up and for reports, and makes no areas (Nov 7 rule). The page asks what she offers later, prefilled from these picks. Address is required for receipts and IVU; the page can hide it.',
+ today:'<b>Today, with Get started.</b> \u201cSet up your page\u201d is new. The first plan and first class fill it: an area shows only once it has a class or a price.',
+ setup:'<b>Setting up the page, three short steps.</b> 1 What do you offer? (ticked from her focus, renamable; each becomes an area, which is a Track in the code). 2 Look and top photo. 3 A few words. All of it stays editable in Settings › Your page.',
+ settings:'<b>Settings › Your page</b>, next to Business, Look and Payments. Every knob at launch, with the page live beside it. Pick a demo gym above, or the gym you just signed up.',
+ page:'<b>The gym\u2019s page.</b> Book and Buy work: signed out they go through a quick sign-up first. Buy sends a request to the desk, since paying online isn\u2019t on yet. Switch Visitor to see a member\u2019s view, and try EN · ES in the top bar.'
+};
+let pvRO=null;
+function render(){
+  const app=document.getElementById('app');
+  const bare=/bare/.test(location.hash);
+  document.body.className=(S.wid==='phone'?'phone':'')+(bare?' bare':'');
+  const g=G();
+  const showGym=S.view==='settings'||S.view==='page';
+  document.getElementById('strip').innerHTML=`<b>Screen</b><span class="seg">${VIEWS.map(v=>`<button data-a="view" data-v="${v[0]}" aria-pressed="${S.view===v[0]}">${v[1]}</button>`).join('')}</span>
+    ${showGym?`<b>Gym</b><span class="seg">${S.order.filter(k=>S.gyms[k]).map(k=>`<button data-a="gym" data-v="${k}" aria-pressed="${S.gym===k}">${esc(S.gyms[k].isNew?S.gyms[k].name+' (yours)':S.gyms[k].label)}</button>`).join('')}</span>`:''}
+    ${S.view==='page'?`<b>Visitor</b><span class="seg"><button data-a="mem" data-v="0" aria-pressed="${!S.member}">Signed out</button><button data-a="mem" data-v="1" aria-pressed="${S.member}">Signed in</button></span>`:''}
+    <b>Width</b><span class="seg"><button data-a="wid" data-v="desk" aria-pressed="${S.wid==='desk'}">Laptop</button><button data-a="wid" data-v="phone" aria-pressed="${S.wid==='phone'}">Phone</button></span>
+    <button class="reset" data-a="reset">Start over</button>`;
+  document.getElementById('case').innerHTML=CASES[S.view]+(S.view==='page'&&S.member&&!g.me?' <b>This gym has no member yet</b>, so signed in looks like signed out.':'');
+  let h='';
+  if(S.view==='email')h=emailView();
+  if(S.view==='signup')h=signupView();
+  if(S.view==='today')h=todayView();
+  if(S.view==='setup')h=setupView();
+  if(S.view==='settings')h=settingsView();
+  if(S.view==='page')h=`<div class="pubwrap">${pageHtml(g,false)}</div>`;
+  app.innerHTML=h;
+  fitPreview();
+  save();
+}
+function fitPreview(){
+  const box=document.getElementById('pvbox'), sc=document.getElementById('pvscale'); if(!box||!sc)return;
+  if(S.pv==='phone'){sc.style.width='374px';sc.style.zoom='';return;}
+  const w=box.clientWidth, base=1180, s=Math.min(1,w/base);
+  sc.style.width=base+'px'; sc.style.zoom=s;
+}
+addEventListener('resize',fitPreview);
+let toastT=null;
+function toast(msg){let el=document.querySelector('.toast');if(!el){el=document.createElement('div');el.className='toast';document.body.appendChild(el);}el.textContent=msg;clearTimeout(toastT);toastT=setTimeout(()=>el.remove(),3200);}
+
+/* =========================================================================
+   Actions
+   ========================================================================= */
+function findClass(g,id){return g.classes.find(c=>c.id===id);}
+function findProd(g,id){return g.products.find(p=>p.id===id);}
+function doBook(g,cid){
+  (S.booked[g.key]=S.booked[g.key]||{})[S.day+'|'+cid]=1;
+  const c=findClass(g,cid); const d=DAYS[S.day];
+  modal({k:'done',msg:`Booked: ${esc(c.n)}, ${d[0]} ${d[1]} at ${esc(c.t)}.`,more:g.rules?esc(g.rules):''});
+}
+function canBook(g,c){
+  /* a member's plan covers it; a new person can book only with a free starter that covers the area */
+  if(S.member&&g.me)return true;
+  const sp=startProd(g); return sp&&isFree(sp)&&covers(sp,c.area)&&(S.requested[g.key]||{})[sp.id];
+}
+function afterJoin(intent){
+  const g=G(); S.joined[g.key]=1; S.member=true;
+  if(!g.me)g.me={owns:[],left:'No plan yet',next:null,fresh:true};
+  if(!intent){modal({k:'done',msg:`You\u2019re in. Welcome to ${esc(g.name)}.`});render();return;}
+  if(intent.t==='buy')return buyFlow(g,intent.id,true);
+  if(intent.t==='book'){
+    const c=findClass(g,intent.id), sp=startProd(g);
+    if(sp&&isFree(sp)&&covers(sp,c.area)){
+      (S.requested[g.key]=S.requested[g.key]||{})[sp.id]=1; g.me.owns.push(sp.id); g.me.left=sp.n; g.me.next=`${c.n}, ${DAYS[S.day][0]} ${c.t}`;
+      render(); return doBook(g,c.id);
+    }
+    render();
+    modal({k:'done',msg:`You\u2019re signed up. To book ${esc(c.n)} you need a class pack or plan.`,more:sp?`New here? ${esc(sp.n)}, ${esc(priceTxt(sp))}.`:'',cta:sp?[`Get ${esc(sp.n)}`,'buy',sp.id]:null});
+  }
+}
+function buyFlow(g,pid,justJoined){
+  const p=findProd(g,pid);
+  (S.requested[g.key]=S.requested[g.key]||{})[pid]=1;
+  if(isFree(p)){ if(g.me&&!g.me.owns.includes(pid)){g.me.owns.push(pid);g.me.left=p.n;} render();
+    return modal({k:'done',msg:`${justJoined?'You\u2019re signed up. ':''}${esc(p.n)} is yours.`,more:g.classes.length?'Pick a class on the schedule and tap Book.':`${esc(g.name)} will contact you to set it up.`});}
+  render();
+  modal({k:'done',msg:`${justJoined?'You\u2019re signed up. ':''}${esc(g.name)} has your request for ${esc(p.n)} (${esc(p.p)}${esc(p.per||'')}).`,more:`Paying online isn\u2019t on yet. They\u2019ll help you pay at the desk or by WhatsApp, and it shows here as soon as it\u2019s paid.`});
+}
+function k(g,key,v){
+  if(key==='look')g.look=v;
+  if(key==='brand')g.brand=v||null;
+  if(key==='logo'){g.logo=null;g.logoLum=null;}
+  if(key==='hero')g.hero=v;
+  if(key==='heroPh'){g.heroPh=+v;g.focal=[50,50];g.heroSmall=null;}
+  if(key==='showAddress')g.showAddress=!g.showAddress;
+  if(key==='showHours')g.showHours=!g.showHours;
+  if(key==='sched')g.sched=v;
+  if(key==='first')g.first=v;
+}
+
+document.addEventListener('click',ev=>{
+  const el=ev.target.closest('[data-a]'); if(!el)return;
+  const a=el.dataset.a, v=el.dataset.v; const g=G();
+  if(a==='scrim'){if(ev.target===el)closeModal();return;}
+  if(el.tagName==='A'||a==='jump')ev.preventDefault();
+  /* strip */
+  if(a==='view'){S.view=v;S.setup=0;S.setupPick=null;if(v==='setup'&&S.newKey)S.gym=S.newKey;if((v==='settings'||v==='page')&&!S.gyms[S.gym])S.gym='pilates';if(v==='today'||v==='setup'){if(!S.newKey){if(!S.su||!S.su.biz)ensureNew();S.su.addr=S.su.addr||'Calle Ejemplo 7, San Juan';if(!S.su.focus.length)S.su.focus=['strength','hiit'];if(!S.su.svc.length)S.su.svc=['group','one'];if(S.su.staff==null)S.su.staff=false;createGym();S.view=v;}}
+    location.hash=''; return render();}
+  if(a==='gym'){S.gym=v;S.filt='all';return render();}
+  if(a==='mem'){S.member=v==='1';return render();}
+  if(a==='wid'){S.wid=v;return render();}
+  if(a==='reset'){if(el.dataset.sure){localStorage.removeItem(KEY);S=fresh();closeModal();return render();}el.dataset.sure='1';el.textContent='Tap again to erase your changes';setTimeout(()=>{if(el.isConnected){delete el.dataset.sure;el.textContent='Start over';}},3000);return;}
+  /* sign-up */
+  if(a==='go'){S.view=v;return render();}
+  if(a==='suf'){const f=S.su.focus,i=f.indexOf(v);i>=0?f.splice(i,1):f.push(v);return render();}
+  if(a==='sus'){const f=S.su.svc,i=f.indexOf(v);i>=0?f.splice(i,1):f.push(v);return render();}
+  if(a==='sust'){S.su.staff=v==='1';return render();}
+  if(a==='create'){createGym();toast(`${S.gyms[S.newKey].name} is created.`);return render();}
+  if(a==='gs'){const ng=S.gyms[S.newKey];S.gym=S.newKey;
+    if(v==='page'){if(ng.pageSet){S.view='settings';}else{S.view='setup';S.setup=0;S.setupPick=null;}return render();}
+    if(v==='prod')return modal({k:'qprod',all:true,sel:[]});
+    if(v==='cls'){if(!ng.areas.length)return modal({k:'msg',title:'Set up your page first',msg:'A class belongs to an area (a Track). Set up your page to name your areas, then add the class.'});return modal({k:'qcls',area:ng.areas[0].id});}
+    if(v==='share'){ng.shared=true;navigator.clipboard&&navigator.clipboard.writeText(pageUrl(ng)).catch(()=>{});toast('Link copied: zana.fit/'+slug(ng.name));return render();}
+    return toast('Not part of this prototype.');}
+  /* setup */
+  if(a==='opick'){const pk=S.setupPick,i=pk.findIndex(p=>p.k===v);
+    if(i>=0){const ex=pk[i].id&&g.areas.find(x=>x.id===pk[i].id);if(ex&&(g.classes.some(c=>c.area===ex.id)||g.products.some(p=>!isAll(p.a)&&p.a.includes(ex.id)))){return modal({k:'msg',title:`${esc(ex.n)} has classes or prices`,msg:'Untick it after moving them, or stop offering it in Settings › Tracks. Removing it here would hide them.'});}pk.splice(i,1);}
+    else pk.push({k:v,n:el.dataset.n});return render();}
+  if(a==='ownadd'){const inp=document.getElementById('ownarea');const n=(inp&&inp.value||'').trim();if(n){S.setupPick.push({k:'own-'+slug(n),n});}return render();}
+  if(a==='setback'){if(S.setup===0){S.setupPick=null;S.view=S.reask?'settings':'today';S.reask=false;}else S.setup--;return render();}
+  if(a==='setskip'){S.setupPick=[];applyPick(g);S.setup=1;return render();}
+  if(a==='setnext'){
+    if(S.setup===0){const bl=applyPick(g);if(S.reask){S.reask=false;S.view='settings';if(bl.length)toast(`${bl.map(x=>x.n).join(', ')} kept: they have classes or prices.`);return render();}S.setup=1;return render();}
+    if(S.setup===1){S.setup=2;return render();}
+    g.pageSet=true;S.view='settings';S.setup=0;toast(visibleAreas(g).length?'Your page is set up.':'Your page is set up. Add a class or a price to fill it.');return render();}
+  /* knobs */
+  if(a==='k'){k(g,el.dataset.k,v);return render();}
+  if(a==='focal'){if(typeof g.heroPh!=='string')return toast('Tap point works on an uploaded photo. Samples stay centered.');const r=el.getBoundingClientRect();g.focal=[Math.round((ev.clientX-r.left)/r.width*100),Math.round((ev.clientY-r.top)/r.height*100)];return render();}
+  if(a==='amv'){const i=+v,d=+el.dataset.d,j=i+d;const ar=g.areas;[ar[i],ar[j]]=[ar[j],ar[i]];return render();}
+  if(a==='aph'){g.areas[+el.dataset.i].ph=v===''?null:+v;return render();}
+  if(a==='reask'){S.reask=true;S.setupPick=initPick(g);S.view='setup';S.setup=0;return render();}
+  if(a==='pshow'){const p=findProd(g,v);p.show=!p.show;return render();}
+  if(a==='pstart'){g.start=g.start===v?null:v;return render();}
+  if(a==='banclear'){g.banner={text:'',end:''};return render();}
+  if(a==='pv'){S.pv=v;return render();}
+  if(a==='copy'){navigator.clipboard&&navigator.clipboard.writeText(pageUrl(g)).catch(()=>{});toast('Copied. In Zana: zana.fit/'+slug(g.name)+'. Here, a labs link to this page.');return;}
+  if(a==='viewpage'){S.view='page';S.member=false;window.scrollTo(0,0);return render();}
+  if(a==='othertab')return toast('Other Settings tabs are in the Settings prototype.');
+  if(a==='qadd'){if(v==='prod')return modal({k:'qprod',all:!el.dataset.i,sel:el.dataset.i?[el.dataset.i]:[]});if(!g.areas.length)return toast('Name your areas first.');return modal({k:'qcls',area:el.dataset.i||g.areas[0].id});}
+  /* public page */
+  if(a==='jump'){const t2=document.getElementById(v);if(t2)t2.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(a==='lang'){S.lang=v;return render();}
+  if(a==='day'){S.day=+v;return render();}
+  if(a==='filt'){S.filt=v;return render();}
+  if(a==='signin')return modal({k:'signin'});
+  if(a==='signinsend'){const e=document.getElementById('se');return modal({k:'signin',sent:true,email:e&&e.value});}
+  if(a==='signinok'){S.member=true;if(!g.me)g.me={owns:[],left:'No plan yet',next:null};closeModal();return render();}
+  if(a==='signout'){S.member=false;toast('Signed out.');return render();}
+  if(a==='joinbtn')return modal({k:'join',sms:false,wv:false});
+  if(a==='book'){const c=findClass(g,v);if(canBook(g,c))return doBook(g,v),render();
+    if(S.member&&g.me){render();const sp=startProd(g);return modal({k:'done',msg:`To book ${esc(c.n)} you need a class pack or plan.`,cta:sp?[`Get ${esc(sp.n)}`,'buy',sp.id]:null});}
+    return modal({k:'join',sms:false,wv:false,intent:{t:'book',id:v,label:`${c.n} at ${c.t}`}});}
+  if(a==='unbook'){delete (S.booked[g.key]||{})[S.day+'|'+v];toast('Booking cancelled.');return render();}
+  if(a==='buy'){const p=findProd(g,v);closeModal();if(S.member)return buyFlow(g,v,false);return modal({k:'join',sms:false,wv:false,intent:{t:'buy',id:v,label:p.n}});}
+  /* modal */
+  if(a==='mclose')return closeModal();
+  if(a==='mtog'){M[v]=!M[v];const n=document.getElementById('jn'),e=document.getElementById('je');if(n)M.name=n.value;if(e)M.email=e.value;return drawModal();}
+  if(a==='joingo'){const n=document.getElementById('jn').value.trim(),e=document.getElementById('je').value.trim();
+    if(!n||e.indexOf('@')<1){M.name=n;M.email=e;drawModal();return toast('Add your name and email.');}
+    if(!M.wv){M.name=n;M.email=e;drawModal();return toast(`Agree to the ${g.mode==='Online'?'coaching agreement':'waiver'} to sign up.`);}
+    const it=M.intent;closeModal();return afterJoin(it);}
+  if(a==='qall'){M.all=!M.all;return drawModal();}
+  if(a==='qsel'){M.all=false;const i=M.sel.indexOf(v);i>=0?M.sel.splice(i,1):M.sel.push(v);return drawModal();}
+  if(a==='qprodok'){const n=document.getElementById('qn').value.trim()||'Plan',p=document.getElementById('qp').value.trim()||'$0',per=document.getElementById('qper').value,d=document.getElementById('qd').value.trim();
+    const cov=M.all||!M.sel.length?'all':M.sel.slice();const np={id:uid('p'),n,p:/^\$?0$/.test(p)?'Free':(p[0]==='$'||/free/i.test(p)?p:'$'+p),per,d,a:cov,show:true};g.products.push(np);
+    closeModal();toast(`${n} added. Star a plan as Start here in Settings › Your page if you want one for new people.`);return render();}
+  if(a==='qclsok'){const n=document.getElementById('cn').value.trim()||'Class',ar=document.getElementById('ca').value,tm=document.getElementById('ct').value.trim()||'7:00 AM',cap=Math.max(1,parseInt(document.getElementById('cc').value)||12),co=document.getElementById('cco').value.trim();
+    let area=ar; if(!area){if(!g.areas.length)g.areas=[{id:uid('a'),src:'general',n:'General',d:'',ph:null}];area=g.areas[0].id;}
+    g.classes.push({id:uid('c'),area,t:tm,n,coach:co,left:cap,cap});closeModal();toast(`${n} added.`);return render();}
+});
+/* typing in knobs: update and refresh the preview without losing focus */
+let typT=null;
+document.addEventListener('input',ev=>{
+  const el=ev.target, g=G();
+  if(el.dataset.su){S.su[el.dataset.su]=el.value;const pos=el.selectionStart,key=el.dataset.su;clearTimeout(typT);typT=setTimeout(()=>{render();const x=document.querySelector(`[data-su="${key}"]`);if(x){x.focus();try{x.setSelectionRange(pos,pos);}catch(e){}}},250);return;}
+  if(el.dataset.kin){const key=el.dataset.kin;
+    if(key==='brand'){g.brand=el.value;clearTimeout(typT);typT=setTimeout(render,120);return;}
+    g[key]=el.value; if(key==='desc'){const c=document.getElementById('desccnt');if(c){c.textContent=el.value.length+' of 400';c.className='cnt'+(el.value.length>=400?' over':'');}}
+    softPreview();return;}
+  if(el.dataset.ban){g.banner=g.banner||{text:'',end:''};g.banner[el.dataset.ban]=el.value;softPreview();if(el.dataset.ban==='end')render();return;}
+  if(el.dataset.ain){const a=g.areas[+el.dataset.i];a[el.dataset.ain]=el.value;softPreview();return;}
+  if(el.dataset.rn!=null){S.setupPick[+el.dataset.rn].n=el.value;return;}
+});
+function softPreview(){const sc=document.getElementById('pvscale');if(sc){sc.innerHTML=pageHtml(G(),true);}save();}
+/* uploads: downsized in the browser and kept here only */
+document.addEventListener('change',ev=>{
+  const el=ev.target; if(!el.dataset.file||!el.files||!el.files[0])return; const f=el.files[0], g=G(), kind=el.dataset.file;
+  if(!/^image\/(png|jpeg|webp)$/.test(f.type))return modal({k:'msg',title:'That file type doesn\u2019t work',msg:'Use a PNG, JPEG or WebP picture. SVG logos aren\u2019t accepted.'});
+  if(kind==='logo'&&f.size>512*1024)return modal({k:'msg',title:'That logo is too big',msg:`It\u2019s ${Math.round(f.size/1024)} KB. Logos can be up to 512 KB.`});
+  const rd=new FileReader(); rd.onload=()=>{const img=new Image();img.onload=()=>{
+    const max=kind==='logo'?256:1600, sc=Math.min(1,max/Math.max(img.width,img.height));
+    const cv=document.createElement('canvas');cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);const cx=cv.getContext('2d');cx.drawImage(img,0,0,cv.width,cv.height);
+    if(kind==='logo'){
+      const d=cx.getImageData(0,0,cv.width,cv.height).data;let r=0,gg=0,b=0,n=0;for(let i=0;i<d.length;i+=16){if(d[i+3]>128){r+=d[i];gg+=d[i+1];b+=d[i+2];n++;}}
+      g.logoLum=n?lum('#'+[r,gg,b].map(x=>Math.round(x/n).toString(16).padStart(2,'0')).join('')):null; g.logo=cv.toDataURL('image/png');
+    } else {
+      const url=cv.toDataURL('image/jpeg',.8);
+      if(kind==='hero'){g.heroPh=url;g.focal=[50,50];g.heroSmall=img.width<1200?img.width:null;if(g.hero==='none')g.hero='full';}
+      if(kind==='area'){const a=g.areas[+el.dataset.i];a.ph=url;a.focal=[50,50];}
+    }
+    render();};img.src=rd.result;}; rd.readAsDataURL(f);
+});
+function pageUrl(g){return location.origin+location.pathname+'#/page/'+g.key;}
+
+/* links: #/page/pilates, #/settings/box, #/signup, add /bare to hide the test strip */
+function fromHash(){
+  const m=location.hash.match(/^#\/(\w+)(?:\/([\w-]+))?/); if(!m)return;
+  const v=m[1], key=m[2];
+  if(VIEWS.some(x=>x[0]===v))S.view=v;
+  if(key&&S.gyms[key])S.gym=key;
+}
+addEventListener('hashchange',()=>{fromHash();render();});
+fromHash();
+render();
+</script>
+</body>
+</html>
