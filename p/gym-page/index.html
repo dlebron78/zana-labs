@@ -1600,6 +1600,7 @@ function render(){
   save();
 }
 function fitPreview(){
+  document.querySelectorAll('.sthumb>div,.gp>div').forEach(x=>{const cw=parseFloat(getComputedStyle(x).width);const w=x.parentElement.clientWidth;if(w&&cw>=1000)x.style.zoom=((w-2)/cw).toFixed(4);});
   const box=document.getElementById('pvbox'), sc=document.getElementById('pvscale'); if(!box||!sc)return;
   if(S.pv==='phone'){sc.style.width='374px';sc.style.zoom='';return;}
   const w=box.clientWidth, base=1240, s=Math.min(1,w/base);
