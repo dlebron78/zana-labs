@@ -277,3 +277,38 @@ button.m-row:hover { background: #FAFAF8; }
 }
 .m-addrow { min-height: 52px; }
 .m-addrow .m-rt b { font-weight: 600; }
+
+/* ---------- v3: the bottom menu is the pick, review fixes, an overdue member ---------- */
+/* the gym's notice sits in the gym's own color, right under the bar */
+.m-news { background: var(--f); color: var(--onf); border-bottom: 0; border-top: 1px solid var(--wash); }
+.m-news .m-lab { color: var(--onf2); }
+.m-news .m-i { color: var(--onf2); }
+/* tabs: Me is her initials; a red dot on Home when something there needs her */
+.m-tabi { position: relative; display: grid; place-items: center; width: 26px; height: 24px; }
+.m-tabme { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1.6px solid currentColor; font-size: 10px; font-weight: 700; letter-spacing: .02em; }
+.m-tabbar button[aria-current="page"] .m-tabme { background: var(--ink); border-color: var(--ink); color: #fff; }
+.m-dot { position: absolute; top: -1px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px var(--card); }
+/* Pay first, the cancel warning */
+.m-st.bad, .m-state.bad { color: var(--red); }
+.m-state.bad { font-weight: 500; }
+.m-warn { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--fill); font-size: 15px; }
+.m-warn.bad { background: var(--prob-bg); color: var(--red); border: 1px solid var(--prob-line); }
+.btn.m-danger { background: var(--prob-bg); color: var(--red); }
+/* fix 4: who the booking is for, big enough to notice */
+.m-whobig { display: grid; gap: 8px; }
+.m-whobig > div { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
+.m-whobig button { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); text-align: left; }
+.m-whobig button > span:last-child { display: grid; min-width: 0; }
+.m-whobig button b { font-size: 16px; font-weight: 700; }
+.m-whobig button span span { font-size: 13px; color: var(--text2); }
+.m-whobig button[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.m-whoava { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--fill); font-size: 14px; font-weight: 700; }
+.m-whobig button[aria-pressed="true"] .m-whoava { background: var(--ink); color: #fff; }
+.m-whobig button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* Me: her card */
+.m-meCard { display: flex; align-items: center; gap: 12px; }
+.m-meava { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 16px; font-weight: 700; }
+.m-meCard .m-rt { display: grid; min-width: 0; }
+.m-meCard .m-rt b { font-size: 17px; }
+.m-meCard .m-rt span { font-size: 14px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; }
+.notes .n-fx { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; }

@@ -1,7 +1,7 @@
 /* Member home: what the phone draws. Pure text in, text out: no page access here, so the same code can be checked without a browser.
    The one rule behind every screen: a thing shows only when this person has one. Nothing is ever shown empty or locked. */
 
-import { DAYS, WD, GYMS, CLASSES, COACHES, WEEK, FULL, WORKOUTS, W, F } from './data.js?v=2';
+import { DAYS, WD, GYMS, CLASSES, COACHES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=3';
 
 let S;                                      // the state being drawn: draw() and bind() set it, the helpers below read it
 export const bind = state => { S = state; };
@@ -15,6 +15,7 @@ const gym = () => GYMS[me().gym];
 const person = id => me().people.find(p => p.id === id) || me().people[0];
 const up = s => s.charAt(0).toUpperCase() + s.slice(1);
 const fam = () => me().people.length > 1;
+export const FX = () => S.fx !== 'off';      // the review fixes 1, 3, 4 and 5: on unless the viewer switched them off
 
 const svg = d => `<svg class="m-i" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${d}</svg>`;
 const I = {
@@ -56,6 +57,8 @@ export const bid = x => `${x.day}-${x.time}-${x.cls}`;
 const bkOf = (who, c) => me().bookings.find(x => x.who === who && bid(x) === c.id);
 const canTake = (p, cls) => !!CLASSES[cls].minor === !!p.minor;     // teens classes for the teen, the rest for adults
 const byWhen = (a, c) => a.day - c.day || a.time.localeCompare(c.time);
+const mins = hm => { const [h, m] = hm.split(':').map(Number); return h * 60 + m; };
+export const hoursTo = x => (x.day * 1440 + mins(x.time) - mins(NOW)) / 60;      // from now (Tuesday 4:15 PM) to the class
 
 /* Which classes the schedule opens on for this person: the ones she has booked before. */
 function listFor(p, day) {
@@ -76,6 +79,9 @@ const planName = pl => (pl.name ? t(pl.name) : t(prod(pl.pid).name));
 /* What booking one class costs this person: nothing extra on a plan, one class off a pack, or the single price. */
 export function costOf(m, who) {
   const pl = m.plans.find(x => x.who === who);
+  const due = m.alerts.find(a => a.kind === 'due' && a.who === who);
+  if (due && S.grace === 'out') return { kind: 'blocked', alert: due, plan: pl || null };     // grace has run out: Book turns into Pay first [PHO-181]
+  if (who === m.people[0].id && m.credits > 0 && !(pl && (pl.kind === 'plan' || pl.left > 0))) return { kind: 'credit' };
   if (pl && pl.kind === 'plan') return { kind: 'plan', plan: pl };
   if (pl && pl.kind === 'pack' && pl.left > 0) return { kind: 'pack', plan: pl };
   return { kind: 'pay', amount: GYMS[m.gym].single, plan: pl || null };
@@ -89,6 +95,11 @@ export function offerFor(m, who) {
   const g = GYMS[m.gym], p = m.people.find(x => x.id === who);
   if (!p || p.minor) return null;
   const pl = m.plans.find(x => x.who === who);
+  const unl = g.products.find(x => x.kind === 'plan');
+  if (!pl && FX() && m.pace && unl) {         // fix 5: she comes often enough that a month of single classes costs more than the plan
+    const monthly = Math.round(m.pace * 52 / 12 * g.single);
+    if (monthly > unl.price) return { why: 'unl', pid: unl.id, price: unl.price, monthly, save: monthly - unl.price, pace: m.pace };
+  }
   if (!pl) {
     const intro = g.intro && !m.bought ? g.intro : null;
     const pr = intro ? g.products.find(x => x.id === intro.pid) : g.products.find(x => x.kind === 'pack');
@@ -108,12 +119,13 @@ export function priceFor(m, who, pid) {
 }
 function offerCopy(o) {
   const u = gym().unit, x = f();
+  if (o.why === 'unl') return { title: x.unlTitle(o.price), line: x.unlLine(o.pace, o.monthly, o.save) };
   if (o.why === 'intro') return { title: x.introTitle(o.n, u, o.price), line: x.introLine(o.full, o.full - o.price) };
   if (o.why === 'first') return { title: x.packTitle(o.n, u, o.price), line: x.introLine(o.full, o.full - o.price) };
   if (o.why === 'bigger') return { title: x.biggerTitle(o.n, u, o.price), line: x.biggerLine(o.each, o.nowEach, u) };
   return { title: x.sameTitle(o.n, u, o.price), line: x.sameLine(o.each, u) };
 }
-const buyBtn = (o, who, cls = 'btn') => `<button class="${cls}" data-act="sheet" data-kind="pay" data-pay="product" data-id="${o.pid}" data-who="${who}">${esc(f().buyN(o.n, gym().unit))}</button>`;
+const buyBtn = (o, who, cls = 'btn') => `<button class="${cls}" data-act="sheet" data-kind="pay" data-pay="product" data-id="${o.pid}" data-who="${who}">${esc(o.why === 'unl' ? f().switchTo(t(prod(o.pid).name)) : f().buyN(o.n, gym().unit))}</button>`;
 
 /* ---------- what this person has: it decides every section, tab and button ---------- */
 export function has(m) {
@@ -126,15 +138,17 @@ export function has(m) {
 const aboutName = () => `${t(W.about)} ${gym().name}`;
 function sections() {                         // the lines under the gym's name
   const h = has(me());
+  if (FX()) return [['home', t(W.home)], h.book && ['schedule', t(W.schedule)], h.train && ['workouts', t(W.workouts)], ['gym', aboutName()]].filter(Boolean);      // fix 1: her own things live under her initials
   return [['home', t(W.home)], h.book && ['schedule', t(W.schedule)], h.train && ['workouts', t(W.workouts)], h.family && ['family', t(W.family)],
     ['plan', t(W.plan)], ['gym', aboutName()], ['account', t(W.account)]].filter(Boolean);
 }
-function tabs() {                             // the runner-up: a bottom bar
+function tabs() {                             // the pick: a bar at the bottom. A tab shows only when she has something for it
   const h = has(me());
-  return [['home', t(W.home)], h.book && ['schedule', t(W.schedule)], h.train && ['workouts', t(W.workouts)], ['account', t(W.account)]].filter(Boolean);
+  return [['home', t(W.home)], h.book && ['schedule', t(W.schedule)], h.train && ['workouts', t(W.workouts)], ['account', t(W.meTab)]].filter(Boolean);
 }
 const isTab = s => ['home', 'schedule', 'workouts', 'account'].includes(s);
-const titleOf = s => (s === 'gym' ? aboutName() : t(W[s]));
+const titleOf = s => (s === 'gym' ? aboutName() : s === 'account' && S.nav === 'tabs' ? t(W.meTab) : t(W[s]));
+const underMe = s => ['plan', 'family'].includes(s) && (S.nav === 'tabs' || FX());     // pages reached from her initials go back there
 
 /* ---------- the bar on top ---------- */
 function top() {
@@ -142,7 +156,7 @@ function top() {
   const title = esc(home ? g.name : titleOf(S.screen));
   const lead = home || (tabbed && isTab(S.screen))
     ? `<span class="m-logo" aria-hidden="true">${g.mark}</span>`
-    : `<button class="m-icb" data-act="go" data-arg="${tabbed ? 'account' : 'home'}" aria-label="${T(W.back)}">${I.back}</button>`;
+    : `<button class="m-icb" data-act="go" data-arg="${tabbed || underMe(S.screen) ? 'account' : 'home'}" aria-label="${T(W.back)}">${I.back}</button>`;
   const mid = tabbed
     ? `<b class="m-title">${title}</b>`
     : `<button class="m-title" data-act="menu" aria-expanded="${!!S.menu}" aria-haspopup="true"><b>${title}</b>${I.down}</button>`;
@@ -161,7 +175,9 @@ function bottom() {
   let bar = '';
   if (S.nav === 'tabs') {
     const cur = isTab(S.screen) ? S.screen : 'account';
-    bar = `<nav class="m-tabbar" aria-label="${T(W.tabsLabel)}">${tabs().map(([id, label]) => `<button data-act="go" data-arg="${id}"${cur === id ? ' aria-current="page"' : ''}>${I[id]}<span>${esc(label)}</span></button>`).join('')}</nav>`;
+    const icon = id => (id === 'account' ? `<span class="m-tabme" aria-hidden="true">${esc(me().ini)}</span>` : I[id]);      // Me is her initials
+    const dot = id => (id === 'home' && S.screen !== 'home' && me().alerts.length ? '<i class="m-dot" aria-hidden="true"></i>' : '');      // something on Home needs her
+    bar = `<nav class="m-tabbar" aria-label="${T(W.tabsLabel)}">${tabs().map(([id, label]) => `<button data-act="go" data-arg="${id}"${cur === id ? ' aria-current="page"' : ''}><span class="m-tabi">${icon(id)}${dot(id)}</span><span>${esc(label)}</span></button>`).join('')}</nav>`;
   } else if (S.nav === 'book' && S.screen === 'home' && h.book) {
     bar = `<div class="m-bookbar"><button class="btn pri lg m-wide" data-act="go" data-arg="schedule">${T(W.bookClass)}</button></div>`;
   }
@@ -180,7 +196,8 @@ function notices() {
   const m = me(), red = [], blue = [];
   m.alerts.forEach(a => {
     const p = person(a.who), pl = m.plans.find(x => x.who === a.who);
-    red.push(`<section class="m-note act"><p class="m-nk">${T(W.needsYou)}</p><b>${esc(f().dueTitle(p.name, p.me))}</b><p>${esc(f().dueLine(planName(pl), a.amount, t(a.since)))}</p>
+    const grace = S.grace === 'out' ? f().graceOut() : gym().graceUntil ? f().graceIn(t(gym().graceUntil)) : '';
+    red.push(`<section class="m-note act"><p class="m-nk">${T(W.needsYou)}</p><b>${esc(f().dueTitle(p.name, p.me))}</b><p>${esc(f().dueLine(planName(pl), a.amount, t(a.since)))} ${esc(grace)}</p>
       <div class="m-na"><button class="btn" data-act="sheet" data-kind="pay" data-pay="due" data-id="${a.id}" data-who="${a.who}">${esc(f().payAmt(a.amount))}</button></div></section>`);
   });
   m.plans.forEach(pl => {      // a pack that just ran out: the one time an offer moves up here. "Not now" sends it back down to her plan
@@ -214,7 +231,21 @@ function nextCard(x) {
   return `<section class="card m-next"><div class="m-nh"><span class="m-lab">${esc(whenWord(x.day))}</span><span class="m-pill ok">${I.check}${T(W.booked)}</span></div>
     <div class="m-nt"><span class="m-time">${clock(x.time)}</span><span class="m-what"><b>${T(k.name)}</b>${tag(person(x.who))}</span></div>
     <p class="m-meta">${esc(COACHES[c.coach])} · ${k.mins} min · ${T(k.room)}</p>${tr ? workout(tr) : ''}
-    <div class="m-foot">${tr ? logBtn(tr) : ''}<button class="m-link" data-act="cancel" data-id="${bid(x)}" data-who="${x.who}">${T(W.cancel)}</button></div></section>`;
+    <div class="m-foot">${tr ? logBtn(tr) : ''}${cancelBtn(x, 'm-link')}</div></section>`;
+}
+/* Cancel: with fix 3, a booking she paid for asks first and says what she gets back. Leaving a waitlist never asks. */
+function cancelBtn(x, cls) {
+  const label = x.wait ? T(W.waitLeave) : T(W.cancel);
+  return FX() && !x.wait
+    ? `<button class="${cls}" data-act="sheet" data-kind="cancel" data-id="${bid(x)}" data-who="${x.who}">${label}</button>`
+    : `<button class="${cls}" data-act="cancel" data-id="${bid(x)}" data-who="${x.who}">${label}</button>`;
+}
+/* What a cancel costs, from the gym's window and how the class was paid for. */
+export function cancelTerms(x) {
+  const g = gym(), hrs = g.cancelHrs, late = hrs > 0 && hoursTo(x) < hrs;
+  if (x.pack) return { late, back: late ? 'none' : 'pack' };
+  if (x.paid || x.credit) return { late, back: late ? 'none' : 'credit', amt: x.paid || g.single };
+  return { late, back: 'plan' };
 }
 function trackRows(ids, label, dflt) {
   if (!ids.length) return '';
@@ -250,8 +281,15 @@ function weekRows(rest, canBook) {
     const name = `<b>${T(k.name)}${tag(p)}</b>`;
     return booked
       ? `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${x.who}">${when}<span class="m-rt">${name}<span>${esc(COACHES[c.coach])}</span></span><span class="m-st ${x.wait ? 'q' : 'ok'}">${x.wait ? T(W.waiting) : I.check + T(W.booked)}</span></button>`
-      : `<div class="m-row">${when}<span class="m-rt">${name}<span>${T(W.usual)}</span></span><button class="btn sm" data-act="quick" data-id="${c.id}" data-who="${x.who}">${T(W.book)}</button></div>`;
-  }).join('')}${canBook ? `<button class="m-row m-addrow" data-act="go" data-arg="schedule"><span class="m-rt"><b>+ ${T(W.bookAnother)}</b></span>${I.right}</button>` : ''}</div></section>`;
+      : `<div class="m-row">${when}<span class="m-rt">${name}<span>${T(W.usual)}</span></span>${costOf(m, x.who).kind === 'blocked'
+        ? `<button class="btn sm" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${x.who}">${T(W.payFirst)}</button>`
+        : `<button class="btn sm" data-act="quick" data-id="${c.id}" data-who="${x.who}">${T(W.book)}</button>`}</div>`;
+  }).join('')}${canBook ? addRows() : ''}</div></section>`;
+}
+function addRows() {               // fix 4: a parent gets one row per person, so booking for her son is in plain sight
+  const m = me();
+  if (!(fam() && FX())) return `<button class="m-row m-addrow" data-act="go" data-arg="schedule"><span class="m-rt"><b>+ ${T(W.bookAnother)}</b></span>${I.right}</button>`;
+  return m.people.map(p => `<button class="m-row m-addrow" data-act="go" data-arg="schedule" data-who="${p.id}"><span class="m-rt"><b>+ ${esc(p.me ? f().bookForMe() : f().bookFor(p.name))}</b></span>${I.right}</button>`).join('');
 }
 
 /* Her plan, in one card. The offer sits here, at the thing it is about, and only one at a time. */
@@ -261,7 +299,7 @@ function planBlock(link) {
     const pl = m.plans.find(x => x.who === p.id);
     if (!pl && (p.minor || !g.classes)) return;
     let title, line;
-    if (!pl) { title = t(W.payPer); line = esc(f().perUnit(g.single, g.unit)); }
+    if (!pl) { title = t(W.payPer); line = esc(f().perUnit(g.single, g.unit)) + (p.me && m.credits > 0 ? ` · <strong>${esc(f().creditLine(m.credits))}</strong>` : ''); }
     else if (pl.kind === 'pack') { title = planName(pl); line = `${pl.left <= 2 ? `<strong>${esc(f().left(pl.left, g.unit))}</strong>` : esc(f().left(pl.left, g.unit))}${pl.left > 0 ? ` · ${esc(f().useBy(t(pl.until)))}` : ''}`; }
     else { title = planName(pl); line = pl.due ? `<strong class="m-bad">${T(W.payFailed)}</strong>` : esc(f().renews(t(pl.renews), pl.price || prod(pl.pid).price)); }
     const inner = `<span class="m-rt"><b>${esc(title)}${tag(p)}</b><span>${line}</span></span>`;
@@ -287,7 +325,8 @@ function home() {
   if (next && !nextToday) out += nextCard(next);
   if (!next && h.book) out += emptyCard(t(W.nothingBooked), t(W.nothingBookedLine));
   if (S.nav === 'menu' && h.book) out += `<button class="btn lg m-wide" data-act="go" data-arg="schedule">${T(W.bookClass)}</button>`;
-  out += weekRows(m.bookings.filter(x => x !== next).sort(byWhen), h.book) + planBlock(true);
+  out += weekRows(m.bookings.filter(x => x !== next).sort(byWhen), h.book) || (h.book ? `<section class="m-sec"><div class="card m-rows">${addRows()}</div></section>` : '');
+  out += planBlock(true);
   return `<div class="m-page${g.news ? ' m-hasnews' : ''}">${g.news ? newsStrip() : ''}${out}</div>`;
 }
 
@@ -295,16 +334,19 @@ function home() {
 function schedule() {
   const m = me(), p = person(S.who || m.people[0].id), { all, mine } = listFor(p, S.day);
   const list = S.all ? all : mine, more = all.length > mine.length;
-  const whoSeg = fam() ? `<div class="m-who"><span class="m-lab">${T(W.forWhom)}</span><span class="m-seg" role="group" aria-label="${T(W.forWhom)}">${m.people.map(x => `<button data-act="who" data-arg="${x.id}" aria-pressed="${x.id === p.id}">${x.me ? T(W.me) : esc(x.name)}</button>`).join('')}</span></div>` : '';
+  const whoSeg = !fam() ? '' : FX()
+    ? `<div class="m-whobig" role="group" aria-label="${T(W.forWhom)}"><p class="m-lab">${T(W.forWhom)}</p><div>${m.people.map(x => `<button data-act="who" data-arg="${x.id}" aria-pressed="${x.id === p.id}"><span class="m-whoava" aria-hidden="true">${esc(x.name.charAt(0))}</span><span><b>${esc(x.name)}</b><span>${x.me ? T(W.you) : `${x.age} ${T(W.years)}`}</span></span></button>`).join('')}</div></div>`
+    : `<div class="m-who"><span class="m-lab">${T(W.forWhom)}</span><span class="m-seg" role="group" aria-label="${T(W.forWhom)}">${m.people.map(x => `<button data-act="who" data-arg="${x.id}" aria-pressed="${x.id === p.id}">${x.me ? T(W.me) : esc(x.name)}</button>`).join('')}</span></div>`;
   const strip = `<div class="m-days" role="group" aria-label="${T(W.schedule)}">${DAYS.map((d, i) => `<button data-act="day" data-arg="${i}" aria-pressed="${i === S.day}"><span>${esc(dayShort(i))}</span><b>${d.n}</b></button>`).join('')}</div>`;
   const rows = list.map(c => {
     const k = CLASSES[c.cls], x = bkOf(p.id, c), left = k.cap - taken(c), cost = costOf(m, p.id);
     const right = x ? (x.wait ? `<span class="m-st q">${T(W.waiting)}</span>` : `<span class="m-st ok">${I.check}${T(W.booked)}</span>`)
-      : left <= 0 ? `<span class="m-st q">${T(W.full)}</span>` : cost.kind === 'pay' ? `<span class="m-st q">$${cost.amount}</span>` : '';
+      : left <= 0 ? `<span class="m-st q">${T(W.full)}</span>` : cost.kind === 'blocked' ? `<span class="m-st bad">${T(W.payFirst)}</span>` : cost.kind === 'pay' ? `<span class="m-st q">$${cost.amount}</span>` : '';
     const spots = !x && left > 0 && left <= 3 ? ` · ${left} ${T(left === 1 ? W.spot : W.spots)}` : '';
     return `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${p.id}"><span class="m-rd"><b>${clock(c.time)}</b></span><span class="m-rt"><b>${T(k.name)}</b><span>${esc(COACHES[c.coach])} · ${k.mins} min${spots}</span></span>${right}${I.right}</button>`;
   }).join('');
-  return `<div class="m-page">${whoSeg}${strip}<section class="m-sec"><h2 class="m-lab">${esc(dateLine(S.day))}</h2>${
+  const head = fam() && FX() && !p.me ? `${esc(f().classesFor(p.name))} · ${esc(dateLine(S.day))}` : esc(dateLine(S.day));
+  return `<div class="m-page">${whoSeg}${strip}<section class="m-sec"><h2 class="m-lab">${head}</h2>${
     rows ? `<div class="card m-rows">${rows}</div>` : `<section class="m-none"><span>${T(all.length ? W.noneThisDay : W.noneAtAll)}</span></section>`}</section>${
     more ? `<button class="m-link m-center" data-act="all">${T(S.all ? W.showMine : W.showAll)}</button>` : ''}</div>`;
 }
@@ -353,9 +395,14 @@ function gymPage() {
 }
 function accountPage() {
   const m = me(), g = gym(), h = has(m);
-  const links = S.nav === 'tabs'               // with tabs, everything without a tab of its own ends up in here
-    ? `<div class="card m-rows">${[['plan', t(W.plan)], h.family && ['family', t(W.family)], ['gym', aboutName()]].filter(Boolean).map(([id, label]) => `<button class="m-row" data-act="go" data-arg="${id}"><span class="m-rt"><b>${esc(label)}</b></span>${I.right}</button>`).join('')}</div>` : '';
-  return `<div class="m-page"><section class="card"><div class="m-nt"><span class="m-what"><b>${esc(m.full)}</b></span></div><p class="m-meta">${esc(m.email)}</p></section>${links}
+  const mine = S.nav === 'tabs' || FX();       // everything that is hers, under her initials
+  const links = mine
+    ? `<div class="card m-rows">${[['plan', t(W.plan)], h.family && ['family', t(W.family)], S.nav === 'tabs' && ['gym', aboutName()]].filter(Boolean).map(([id, label]) => `<button class="m-row" data-act="go" data-arg="${id}"><span class="m-rt"><b>${esc(label)}</b></span>${I.right}</button>`).join('')}</div>` : '';
+  const bk = mine && h.book ? listCard(t(W.upcoming), m.bookings.slice().sort(byWhen).map(x => {
+    const k = CLASSES[x.cls], c = findClass(bid(x));
+    return c ? `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${x.who}"><span class="m-rd"><b>${esc(dayShort(x.day))}</b><span>${clock(x.time)}</span></span><span class="m-rt"><b>${T(k.name)}${tag(person(x.who))}</b><span>${esc(COACHES[c.coach])}</span></span><span class="m-st ${x.wait ? 'q' : 'ok'}">${x.wait ? T(W.waiting) : I.check + T(W.booked)}</span></button>` : '';
+  }).join('')) : '';
+  return `<div class="m-page"><section class="card m-meCard"><span class="m-meava" aria-hidden="true">${esc(m.ini)}</span><span class="m-rt"><b>${esc(m.full)}</b><span>${esc(m.email)}</span></span></section>${links}${bk}
     <section class="m-sec"><h2 class="m-lab">${T(W.language)}</h2><span class="m-seg m-start" role="group" aria-label="${T(W.language)}"><button data-act="lang" data-arg="en" aria-pressed="${S.lang === 'en'}">English</button><button data-act="lang" data-arg="es" aria-pressed="${S.lang === 'es'}">Español</button></span></section>
     ${listCard(t(W.notifications), kv(T(W.notifLine), ''))}${listCard(t(W.documents), kv(esc(f().waiver(t(m.waiver))), ''))}${listCard(t(W.yourGyms), kv(esc(f().onlyPlace(g.name)), ''))}
     <button class="btn m-start" data-act="mock">${T(W.signOut)}</button>${sketch()}</div>`;
@@ -369,18 +416,32 @@ function classSheet() {
   const m = me(), c = findClass(S.sheet.id), p = person(S.sheet.who), k = CLASSES[c.cls], g = gym();
   const x = bkOf(p.id, c), tk = taken(c), cost = costOf(m, p.id), o = offerFor(m, p.id);
   let state = '', action, fine = '', extra = '';
-  if (x && x.wait) { state = `<p class="m-state q">${T(W.waitOn)}</p>`; action = `<button class="btn lg m-wide" data-act="cancel" data-id="${c.id}" data-who="${p.id}">${T(W.waitLeave)}</button>`; fine = t(W.waitNote); }
-  else if (x) { state = `<p class="m-state ok">${I.check}${T(W.youBooked)}</p>`; action = `<button class="btn lg m-wide" data-act="cancel" data-id="${c.id}" data-who="${p.id}">${T(W.cancel)}</button>`; }
+  if (x && x.wait) { state = `<p class="m-state q">${T(W.waitOn)}</p>`; action = cancelBtn(x, 'btn lg m-wide'); fine = t(W.waitNote); }
+  else if (x) { state = `<p class="m-state ok">${I.check}${T(W.youBooked)}</p>`; action = cancelBtn(x, 'btn lg m-wide'); }
+  else if (cost.kind === 'blocked') {        // grace is over: the one button pays the overdue plan, then she comes back here to book
+    state = `<p class="m-state bad">${esc(f().payFirstLine(cost.alert.amount))}</p>`;
+    action = `<button class="btn pri lg m-wide" data-act="sheet" data-kind="pay" data-pay="due" data-id="${cost.alert.id}" data-who="${p.id}">${esc(f().payAmt(cost.alert.amount))}</button>`;
+  }
   else if (tk >= k.cap) { state = `<p class="m-state q">${T(W.full)}. ${esc(f().spotsOf(tk, k.cap))}.</p>`; action = `<button class="btn pri lg m-wide" data-act="wait" data-id="${c.id}" data-who="${p.id}">${T(W.waitJoin)}</button>`; fine = t(W.waitNote); }
   else if (cost.kind === 'pay') {
     action = `<button class="btn pri lg m-wide" data-act="bookpay" data-id="${c.id}" data-who="${p.id}">${esc(f().bookPay(cost.amount))}</button>`; fine = f().charged(cost.amount);
     if (o) extra = `<div class="m-offer m-inset"><p class="m-lab">${T(W.offer)}</p><div><b>${esc(offerCopy(o).title)}</b><p>${esc(offerCopy(o).line)}</p></div>${buyBtn(o, p.id)}</div>`;   // the offer sits under the button, never in front of it
   } else {
     action = `<button class="btn pri lg m-wide" data-act="book" data-id="${c.id}" data-who="${p.id}">${T(W.book)}</button>`;
-    fine = cost.kind === 'pack' ? f().uses(cost.plan.left, g.unit) : f().included(planName(cost.plan));
+    fine = cost.kind === 'credit' ? f().usesCredit() : cost.kind === 'pack' ? f().uses(cost.plan.left, g.unit) : f().included(planName(cost.plan));
   }
   return { title: T(k.name), body: `<p class="m-meta">${c.day === 0 ? `${T(W.today)} · ` : ''}${esc(dateLine(c.day))} · ${clock(c.time)} · ${k.mins} min</p><p class="m-meta">${esc(COACHES[c.coach])} · ${T(k.room)}</p><p class="m-desc">${T(k.blurb)}</p>${
     fam() ? `<p class="m-for"><span class="m-lab">${T(W.forWhom)}</span> <b>${p.me ? T(W.me) : esc(p.name)}</b></p>` : ''}${state}${action}${fine ? `<p class="m-fine">${esc(fine)}</p>` : ''}${extra}` };
+}
+function cancelSheet() {
+  const m = me(), c = findClass(S.sheet.id), p = person(S.sheet.who), k = CLASSES[c.cls], g = gym();
+  const x = bkOf(p.id, c), tm = cancelTerms(x), u = f().unit(g.unit, 1), hrs = g.cancelHrs;
+  const line = tm.back === 'pack' ? f().cancelBack(u, hrs) : tm.back === 'credit' ? f().cancelCredit(tm.amt, hrs)
+    : tm.back === 'none' ? (x.pack ? f().cancelLost(u, hrs) : f().cancelPaidLost(tm.amt, hrs)) : f().cancelPlan();
+  return { title: T(W.cancelQ), body: `<p class="m-meta"><b>${T(k.name)}</b> · ${esc(dateLine(c.day))} · ${clock(c.time)}</p>${p.me ? '' : `<p class="m-for">${esc(f().cancelFor(p.name))}</p>`}
+    <p class="m-warn${tm.back === 'none' ? ' bad' : ''}">${esc(line)}</p>
+    <button class="btn lg m-wide${tm.back === 'none' ? ' m-danger' : ''}" data-act="cancel" data-id="${c.id}" data-who="${p.id}">${T(W.yesCancel)}</button>
+    <button class="m-link m-center" data-act="close">${T(W.keep)}</button>` };
 }
 function logSheet() {
   const tr = S.sheet.id, w = WORKOUTS[tr], res = (me().results || {})[tr] || {};
@@ -411,7 +472,7 @@ function sessionSheet() {
     <button class="btn lg m-wide" data-act="nosession">${T(W.cancelSession)}</button><p class="m-fine">${esc(f().sessionLine(s.coach))}</p>` };
 }
 function sheet() {
-  const v = ({ class: classSheet, log: logSheet, pay: paySheet, news: newsSheet, session: sessionSheet }[S.sheet.kind])();
+  const v = ({ class: classSheet, cancel: cancelSheet, log: logSheet, pay: paySheet, news: newsSheet, session: sessionSheet }[S.sheet.kind])();
   /* a message that belongs to this sheet (she just paid from inside it) is said here: the bar at the bottom is covered */
   const said = S.toast && S.toast.sheet ? `<p class="m-state ok m-said" role="status">${I.check}<span>${esc(S.toast.text)}</span></p>` : '';
   return `<div class="m-scrim" data-act="close"></div><div class="m-sheet" role="dialog" aria-modal="true" aria-labelledby="m-sheet-t" tabindex="-1">

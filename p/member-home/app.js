@@ -1,9 +1,9 @@
 /* Member home: the clicks. Everything is pretend: no server, no payments, no messages.
-   The link keeps the sample member, the layout and the language: ?m=marta&nav=book&lang=es */
+   The link keeps the sample member, the layout, the review fixes, the grace state and the language: ?m=marta&nav=tabs&fx=off&grace=out&lang=es */
 
-import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=2';
-import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast } from './views.js?v=2';
-import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=2';
+import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=3';
+import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms } from './views.js?v=3';
+import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=3';
 
 const $ = id => document.getElementById(id);
 const clone = x => JSON.parse(JSON.stringify(x));
@@ -12,7 +12,9 @@ const fresh = () => ({ screen: 'home', day: 0, who: null, all: false, open: unde
 
 const S = {
   m: Object.hasOwn(MEMBERS, Q.get('m') || '') ? Q.get('m') : 'marta',
-  nav: Object.hasOwn(PATTERNS, Q.get('nav') || '') ? Q.get('nav') : 'book',
+  nav: Object.hasOwn(PATTERNS, Q.get('nav') || '') ? Q.get('nav') : 'tabs',      // Daniel: the bottom menu is the pick
+  fx: Q.get('fx') === 'off' ? 'off' : 'on',          // review fixes 1, 3, 4 and 5
+  grace: Q.get('grace') === 'out' ? 'out' : 'in',    // an overdue member: still inside the gym's grace, or past it
   lang: Q.get('lang') === 'es' ? 'es' : 'en',
   db: clone(MEMBERS),              // each sample member's things; taps change this copy only
   ...fresh(),
@@ -48,14 +50,22 @@ function notesHtml() {
     <p>${n.who}</p>
     <h3>Try it</h3>
     <ol>${x.steps.map(s => `<li>${s}</li>`).join('')}</ol>
-    <h3>${S.nav === 'book' ? 'Where it is weak' : 'What breaks'}</h3>
+    <h3>${S.nav === 'tabs' ? 'Where it is weak' : 'What breaks'}</h3>
     <p class="n-weak">${x.weak}</p>
     <h3>Daniel's list, in this layout</h3>
     <div class="n-core">${CORE[S.nav].map(([k, v]) => `<div><b>${k}</b><span>${v}</span></div>`).join('')}</div>
     <h3>What the owner sets up</h3>
     <p>${OWNER[me().gym]}</p>
     <p class="n-more"><a href="spec.html">Read the plan in plain words</a>. It weighs the three layouts, lists everything a member could need with its card, and says what is not carded yet.</p>
-    <p class="n-fine">Everything here is pretend. Tablado, Repecho and the people are made up. Nothing is charged or sent.</p>`;
+    <h3>Review fixes (${S.fx === 'off' ? 'off' : 'on'})</h3>
+    <ul class="n-fx">
+      <li><b>1.</b> Her own things live under her initials (the Me tab), not under the gym's name.</li>
+      <li><b>3.</b> Cancelling a class she paid for asks first and says what comes back. Tablado's cancel window is 2 hours, the default canon gives it when a gym turns it on. It is 4:15 PM in this mockup.</li>
+      <li><b>4.</b> A parent sees "Book a class for Mateo" on Home and a big Booking for switch on Schedule.</li>
+      <li><b>5.</b> A drop-in coming twice a week is offered Unlimited when it saves her money.</li>
+      <li><b>2.</b> Past classes and best lifts up front: not done, later.</li>
+    </ul>
+    <p class="n-fine"><b>Pretend:</b> nothing is charged, booked or sent. Members can't book or pay for themselves in Zana yet. Tablado, Repecho and the people are made up.</p>`;
 }
 
 /* ---------- draw ---------- */
@@ -89,25 +99,28 @@ function render() {
   else if (!sheetEl && hadSheet && opener) { target = phone.querySelector(opener); opener = null; }
   else if (key) target = phone.querySelector(key);
   if (target) target.focus({ preventScroll: true });
-  try { history.replaceState(null, '', `?m=${S.m}&nav=${S.nav}${S.lang === 'es' ? '&lang=es' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
+  try { history.replaceState(null, '', `?m=${S.m}&nav=${S.nav}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.lang === 'es' ? '&lang=es' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
 }
 
 /* ---------- what a tap does ---------- */
 const packOf = (m, who) => m.plans.find(p => p.who === who && p.kind === 'pack');
 
-function drop(m, x) {                    // take a booking back, and give the class back to the pack it came from
+function drop(m, x, back = 'pack') {     // take a booking back; give the class back to its pack, or keep what she paid as a credit
   m.bookings = m.bookings.filter(y => y !== x);
   const pl = x.pack && packOf(m, x.who);
-  if (pl) pl.left += 1;
+  if (pl && back === 'pack') pl.left += 1;
+  if (back === 'credit') m.credits = (m.credits || 0) + 1;
 }
 function doBook(who, id) {
   const m = me(), c = findClass(id), cost = costOf(m, who);
   const x = { who, day: c.day, time: c.time, cls: c.cls };
   if (cost.kind === 'pack') { cost.plan.left -= 1; x.pack = true; }      // assumed: a booking holds one class from the pack
+  if (cost.kind === 'credit') { m.credits -= 1; x.credit = true; }
   m.bookings.push(x);
   S.sheet = null;
-  const last = x.pack && cost.plan.left === 0;
-  toast(f().toastBooked(whenToast(c.day, c.time)) + (last ? f().toastLast(GYMS[m.gym].unit) : ''), () => drop(m, x));
+  const last = x.pack && cost.plan.left === 0, p = m.people.find(y => y.id === who);
+  const said = p && !p.me ? f().toastBookedFor(p.name, whenToast(c.day, c.time)) : f().toastBooked(whenToast(c.day, c.time));
+  toast(said + (last ? f().toastLast(GYMS[m.gym].unit) : ''), () => drop(m, x, x.credit ? 'credit' : 'pack'));
 }
 
 const ACT = {
@@ -142,7 +155,8 @@ const ACT = {
   },
   book(a) { doBook(a.who, a.id); },
   quick(a, el) {                           // one tap when it costs her nothing more; the sheet with the price when it charges
-    if (costOf(me(), a.who).kind === 'pay') ACT.sheet({ kind: 'class', id: a.id, who: a.who }, el);
+    const k = costOf(me(), a.who).kind;
+    if (k === 'pay' || k === 'blocked') ACT.sheet({ kind: 'class', id: a.id, who: a.who }, el);
     else doBook(a.who, a.id);
   },
   bookpay(a) {
@@ -161,12 +175,15 @@ const ACT = {
   cancel(a) {
     const m = me(), x = m.bookings.find(y => y.who === a.who && bid(y) === a.id);
     if (!x) return false;
-    drop(m, x);
+    const tm = x.wait ? { back: 'pack' } : cancelTerms(x);      // pack: the class returns; credit: kept for another class; none: too late
+    drop(m, x, tm.back);
     S.sheet = null;
-    toast(x.wait ? f().toastLeft() : f().toastCancelled(), () => {
+    const said = x.wait ? f().toastLeft() : tm.back === 'none' ? f().toastLate() : tm.back === 'credit' ? f().toastCredit() : f().toastCancelled();
+    toast(said, () => {
       m.bookings.push(x);
       const pl = x.pack && packOf(m, x.who);
-      if (pl) pl.left -= 1;
+      if (pl && tm.back === 'pack') pl.left -= 1;
+      if (tm.back === 'credit') m.credits -= 1;
     });
     return true;
   },

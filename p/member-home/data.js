@@ -5,7 +5,8 @@
 export const b = (en, es) => ({ en, es });
 
 /* ---------- the calendar ----------
-   Today is Tuesday, November 17, 2026. A member books herself up to 7 days ahead, so the strip runs to next Tuesday. */
+   Today is Tuesday, November 17, 2026, and it is 4:15 PM. A member books herself up to 7 days ahead, so the strip runs to next Tuesday. */
+export const NOW = '16:15';
 export const DAYS = [
   { n: 17, wd: 2 }, { n: 18, wd: 3 }, { n: 19, wd: 4 }, { n: 20, wd: 5 },
   { n: 21, wd: 6 }, { n: 22, wd: 7 }, { n: 23, wd: 1 }, { n: 24, wd: 2 },
@@ -31,6 +32,8 @@ export const GYMS = {
     },
     single: 25,                       // the price of one class, paid one by one
     unit: 'class',
+    cancelHrs: 2,                     // the gym switched its cancel window on: canon ships it off, 2 hours when on [ENTITLEMENT_TIMING_DECISION D8]
+    graceUntil: b('Fri, Nov 20', 'vie 20 nov'),      // the gym's grace setting [PHO-181], a placeholder of 5 days after the due date
     products: [
       { id: 'p5', kind: 'pack', n: 5, price: 115, name: b('5-class pack', 'Paquete de 5 clases') },
       { id: 'p10', kind: 'pack', n: 10, price: 210, name: b('10-class pack', 'Paquete de 10 clases') },
@@ -49,6 +52,7 @@ export const GYMS = {
     news: null,
     single: 45,
     unit: 'session',
+    cancelHrs: 0,
     products: [
       { id: 's8', kind: 'pack', n: 8, price: 320, name: b('8 sessions', '8 sesiones') },
       { id: 'mo', kind: 'plan', price: 420, name: b('Monthly plan', 'Plan mensual') },
@@ -119,8 +123,10 @@ export const MEMBERS = {
     people: [{ id: 'ines', name: 'Inés', me: true, likes: ['yo'] }],
     plans: [],
     bought: false,                    // she has never bought a pack, so the intro price is still hers
+    pace: 2,                          // classes a week over her last 30 days: about $217 a month, paid one by one
+    credits: 0,                       // classes she cancelled in time, kept as credit
     tracks: [],
-    bookings: [{ who: 'ines', day: 0, time: '18:30', cls: 'yo' }],
+    bookings: [{ who: 'ines', day: 0, time: '18:30', cls: 'yo', paid: 25 }],
     usual: [{ who: 'ines', day: 2, time: '18:30', cls: 'yo' }],
     alerts: [], notices: [],
     receipts: [{ d: b('Today', 'Hoy'), what: b('Single class', 'Clase suelta'), amt: 25 }, { d: b('Nov 12', '12 nov'), what: b('Single class', 'Clase suelta'), amt: 25 }, { d: b('Nov 10', '10 nov'), what: b('Single class', 'Clase suelta'), amt: 25 }],
@@ -192,6 +198,22 @@ export const MEMBERS = {
     receipts: [{ d: b('Oct 28', '28 oct'), what: b('5-class pack', 'Paquete de 5 clases'), amt: 115 }, { d: b('Oct 15', '15 oct'), what: b('Teens, 2 classes a week', 'Teens, 2 clases por semana'), amt: 65 }],
     waiver: b('Aug 30', '30 ago'),
   },
+  luis: {
+    id: 'luis', first: 'Luis', full: 'Luis R.', ini: 'LR', email: 'luis@example.com', gym: 'tablado',
+    people: [{ id: 'luis', name: 'Luis', me: true, likes: ['ct'] }],
+    plans: [{ who: 'luis', kind: 'plan', pid: 'unl', renews: b('Dec 15', '15 dic'), due: true }],
+    bought: true,
+    tracks: ['ct'],
+    bookings: [{ who: 'luis', day: 2, time: '06:00', cls: 'ct' }],
+    usual: [{ who: 'luis', day: 3, time: '06:00', cls: 'ct' }],
+    alerts: [{ id: 'due-luis', kind: 'due', who: 'luis', amount: 159, since: b('Nov 15', '15 nov') }],
+    notices: [],
+    results: {},
+    history: [{ d: b('Mon', 'lun'), what: b('Cross-training', 'Cross-training'), res: b('16:40 · Scaled', '16:40 · Escalado') }],
+    bests: [{ what: b('Back squat', 'Sentadilla trasera'), res: '205 lb', d: b('Nov 2', '2 nov') }],
+    receipts: [{ d: b('Oct 15', '15 oct'), what: b('Unlimited', 'Ilimitado'), amt: 159 }],
+    waiver: b('Jun 2', '2 jun'),
+  },
 };
 
 /* ---------- screen words ---------- */
@@ -245,6 +267,10 @@ export const W = {
   sketch: b('A sketch. It shows what lives here, not the final design.', 'Un boceto. Muestra qué vive aquí, no el diseño final.'),
   undo: b('Undo', 'Deshacer'),
   mockOnly: b('Not part of this mockup.', 'No es parte de esta maqueta.'),
+  meTab: b('Me', 'Yo'), upcoming: b('Your bookings', 'Tus reservas'),
+  payFirst: b('Pay first', 'Paga primero'), keep: b('Keep it', 'Mantenerla'), yesCancel: b('Yes, cancel', 'Sí, cancelar'),
+  cancelQ: b('Cancel this class?', '¿Cancelar esta clase?'),
+  credit: b('Class credit', 'Crédito de clase'),
 };
 
 /* Sentences with numbers in them, one set per language. */
@@ -289,6 +315,26 @@ export const F = {
     waiverBy: (d, who) => `Waiver signed by ${who} on ${d}, at the desk`,
     onlyPlace: gym => `Only ${gym} for now`,
     spotsOf: (taken, cap) => `${taken} of ${cap} taken`,
+    graceIn: d => `You can keep booking until ${d}.`,
+    graceOut: () => 'The grace period is over, so booking is paused until it is paid.',
+    payFirstLine: amt => `The plan is overdue. Pay $${amt} first, then this class books in one tap.`,
+    unlTitle: price => `Unlimited: $${price} a month`,
+    unlLine: (pace, monthly, save) => `You come about ${pace === 2 ? 'twice' : `${pace} times`} a week, about $${monthly} a month one by one. You'd save $${save}.`,
+    switchTo: name => `Switch to ${name}`,
+    cancelBack: (u, hrs) => `It's more than ${hrs} hours away, so the ${u} goes back to the pack.`,
+    cancelLost: (u, hrs) => `It starts in under ${hrs} hours, so the ${u} won't go back to the pack.`,
+    cancelCredit: (amt, hrs) => `It's more than ${hrs} hours away, so the $${amt} you paid stays as a credit for another class.`,
+    cancelPaidLost: (amt, hrs) => `It starts in under ${hrs} hours, so the $${amt} you paid won't come back.`,
+    cancelPlan: () => 'Nothing is lost on the plan. The spot goes to the next person in line.',
+    cancelFor: name => `This is ${name}'s class.`,
+    toastLate: () => 'Booking cancelled. It was too late to get the class back.',
+    toastCredit: () => 'Booking cancelled. The class is saved as a credit.',
+    usesCredit: () => 'Uses your class credit.',
+    creditLine: n => `${n} class credit${n === 1 ? '' : 's'} to use`,
+    bookFor: name => `Book a class for ${name}`,
+    bookForMe: () => 'Book a class for you',
+    classesFor: name => `Classes for ${name}`,
+    toastBookedFor: (name, when) => `${name} is booked for ${when}.`,
   },
   es: {
     unit: (u, n) => (u === 'session' ? (n === 1 ? 'sesión' : 'sesiones') : (n === 1 ? 'clase' : 'clases')),
@@ -330,5 +376,25 @@ export const F = {
     waiverBy: (d, who) => `Relevo firmado por ${who} el ${d}, en recepción`,
     onlyPlace: gym => `Solo ${gym} por ahora`,
     spotsOf: (taken, cap) => `${taken} de ${cap} ocupados`,
+    graceIn: d => `Puedes seguir reservando hasta el ${d}.`,
+    graceOut: () => 'Se acabó el plazo de gracia, así que las reservas están en pausa hasta que se pague.',
+    payFirstLine: amt => `El plan está atrasado. Paga $${amt} primero y luego esta clase se reserva con un toque.`,
+    unlTitle: price => `Ilimitado: $${price} al mes`,
+    unlLine: (pace, monthly, save) => `Vienes unas ${pace === 2 ? 'dos' : pace} veces por semana, unos $${monthly} al mes clase por clase. Ahorrarías $${save}.`,
+    switchTo: name => `Cambiar a ${name}`,
+    cancelBack: (u, hrs) => `Faltan más de ${hrs} horas, así que la ${u} vuelve al paquete.`,
+    cancelLost: (u, hrs) => `Empieza en menos de ${hrs} horas, así que la ${u} no vuelve al paquete.`,
+    cancelCredit: (amt, hrs) => `Faltan más de ${hrs} horas, así que los $${amt} que pagaste quedan como crédito para otra clase.`,
+    cancelPaidLost: (amt, hrs) => `Empieza en menos de ${hrs} horas, así que los $${amt} que pagaste no se devuelven.`,
+    cancelPlan: () => 'El plan no pierde nada. El espacio pasa a la siguiente persona en la lista.',
+    cancelFor: name => `Es la clase de ${name}.`,
+    toastLate: () => 'Reserva cancelada. Ya era tarde para recuperar la clase.',
+    toastCredit: () => 'Reserva cancelada. La clase queda como crédito.',
+    usesCredit: () => 'Usa tu crédito de clase.',
+    creditLine: n => `${n} ${n === 1 ? 'crédito' : 'créditos'} de clase por usar`,
+    bookFor: name => `Reservar clase para ${name}`,
+    bookForMe: () => 'Reservar clase para ti',
+    classesFor: name => `Clases para ${name}`,
+    toastBookedFor: (name, when) => `${name} tiene reserva: ${when}${when.endsWith('.') ? '' : '.'}`,
   },
 };

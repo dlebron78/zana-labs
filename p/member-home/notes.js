@@ -1,8 +1,8 @@
 /* Member home: the notes beside the phone. For the person reviewing the design, so English only. */
 
 export const PATTERNS = {
-  book: { name: 'Home + Book', tag: 'The pick', line: 'One home, in time order. One Book button pinned at the bottom. Everything else is under the gym\'s name at the top.' },
-  tabs: { name: 'Bottom tabs', tag: 'Runner-up', line: 'The proposal: a bar at the bottom with Home, Schedule, Workouts and Account. A tab hides when the member has nothing for it.' },
+  tabs: { name: 'Bottom tabs', tag: 'The pick', line: 'A bar at the bottom: Home, Schedule, Workouts and Me (her initials). A tab shows only when she has something for it. Schedule takes the place of the pinned Book button.' },
+  book: { name: 'Home + Book', tag: 'Earlier pick', line: 'One home, in time order. One Book button pinned at the bottom. Everything else is under the gym\'s name at the top.' },
   menu: { name: 'Menu only', tag: 'Third', line: 'Like the staff app: a home, and a menu under the name. Booking is one of the menu lines, plus a row on the home.' },
 };
 
@@ -17,12 +17,12 @@ export const CORE = {
     ['Upselling', 'One offer, at her plan, and under the button when she pays for a class. It moves to the top only when her pack runs out, in blue, with Not now. Booking is pinned, so an offer cannot push it down.'],
   ],
   tabs: [
-    ['Her plan, buy more', 'On Home, and again inside the Account tab. Two places to keep in step.'],
-    ['Book', 'The Schedule tab. One tap, the same as the pick.'],
-    ['Workouts', 'On Home, and again in the Workouts tab.'],
-    ['News', 'On Home only. She sees it when she passes through Home.'],
-    ['Warnings', 'On Home only. On another tab she needs a red dot on the Home tab to know.'],
-    ['Upselling', 'A card on Home. When a gym wants more, the pull is to add a Shop tab.'],
+    ['Her plan, buy more', 'The plan card on Home, with its one offer. Me holds the rest: every option, receipts, card.'],
+    ['Book', 'The Schedule tab, one tap from anywhere. Home also ends with "+ Book another class".'],
+    ['Workouts', 'Today\'s booked class carries its workout on Home. The Workouts tab has every track, history and bests.'],
+    ['News', 'The gym\'s notice, in the gym\'s color, at the top of Home.'],
+    ['Warnings', 'Top of Home. While she is on another tab, a red dot on Home says something needs her.'],
+    ['Upselling', 'One offer, on the plan card. It moves to the top only when a pack runs out.'],
   ],
   menu: [
     ['Her plan, buy more', 'The same card on the home as the pick.'],
@@ -55,11 +55,13 @@ export const NOTES = {
     },
     tabs: {
       steps: [
-        'The same home, the same offer.',
-        'Booking Thursday without the shortcut is four taps, the same as the pick: Schedule tab, Thursday, the class, Book and pay.',
-        'The Account tab holds her payments, the waiver and the language.',
+        'Three tabs: Home, Schedule, Me. No Workouts tab, because yoga posts no workouts.',
+        'Fix 5: her plan card says she comes about twice a week, about $217 a month one by one, and offers Unlimited at $159. Switch to Unlimited opens a pretend checkout.',
+        'Fix 3: on tonight\'s yoga, tap Cancel booking. It is more than 2 hours away, so the warning says the $25 stays as a credit. Cancel, then book Thursday: it uses the credit.',
+        'Schedule is one tap from any screen. It opens on yoga, her usual.',
+        'Me (her initials) holds her bookings, payments, receipts and the language.',
       ],
-      weak: 'It works. But the bar is three tabs and one of them she opens once a month. Marta has four tabs at the same gym, so two friends see two different apps.',
+      weak: 'Three tabs while Marta at the same gym has four, so two friends see slightly different bars. That is the point of the rule, but it is worth knowing.',
     },
     menu: {
       steps: [
@@ -84,11 +86,13 @@ export const NOTES = {
     },
     tabs: {
       steps: [
-        'The same home, the same workout card.',
-        'The Workouts tab shows the same four workouts again, with her history under them.',
-        'Schedule is one tap, the same as the Book button.',
+        'Four tabs: Home, Schedule, Workouts, Me.',
+        'Tonight\'s 6:00 PM class is on Home with its workout open. Log score works here.',
+        'Fix 3: tap Cancel booking on it. It starts in under 2 hours, but she is on Unlimited, so the warning only says her spot goes to the next person.',
+        'Workouts has all four tracks, her recent results and personal bests.',
+        'Schedule, Wednesday 6:00 PM is full: Join the waitlist.',
       ],
-      weak: 'Today\'s workout lives in two places, so "where do I log it?" has two answers. Four tabs is also the ceiling: events, a shop or a check-in code would each ask for a fifth.',
+      weak: 'Today\'s workout shows on Home and in Workouts, so there are two places to log. Four tabs is also the ceiling: events, a shop or a check-in code would each ask for a fifth.',
     },
     menu: {
       steps: [
@@ -114,10 +118,12 @@ export const NOTES = {
     },
     tabs: {
       steps: [
-        'The bar has three tabs: Home, Workouts, Account. Schedule is hidden.',
-        'Home and Workouts show the same program day.',
+        'Three tabs: Home, Workouts, Me. No Schedule, because Nico books the sessions.',
+        'The bar is Repecho\'s green. That color and the logo are all Nico set up.',
+        'Home: Nico\'s note, today\'s program day with tick-offs, Thursday\'s session, and 2 sessions left with an offer.',
+        'When clients can book a 1:1 themselves (PHO-365), a Schedule tab appears as Book a session.',
       ],
-      weak: 'For a trainer with 3 clients this is a tab bar with one useful tab. It makes a small business look like a half-empty big one.',
+      weak: 'Home and Workouts show the same program day. For a trainer with few clients the bar is thin, but it is the same app as a big gym\'s.',
     },
     menu: {
       steps: ['With nothing to book, this is the same screen as the pick.'],
@@ -140,10 +146,13 @@ export const NOTES = {
     },
     tabs: {
       steps: [
-        'Home mixes her things and Mateo\'s, the same as the pick.',
-        'Schedule needs the Me or Mateo switch. Account needs it again for the two plans.',
+        'Red card on top: Mateo\'s $65 did not go through. Pay $65 clears it.',
+        'Fix 4: This week ends with two rows, "Book a class for you" and "Book a class for Mateo".',
+        'Tap the Mateo row. Schedule opens with a big Booking for switch, Mateo picked, and only Teens classes. Book: the message names Mateo.',
+        'Fix 3: book her usual Saturday yoga (her last pack class), then cancel it. It is days away, so the warning says the class goes back to her pack.',
+        'Me holds Family: Mateo\'s plan and his waiver.',
       ],
-      weak: 'Tabs sort by feature. Her question is "for whom". The answer has to be repeated inside each tab.',
+      weak: 'Tabs sort by feature, and her question is "for whom". The switch on Schedule answers it, but Me still mixes her plan and Mateo\'s.',
     },
     menu: {
       steps: [
@@ -151,6 +160,27 @@ export const NOTES = {
         'Booking for Mateo from another page: the name, Schedule, Mateo, the class, Book.',
       ],
       weak: 'Five taps, and the first one is hidden. The red card and the offer also push the Book row down the page.',
+    },
+  },
+  luis: {
+    title: 'Luis, overdue',
+    who: 'Luis is on Unlimited at Tablado. His $159 for this month did not go through on Nov 15. Use the In grace and Grace over switch at the top to see both states.',
+    tabs: {
+      steps: [
+        'In grace: a red card on top says the $159 is overdue and he can keep booking until Friday, Nov 20. His Thursday class stays booked and Book still works.',
+        'Switch to Grace over. The card says booking is paused. In Schedule every class reads Pay first.',
+        'Tap a class: the one button is Pay $159. Pay, and the sheet comes back with Book.',
+        'On another tab, a red dot on Home says something needs him.',
+      ],
+      weak: 'Grace days are a placeholder (5 days). The real number is each gym\'s setting, which has no screen yet (PHO-181).',
+    },
+    book: {
+      steps: ['The same red card and Pay first, with the Book button pinned at the bottom instead of tabs.'],
+      weak: 'Same as with tabs.',
+    },
+    menu: {
+      steps: ['The same red card and Pay first. Schedule sits under the gym\'s name.'],
+      weak: 'Same as with tabs, plus the hidden first tap.',
     },
   },
 };
