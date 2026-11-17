@@ -3,8 +3,8 @@
    owner.js turns those into the settings in force, and the preview frame draws them.
    What an owner may change, and how far, is decided in owner.js. This file only draws the controls. */
 
-import { FX } from './recipes.js?v=13';
-import { OWNER_GYM, STYLES, SPACES, SIZES, OWNER_FX, TOP, LOCKED, STYLE, resolve, tokensOf, coverUse, photoCards, scaleOf } from './owner.js?v=13';
+import { FX } from './recipes.js?v=14';
+import { OWNER_GYM, STYLES, SPACES, SIZES, OWNER_FX, TOP, LOCKED, STYLE, resolve, tokensOf, coverUse, photoCards, scaleOf } from './owner.js?v=14';
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -450,7 +450,7 @@ function mountFrame() {
   if (frame) return;
   frame = document.createElement('iframe');
   frame.title = W.pvTitle;
-  frame.src = 'preview.html?v=13';
+  frame.src = 'preview.html?v=14';
   $('#st-holder').append(frame);
   fit();
 }

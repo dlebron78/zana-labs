@@ -10,7 +10,7 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 
 /* ---------- top bar: sample tabs. On a phone it scrolls away with the page. ---------- */
 .vw-top { position: relative; z-index: 70; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; padding: 8px 12px 10px; background: #0b0b0c; color: #fff; }
-.vw-brand { display: inline-flex; align-items: baseline; gap: 7px; min-height: 36px; color: #fff; font-size: 16px; text-decoration: none; white-space: nowrap; }
+.vw-brand { display: inline-flex; align-items: baseline; gap: 7px; line-height: 36px; color: #fff; font-size: 16px; text-decoration: none; white-space: nowrap; }   /* the line height centers the words and keeps a 36px tap target */
 .vw-brand b { font-weight: 700; }
 .vw-brand span { display: none; font-weight: 500; color: #d6d6d2; }
 .vw-help a { color: inherit; font-weight: 600; text-underline-offset: 3px; }
