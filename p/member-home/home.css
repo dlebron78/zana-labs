@@ -1,61 +1,53 @@
-/* Member home, high fidelity.
+/* Member home, high fidelity. The page is the app: it fills the phone screen, or the whole browser window on a laptop.
    Zana's final look [DESIGN_2026-10-22_look; phoenix frontend/src/tokens.css, the --zk- block]: Geist, ink #111111, cards on #F5F5F3,
    16px card corners, tonal buttons, the gym's own color only in the bar on top. ../../kit/zana.css carries the same values for every labs page.
-   Prefixes: vw- the viewer around the phone, m- the member app, n- the notes. A color never stands alone: words or a tick go with it. */
+   Prefixes: m- the member app, dm- the sample menu tucked in a corner (not part of the app), n- the notes.
+   A color never stands alone: words or a tick go with it. */
 
-/* Member home prototype.
-   Zana's look comes from ../../kit/zana.css: the tokens, .btn, .card and the lettered .ix circle.
-   Everything added here is prefixed: vw- for the viewer around the phone, m- for the member app inside it, n- for the notes.
-   Status colors follow the product: red to act, blue for her, soft green for done, gray for quiet. A color never stands alone: words or a tick go with it. */
-
-body.mh { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: #ECECE8; }
+html { height: 100%; background: var(--page); }
+body.mh { margin: 0; height: 100%; overflow: hidden; background: var(--page); overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
 .mh [hidden] { display: none !important; }
+.vw-noscript { margin: 0; padding: 24px; font-size: 18px; }
 
-/* ---------- the viewer bar ---------- */
-.vw { position: relative; z-index: 50; display: grid; gap: 8px; padding: 8px 16px 10px; background: #0b0b0c; color: #fff; }
-.vw-row { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
-.vw-brand { display: inline-flex; align-items: baseline; gap: 8px; color: #fff; text-decoration: none; font-size: 16px; line-height: 36px; white-space: nowrap; }
-.vw-brand b { font-weight: 700; }
-.vw-brand span { color: #d6d6d2; font-weight: 500; }
-.vw-end { margin-left: auto; display: flex; align-items: center; gap: 8px 12px; }
-.vw-seg { display: inline-flex; gap: 4px; padding: 3px; border-radius: 12px; background: #232325; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
-.vw-seg::-webkit-scrollbar { display: none; }
-.vw-seg button { flex: none; display: inline-flex; align-items: baseline; gap: 6px; min-height: 36px; padding: 0 12px; border: 0; border-radius: 9px; background: none; color: #e9e9e6; font-size: 15px; font-weight: 600; white-space: nowrap; }
+/* ---------- the app fills the screen ---------- */
+.phone {
+  --f: #0E0E0E; --onf: #FFFFFF; --onf2: #A3A3A0; --wash: rgba(255, 255, 255, .14);
+  --done: #17663A; --done-soft: #E4F5E8; --welcome: #2450BF; --welcome-soft: #EEF3FE; --welcome-line: #CCDAF8;
+  --ease-out: cubic-bezier(.32, .72, 0, 1); --ease-in: cubic-bezier(.4, 0, 1, 1);
+  --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
+  position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden;
+  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
+  background: var(--page);
+  font-feature-settings: "ss01", "cv11";
+  isolation: isolate;
+}
+
+/* ---------- the sample menu: one small button in a corner, outside the app ---------- */
+.dm-fab { position: fixed; z-index: 40; right: 14px; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 20px; background: rgba(17, 17, 17, .78); color: #fff; box-shadow: 0 6px 18px rgba(17, 17, 17, .28); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity .2s, transform .2s; }
+.dm-fab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.dm-fab[aria-expanded="true"] { background: #fff; color: #111; }
+.mh-cover .dm-fab { opacity: 0; transform: scale(.8); pointer-events: none; }
+.dm-fab:focus-visible { outline: 2.5px solid #7aa2ff; outline-offset: 2px; }
+
+.dm { position: fixed; z-index: 45; right: 12px; bottom: calc(130px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; width: min(372px, calc(100vw - 24px)); max-height: calc(100dvh - 150px - env(safe-area-inset-bottom, 0px)); overflow-y: auto; padding: 14px 14px 16px; border-radius: 18px; background: #0b0b0c; color: #fff; box-shadow: 0 24px 60px rgba(0, 0, 0, .4); scrollbar-width: none; animation: m-rise .2s var(--ease-out, ease-out); }
+.dm-h { display: flex; align-items: center; gap: 8px; }
+.dm-h b { font-size: 15px; font-weight: 700; }
+.dm-h span { color: #a9a9a4; font-size: 13px; }
+.dm-x { margin-left: auto; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 16px; background: #232325; color: #fff; }
+.dm-x svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.dm-g { display: grid; gap: 6px; }
+.dm-l { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #a9a9a4; }
+.dm-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding-top: 2px; }
+.vw-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 3px; border-radius: 12px; background: #232325; }
+.vw-seg button { flex: 1 0 auto; display: inline-flex; align-items: baseline; justify-content: center; gap: 6px; min-height: 36px; padding: 0 12px; border: 0; border-radius: 9px; background: none; color: #e9e9e6; font-size: 15px; font-weight: 600; white-space: nowrap; }
 .vw-seg button b { font-weight: 600; }
 .vw-seg button i { font-style: normal; font-weight: 500; font-size: 13px; color: #b4b4af; }
 .vw-seg button[aria-pressed="true"] { background: #fff; color: #0b0b0c; }
 .vw-seg button[aria-pressed="true"] i { color: #4A4A48; }
 .vw-btn { min-height: 36px; padding: 0 12px; border: 1.5px solid #5a5a5e; border-radius: 10px; background: none; color: #f1f1ee; font-size: 15px; font-weight: 600; white-space: nowrap; }
-.vw-btn[aria-expanded="true"][data-do="notes"] { background: #fff; border-color: #fff; color: #0b0b0c; }
 .vw-link { color: #fff; font-size: 15px; font-weight: 600; text-underline-offset: 3px; white-space: nowrap; }
-.vw-phone-only { display: none; }
-.vw-noscript { margin: 0; padding: 24px; font-size: 18px; }
-.vw button:focus-visible, .vw a:focus-visible { outline: 2.5px solid #7aa2ff; outline-offset: 2px; box-shadow: none; }
+.dm button:focus-visible, .dm a:focus-visible { outline: 2.5px solid #7aa2ff; outline-offset: 2px; box-shadow: none; }
 .vw-seg button:focus-visible { outline-offset: -3px; }
-.vw-seg button[aria-pressed="true"]:focus-visible { outline-color: #2450BF; }
-
-/* ---------- the stage: the phone, and the notes beside it ---------- */
-main.stage { flex: 1; display: grid; grid-template-columns: 412px minmax(0, 520px); gap: 48px; justify-content: center; align-items: start; padding: 24px 24px 48px; }
-
-/* The phone. On a laptop it is drawn as a device: a dark bezel, the clock and battery on top, the home bar at the bottom.
-   On a real phone none of that is drawn: the page is the app. */
-.phone {
-  --f: #0E0E0E; --onf: #FFFFFF; --onf2: #A3A3A0; --wash: rgba(255, 255, 255, .14);
-  --done: #17663A; --done-soft: #E4F5E8; --welcome: #2450BF; --welcome-soft: #EEF3FE; --welcome-line: #CCDAF8;
-  --ease-out: cubic-bezier(.32, .72, 0, 1); --ease-in: cubic-bezier(.4, 0, 1, 1);
-  position: sticky; top: 16px; display: flex; flex-direction: column; width: 412px; height: min(866px, calc(100vh - 150px)); min-height: 520px; overflow: hidden;
-  background: var(--page); border: 11px solid #0D0D0D; border-radius: 56px;
-  box-shadow: 0 0 0 1.5px #3B3B3A, 0 2px 0 1.5px #2A2A29, 0 40px 90px rgba(17, 17, 17, .28);
-  font-feature-settings: "ss01", "cv11";
-  isolation: isolate;
-}
-.m-status { position: relative; z-index: 7; flex: none; display: flex; align-items: center; height: 50px; padding: 4px 26px 0 34px; background: var(--f); color: var(--onf); }
-.m-status b { font-size: 16px; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
-.m-island { position: absolute; top: 11px; left: 50%; width: 118px; height: 34px; margin-left: -59px; border-radius: 20px; background: #000; }
-.m-sicons { margin-left: auto; display: flex; align-items: center; gap: 6px; }
-.m-sicons svg { height: 12px; width: auto; fill: currentColor; }
-.m-homebar { position: absolute; z-index: 20; left: 50%; bottom: 8px; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: #111; pointer-events: none; }
-.m-browser { display: none; }
 
 /* ---------- the member app, in Zana's final look (Geist, ink #111, cards on #F5F5F3) ---------- */
 .m-i { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
@@ -396,71 +388,49 @@ button.m-row:active { background: var(--fill); }
 .n-btn { min-height: 36px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--fill); color: var(--ink); font-size: 15px; font-weight: 600; }
 
 
-/* ---------- a real phone: the page is the app. No bezel, no fake clock, no home bar ---------- */
+
+/* the notes open over the app, from the sample menu */
+.notes { display: none; }
+.mh-notes-open .notes { display: block; position: fixed; inset: 0; z-index: 60; overflow-y: auto; padding: 0 16px calc(40px + env(safe-area-inset-bottom, 0px)); background: #fff; }
+.mh-notes-open .n-top { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; margin: 0 -16px 12px; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; border-bottom: 1px solid var(--line); background: #fff; }
+
+/* ---------- on a phone: the safe areas of a real screen, the menu pinned to the bottom ---------- */
+.m-top { height: calc(56px + var(--safe-t)); padding-top: var(--safe-t); }
+.m-tabbar { padding-bottom: calc(6px + var(--safe-b)); }
+.m-bookbar { padding-bottom: calc(10px + var(--safe-b)); }
+.m-sheet { padding-bottom: calc(24px + var(--safe-b)); max-height: calc(100% - 48px - var(--safe-t)); }
+.m-scrim.m-under, .m-menu { top: calc(56px + var(--safe-t)); }
 @media (max-width: 759px) {
-  body.mh { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; }
-  .vw { gap: 6px; padding: 6px 10px 8px; }
-  .vw-row { gap: 6px 8px; flex-wrap: nowrap; }
-  .vw-brand span, .vw-seg button i, .vw-wide-only { display: none !important; }
-  .vw-phone-only { display: inline-flex; align-items: center; }
-  .vw-end { gap: 6px; }
-  .vw-seg button { min-height: 34px; padding: 0 10px; }
-  .vw-btn { min-height: 34px; padding: 0 10px; }
-  .vw-switches { flex-direction: column; align-items: flex-start; }
-  .mh-min .vw-switches { display: none; }
-  .vw-pair { flex-wrap: nowrap; gap: 6px; }
-  .vw-pair .vw-seg button { padding: 0 8px; }
-  main.stage { display: flex; flex-direction: column; min-height: 0; padding: 0; }
-  .phone { position: relative; top: auto; flex: 1; align-self: stretch; width: auto; height: auto; min-height: 0; border: 0; border-radius: 0; box-shadow: none; }
-  .m-status, .m-homebar, .m-browser { display: none; }
-  .m-tabbar { padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px)); }
-  .m-bookbar { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
-  .m-sheet { padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
-  .m-scrim.m-under, .m-menu { top: 56px; }
-  .notes { display: none; position: fixed; inset: 0; z-index: 60; overflow-y: auto; padding: 12px 16px 40px; background: #fff; }
-  .mh-notes-open .notes { display: block; }
-  .n-top { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; margin: -12px -16px 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); background: #fff; }
   .n-core div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 }
-@media (min-width: 760px) and (max-width: 979px) {
-  main.stage { grid-template-columns: 412px minmax(0, 1fr); gap: 24px; padding: 20px 16px 40px; }
-}
 
-/* ---------- the same member page opened on a laptop: a browser window, the tabs on top, one column in the middle ---------- */
+/* ---------- on a laptop: the same page in the whole browser window. Tabs on top, one column in the middle, sheets as a side panel ---------- */
 @media (min-width: 760px) {
-  body.mh-laptop main.stage { grid-template-columns: minmax(0, 1200px); gap: 32px; }
-  body.mh-laptop .notes { max-width: 760px; justify-self: center; }
-  .phone.is-laptop { position: relative; top: auto; width: auto; height: min(820px, calc(100vh - 150px)); border: 1px solid #CFCFCA; border-radius: 14px; box-shadow: 0 30px 70px rgba(17, 17, 17, .18); }
-  .is-laptop .m-status, .is-laptop .m-homebar { display: none; }
-  .is-laptop .m-layer { top: 44px; }
-  .is-laptop .m-browser { order: 0; flex: none; display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 16px; border-bottom: 1px solid #DCDCD8; background: #EDEDEA; }
-  .m-dots { display: flex; gap: 8px; }
-  .m-dots i { width: 12px; height: 12px; border-radius: 50%; background: #D3D3CF; }
-  .m-url { display: inline-flex; align-items: center; gap: 8px; height: 30px; margin: 0 auto; padding: 0 16px; border-radius: 8px; background: #fff; color: var(--text2); font-size: 13px; font-weight: 500; transform: translateX(-30px); }
-  .m-url svg { width: 10px; height: 12px; fill: currentColor; color: var(--text3); }
-  .is-laptop .m-top { order: 1; height: 64px; padding: 0 max(24px, calc(50% - 360px)); }
-  .is-laptop .m-bottom { order: 2; position: static; }
-  .is-laptop .m-scroll { order: 3; padding: 0 24px 48px; scrollbar-width: thin; }
-  .is-laptop .m-page { width: 100%; max-width: 720px; margin: 0 auto; gap: 20px; padding-top: 28px; }
-  .is-laptop .m-page.m-hasnews { padding-top: 16px; }
-  .is-laptop .m-news { margin: 0; border-radius: 12px; border-top: 0; }
-  .is-laptop .m-h1 { font-size: 40px; }
-  .is-laptop .m-tabbar { display: flex; justify-content: center; gap: 4px; padding: 0 24px; border-top: 0; border-bottom: 1px solid var(--line); background: #fff; backdrop-filter: none; }
-  .is-laptop .m-tabbar button { grid-auto-flow: column; gap: 8px; height: 52px; padding: 0 16px; border-radius: 0; font-size: 15px; box-shadow: inset 0 -2px 0 transparent; }
-  .is-laptop .m-tabbar button[aria-current="page"] { box-shadow: inset 0 -2px 0 var(--ink); }
-  .is-laptop .m-tabi { width: auto; height: auto; background: none !important; }
-  .is-laptop .m-tabbar .m-i { width: 20px; height: 20px; }
-  .is-laptop .m-tabme { width: 22px; height: 22px; font-size: 9px; }
-  .is-laptop .m-dot { top: -3px; right: -5px; }
-  .is-laptop .m-bookbar { padding: 12px max(24px, calc(50% - 360px)); border-top: 0; border-bottom: 1px solid var(--line); }
-  .is-laptop .m-bookbar .m-wide { width: auto; padding: 0 28px; }
-  .is-laptop .m-toast { left: calc(50% - 200px); right: auto; bottom: 24px; width: 400px; }
-  .is-laptop .m-scrim.m-under, .is-laptop .m-menu { top: 64px; }
-  .is-laptop .m-menu { left: max(24px, calc(50% - 360px)); right: auto; width: 300px; border-radius: 0 0 16px 16px; }
+  .m-top { order: 1; height: 64px; padding: 0 max(24px, calc(50% - 360px)); }
+  .m-bottom { order: 2; position: static; }
+  .m-scroll { order: 3; padding: 0 24px 64px; scrollbar-width: thin; }
+  .m-page { width: 100%; max-width: 720px; margin: 0 auto; gap: 20px; padding-top: 28px; }
+  .m-page.m-hasnews { padding-top: 16px; }
+  .m-news { margin: 0; border-radius: 12px; border-top: 0; }
+  .m-h1 { font-size: 40px; }
+  .m-tabbar { display: flex; justify-content: center; gap: 4px; padding: 0 24px; border-top: 0; border-bottom: 1px solid var(--line); background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .m-tabbar button { grid-auto-flow: column; gap: 8px; height: 52px; padding: 0 16px; border-radius: 0; font-size: 15px; box-shadow: inset 0 -2px 0 transparent; }
+  .m-tabbar button[aria-current="page"] { box-shadow: inset 0 -2px 0 var(--ink); }
+  .m-tabi { width: auto; height: auto; background: none !important; }
+  .m-tabbar .m-i { width: 20px; height: 20px; }
+  .m-tabme { width: 22px; height: 22px; font-size: 9px; }
+  .m-dot { top: -3px; right: -5px; }
+  .m-toast { position: fixed; left: calc(50% - 200px); right: auto; bottom: 28px; width: 400px; }
+  .m-scrim.m-under, .m-menu { top: 64px; }
+  .m-menu { left: max(24px, calc(50% - 360px)); right: auto; width: 300px; border-radius: 0 0 16px 16px; }
   /* a sheet opens as a panel at the right edge [the kit: --zk-sheet-inset on a laptop] */
-  .is-laptop .m-sheet { top: 0; left: auto; right: 0; bottom: 0; width: 440px; max-height: none; padding: 24px 28px 28px; border-radius: 20px 0 0 20px; align-content: start; box-shadow: -8px 0 30px rgba(17, 17, 17, .14); }
-  .is-laptop .m-grab { display: none; }
-  .is-laptop .m-sheet.m-enter { animation-name: m-side; }
-  .is-laptop .m-sheet.m-leave { animation-name: m-sideout; }
-  .is-laptop .m-days { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
+  .m-sheet { top: 0; left: auto; right: 0; bottom: 0; width: 440px; max-height: none; padding: 24px 28px 28px; border-radius: 20px 0 0 20px; align-content: start; box-shadow: -8px 0 30px rgba(17, 17, 17, .14); }
+  .m-grab { display: none; }
+  .m-sheet.m-enter { animation-name: m-side; }
+  .m-sheet.m-leave { animation-name: m-sideout; }
+  .m-days { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
+  .dm-fab { right: 20px; bottom: 20px; }
+  .dm { right: 20px; bottom: 72px; max-height: calc(100vh - 100px); }
+  .mh-notes-open .notes { left: auto; width: 560px; padding: 0 28px 48px; box-shadow: -10px 0 40px rgba(17, 17, 17, .18); }
+  .mh-notes-open .n-top { margin: 0 -28px 16px; padding: 14px 28px; }
 }

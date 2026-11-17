@@ -4,73 +4,72 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#C4161C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Barrio">
 <link rel="icon" href="data:,">
-<title>Member home · Zana Labs</title>
-<meta name="description" content="High-fidelity prototype: what a member of Barrio Fitness sees when she signs in, in Zana's final look. A bottom menu with Home, Schedule, Workouts and Me. Five sample members, review fixes on or off, an overdue plan in grace or past it, phone or laptop.">
+<title>Barrio Fitness</title>
+<meta name="description" content="High-fidelity prototype of the Zana member home: what a member of Barrio Fitness sees when she signs in. The page is the app. Sample members and versions are in the small button in the corner.">
 <!-- Geist is Zana's face. Loaded from Google Fonts here because this is a labs page. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&display=swap">
 <link rel="stylesheet" href="../../kit/zana.css">
-<link rel="stylesheet" href="home.css?v=7">
+<link rel="stylesheet" href="home.css?v=8">
 </head>
 <body class="mh">
-<header class="vw">
-  <div class="vw-row">
-    <a class="vw-brand" href="../../"><b>Zana Labs</b><span>Member home</span></a>
-    <span class="vw-end">
-      <span class="vw-seg" role="group" aria-label="Language of the mockup">
-        <button type="button" data-set="lang:en" aria-pressed="true">EN</button>
-        <button type="button" data-set="lang:es" aria-pressed="false">ES</button>
-      </span>
-      <button type="button" class="vw-btn vw-wide-only" data-do="reset">Start over</button>
-      <a class="vw-link vw-wide-only" href="spec.html">The plan</a>
-      <button type="button" class="vw-btn vw-phone-only" data-do="notes" aria-expanded="false" aria-controls="mh-notes">Notes</button>
-      <button type="button" class="vw-btn vw-phone-only" data-do="switches" aria-expanded="true" aria-controls="mh-switches" aria-label="Show or hide the switches">Hide</button>
-    </span>
-  </div>
-  <div class="vw-row vw-switches" id="mh-switches">
-    <span class="vw-seg" role="group" aria-label="Sample member">
+<section class="phone" id="mh-phone" aria-label="Barrio Fitness member app">
+  <div class="m-top" id="mh-top"></div>
+  <div class="m-scroll" id="mh-scroll"></div>
+  <div class="m-bottom" id="mh-bottom"></div>
+  <div class="m-layer" id="mh-layer"></div>
+</section>
+
+<!-- The sample menu. Not part of the app: it switches between the versions of this prototype. -->
+<button type="button" class="dm-fab" data-do="demo" aria-expanded="false" aria-controls="mh-demo" aria-label="Versions of this prototype"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+<div class="dm" id="mh-demo" role="dialog" aria-label="Versions of this prototype" hidden>
+  <div class="dm-h"><b>Prototype versions</b><span>not part of the app</span><button type="button" class="dm-x" data-do="demo" aria-label="Close"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 2l10 10M12 2 2 12"/></svg></button></div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-m">Member</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-m">
       <button type="button" data-set="m:ines" aria-pressed="false"><b>Inés</b><i>drop-in</i></button>
       <button type="button" data-set="m:maria" aria-pressed="true"><b>María</b><i>unlimited</i></button>
       <button type="button" data-set="m:rafa" aria-pressed="false"><b>Rafa</b><i>1:1 client</i></button>
       <button type="button" data-set="m:carmen" aria-pressed="false"><b>Carmen</b><i>parent</i></button>
       <button type="button" data-set="m:luis" aria-pressed="false"><b>Luis</b><i>overdue</i></button>
     </span>
-    <span class="vw-seg" role="group" aria-label="Way to get around">
-      <button type="button" data-set="nav:tabs" aria-pressed="true"><b>Bottom tabs</b><i>the pick</i></button>
-      <button type="button" data-set="nav:book" aria-pressed="false"><b>Home + Book</b><i>earlier</i></button>
-      <button type="button" data-set="nav:menu" aria-pressed="false"><b>Menu only</b></button>
-    </span>
-    <span class="vw-pair">
-    <span class="vw-seg" role="group" aria-label="Review fixes 1, 3, 4 and 5">
-      <button type="button" data-set="fx:on" aria-pressed="true"><b>Fixes on</b></button>
-      <button type="button" data-set="fx:off" aria-pressed="false"><b>Fixes off</b></button>
-    </span>
-    <span class="vw-seg vw-wide-only" role="group" aria-label="Device">
-      <button type="button" data-set="dev:phone" aria-pressed="true"><b>Phone</b></button>
-      <button type="button" data-set="dev:laptop" aria-pressed="false"><b>Laptop</b></button>
-    </span>
-    <span class="vw-seg" role="group" aria-label="When a payment is overdue">
-      <button type="button" data-set="grace:in" aria-pressed="true"><b>In grace</b></button>
-      <button type="button" data-set="grace:out" aria-pressed="false"><b>Grace over</b></button>
-    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-g">Overdue payment (Luis, Carmen)</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-g">
+      <button type="button" data-set="grace:in" aria-pressed="true"><b>In grace</b><i>can still book</i></button>
+      <button type="button" data-set="grace:out" aria-pressed="false"><b>Grace over</b><i>pay first</i></button>
     </span>
   </div>
-</header>
-<main class="stage">
-  <section class="phone" id="mh-phone" aria-label="Member app mockup">
-    <div class="m-status" aria-hidden="true"><b>4:15</b><span class="m-island"></span><span class="m-sicons"><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 16 12"><path d="M8 11.5 5.6 8.9a3.4 3.4 0 0 1 4.8 0zM3.4 6.7a6.6 6.6 0 0 1 9.2 0l-1.4 1.4a4.6 4.6 0 0 0-6.4 0zM1.2 4.5a9.8 9.8 0 0 1 13.6 0l-1.4 1.4a7.8 7.8 0 0 0-10.8 0z"/></svg><svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="23" height="11" rx="3.2" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="16" height="8" rx="2"/><path d="M25 4v4a2 2 0 0 0 0-4z" opacity=".5"/></svg></span></div>
-    <div class="m-browser" aria-hidden="true"><span class="m-dots"><i></i><i></i><i></i></span><span class="m-url"><svg viewBox="0 0 12 14"><rect x="1" y="6" width="10" height="7.5" rx="1.5"/><path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>barrio.zana.fit</span></div>
-    <div class="m-top" id="mh-top"></div>
-    <div class="m-scroll" id="mh-scroll"></div>
-    <div class="m-bottom" id="mh-bottom"></div>
-    <div class="m-layer" id="mh-layer"></div>
-    <i class="m-homebar" aria-hidden="true"></i>
-  </section>
-  <aside class="notes" id="mh-notes" aria-label="Notes on this sample"></aside>
-</main>
-<noscript><p class="vw-noscript">This mockup is drawn in the browser, so it needs JavaScript switched on. The plan in plain words is on <a href="spec.html">its own page</a>.</p></noscript>
-<script type="module" src="app.js?v=5"></script>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-fx">Review fixes 1, 3, 4 and 5</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-fx">
+      <button type="button" data-set="fx:on" aria-pressed="true"><b>On</b></button>
+      <button type="button" data-set="fx:off" aria-pressed="false"><b>Off</b></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-lang">Language</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-lang">
+      <button type="button" data-set="lang:en" aria-pressed="true"><b>English</b></button>
+      <button type="button" data-set="lang:es" aria-pressed="false"><b>Español</b></button>
+    </span>
+  </div>
+  <div class="dm-row">
+    <button type="button" class="vw-btn" data-do="reset">Start over</button>
+    <button type="button" class="vw-btn" data-do="notes">Notes on this member</button>
+    <a class="vw-link" href="spec.html">The plan</a>
+  </div>
+</div>
+<aside class="notes" id="mh-notes" aria-label="Notes on this sample"></aside>
+<noscript><p class="vw-noscript">This prototype is drawn in the browser, so it needs JavaScript switched on. The plan in plain words is on <a href="spec.html">its own page</a>.</p></noscript>
+<script type="module" src="app.js?v=6"></script>
 </body>
 </html>

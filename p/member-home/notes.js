@@ -1,7 +1,7 @@
 /* Member home: the notes beside the phone. For the person reviewing the design, so English only. */
 
 export const PATTERNS = {
-  tabs: { name: 'Bottom tabs', tag: 'The pick', line: 'A bar at the bottom: Home, Schedule, Workouts and Me (shown as initials). A tab shows only when she has something for it. Schedule takes the place of the pinned Book button.' },
+  tabs: { name: 'Bottom tabs', tag: 'Daniel\'s pick', line: 'A bar at the bottom: Home, Schedule, Workouts and Me (shown as initials). A tab shows only when she has something for it. Schedule takes the place of the pinned Book button.' },
   book: { name: 'Home + Book', tag: 'Earlier pick', line: 'One home, in time order. One Book button pinned at the bottom. Everything else is under the gym\'s name at the top.' },
   menu: { name: 'Menu only', tag: 'Third', line: 'Like the staff app: a home, and a menu under the name. Booking is one of the menu lines, plus a row on the home.' },
 };
@@ -164,7 +164,7 @@ export const NOTES = {
   },
   luis: {
     title: 'Luis, overdue',
-    who: 'Luis is on Unlimited at Barrio. His $159 for this month did not go through on Nov 15. Use the In grace and Grace over switch at the top to see both states.',
+    who: 'Luis is on Unlimited at Barrio. His $159 for this month did not go through on Nov 15. Open the button in the corner and pick In grace or Grace over to see both states.',
     tabs: {
       steps: [
         'In grace: a red card on top says the $159 is overdue and he can keep booking until Friday, Nov 20. His Thursday class stays booked and Book still works.',

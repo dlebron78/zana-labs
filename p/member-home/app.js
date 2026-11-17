@@ -1,11 +1,13 @@
 /* Member home: the clicks. Everything is pretend: no server, no payments, no messages.
-   The link keeps the sample member, the layout, the review fixes, the grace state, the device and the language: ?m=maria&nav=tabs&fx=off&grace=out&dev=laptop&lang=es
+   The page is the app: it fills a phone screen, or the whole browser window on a laptop. The layout follows the real screen width.
+   The versions sit in a small menu in the corner. The link keeps them, so a case opens directly: ?m=luis&grace=out&fx=off&lang=es
+   (member= and fixes=off work too).
    Motion: sheets slide up and back down, a new screen fades in, a toast rises with a line that runs down while Undo is still possible,
    a status that just changed pops once, and a payment shows a short wait on its button. All of it stops when the device asks for less motion. */
 
-import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=5';
-import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms } from './views.js?v=5';
-import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=5';
+import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=6';
+import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms } from './views.js?v=6';
+import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=6';
 
 const $ = id => document.getElementById(id);
 const clone = x => JSON.parse(JSON.stringify(x));
@@ -13,11 +15,10 @@ const Q = new URLSearchParams(location.search);
 const fresh = () => ({ screen: 'home', day: 0, who: null, all: false, open: undefined, menu: false, sheet: null, toast: null });
 
 const S = {
-  m: Object.hasOwn(MEMBERS, Q.get('m') || '') ? Q.get('m') : 'maria',
-  nav: Object.hasOwn(PATTERNS, Q.get('nav') || '') ? Q.get('nav') : 'tabs',      // Daniel: the bottom menu is the pick
-  fx: Q.get('fx') === 'off' ? 'off' : 'on',          // review fixes 1, 3, 4 and 5
+  m: Object.hasOwn(MEMBERS, Q.get('m') || Q.get('member') || '') ? (Q.get('m') || Q.get('member')) : 'maria',
+  nav: 'tabs',                                        // Daniel, Nov 17: the bottom tabs. The other layouts stay in the code, out of the menu
+  fx: Q.get('fx') === 'off' || Q.get('fixes') === 'off' ? 'off' : 'on',   // review fixes 1, 3, 4 and 5
   grace: Q.get('grace') === 'out' ? 'out' : 'in',    // an overdue member: still inside the gym's grace, or past it
-  dev: Q.get('dev') === 'laptop' ? 'laptop' : 'phone', // how the member page looks on a phone, or opened on a laptop
   lang: Q.get('lang') === 'es' ? 'es' : 'en',
   db: clone(MEMBERS),              // each sample member's things; taps change this copy only
   ...fresh(),
@@ -39,6 +40,7 @@ function toast(text, undo) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {      // remove it quietly: a full redraw here could wipe a score she is typing
     S.toast = null; undoFn = null;
+    document.body.classList.toggle('mh-cover', !!(S.sheet || S.menu));
     phone.querySelectorAll('.m-toast, .m-said').forEach(el => {
       if (calm()) { el.remove(); return; }
       el.classList.add('m-leave');
@@ -85,8 +87,7 @@ function render() {
   const oldLayer = [...layer.children].filter(el => !el.classList.contains('m-leave')), oldKey = (layer.querySelector('.m-sheet:not(.m-leave)') || {}).dataset?.k;
   const v = draw(S);
   phone.lang = S.lang;
-  phone.classList.toggle('is-laptop', S.dev === 'laptop');
-  document.body.classList.toggle('mh-laptop', S.dev === 'laptop');
+  document.body.classList.toggle('mh-cover', !!(S.sheet || S.menu || S.toast));     // the corner button steps aside for a sheet or a message
   phone.style.setProperty('--f', v.frame.bg);
   phone.style.setProperty('--onf', v.frame.on);
   phone.style.setProperty('--onf2', v.frame.on2);
@@ -125,7 +126,7 @@ function render() {
   else if (!sheetEl && hadSheet && opener) { target = phone.querySelector(opener); opener = null; }
   else if (key) target = phone.querySelector(key);
   if (target) target.focus({ preventScroll: true });
-  try { history.replaceState(null, '', `?m=${S.m}&nav=${S.nav}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.dev === 'laptop' ? '&dev=laptop' : ''}${S.lang === 'es' ? '&lang=es' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
+  try { history.replaceState(null, '', `?m=${S.m}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.lang === 'es' ? '&lang=es' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
 }
 
 /* ---------- what a tap does ---------- */
@@ -287,30 +288,30 @@ phone.addEventListener('click', e => {
   if (fn(el.dataset, el) !== false) render();
 });
 
-/* ---------- the viewer around the phone ---------- */
-const body = document.body;
+/* ---------- the sample menu in the corner: not part of the app ---------- */
+const body = document.body, demo = $('mh-demo'), fab = document.querySelector('.dm-fab');
 const DO = {
-  reset() { S.db = clone(MEMBERS); Object.assign(S, fresh()); clearToast(); body.classList.remove('mh-notes-open'); syncViewer(); render(); },
-  notes() { body.classList.toggle('mh-notes-open'); syncViewer(); if (body.classList.contains('mh-notes-open')) notes.scrollTop = 0; },
-  switches() { body.classList.toggle('mh-min'); syncViewer(); },
+  reset() { S.db = clone(MEMBERS); Object.assign(S, fresh()); clearToast(); body.classList.remove('mh-notes-open'); demo.hidden = true; syncViewer(); render(); },
+  notes() { demo.hidden = true; body.classList.toggle('mh-notes-open'); syncViewer(); if (body.classList.contains('mh-notes-open')) notes.scrollTop = 0; },
+  demo() { demo.hidden = !demo.hidden; syncViewer(); if (!demo.hidden) demo.querySelector('[aria-pressed="true"]')?.focus({ preventScroll: true }); else fab.focus({ preventScroll: true }); },
 };
 function syncViewer() {
-  const open = body.classList.contains('mh-notes-open'), min = body.classList.contains('mh-min');
-  document.querySelectorAll('.vw [data-do="notes"]').forEach(el => el.setAttribute('aria-expanded', String(open)));
-  document.querySelectorAll('.vw [data-do="switches"]').forEach(el => { el.textContent = min ? 'Show' : 'Hide'; el.setAttribute('aria-expanded', String(!min)); });
+  fab.setAttribute('aria-expanded', String(!demo.hidden));
 }
 document.addEventListener('click', e => {
   const set = e.target.closest('[data-set]'), act = e.target.closest('[data-do]');
   if (set) {
     const [k, v] = set.dataset.set.split(':');
     S[k] = v;
-    if (k !== 'lang' && k !== 'dev') { Object.assign(S, fresh()); clearToast(); }      // a new member or layout starts on the home; language and device keep her place
+    if (k !== 'lang') { Object.assign(S, fresh()); clearToast(); }      // a new member or state starts on the home; a new language keeps her place
     render();
   } else if (act && DO[act.dataset.do]) DO[act.dataset.do]();
+  else if (!demo.hidden && !demo.contains(e.target)) { demo.hidden = true; syncViewer(); }      // a tap outside closes the menu
 });
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (body.classList.contains('mh-notes-open')) DO.notes();
+  else if (!demo.hidden) DO.demo();
   else if (S.sheet || S.menu) { S.sheet = null; S.menu = false; render(); }
 });
 
