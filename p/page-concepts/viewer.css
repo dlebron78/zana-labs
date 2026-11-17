@@ -13,9 +13,10 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 .vw-brand { display: inline-flex; align-items: baseline; gap: 7px; min-height: 36px; color: #fff; font-size: 16px; text-decoration: none; white-space: nowrap; }
 .vw-brand b { font-weight: 700; }
 .vw-brand span { font-weight: 500; color: #d6d6d2; }
-.vw-end { display: flex; align-items: center; gap: 10px; }
+.vw-brand { grid-area: 1 / 1; }
+.vw-end { grid-area: 1 / 2; display: flex; align-items: center; gap: 10px; }
 .vw-link { color: #fff; font-size: 16px; font-weight: 600; text-underline-offset: 3px; white-space: nowrap; }
-.vw-tabs { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.vw-tabs { grid-area: 2 / 1 / 3 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .vw-tab { min-height: 42px; padding: 0 4px; border: 1.5px solid #47474a; border-radius: 10px; background: transparent; color: #f1f1ee; font-size: 16px; font-weight: 600; }
 .vw-tab[aria-pressed="true"] { background: #fff; border-color: #fff; color: #0b0b0c; }
 .vw-adjust { display: none; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1.5px solid #fff; border-radius: 999px; background: #fff; color: #0b0b0c; font-size: 16px; font-weight: 600; }
@@ -23,8 +24,10 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 .vw-ico { width: 18px; height: 18px; flex: none; }
 
 /* the floating Adjust button (phones) */
-.vw-fab { position: fixed; z-index: 75; right: 12px; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px 0 14px; border: 1.5px solid #fff; border-radius: 999px; background: #0b0b0c; color: #fff; font-size: 16px; font-weight: 600; box-shadow: 0 8px 26px rgba(0,0,0,.4); }
+.vw-fab { position: fixed; z-index: 75; left: 12px; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 48px; min-height: 48px; padding: 0 18px 0 14px; border: 1.5px solid #fff; border-radius: 999px; background: #0b0b0c; color: #fff; font-size: 16px; font-weight: 600; box-shadow: 0 8px 26px rgba(0,0,0,.4); }
 .vw-fab[aria-expanded="true"] { display: none; }
+.vw-fab.is-small { padding: 0; }
+.vw-fab.is-small span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* ---------- the Adjust panel: a bottom sheet on a phone, a floating card on a laptop ---------- */
 .vw-panel { position: fixed; z-index: 80; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; max-height: min(64svh, 560px); background: #fff; color: #111; border-radius: 18px 18px 0 0; box-shadow: 0 -12px 44px rgba(0,0,0,.38); font-size: 16px; line-height: 1.4; transform: translateY(105%); visibility: hidden; transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .2s ease, visibility 0s linear .3s; }
@@ -75,7 +78,8 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 @media (min-width: 900px) {
   :root { --chrome-h: 52px; }
   .vw-top { position: sticky; top: 0; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 16px; height: 52px; padding: 0 16px; }
-  .vw-tabs { grid-column: auto; display: flex; gap: 6px; }
+  .vw-brand, .vw-end, .vw-tabs { grid-area: auto; }
+  .vw-tabs { display: flex; gap: 6px; }
   .vw-tab { min-height: 36px; padding: 0 18px; border-radius: 999px; }
   .vw-end { justify-content: flex-end; gap: 18px; }
   .vw-adjust { display: inline-flex; }
@@ -85,7 +89,7 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 }
 
 /* ui=0: the page alone, the way a visitor would see it */
-html.vw-bare { --chrome-h: 0px; }
+html.vw-bare { --chrome-h: 0px; --chrome-above: 0px; }
 html.vw-bare .vw-top, html.vw-bare .vw-fab, html.vw-bare .vw-panel { display: none; }
 
 @media (prefers-reduced-motion: reduce) { .vw-panel, .vw-sw i, .vw-sw i::after, .vw-blk i, .vw-blk i::after { transition: none; } }

@@ -2,19 +2,19 @@
    All it does: pick a recipe, keep track of what the viewer changed, and ask the framework to draw.
    The framework itself is data.js, tokens.js, blocks.js, effects.js, recipes.js and page.js. */
 
-import { GYMS } from './data.js?v=2';
-import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=2';
-import { buildTokens, CHOICES } from './tokens.js?v=2';
-import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=2';
-import { mountEffects } from './effects.js?v=2';
-import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=2';
+import { GYMS } from './data.js?v=3';
+import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=3';
+import { buildTokens, CHOICES } from './tokens.js?v=3';
+import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=3';
+import { mountEffects } from './effects.js?v=3';
+import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=3';
 
 const $ = (s, el = document) => el.querySelector(s);
 const stage = $('#stage'), topBar = $('#vw-top'), panel = $('#vw-panel'), fab = $('#vw-fab');
 const Q = new URLSearchParams(location.search);
 if (Q.get('debug') === '1') {
   const box = document.createElement('pre');
-  box.style.cssText = 'position:fixed;z-index:999;left:8px;bottom:8px;max-width:min(92vw,720px);max-height:40vh;overflow:auto;margin:0;padding:8px 10px;background:#fff;color:#a40020;border:2px solid #a40020;font:12px/1.4 ui-monospace,monospace;white-space:pre-wrap';
+  box.style.cssText = 'position:fixed;z-index:999;right:8px;top:8px;max-width:min(92vw,720px);max-height:40vh;overflow:auto;margin:0;padding:8px 10px;background:#fff;color:#a40020;border:2px solid #a40020;font:12px/1.4 ui-monospace,monospace;white-space:pre-wrap';
   box.textContent = 'debug: nothing to report';
   document.body.appendChild(box);
   const say = m => { box.textContent = (box.textContent.startsWith('debug:') ? '' : box.textContent + '\n') + m; };
@@ -109,6 +109,7 @@ function draw(keep = true) {
   const at = keep && root ? anchor() : null;
   if (unmount) unmount();
   if (unwire) unwire();
+  drawTop(); measure();                                                          // the top bar first: the page needs its height
   page = buildPage(rec, gym, { lang: state.lang, fx: liveFx(), tokens: state.tokens, brand: state.brand, hero: state.hero, sched: state.sched, follow: state.follow, off: state.off });
   stage.innerHTML = page.html;
   root = stage.firstElementChild;
@@ -121,7 +122,7 @@ function draw(keep = true) {
   unmount = mountEffects(root, liveFx(), { stick, S: page.x.S });
   if (at) restore(at);
   document.title = `${rec.name}: ${gym.name} · Zana page framework`;
-  writeUrl(); drawTop(); drawPanel();
+  writeUrl(); drawPanel();
 }
 
 /* a repaint: only tokens changed (color, light or dark, photos, spacing, corners, type). Nothing is rebuilt. */
@@ -291,12 +292,15 @@ document.addEventListener('keydown', e => {
   if (fn) { e.preventDefault(); fn(); }
 });
 mqWide.addEventListener('change', () => draw());
+function measure() { document.documentElement.style.setProperty('--chrome-above', (mqWide.matches || state.bare ? 0 : topBar.offsetHeight) + 'px'); }
+window.addEventListener('resize', measure);
+window.addEventListener('scroll', () => fab.classList.toggle('is-small', window.scrollY > 240), { passive: true });
 mqStill.addEventListener('change', () => draw());
 
 /* ---------- start ---------- */
 readUrl();
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 document.documentElement.classList.toggle('vw-bare', state.bare);
-fab.innerHTML = `${ICON}Adjust`;
+fab.innerHTML = `${ICON}<span>Adjust</span>`;
 draw(false);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.dispatchEvent(new Event('resize')));
