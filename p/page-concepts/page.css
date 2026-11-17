@@ -45,7 +45,7 @@
 .zp-tag { font-size: var(--tag); font-weight: 700; line-height: 1.3; letter-spacing: .09em; text-transform: uppercase; color: var(--ink2); }
 .zp-lead { max-width: 33em; text-wrap: pretty; }
 .zp-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.zp-num > span { margin-left: .28em; font-family: var(--bf); font-stretch: 100%; font-weight: 700; font-size: max(.56em, 13px); letter-spacing: .03em; text-transform: none; }
+.zp-num > span { margin-left: -.12em; font-family: var(--bf); font-stretch: 100%; font-weight: 700; font-size: max(.56em, 13px); letter-spacing: .03em; text-transform: none; }
 .zp-link { padding: 0; border: 0; background: none; color: inherit; font-weight: 600; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; cursor: pointer; }
 .zp-note { margin-top: var(--gap); font-size: var(--small); color: var(--ink2); }
 .zp-w { display: none; }

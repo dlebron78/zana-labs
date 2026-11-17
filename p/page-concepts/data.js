@@ -128,7 +128,7 @@ export const GYMS = {
         ticks: [b('Unlimited classes', 'Clases ilimitadas'), b('Book up to 7 days ahead', 'Reserva hasta 7 días antes'), b('Cancel anytime', 'Cancela cuando quieras')] },
     ],
     reviews: [
-      { who: 'Mariana C.', q: b('I book on the bus and I am on the bike twenty minutes later.', 'Reservo en la guagua y veinte minutos después estoy en la bici.') },
+      { who: 'Mariana C.', q: b('I book on the way and I am on the bike twenty minutes later.', 'Reservo de camino y veinte minutos después estoy en la bici.') },
       { who: 'Omar D.', q: b('Paola remembers what I did last week better than I do.', 'Paola se acuerda de lo que hice la semana pasada mejor que yo.') },
       { who: 'Isabel F.', q: b('Five kinds of classes means I never get bored. Sunday yoga is my reset.', 'Con cinco tipos de clases nunca me aburro. El yoga del domingo es mi reinicio.') },
     ],

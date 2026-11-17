@@ -119,7 +119,9 @@ const avatar = (c, cls = '') => (c && c.photo
   : `<span class="zp-av zp-av--init ${cls}" aria-hidden="true">${c ? esc(initials(c.name)) : '<svg viewBox="0 0 16 16" width="45%" aria-hidden="true"><path d="M3 12V7m5 5V4m5 8V8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'}</span>`);
 const photo = (src, o = {}) => `<div class="zp-ph ${o.cls || ''}"><img class="zp-img" src="${src}" alt="${esc(o.alt || '')}"${o.pos ? ` style="object-position:${o.pos}"` : ''} ${o.eager ? 'fetchpriority="high"' : 'loading="lazy"'}></div>`;
 const head = (tag, title, o = {}) => `<div class="zp-head" data-rise><div class="zp-head__t"><p class="zp-tag">${esc(tag)}</p><h2 class="zp-h2">${title}</h2>${o.lead ? `<p class="zp-lead">${esc(o.lead)}</p>` : ''}</div>${o.side || ''}</div>`;
-const clock = t => `${esc(t.clock)}<span>${esc(t.ap)}</span>`;
+/* keep a time and its am/pm together on one line: "9 p. m." must never break after the 9 or the p. */
+const glue = s => String(s).replace(/(\d) (?=(?:[ap]\. ?m\.|AM\b|PM\b))/g, '$1\u00a0').replace(/\b([ap])\. m\./g, '$1.\u00a0m.');
+const clock = t => `${esc(t.clock)} <span>${esc(t.ap)}</span>`;   /* a real space, so a screen reader says "6:00 a.m." and not "6:00a.m." */
 const wide = gym => gym.photos.filter(p => p.shape === 'wide');
 const slideStack = pics => pics.map((s, i) => `<div class="zp-slide${i ? '' : ' is-on'}"><img class="zp-img" src="${s.src}" alt=""${s.pos ? ` style="object-position:${s.pos}"` : ''} ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></div>`).join('');
 const arrowBtns = S => `<div class="zp-arrows"><button type="button" class="zp-arrow" data-dir="-1" aria-label="${esc(S.prev)}">${ARROW}</button><button type="button" class="zp-arrow" data-dir="1" aria-label="${esc(S.nextCard)}">${ARROW}</button></div>`;
@@ -448,7 +450,7 @@ export function footer(gym, x) {
     <div class="zp-foot__grid">
       <div class="zp-foot__brand">${logo(gym)}<p>${esc(x.L(gym.kind))}. ${esc(gym.area)}.</p><a class="zp-btn" href="#schedule">${esc(S.book)}</a></div>
       <div><p class="zp-tag">${esc(S.tFind)}</p><p>${p.addr.map(esc).join('<br>')}</p><p><a class="zp-link" href="#" data-act="noop">${esc(S.maps)}</a></p></div>
-      <div><p class="zp-tag">${esc(S.tHours)}</p><p>${p.hours.map(h => esc(L(h))).join('<br>')}</p></div>
+      <div><p class="zp-tag">${esc(S.tHours)}</p><p>${p.hours.map(h => esc(glue(L(h)))).join('<br>')}</p></div>
       <div><p class="zp-tag">${esc(S.tContact)}</p><p>${esc(p.phone)}<br>${esc(p.email)}</p><p><button class="zp-link" type="button" data-act="lang">${esc(S.switchTo)}</button></p></div>
     </div>
     <p class="zp-foot__made">${esc(S.made)}</p>

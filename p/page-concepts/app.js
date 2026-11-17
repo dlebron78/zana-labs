@@ -2,12 +2,12 @@
    All it does: pick a recipe, keep track of what the viewer changed, and ask the framework to draw.
    The framework itself is data.js, tokens.js, blocks.js, effects.js, recipes.js and page.js. */
 
-import { GYMS } from './data.js?v=5';
-import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=5';
-import { buildTokens, CHOICES } from './tokens.js?v=5';
-import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=5';
-import { mountEffects } from './effects.js?v=5';
-import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=5';
+import { GYMS } from './data.js?v=6';
+import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=6';
+import { buildTokens, CHOICES } from './tokens.js?v=6';
+import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=6';
+import { mountEffects } from './effects.js?v=6';
+import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=6';
 
 const $ = (s, el = document) => el.querySelector(s);
 const stage = $('#stage'), topBar = $('#vw-top'), panel = $('#vw-panel'), fab = $('#vw-fab');
