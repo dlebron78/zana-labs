@@ -100,4 +100,6 @@ html.vw-bare .vw-top, html.vw-bare .vw-fab, html.vw-bare .vw-panel { display: no
 
 @keyframes vw-ring { from { box-shadow: 0 0 0 0 rgba(255,255,255,.75); } to { box-shadow: 0 0 0 14px rgba(255,255,255,0); } }
 @media (min-width: 1200px) { .vw-more { display: inline; } }
+/* on a full HD screen or wider the panel starts open, so it is a touch slimmer there and clears the page's widest content */
+@media (min-width: 1920px) { .vw-panel { right: 8px; width: 336px; } }
 @media (prefers-reduced-motion: reduce) { html.vw-hint-on .vw-adjust[aria-expanded="false"] { animation: none; box-shadow: 0 0 0 4px rgba(255,255,255,.4); } .vw-panel, .vw-sw i, .vw-sw i::after, .vw-blk i, .vw-blk i::after { transition: none; } }
