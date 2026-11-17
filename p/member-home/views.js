@@ -1,7 +1,7 @@
 /* Member home: what the phone draws. Pure text in, text out: no page access here, so the same code can be checked without a browser.
    The one rule behind every screen: a thing shows only when this person has one. Nothing is ever shown empty or locked. */
 
-import { DAYS, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=6';
+import { DAYS, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=7';
 
 let S;                                      // the state being drawn: draw() and bind() set it, the helpers below read it
 export const bind = state => { S = state; };
@@ -183,11 +183,13 @@ function top() {
   const lead = home || (tabbed && isTab(S.screen))
     ? `<span class="m-logo" aria-hidden="true">${g.mark}</span>`
     : `<button class="m-icb" data-act="go" data-arg="${tabbed || underMe(S.screen) ? 'account' : 'home'}" aria-label="${T(W.back)}">${I.back}</button>`;
+  /* on a phone the bar names the screen; on a laptop the tabs already do, so the bar keeps the gym's name */
   const mid = tabbed
-    ? `<b class="m-title">${title}</b>`
+    ? `<b class="m-title"><span class="m-t-sec">${title}</span><span class="m-t-gym" aria-hidden="true">${esc(g.name)}</span></b>`
     : `<button class="m-title" data-act="menu" aria-expanded="${!!S.menu}" aria-haspopup="true"><b>${title}</b>${I.down}</button>`;
   const ava = tabbed ? '' : `<button class="m-ava" data-act="go" data-arg="account" aria-label="${T(W.account)}: ${esc(m.full)}">${m.ini}</button>`;      // with tabs, Account already has a tab
-  return `${lead}${mid}<span class="m-sp"></span>${ava}`;
+  const who = tabbed ? `<button class="m-who" data-act="go" data-arg="account" tabindex="-1" aria-hidden="true"><span>${esc(m.full)}</span><i>${m.ini}</i></button>` : '';      // laptop only: who is signed in, top right
+  return `${lead}${mid}<span class="m-sp"></span>${ava}${who}`;
 }
 function menu() {
   return `<button class="m-scrim m-under" data-act="menu" aria-label="${T(W.close)}"></button><nav class="m-menu" aria-label="${T(W.menu)}">${

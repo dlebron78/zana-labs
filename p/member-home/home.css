@@ -39,7 +39,7 @@ body.mh { margin: 0; height: 100%; overflow: hidden; background: var(--page); ov
 .dm-l { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #a9a9a4; }
 .dm-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding-top: 2px; }
 .vw-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 3px; border-radius: 12px; background: #232325; }
-.vw-seg button { flex: 1 0 auto; display: inline-flex; align-items: baseline; justify-content: center; gap: 6px; min-height: 36px; padding: 0 12px; border: 0; border-radius: 9px; background: none; color: #e9e9e6; font-size: 15px; font-weight: 600; white-space: nowrap; }
+.vw-seg button { flex: 1 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 0 12px; border: 0; border-radius: 9px; background: none; color: #e9e9e6; font-size: 15px; font-weight: 600; white-space: nowrap; }
 .vw-seg button b { font-weight: 600; }
 .vw-seg button i { font-style: normal; font-weight: 500; font-size: 13px; color: #b4b4af; }
 .vw-seg button[aria-pressed="true"] { background: #fff; color: #0b0b0c; }
@@ -395,6 +395,8 @@ button.m-row:active { background: var(--fill); }
 .mh-notes-open .n-top { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; margin: 0 -16px 12px; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; border-bottom: 1px solid var(--line); background: #fff; }
 
 /* ---------- on a phone: the safe areas of a real screen, the menu pinned to the bottom ---------- */
+.m-t-gym, .m-who { display: none; }
+.m-scroll { padding-bottom: 72px; }
 .m-top { height: calc(56px + var(--safe-t)); padding-top: var(--safe-t); }
 .m-tabbar { padding-bottom: calc(6px + var(--safe-b)); }
 .m-bookbar { padding-bottom: calc(10px + var(--safe-b)); }
@@ -407,6 +409,11 @@ button.m-row:active { background: var(--fill); }
 /* ---------- on a laptop: the same page in the whole browser window. Tabs on top, one column in the middle, sheets as a side panel ---------- */
 @media (min-width: 760px) {
   .m-top { order: 1; height: 64px; padding: 0 max(24px, calc(50% - 360px)); }
+  .m-t-sec { display: none; }
+  .m-t-gym { display: inline; }
+  .m-who { display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 4px 0 12px; border: 0; border-radius: 20px; background: none; color: var(--onf); font-size: 14px; font-weight: 600; }
+  .m-who:hover { background: var(--wash); }
+  .m-who i { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 16px; background: var(--wash); font-style: normal; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
   .m-bottom { order: 2; position: static; }
   .m-scroll { order: 3; padding: 0 24px 64px; scrollbar-width: thin; }
   .m-page { width: 100%; max-width: 720px; margin: 0 auto; gap: 20px; padding-top: 28px; }
