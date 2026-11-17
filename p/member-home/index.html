@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Member home · Zana Labs</title>
+<meta name="description" content="Prototype: what a member sees when she signs in. One home, one Book button, everything else under the gym's name. Four sample members, three ways to navigate.">
+<!-- Geist is Zana's face. Loaded from Google Fonts here because this is a labs page. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&display=swap">
+<link rel="stylesheet" href="../../kit/zana.css">
+<link rel="stylesheet" href="home.css?v=1">
+</head>
+<body class="mh">
+<header class="vw">
+  <div class="vw-row">
+    <a class="vw-brand" href="../../"><b>Zana Labs</b><span>Member home</span></a>
+    <span class="vw-end">
+      <span class="vw-seg" role="group" aria-label="Language of the mockup">
+        <button type="button" data-set="lang:en" aria-pressed="true">EN</button>
+        <button type="button" data-set="lang:es" aria-pressed="false">ES</button>
+      </span>
+      <button type="button" class="vw-btn vw-wide-only" data-do="reset">Start over</button>
+      <a class="vw-link vw-wide-only" href="spec.html">The plan</a>
+      <button type="button" class="vw-btn vw-phone-only" data-do="notes" aria-expanded="false" aria-controls="mh-notes">Notes</button>
+      <button type="button" class="vw-btn vw-phone-only" data-do="switches" aria-expanded="true" aria-controls="mh-switches" aria-label="Show or hide the switches">Hide</button>
+    </span>
+  </div>
+  <div class="vw-row vw-switches" id="mh-switches">
+    <span class="vw-seg" role="group" aria-label="Sample member">
+      <button type="button" data-set="m:ines" aria-pressed="false"><b>Inés</b><i>drop-in</i></button>
+      <button type="button" data-set="m:marta" aria-pressed="true"><b>Marta</b><i>4 tracks</i></button>
+      <button type="button" data-set="m:rafa" aria-pressed="false"><b>Rafa</b><i>1:1 client</i></button>
+      <button type="button" data-set="m:carmen" aria-pressed="false"><b>Carmen</b><i>parent</i></button>
+    </span>
+    <span class="vw-seg" role="group" aria-label="Way to get around">
+      <button type="button" data-set="nav:book" aria-pressed="true"><b>Home + Book</b><i>the pick</i></button>
+      <button type="button" data-set="nav:tabs" aria-pressed="false"><b>Bottom tabs</b></button>
+      <button type="button" data-set="nav:menu" aria-pressed="false"><b>Menu only</b></button>
+    </span>
+  </div>
+</header>
+<main class="stage">
+  <section class="phone" id="mh-phone" aria-label="Member app mockup">
+    <div class="m-top" id="mh-top"></div>
+    <div class="m-scroll" id="mh-scroll"></div>
+    <div class="m-bottom" id="mh-bottom"></div>
+    <div class="m-layer" id="mh-layer"></div>
+  </section>
+  <aside class="notes" id="mh-notes" aria-label="Notes on this sample"></aside>
+</main>
+<noscript><p class="vw-noscript">This mockup is drawn in the browser, so it needs JavaScript switched on. The plan in plain words is on <a href="spec.html">its own page</a>.</p></noscript>
+<script type="module" src="app.js?v=1"></script>
+</body>
+</html>
