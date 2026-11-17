@@ -122,6 +122,8 @@ const head = (tag, title, o = {}) => `<div class="zp-head" data-rise><div class=
 /* keep a time and its am/pm together on one line: "9 p. m." must never break after the 9 or the p. */
 const glue = s => String(s).replace(/(\d) (?=(?:[ap]\. ?m\.|AM\b|PM\b))/g, '$1\u00a0').replace(/\b([ap])\. m\./g, '$1.\u00a0m.');
 const clock = t => `${esc(t.clock)} <span>${esc(t.ap)}</span>`;   /* a real space, so a screen reader says "6:00 a.m." and not "6:00a.m." */
+/* keep a trailing initial with its name: "Luis O." must never leave the "O." alone on the next line */
+const person = s => String(s).replace(/ (?=\S{1,3}$)/, '\u00a0');
 const wide = gym => gym.photos.filter(p => p.shape === 'wide');
 const slideStack = pics => pics.map((s, i) => `<div class="zp-slide${i ? '' : ' is-on'}"><img class="zp-img" src="${s.src}" alt=""${s.pos ? ` style="object-position:${s.pos}"` : ''} ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></div>`).join('');
 const arrowBtns = S => `<div class="zp-arrows"><button type="button" class="zp-arrow" data-dir="-1" aria-label="${esc(S.prev)}">${ARROW}</button><button type="button" class="zp-arrow" data-dir="1" aria-label="${esc(S.nextCard)}">${ARROW}</button></div>`;
@@ -151,7 +153,7 @@ function sessionBits(s, x) {
   const fullUp = s.left === 0;
   return {
     cls, co, fullUp, t: x.time(s.time),
-    who: co ? `${S.withCoach} ${co.name}` : S.openFloor,
+    who: co ? `${S.withCoach} ${person(co.name)}` : S.openFloor,
     spots: fullUp ? S.full : S.left(s.left),
     btn: `<a class="zp-btn zp-btn--sm${fullUp ? ' zp-btn--ghost' : ''}" href="#" data-act="reserve">${esc(fullUp ? S.wait : S.bookShort)}</a>`,
     name: L(cls.name),
@@ -254,7 +256,7 @@ export function heroTiles(gym, x) {
   const pos = p => (p.pos ? ` style="object-position:${p.pos}"` : '');
   return `<section class="zp-hero zp-hero--tiles" data-block="heroTiles" id="top">
     <div class="zp-hero__in zp-tiles">${heroCopy(gym, x)}
-      <div class="zp-tiles__grid" style="--n:${pics.length}" data-fx-hero="tiles">${pics.map((p, i) => `<figure class="zp-tile"><div class="zp-ph"><img class="zp-img" src="${p.src}" alt=""${pos(p)} fetchpriority="high">${alts[i] ? `<img class="zp-img zp-tile__alt" data-src="${alts[i].src}" alt=""${pos(alts[i])}>` : ''}</div>${i === 1 ? `<figcaption class="zp-chip">${esc(x.L(gym.offer))}</figcaption>` : ''}</figure>`).join('')}</div>
+      <div class="zp-tiles__grid" style="--n:${pics.length}" data-fx-hero="tiles">${pics.map((p, i) => `<figure class="zp-tile"><div class="zp-ph"><img class="zp-img" src="${p.src}" alt=""${pos(p)} fetchpriority="high">${alts[i] ? `<img class="zp-img zp-tile__alt" data-src="${alts[i].src}" alt=""${pos(alts[i])}>` : ''}</div>${i === 1 ? `<figcaption class="zp-tile__badge"><span class="zp-chip">${esc(x.L(gym.offer))}</span></figcaption>` : ''}</figure>`).join('')}</div>
     </div>
   </section>`;
 }
@@ -362,7 +364,7 @@ export function scheduleList(gym, x, o = {}) {
   return scheduleShell(gym, x, o, 'scheduleList', s => { const b = sessionBits(s, x); return `<article class="zp-row" data-cls="${s.cls}">
     <p class="zp-row__time zp-num">${clock(b.t)}</p>
     <p class="zp-row__name">${esc(b.name)} <span>${b.cls.mins} ${esc(S.min)}</span></p>
-    <p class="zp-row__who">${avatar(b.co)}<span>${esc(b.co ? b.co.name : S.openFloor)}</span></p>
+    <p class="zp-row__who">${avatar(b.co)}<span>${esc(b.co ? person(b.co.name) : S.openFloor)}</span></p>
     <p class="zp-row__spots">${esc(b.spots)}</p>
     ${b.btn}
   </article>`; }, 'zp-rows');
@@ -395,7 +397,7 @@ export function coaches(gym, x, o = {}) {
     ${head(S.tCoaches, esc(S.hCoaches), { side: arrowBtns(S) })}
     <div class="zp-coaches" style="--cols:${Math.min(5, Math.max(3, gym.coaches.length))}" data-fx-slide>${gym.coaches.map((c, i) => `<article class="zp-coach" data-rise style="--i:${i}">
       ${avatar(c, 'zp-coach__ph')}
-      <h3 class="zp-h3">${esc(c.name)}</h3>
+      <h3 class="zp-h3">${esc(person(c.name))}</h3>
       <p class="zp-coach__role">${esc(L(c.role))}</p>
     </article>`).join('')}</div>
   </div></section>`;
@@ -407,7 +409,7 @@ export function reviews(gym, x, o = {}) {
   if (!gym.reviews || !gym.reviews.length) return '';
   return `<section class="zp-sec${o.band ? ' zp-sec--band' : ''}" data-block="reviews" id="reviews"><div class="zp-in">
     ${head(S.tReviews, esc(S.hReviews))}
-    <div class="zp-quotes">${gym.reviews.slice(0, 3).map((r, i) => `<figure class="zp-quote" data-rise style="--i:${i}"><blockquote>${esc(L(r.q))}</blockquote><figcaption>${esc(r.who)}</figcaption></figure>`).join('')}</div>
+    <div class="zp-quotes">${gym.reviews.slice(0, 3).map((r, i) => `<figure class="zp-quote" data-rise style="--i:${i}"><blockquote>${esc(L(r.q))}</blockquote><figcaption>${esc(person(r.who))}</figcaption></figure>`).join('')}</div>
   </div></section>`;
 }
 

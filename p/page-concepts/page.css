@@ -178,7 +178,10 @@
 .zp-tile .zp-img { position: absolute; inset: 0; }
 .zp-tile:nth-child(2) { margin-top: clamp(22px, 4vw, 56px); }
 .zp-tile:nth-child(3) { margin-top: clamp(8px, 1.6vw, 22px); }
-.zp-tile .zp-chip { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); }
+/* the offer badge shows only when it fits inside its tile. A 1px spacer shares its line, so a badge that is too wide wraps to a second line, out of sight */
+.zp-tile__badge { position: absolute; left: 8px; right: 8px; bottom: 14px; display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; align-items: center; height: 38px; overflow: hidden; }
+.zp-tile__badge::before { content: ""; flex: none; width: 1px; height: 38px; }
+.zp-tile__badge .zp-chip { flex: none; }
 .zp-tile__alt { opacity: 0; transition: opacity 1.4s ease; }
 .zp-tile.is-alt .zp-tile__alt { opacity: 1; }
 @media (min-width: 700px) { .zp-framed__ph .zp-ph { aspect-ratio: 21 / 9; } }
