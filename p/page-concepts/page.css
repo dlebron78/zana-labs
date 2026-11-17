@@ -95,6 +95,9 @@
 .zp-logo { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; margin-right: auto; color: inherit; text-decoration: none; }
 .zp-logo svg { flex: none; width: 28px; height: 28px; }
 .zp-logo__w { font-size: 21px; line-height: 1; letter-spacing: var(--logo-track); text-transform: var(--hcase); white-space: nowrap; }
+/* an uploaded logo. One color: the picture is a stencil filled with the text color, so it follows the menu bar from clear to solid */
+.zp-logo__pic { display: block; flex: none; width: auto; height: 32px; max-width: min(190px, 46vw); object-fit: contain; }
+.zp-logo__pic--mono { background-color: currentColor; -webkit-mask: var(--logo) center / contain no-repeat; mask: var(--logo) center / contain no-repeat; }
 .zp-nav { display: none; gap: clamp(18px, 2.4vw, 34px); margin-right: clamp(6px, 1.6vw, 22px); }
 .zp-nav a, .zp-drawer > a:not(.zp-btn) { font-size: 16px; font-weight: 600; text-decoration: none; }
 .zp-nav a:hover { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 6px; }

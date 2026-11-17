@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Business page settings · Zana</title>
+<meta name="description" content="Mock: the settings screen a gym owner would use for their business page. Nothing is saved.">
+<!-- A mock of the owner's settings screen. The screen itself uses one typeface, Geist (Zana's own).
+     The preview beside it is a frame (preview.html) that draws the real page with the framework. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&display=swap">
+<link rel="stylesheet" href="settings.css?v=11">
+</head>
+<body>
+<div class="st-labs" id="st-labs"></div>
+<header class="st-top" id="st-top"></header>
+<div class="st-body" id="st-body" data-view="settings">
+  <main class="st-settings" id="st-settings"></main>
+  <aside class="st-preview" id="st-preview">
+    <div class="st-pv__bar" id="st-pvbar"></div>
+    <div class="st-pv__pane" id="st-pane"><div class="st-pv__holder" id="st-holder"></div></div>
+  </aside>
+</div>
+<nav class="st-switch" id="st-switch"></nav>
+<p class="st-toast" id="st-toast" role="status" aria-live="polite"></p>
+<p class="st-live" id="st-live" aria-live="polite"></p>
+<noscript><p class="st-noscript">This screen builds its preview in the browser, so it needs JavaScript switched on.</p></noscript>
+<script type="module" src="settings.js?v=11"></script>
+</body>
+</html>

@@ -112,7 +112,15 @@ const COPY = {
 export const VOICES = Object.keys(COPY);
 
 /* ---------- small pieces the blocks share ---------- */
-const logo = gym => `<a class="zp-logo" href="#top" aria-label="${esc(gym.name)}"><svg viewBox="0 0 32 32" aria-hidden="true">${gym.logo.mark}</svg><span class="zp-logo__w">${esc(gym.logo.word)}</span></a>`;
+/* The logo. With no image, the mark and the name are set in the heading typeface.
+   An uploaded image shows as it is, or (one color) painted in the text color: the image is used as a stencil, so it shows on any background. */
+const logo = gym => {
+  const l = gym.logo;
+  const pic = !l.src ? `<svg viewBox="0 0 32 32" aria-hidden="true">${l.mark}</svg><span class="zp-logo__w">${esc(l.word)}</span>`
+    : l.mono ? `<span class="zp-logo__pic zp-logo__pic--mono" style="--logo:url('${esc(l.src)}');aspect-ratio:${+l.ratio || 3}"></span>`
+    : `<img class="zp-logo__pic" src="${esc(l.src)}" alt="">`;
+  return `<a class="zp-logo" href="#top" aria-label="${esc(gym.name)}">${pic}</a>`;
+};
 const initials = name => name.split(/\s+/).map(w => w.charAt(0)).join('').slice(0, 2).toUpperCase();
 const avatar = (c, cls = '') => (c && c.photo
   ? `<span class="zp-av ${cls}"><img class="zp-img" src="${c.photo}" alt="" loading="lazy"></span>`
@@ -182,16 +190,19 @@ export function menuBar(gym, x) {
   </header>`;
 }
 
-/* Hero 1: film. A silent loop behind the headline. The still photo shows first; the video only loads when the "moving hero" effect is on. */
-export function heroFilm(gym, x) {
-  const v = gym.video, still = wide(gym)[0] || gym.photos[0];
+/* Hero 1: film. A silent loop behind the headline. The still photo shows first; the video only loads when the "moving hero" effect is on.
+   With no video it is one photo edge to edge. slides: true makes it a slow slideshow of the gym's wide photos instead. */
+export function heroFilm(gym, x, o = {}) {
+  const pics = wide(gym), still = pics[0] || gym.photos[0];
+  const slides = o.slides && pics.length > 1 ? pics.slice(0, 4) : null;
+  const v = slides ? null : gym.video;
   if (!v && !still) return heroSplit(gym, x, { side: 'today' });
-  const media = v
+  const media = slides ? slideStack(slides) : v
     ? `<picture><source media="(max-width:699px)" srcset="${v.posterTall}"><img class="zp-img" src="${v.posterWide}" alt="" fetchpriority="high"></picture>
        <video class="zp-img" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1" data-wide="${v.wide}" data-tall="${v.tall}"></video>`
     : `<img class="zp-img" src="${still.src}" alt="" fetchpriority="high"${still.pos ? ` style="object-position:${still.pos}"` : ''}>`;
   return `<section class="zp-hero zp-hero--full" data-block="heroFilm" id="top">
-    <div class="zp-hero__media"${v ? ' data-fx-hero="video"' : ''}>${media}</div>
+    <div class="zp-hero__media"${slides ? ' data-fx-hero="slides"' : v ? ' data-fx-hero="video"' : ''}>${media}</div>
     <div class="zp-scrim"></div>
     <div class="zp-hero__in">${heroCopy(gym, x)}</div>
     ${v ? `<button class="zp-pause" type="button" data-act="pause" hidden aria-label="${esc(x.S.pause)}"><i></i></button>` : ''}

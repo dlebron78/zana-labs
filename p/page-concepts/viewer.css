@@ -12,9 +12,10 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 .vw-top { position: relative; z-index: 70; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; padding: 8px 12px 10px; background: #0b0b0c; color: #fff; }
 .vw-brand { display: inline-flex; align-items: baseline; gap: 7px; min-height: 36px; color: #fff; font-size: 16px; text-decoration: none; white-space: nowrap; }
 .vw-brand b { font-weight: 700; }
-.vw-brand span { font-weight: 500; color: #d6d6d2; }
+.vw-brand span { display: none; font-weight: 500; color: #d6d6d2; }
+.vw-help a { color: inherit; font-weight: 600; text-underline-offset: 3px; }
 .vw-brand { grid-area: 1 / 1; }
-.vw-end { grid-area: 1 / 2; display: flex; align-items: center; gap: 10px; }
+.vw-end { grid-area: 1 / 2; display: flex; align-items: center; gap: 16px; }
 .vw-link { color: #fff; font-size: 16px; font-weight: 600; text-underline-offset: 3px; white-space: nowrap; }
 .vw-tabs { grid-area: 2 / 1 / 3 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .vw-tab { min-height: 42px; padding: 0 4px; border: 1.5px solid #47474a; border-radius: 10px; background: transparent; color: #f1f1ee; font-size: 16px; font-weight: 600; }
@@ -80,9 +81,9 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 
 @media (min-width: 900px) {
   :root { --chrome-h: 52px; }
-  .vw-top { position: sticky; top: 0; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 16px; height: 52px; padding: 0 16px; }
+  .vw-top { position: sticky; top: 0; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; height: 52px; padding: 0 16px; }
   .vw-brand, .vw-end, .vw-tabs { grid-area: auto; }
-  .vw-tabs { display: flex; gap: 6px; }
+  .vw-tabs { display: flex; justify-content: center; gap: 6px; }
   .vw-tab { min-height: 36px; padding: 0 18px; border-radius: 999px; }
   .vw-end { justify-content: flex-end; gap: 18px; }
   .vw-adjust { display: inline-flex; }
@@ -98,6 +99,8 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 html.vw-bare { --chrome-h: 0px; --chrome-above: 0px; }
 html.vw-bare .vw-top, html.vw-bare .vw-fab, html.vw-bare .vw-panel { display: none; }
 
+/* the top bar's second word shows where there is room for it beside the two links */
+@media (min-width: 480px) and (max-width: 899.98px), (min-width: 1080px) { .vw-brand span { display: inline; } }
 @keyframes vw-ring { from { box-shadow: 0 0 0 0 rgba(255,255,255,.75); } to { box-shadow: 0 0 0 14px rgba(255,255,255,0); } }
 @media (min-width: 1200px) { .vw-more { display: inline; } }
 /* on a full HD screen or wider the panel starts open, so it is a touch slimmer there and clears the page's widest content */

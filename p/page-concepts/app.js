@@ -2,12 +2,12 @@
    All it does: pick a recipe, keep track of what the viewer changed, and ask the framework to draw.
    The framework itself is data.js, tokens.js, blocks.js, effects.js, recipes.js and page.js. */
 
-import { GYMS } from './data.js?v=10';
-import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=10';
-import { buildTokens, CHOICES } from './tokens.js?v=10';
-import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=10';
-import { mountEffects } from './effects.js?v=10';
-import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=10';
+import { GYMS } from './data.js?v=11';
+import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=11';
+import { buildTokens, CHOICES } from './tokens.js?v=11';
+import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=11';
+import { mountEffects } from './effects.js?v=11';
+import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=11';
 
 const $ = (s, el = document) => el.querySelector(s);
 const stage = $('#stage'), topBar = $('#vw-top'), panel = $('#vw-panel'), fab = $('#vw-fab');
@@ -139,7 +139,7 @@ function paint(redrawPanel = true) {
 function drawTop() {
   topBar.innerHTML = `<a class="vw-brand" href="./"><b>Zana</b><span>page framework</span></a>
     <div class="vw-tabs" role="group" aria-label="Sample page">${ORDER.map(id => `<button type="button" class="vw-tab" data-do="r" data-v="${id}" aria-pressed="${id === state.r}">${RECIPES[id].name}</button>`).join('')}</div>
-    <div class="vw-end"><a class="vw-link" href="spec.html">How it works</a><button type="button" class="vw-adjust" data-do="toggle" aria-expanded="${state.open}">${ICON}<span>Adjust<span class="vw-more"> this page</span></span></button></div>`;
+    <div class="vw-end"><a class="vw-link" href="settings.html">Owner settings</a><a class="vw-link" href="spec.html">How it works</a><button type="button" class="vw-adjust" data-do="toggle" aria-expanded="${state.open}">${ICON}<span>Adjust<span class="vw-more"> this page</span></span></button></div>`;
 }
 
 const seg = (label, key, opts, cur) => `<div class="vw-group"><p class="vw-label">${label}</p><div class="vw-seg" role="group" aria-label="${label}">${opts.map(([v, t]) => `<button type="button" data-do="${key}" data-v="${v}" aria-pressed="${String(v) === String(cur)}">${t}</button>`).join('')}</div></div>`;
@@ -169,7 +169,8 @@ function lookTab() {
     ${seg('Headline size on a laptop', 'scale', [2.5, 2.75, top].map(s => [s, Math.round(18 * s) + 'px']), t.scale >= 3 ? top : t.scale)}
     <p class="vw-help">Body text is 18px. The headline stays between 2.5 and 3 times that, so the two always look like a pair.</p>
     ${seg('Language', 'lang', [['en', 'English'], ['es', 'Español']], state.lang)}
-    <div class="vw-row"><button type="button" data-do="reset">Reset this sample</button><button type="button" data-do="copy">Copy link</button></div>`;
+    <div class="vw-row"><button type="button" data-do="reset">Reset this sample</button><button type="button" data-do="copy">Copy link</button></div>
+    <p class="vw-help">This panel is a viewer: it shows every knob the framework has. The short list a gym owner would get is in the <a href="settings.html">owner settings mock</a>.</p>`;
 }
 
 function motionTab() {
