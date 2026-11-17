@@ -3,9 +3,9 @@
    2. runs the recipe's blocks in order and joins what they return
    3. wires the few things a visitor can press (day tabs, hero tabs, the phone menu, language, Book) */
 
-import { BLOCKS, WORDS, BLOCK_NAMES, HEROES, SCHEDULES, followBook, esc } from './blocks.js?v=16';
-import { buildTokens } from './tokens.js?v=16';
-import { setSlide } from './effects.js?v=16';
+import { BLOCKS, WORDS, BLOCK_NAMES, HEROES, SCHEDULES, followBook, esc } from './blocks.js?v=17';
+import { buildTokens } from './tokens.js?v=17';
+import { setSlide } from './effects.js?v=17';
 
 const pad2 = n => String(n).padStart(2, '0');
 const capFirst = s => s.charAt(0).toUpperCase() + s.slice(1);

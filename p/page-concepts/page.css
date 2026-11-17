@@ -85,6 +85,9 @@
 .zp-in { width: min(100% - 2 * var(--gut), 1200px); margin-inline: auto; }
 .zp-sec { padding-block: calc(var(--sec) * .6); }
 .zp-sec--band { background: var(--band); }
+.zp-cover { padding-block: 0; }
+.zp-cover__ph { aspect-ratio: 4 / 3; }
+@media (min-width: 700px) { .zp-cover__ph { aspect-ratio: 21 / 8; } }
 .zp-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--gap); margin-bottom: var(--head); }
 .zp-head__t { display: grid; gap: 10px; min-width: 0; }
 

@@ -559,7 +559,14 @@ export function followBook(gym, x, variant = 'pill') {
   return `<div class="zp-follow zp-follow--${variant}${price ? '' : ' is-bare'}" data-fx-book role="complementary" aria-label="${esc(c.label)}">${inner}</div>`;
 }
 
-export const BLOCKS = { menuBar, heroFilm, heroSlideshow, heroSplit, heroFramed, heroTiles, offerStrip, statement, classCards, scheduleCards, scheduleList, priceCards, coaches, reviews, firstVisit, bookingBar, footer };
+/* Cover band. The one cover photo Zana staff set, shown wide under a hero that has no photo of its own
+   (Timetable's hero is the day's board). The launch version adds it so a launch page is never photo-free. */
+export function coverBand(gym, x) {
+  const pic = gym.photos[0]; if (!pic) return '';
+  return `<section class="zp-sec zp-cover" data-block="coverBand"><div class="zp-in" data-rise>${photo(pic.src, { cls: 'zp-cover__ph', pos: pic.pos, alt: gym.name })}</div></section>`;
+}
+
+export const BLOCKS = { menuBar, heroFilm, heroSlideshow, heroSplit, heroFramed, heroTiles, coverBand, offerStrip, statement, classCards, scheduleCards, scheduleList, priceCards, coaches, reviews, firstVisit, bookingBar, footer };
 
 /* names the control panel and the spec use */
 export const BLOCK_NAMES = {
@@ -569,6 +576,7 @@ export const BLOCK_NAMES = {
   heroSplit: { en: 'Hero: split with today\'s classes', es: 'Portada: dividida con las clases de hoy' },
   heroFramed: { en: 'Hero: framed photo', es: 'Portada: foto enmarcada' },
   heroTiles: { en: 'Hero: three tiles', es: 'Portada: tres fotos' },
+  coverBand: { en: 'Cover photo', es: 'Foto de portada' },
   offerStrip: { en: 'Offer strip', es: 'Franja de oferta' },
   statement: { en: 'Statement and facts', es: 'Frase y datos' },
   classCards: { en: 'Class cards', es: 'Tarjetas de clases' },

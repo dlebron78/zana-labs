@@ -48,6 +48,9 @@ export function launchCut(recipe, gym, lang) {
     .map(b => (typeof b === 'string' ? [b, {}] : [b[0], { ...(b[1] || {}) }]))
     .filter(([name]) => !SEC_OF[name] || SHIP.sec[SEC_OF[name]] === 1)
     .map(([name, opt]) => (name === 'heroSlideshow' ? ['heroFilm', {}] : [name, opt]));          // a slideshow needs photos an owner uploads: one cover photo instead
+  /* the cover photo is in phase 1, so every launch page shows it. A hero that holds no photo (Timetable's board) gets the photo as a wide band right under it. */
+  const h = blocks.findIndex(([name]) => name.startsWith('hero'));
+  if (h >= 0 && blocks[h][0] === 'heroSplit' && blocks[h][1].side === 'board') blocks.splice(h + 1, 0, ['coverBand', {}]);
   return { recipe: { ...recipe, blocks }, gym: held(gym, lang) };
 }
 export const launchFx = fx => Object.fromEntries(Object.keys(fx).map(id => [id, !!fx[id] && SHIP.fx[id] === 1]));

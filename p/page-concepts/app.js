@@ -2,13 +2,13 @@
    All it does: pick a recipe, keep track of what the viewer changed, and ask the framework to draw.
    The framework itself is data.js, tokens.js, blocks.js, effects.js, recipes.js and page.js. */
 
-import { GYMS, STRESS } from './data.js?v=16';
-import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=16';
-import { buildTokens, CHOICES } from './tokens.js?v=16';
-import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=16';
-import { mountEffects } from './effects.js?v=16';
-import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=16';
-import { SHIP, LAUNCH_STYLES, launchCut, launchFx } from './launch.js?v=16';
+import { GYMS, STRESS } from './data.js?v=17';
+import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=17';
+import { buildTokens, CHOICES } from './tokens.js?v=17';
+import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=17';
+import { mountEffects } from './effects.js?v=17';
+import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=17';
+import { SHIP, LAUNCH_STYLES, launchCut, launchFx } from './launch.js?v=17';
 
 const $ = (s, el = document) => el.querySelector(s);
 const stage = $('#stage'), topBar = $('#vw-top'), note = $('#vw-note'), panel = $('#vw-panel'), fab = $('#vw-fab');
@@ -189,7 +189,7 @@ function lookTab() {
       ${state.launch || state.gym ? '' : `<p class="vw-try"><b>Try this.</b> ${rec.try}</p>`}
     </div>
     <div class="vw-group"><p class="vw-label">What ships first</p>
-      ${toggle('launch', '1', state.launch, 'Launch version', 'Only the first cut: two styles, the sections Zana can fill today, three safe effects. No words or photos an owner would have to add.')}
+      ${toggle('launch', '1', state.launch, 'Launch version', 'Only the first cut: two styles, the sections Zana can fill today, three safe effects. Staff set one cover photo. No other words or photos an owner would have to add.')}
     </div>
     ${seg('Business data', 'gym', [['', 'Own'], ...Object.entries(STRESS).map(([k, g]) => [k, g.label])], state.gym || '')}
     <p class="vw-help">The three test accounts hold only what Zana stores today: no classes, one class, or eight with long names. Spanish only, no photos. Use them to check that nothing breaks.</p>
