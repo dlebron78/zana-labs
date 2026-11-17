@@ -1,7 +1,7 @@
 /* Member home: what the phone draws. Pure text in, text out: no page access here, so the same code can be checked without a browser.
    The one rule behind every screen: a thing shows only when this person has one. Nothing is ever shown empty or locked. */
 
-import { DAYS, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=7';
+import { DAYS, WEEKS, BOOK_AHEAD, CLOSED, WODS, NOT_READY, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=8';
 
 let S;                                      // the state being drawn: draw() and bind() set it, the helpers below read it
 export const bind = state => { S = state; };
@@ -39,6 +39,7 @@ const I = {
   plan: svg('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 12.5h8M8 16h5"/>'),
   out: svg('<path d="M14 4.5h4.5v15H14"/><path d="M10 8l-4 4 4 4M6 12h9"/>'),
   globe: svg('<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.4 2.3 3.5 5 3.5 8s-1.1 5.7-3.5 8c-2.4-2.3-3.5-5-3.5-8s1.1-5.7 3.5-8z"/>'),
+  lock: svg('<rect x="5.5" y="10.5" width="13" height="9.5" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>'),
   bolt: svg('<path d="M13 3.5 5.5 13.5H12l-1 7 7.5-10H12z"/>'),
 };
 
@@ -68,7 +69,7 @@ export const whenToast = (day, time) => `${day === 0 ? t(W.today).toLowerCase() 
 
 /* ---------- the schedule ---------- */
 export function classesOn(day) {
-  if (!gym().classes) return [];
+  if (!gym().classes || !DAYS[day] || day < 0 || CLOSED[day]) return [];
   return (WEEK[DAYS[day].wd] || [])
     .filter(r => day > 0 || r[0] >= '17:00')      // today, only what is still to come this evening
     .map(([time, cls, coach]) => ({ id: `${day}-${time}-${cls}`, day, time, cls, coach }));
@@ -94,8 +95,36 @@ function listFor(p, day) {
 }
 export function firstDay(whoId) {             // open the schedule on the first day that has one of her classes
   const p = person(whoId);
-  const i = DAYS.findIndex((d, n) => listFor(p, n).mine.length > 0);
-  return i < 0 ? 0 : i;
+  for (let n = 0; n <= BOOK_AHEAD; n++) if (listFor(p, n).mine.length) return n;
+  return 0;
+}
+
+/* ---------- one week at a time, Monday to Sunday, with arrows ---------- */
+const wkOf = i => (i > 5 ? 1 : 0);
+const wdLong = i => WD.long[S.lang][DAYS[i].wd];
+function weekBar(act, sel, state) {
+  const wk = wkOf(sel), days = WEEKS[wk], a = DAYS[days[0]], z = DAYS[days[6]];
+  const range = S.lang === 'es' ? `${a.n} al ${z.n} de nov.` : `Nov ${a.n} to ${z.n}`;
+  const arrow = (d, icon, label) => `<button class="m-wkb" data-act="week" data-arg="${d}" data-kind="${act}" aria-label="${T(label)}"${wk + d < 0 || wk + d >= WEEKS.length ? ' disabled' : ''}>${I[icon]}</button>`;
+  return `<div class="m-week"><div class="m-wkh">${arrow(-1, 'back', W.prevWeek)}<p><b>${T(wk ? W.nextWeek : W.thisWeek)}</b><span>${esc(range)}</span></p>${arrow(1, 'right', W.nextWeek)}</div>
+    <div class="m-days" role="group" aria-label="${esc(range)}">${days.map(i => {
+      const s = state(i);
+      return `<button data-act="${act}" data-arg="${i}" aria-pressed="${i === sel}"${s === 'past' ? ' disabled' : ''}${s === 'off' ? ' class="m-off"' : ''}><span>${esc(dayShort(i))}</span><b>${DAYS[i].n}</b>${s === 'off' && act === 'wday' ? `<i class="m-lock" aria-hidden="true">${I.lock}</i>` : ''}</button>`;
+    }).join('')}</div></div>`;
+}
+const opensOn = d => (d - BOOK_AHEAD === 1 ? t(W.opensTomorrow) : f().opensOn(`${dayShort(d - BOOK_AHEAD)} ${DAYS[d - BOOK_AHEAD].n}`));
+
+/* ---------- when a day's workouts show: the Program's Release, as Zana has it ----------
+   One day at a time, or the whole week from its Monday. The day before at 8:00 PM, or midnight. Only a Ready day is released.
+   Minutes are counted from today at 12:00 AM; now is 4:15 PM. */
+export function released(d) {
+  if (NOT_READY[d]) return { ok: false, title: t(W.notReady), line: f().notReadyLine(gym().short || gym().name, wdLong(d)) };
+  const anchor = S.span === 'week' ? WEEKS[wkOf(d)][0] : d, before = S.when !== 'midnight';
+  const at = before ? (anchor - 1) * 1440 + 20 * 60 : anchor * 1440, now = mins(NOW);
+  if (at <= now) return { ok: true };
+  const day = before ? anchor - 1 : anchor, time = clock(before ? '20:00' : '00:00');
+  const tonight = before ? day === 0 : day === 1;
+  return { ok: false, title: f().goesUp(wdLong(day), time, tonight), line: f().relHow(gym().short || gym().name, S.span, S.when) };
 }
 
 /* ---------- plans, prices, offers ---------- */
@@ -246,8 +275,8 @@ function resLine(p, r) {
   const show = p.log === 'weight' ? `${v} lb` : p.log === 'reps' ? `${v} ${T(W.repsShort)}` : v;
   return `<p class="m-res">${I.check}<span>${show}${p.scaled ? ` · ${T(r.rx === 'scaled' ? W.scaled : W.rx)}` : ''}${r.best ? ` · ${T(W.newBest)}` : ''}</span></p>`;
 }
-function workout(tr, bare) {
-  const w = WORKOUTS[tr], res = (me().results || {})[tr] || {};
+function workout(tr, bare, day = 0) {
+  const w = (WODS[day] || {})[tr] || WORKOUTS[tr], res = day === 0 ? (me().results || {})[tr] || {} : {};
   return `<div class="m-wo">${bare ? '' : `<p class="m-woh"><span class="m-lab">${T(W.workout)}</span><b>${T(w.title)}</b></p>`}<ol class="m-parts">${w.parts.map((p, i) => `<li><span class="ix" aria-hidden="true">${String.fromCharCode(65 + i)}</span><div class="m-pt">
     <p class="m-pn"><b>${T(p.name)}</b><span class="mins">${p.mins} min</span></p><p class="m-px">${T(p.text)}</p>${p.scaled ? `<p class="m-scl"><span>${T(W.scaled)}</span>${T(p.scaled)}</p>` : ''}${res[i] ? resLine(p, res[i]) : ''}</div></li>`).join('')}</ol></div>`;
 }
@@ -276,13 +305,13 @@ export function cancelTerms(x) {
   if (x.paid || x.credit) return { late, back: late ? 'none' : 'credit', amt: x.paid || g.single };
   return { late, back: 'plan' };
 }
-function trackRows(ids, label, dflt) {
+function trackRows(ids, label, dflt, day = 0) {
   if (!ids.length) return '';
-  const openId = S.open === undefined ? dflt : S.open;
+  const openId = S.open === undefined ? dflt : S.open, now = day === 0;
   return `<section class="m-sec"><h2 class="m-lab">${esc(label)}</h2><div class="card m-rows">${ids.map(id => {
-    const w = WORKOUTS[id], open = openId === id, mins = w.parts.reduce((a, p) => a + p.mins, 0);
-    return `<div class="m-acc"><button class="m-row" data-act="open" data-arg="${id}" aria-expanded="${open}"><span class="m-rt"><b>${T(CLASSES[id].name)}</b><span>${T(w.title)} · ${mins} min${isLogged(id) ? ` · ${T(W.logged)}` : ''}</span></span>${open ? I.upc : I.down}</button>${
-      open ? `<div class="m-accb">${workout(id, true)}<div class="m-foot">${logBtn(id)}</div></div>` : ''}</div>`;
+    const w = WODS[day][id], open = openId === id, mins = w.parts.reduce((a, p) => a + p.mins, 0);
+    return `<div class="m-acc"><button class="m-row" data-act="open" data-arg="${id}" aria-expanded="${open}"><span class="m-rt"><b>${T(CLASSES[id].name)}</b><span>${T(w.title)} · ${mins} min${now && isLogged(id) ? ` · ${T(W.logged)}` : ''}</span></span>${open ? I.upc : I.down}</button>${
+      open ? `<div class="m-accb">${workout(id, true, day)}${now ? `<div class="m-foot">${logBtn(id)}</div>` : ''}</div>` : ''}</div>`;
   }).join('')}</div></section>`;
 }
 function programCard() {
@@ -366,8 +395,13 @@ function schedule() {
   const whoSeg = !fam() ? '' : FX()
     ? `<div class="m-whobig" role="group" aria-label="${T(W.forWhom)}"><p class="m-lab">${T(W.forWhom)}</p><div>${m.people.map(x => `<button data-act="who" data-arg="${x.id}" aria-pressed="${x.id === p.id}"><span class="m-whoava" aria-hidden="true">${esc(x.name.charAt(0))}</span><span><b>${esc(x.name)}</b><span>${x.me ? T(W.you) : `${x.age} ${T(W.years)}`}</span></span></button>`).join('')}</div></div>`
     : `<div class="m-who"><span class="m-lab">${T(W.forWhom)}</span><span class="m-seg" role="group" aria-label="${T(W.forWhom)}">${m.people.map(x => `<button data-act="who" data-arg="${x.id}" aria-pressed="${x.id === p.id}">${x.me ? T(W.me) : esc(x.name)}</button>`).join('')}</span></div>`;
-  const strip = `<div class="m-days" role="group" aria-label="${T(W.schedule)}">${DAYS.map((d, i) => `<button data-act="day" data-arg="${i}" aria-pressed="${i === S.day}"><span>${esc(dayShort(i))}</span><b>${d.n}</b></button>`).join('')}</div>`;
+  const strip = weekBar('day', S.day, i => (i < 0 ? 'past' : i > BOOK_AHEAD || CLOSED[i] ? 'off' : ''));
+  const later = S.day > BOOK_AHEAD;
   const rows = list.map(c => {
+    if (later) {      // past the 7 days a member can book: she sees the class, and when it opens
+      const k = CLASSES[c.cls];
+      return `<div class="m-row m-later"><span class="m-rd"><b>${clock(c.time)}</b></span><span class="m-rt"><b>${T(k.name)}</b><span class="m-sub">${face(c.coach, 'xs')}${esc(COACHES[c.coach])} · ${k.mins} min</span></span><span class="m-st q">${esc(opensOn(S.day))}</span></div>`;
+    }
     const k = CLASSES[c.cls], x = bkOf(p.id, c), left = k.cap - taken(c), cost = costOf(m, p.id);
     const right = x ? (x.wait ? `<span class="m-st q${pop(p.id, c.id)}">${T(W.waiting)}</span>` : `<span class="m-st ok${pop(p.id, c.id)}">${I.check}${T(W.booked)}</span>`)
       : left <= 0 ? `<span class="m-st q">${T(W.full)}</span>` : cost.kind === 'blocked' ? `<span class="m-st bad">${T(W.payFirst)}</span>` : cost.kind === 'pay' ? `<span class="m-st q">$${cost.amount}</span>` : '';
@@ -375,8 +409,10 @@ function schedule() {
     return `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${p.id}"><span class="m-rd"><b>${clock(c.time)}</b></span><span class="m-rt"><b>${T(k.name)}</b><span class="m-sub">${face(c.coach, 'xs')}${esc(COACHES[c.coach])} · ${k.mins} min${spots}</span></span>${right}${I.right}</button>`;
   }).join('');
   const head = fam() && FX() && !p.me ? `${esc(f().classesFor(p.name))} · ${esc(dateLine(S.day))}` : esc(dateLine(S.day));
-  return `<div class="m-page">${whoSeg}${strip}<section class="m-sec"><h2 class="m-lab">${head}</h2>${
-    rows ? `<div class="card m-rows">${rows}</div>` : `<section class="m-none"><span>${T(all.length ? W.noneThisDay : W.noneAtAll)}</span></section>`}</section>${
+  const none = CLOSED[S.day] && gym().news ? `<section class="m-none"><b>${T(CLOSED[S.day])}</b><span>${T(gym().news.body)}</span></section>`
+    : `<section class="m-none"><span>${T(all.length ? W.noneThisDay : W.noneAtAll)}</span></section>`;
+  return `<div class="m-page">${whoSeg}${strip}<section class="m-sec"><h2 class="m-lab">${head}</h2>${later && rows ? `<p class="m-hint">${T(W.bookAheadLine)}</p>` : ''}${
+    rows ? `<div class="card m-rows">${rows}</div>` : none}</section>${
     more ? `<button class="m-link m-center" data-act="all">${T(S.all ? W.showMine : W.showAll)}</button>` : ''}</div>`;
 }
 
@@ -391,7 +427,16 @@ function workoutsPage() {
   if (m.program) {
     out += programCard() + listCard(t(W.thisWeekPlan), m.program.days.map(d => `<div class="m-row"><span class="m-rt"><b>${T(d.d)}</b><span>${T(d.what)}</span></span>${d.state === 'done' ? `<span class="m-st ok">${I.check}${T(W.done)}</span>` : d.state === 'today' ? `<span class="m-st q">${T(W.today)}</span>` : ''}</div>`).join(''));
   }
-  out += trackRows(tracks, t(W.todayWorkouts), bookedToday ? bookedToday.cls : tracks[0]);
+  if (tracks.length) {      // the week, Monday to Sunday. A day shows once its Program releases it
+    const d = S.wday, r = released(d);
+    out += weekBar('wday', d, i => (released(i).ok ? '' : 'off'));
+    if (!r.ok) out += `<section class="m-none m-locked">${I.lock}<b>${esc(r.title)}</b><span>${esc(r.line)}</span></section>`;
+    else {
+      const ids = tracks.filter(id => WODS[d] && WODS[d][id]);
+      out += ids.length ? trackRows(ids, d === 0 ? t(W.todayWorkouts) : dateLine(d), d === 0 && bookedToday ? bookedToday.cls : ids[0], d)
+        : `<section class="m-none"><b>${T(W.restDay)}</b><span>${esc(f().restLine(wdLong(d)))}</span></section>`;
+    }
+  }
   out += listCard(t(W.recent), (m.history || []).map(r => `<div class="m-row"><span class="m-rd"><b>${T(r.d)}</b></span><span class="m-rt"><b>${T(r.what)}</b><span>${T(r.res)}</span></span></div>`).join(''));
   out += listCard(t(W.bests), (m.bests || []).map(r => kv(`<b>${T(r.what)}</b>`, `${esc(r.res)} · ${T(r.d)}`)).join(''));
   return `<div class="m-page">${out}</div>`;

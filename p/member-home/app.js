@@ -5,14 +5,14 @@
    Motion: sheets slide up and back down, a new screen fades in, a toast rises with a line that runs down while Undo is still possible,
    a status that just changed pops once, and a payment shows a short wait on its button. All of it stops when the device asks for less motion. */
 
-import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=7';
-import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms } from './views.js?v=7';
-import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=7';
+import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=8';
+import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms } from './views.js?v=8';
+import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=8';
 
 const $ = id => document.getElementById(id);
 const clone = x => JSON.parse(JSON.stringify(x));
 const Q = new URLSearchParams(location.search);
-const fresh = () => ({ screen: 'home', day: 0, who: null, all: false, open: undefined, menu: false, sheet: null, toast: null });
+const fresh = () => ({ screen: 'home', day: 0, wday: 0, who: null, all: false, open: undefined, menu: false, sheet: null, toast: null });
 
 const S = {
   m: Object.hasOwn(MEMBERS, Q.get('m') || Q.get('member') || '') ? (Q.get('m') || Q.get('member')) : 'maria',
@@ -20,6 +20,8 @@ const S = {
   fx: Q.get('fx') === 'off' || Q.get('fixes') === 'off' ? 'off' : 'on',   // review fixes 1, 3, 4 and 5
   grace: Q.get('grace') === 'out' ? 'out' : 'in',    // an overdue member: still inside the gym's grace, or past it
   lang: Q.get('lang') === 'es' ? 'es' : 'en',
+  span: Q.get('span') === 'week' ? 'week' : 'day',          // the Program's Release in Zana: one day at a time (the default) or the whole week
+  when: Q.get('when') === 'midnight' ? 'midnight' : 'before',   // the day before at 8:00 PM (the default) or midnight
   db: clone(MEMBERS),              // each sample member's things; taps change this copy only
   ...fresh(),
 };
@@ -75,7 +77,7 @@ function notesHtml() {
       <li><b>5.</b> A drop-in coming twice a week is offered Unlimited when it saves her money.</li>
       <li><b>2.</b> Past classes and best lifts up front: not done, later.</li>
     </ul>
-    <p class="n-fine"><b>Pretend:</b> nothing is charged, booked or sent. Members can't book or pay for themselves in Zana yet. Barrio's red and logo, Repecho and the people are made up. Coach photos stand in for staff profiles, which are not built yet (PHO-402, Staff photo and profile). Class descriptions are made up too: Zana has no field for them yet (PHO-479). The card on file, Change, directions and sign out do nothing.</p>`;
+    <p class="n-fine"><b>Pretend:</b> nothing is charged, booked or sent. Members can't book or pay for themselves in Zana yet. Barrio's red and logo, Repecho and the people are made up. Coach photos stand in for staff profiles, which are not built yet (PHO-402, Staff photo and profile). Class descriptions are made up too: Zana has no field for them yet (PHO-479). The card on file, Change, directions and sign out do nothing. Workouts for the other days are made up. When they show follows the Release each Program has in Zana today (one day at a time or the whole week, the day before at 8:00 PM or midnight, Ready days only); here one switch sets it for all of Barrio's programs.</p>`;
 }
 
 /* ---------- draw ---------- */
@@ -126,7 +128,7 @@ function render() {
   else if (!sheetEl && hadSheet && opener) { target = phone.querySelector(opener); opener = null; }
   else if (key) target = phone.querySelector(key);
   if (target) target.focus({ preventScroll: true });
-  try { history.replaceState(null, '', `?m=${S.m}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.lang === 'es' ? '&lang=es' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
+  try { history.replaceState(null, '', `?m=${S.m}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.lang === 'es' ? '&lang=es' : ''}${S.span === 'week' ? '&span=week' : ''}${S.when === 'midnight' ? '&when=midnight' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
 }
 
 /* ---------- what a tap does ---------- */
@@ -171,6 +173,12 @@ const ACT = {
   },
   open(a, el) { S.open = el.getAttribute('aria-expanded') === 'true' ? null : a.arg; },
   day(a) { S.day = +a.arg; },
+  wday(a) { S.wday = +a.arg; S.open = undefined; },
+  week(a) {      // the arrows: next week opens on its Monday, this week on today
+    const k = a.kind === 'wday' ? 'wday' : 'day', wk = (S[k] > 5 ? 1 : 0) + Number(a.arg);
+    if (wk < 0 || wk > 1) return false;
+    S[k] = wk ? 6 : 0; S.open = undefined;
+  },
   who(a) { S.who = a.arg; S.all = false; S.day = firstDay(S.who); },
   all() { S.all = !S.all; },
   lang(a) { S.lang = a.arg; },
@@ -303,7 +311,7 @@ document.addEventListener('click', e => {
   if (set) {
     const [k, v] = set.dataset.set.split(':');
     S[k] = v;
-    if (k !== 'lang') { Object.assign(S, fresh()); clearToast(); }      // a new member or state starts on the home; a new language keeps her place
+    if (!['lang', 'span', 'when'].includes(k)) { Object.assign(S, fresh()); clearToast(); }      // a new member or state starts on the home; a new language or release keeps her place
     render();
   } else if (act && DO[act.dataset.do]) DO[act.dataset.do]();
   else if (!demo.hidden && !demo.contains(e.target)) { demo.hidden = true; syncViewer(); }      // a tap outside closes the menu

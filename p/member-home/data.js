@@ -5,12 +5,14 @@
 export const b = (en, es) => ({ en, es });
 
 /* ---------- the calendar ----------
-   Today is Tuesday, November 17, 2026, and it is 4:15 PM. A member books herself up to 7 days ahead, so the strip runs to next Tuesday. */
+   Today is Tuesday, November 17, 2026, and it is 4:15 PM. A day is counted from today: -1 is Monday the 16th, 0 today, 12 Sunday the 29th.
+   The schedule and the workouts show one week at a time, Monday to Sunday, with arrows to the next week. A member books herself up to 7 days ahead. */
 export const NOW = '16:15';
-export const DAYS = [
-  { n: 17, wd: 2 }, { n: 18, wd: 3 }, { n: 19, wd: 4 }, { n: 20, wd: 5 },
-  { n: 21, wd: 6 }, { n: 22, wd: 7 }, { n: 23, wd: 1 }, { n: 24, wd: 2 },
-];
+export const DAYS = {};
+for (let i = -1; i <= 12; i++) DAYS[i] = { n: 17 + i, wd: (i + 1) % 7 + 1 };
+export const WEEKS = [[-1, 0, 1, 2, 3, 4, 5], [6, 7, 8, 9, 10, 11, 12]];
+export const BOOK_AHEAD = 7;
+export const CLOSED = { 9: b('Closed for Thanksgiving', 'Cerrado por Acción de Gracias') };      // Thursday the 26th, the gym's own news
 export const WD = {   // weekday names, 1 = Monday
   short: { en: ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], es: ['', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'] },
   long: { en: ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], es: ['', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'] },
@@ -114,6 +116,59 @@ export const WORKOUTS = {
   en: { title: b('Intervals', 'Intervalos'), parts: [
     { name: b('Run', 'Carrera'), mins: 30, text: b('5 x 800 m, rest 2 minutes between each', '5 x 800 m, descansa 2 minutos entre cada una'), log: 'time' },
   ] },
+};
+
+/* ---------- Barrio's programmed days, this week ----------
+   Each Program has a Release in Zana [phoenix: Programs.tsx, training/programs.py release_instant]: one day at a time or the whole week,
+   the day before at a time (8:00 PM unless the gym changes it) or midnight. Only a day marked Ready is released. Saturday is not Ready yet. */
+const P = (en, es, mins, ten, tes, extra = {}) => ({ name: b(en, es), mins, text: b(ten, tes), ...extra });
+export const NOT_READY = { 4: true };
+export const WODS = {
+  '-1': {
+    ct: { title: b('Deadlift day', 'Día de peso muerto'), parts: [
+      P('Deadlift', 'Peso muerto', 20, '5 x 3 @ 80%', '5 x 3 @ 80%'),
+      P('Conditioning', 'Acondicionamiento', 12, '12 minutes, as many rounds as you can: 10 deadlifts, 250 m row', '12 minutos, todas las rondas que puedas: 10 pesos muertos, 250 m de remo',
+        { scaled: b('Lighter bar, 200 m row', 'Barra más liviana, 200 m de remo') }),
+    ] },
+    gy: { title: b('Toes to bar', 'Pies a la barra'), parts: [
+      P('Toes to bar', 'Pies a la barra', 10, 'Every minute for 10 minutes: 8 toes to bar', 'Cada minuto por 10 minutos: 8 pies a la barra', { scaled: b('Hanging knee raises', 'Rodillas al pecho colgando') }),
+      P('Ring support', 'Soporte en anillas', 10, '5 x 20 seconds', '5 x 20 segundos'),
+    ] },
+  },
+  0: WORKOUTS,
+  1: {
+    ct: { title: b('Push press', 'Push press'), parts: [
+      P('Push press', 'Push press', 20, '5 x 5, a little heavier each set', '5 x 5, un poco más pesado cada serie'),
+      P('Conditioning', 'Acondicionamiento', 15, '3 rounds: 20 wall balls, 15 pull-ups, 400 m run', '3 rondas: 20 wall balls, 15 dominadas, 400 m de carrera', { scaled: b('Ring rows instead of pull-ups', 'Remos en anillas en vez de dominadas') }),
+    ] },
+    gy: { title: b('Muscle-up drills', 'Ejercicios de muscle-up'), parts: [
+      P('Kipping swings', 'Balanceos', 10, '4 x 8', '4 x 8'),
+      P('False grip holds', 'Agarre falso', 10, '4 x 20 seconds', '4 x 20 segundos'),
+    ] },
+    en: { title: b('Row', 'Remo'), parts: [P('Row', 'Remo', 30, '4 x 1,000 m, rest 2 minutes between each', '4 x 1.000 m, descansa 2 minutos entre cada uno')] },
+  },
+  2: {
+    ct: { title: b('Partner day', 'Día en pareja'), parts: [
+      P('Warm-up', 'Calentamiento', 10, '2 rounds: 10 lunges, 10 push-ups, 200 m run', '2 rondas: 10 zancadas, 10 flexiones, 200 m de carrera'),
+      P('Partner workout', 'Entreno en pareja', 25, 'Split as you like: 100 calorie row, 80 box jumps, 60 thrusters', 'Repártanlo como quieran: 100 calorías de remo, 80 saltos al cajón, 60 thrusters',
+        { scaled: b('Lighter thrusters, step-ups', 'Thrusters más livianos, subidas al cajón') }),
+    ] },
+    wl: { title: b('Clean and jerk', 'Envión'), parts: [
+      P('Clean and jerk', 'Envión', 25, 'Every 2 minutes for 12 minutes: 1 rep @ 80%', 'Cada 2 minutos por 12 minutos: 1 repetición @ 80%'),
+      P('Front squat', 'Sentadilla frontal', 15, '3 x 3', '3 x 3'),
+    ] },
+  },
+  3: {
+    ct: { title: b('Fran Friday', 'Viernes de Fran'), parts: [
+      P('Thrusters and pull-ups', 'Thrusters y dominadas', 15, '21, 15, 9: thrusters at 95 lb, pull-ups', '21, 15, 9: thrusters con 95 lb, dominadas', { scaled: b('65 lb, banded pull-ups', '65 lb, dominadas con banda') }),
+      P('Accessory', 'Accesorios', 15, '3 x 12 dumbbell rows', '3 x 12 remos con mancuerna'),
+    ] },
+  },
+  4: {
+    ct: { title: b('Team Saturday', 'Sábado en equipo'), parts: [
+      P('Team workout', 'Entreno en equipo', 40, 'Teams of 3: 2,000 m row, 150 wall balls, 100 burpees', 'Equipos de 3: 2.000 m de remo, 150 wall balls, 100 burpees'),
+    ] },
+  },
 };
 
 /* ---------- the four sample members ----------
@@ -224,6 +279,9 @@ export const W = {
   dateLong: b('Tuesday, November 17', 'Martes, 17 de noviembre'),
   hi: b('Hi', 'Hola'),
   today: b('Today', 'Hoy'), tomorrow: b('Tomorrow', 'Mañana'),
+  nextWeek: b('Next week', 'La semana que viene'), prevWeek: b('Previous week', 'Semana anterior'),
+  bookAheadLine: b('You can book up to 7 days ahead.', 'Puedes reservar hasta 7 días antes.'), opensTomorrow: b('Opens tomorrow', 'Abre mañana'),
+  restDay: b('Rest day', 'Día de descanso'), notReady: b('Not posted yet', 'Aún no está publicado'),
   home: b('Home', 'Inicio'), schedule: b('Schedule', 'Horario'), workouts: b('Workouts', 'Entreno'), family: b('Family', 'Familia'),
   plan: b('Plan and payments', 'Plan y pagos'), account: b('Account', 'Cuenta'), about: b('About', 'Sobre'),
   menu: b('Sections', 'Secciones'), tabsLabel: b('Sections', 'Secciones'), back: b('Back', 'Volver'), close: b('Close', 'Cerrar'),
@@ -308,6 +366,11 @@ export const F = {
     dueTitle: (name, mine) => (mine ? 'Your payment did not go through' : `${name}'s payment did not go through`),
     dueLine: (plan, amt, since) => `${plan}. $${amt} was due ${since}.`,
     wasDue: since => `Was due ${since}`,
+    opensOn: d => `Opens ${d}`,
+    goesUp: (wd, time, tonight) => (tonight ? `Goes up tonight at ${time}` : `Goes up ${wd} at ${time}`),
+    relHow: (g, span, when) => `${g} shows ${span === 'week' ? 'the whole week at once' : 'workouts one day at a time'}, ${span === 'week' ? (when === 'midnight' ? 'at midnight on Monday' : 'on Sunday at 8:00 PM') : (when === 'midnight' ? 'at midnight that day' : 'the night before at 8:00 PM')}.`,
+    notReadyLine: (g, wd) => `${g}'s coaches haven't marked ${wd} ready yet.`,
+    restLine: wd => `Nothing is programmed for ${wd}.`,
     toastBooked: when => `Booked for ${when}.`,
     toastLast: u => ` That was your last ${F.en.unit(u, 1)}.`,
     toastCharged: amt => ` $${amt} charged to your card.`,
@@ -370,6 +433,11 @@ export const F = {
     dueTitle: (name, mine) => (mine ? 'Tu pago no pasó' : `El pago de ${name} no pasó`),
     dueLine: (plan, amt, since) => `${plan}. $${amt} vencieron el ${since}.`,
     wasDue: since => `Vencía el ${since}`,
+    opensOn: d => `Abre el ${d}`,
+    goesUp: (wd, time, tonight) => (tonight ? `Se publica esta noche a las ${time}` : `Se publica el ${wd} a las ${time}`),
+    relHow: (g, span, when) => `${g} muestra ${span === 'week' ? 'la semana entera de una vez' : 'los entrenos día a día'}, ${span === 'week' ? (when === 'midnight' ? 'a medianoche del lunes' : 'el domingo a las 8:00 p. m.') : (when === 'midnight' ? 'a medianoche de ese día' : 'la noche antes a las 8:00 p. m.')}.`,
+    notReadyLine: (g, wd) => `Los coaches de ${g} aún no han marcado el ${wd} como listo.`,
+    restLine: wd => `No hay nada programado para el ${wd}.`,
     toastBooked: when => `Reserva hecha: ${when}${when.endsWith('.') ? '' : '.'}`,      // "p. m." already ends in a period
     toastLast: u => ` Era tu última ${F.es.unit(u, 1)}.`,
     toastCharged: amt => ` Se cobraron $${amt} a tu tarjeta.`,

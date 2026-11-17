@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&display=swap">
 <link rel="stylesheet" href="../../kit/zana.css">
-<link rel="stylesheet" href="home.css?v=9">
+<link rel="stylesheet" href="home.css?v=10">
 </head>
 <body class="mh">
 <section class="phone" id="mh-phone" aria-label="Barrio Fitness member app">
@@ -56,6 +56,20 @@
     </span>
   </div>
   <div class="dm-g">
+    <span class="dm-l" id="dm-l-span">Program release: show workouts</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-span">
+      <button type="button" data-set="span:day" aria-pressed="true"><b>One day at a time</b></button>
+      <button type="button" data-set="span:week" aria-pressed="false"><b>The whole week</b></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-when">Program release: when</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-when">
+      <button type="button" data-set="when:before" aria-pressed="true"><b>Day before</b><i>8 PM</i></button>
+      <button type="button" data-set="when:midnight" aria-pressed="false"><b>Midnight</b></button>
+    </span>
+  </div>
+  <div class="dm-g">
     <span class="dm-l" id="dm-l-lang">Language</span>
     <span class="vw-seg" role="group" aria-labelledby="dm-l-lang">
       <button type="button" data-set="lang:en" aria-pressed="true"><b>English</b></button>
@@ -70,6 +84,6 @@
 </div>
 <aside class="notes" id="mh-notes" aria-label="Notes on this sample"></aside>
 <noscript><p class="vw-noscript">This prototype is drawn in the browser, so it needs JavaScript switched on. The plan in plain words is on <a href="spec.html">its own page</a>.</p></noscript>
-<script type="module" src="app.js?v=7"></script>
+<script type="module" src="app.js?v=8"></script>
 </body>
 </html>
