@@ -1,7 +1,7 @@
 /* Member home: what the phone draws. Pure text in, text out: no page access here, so the same code can be checked without a browser.
    The one rule behind every screen: a thing shows only when this person has one. Nothing is ever shown empty or locked. */
 
-import { DAYS, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=4';
+import { DAYS, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=5';
 
 let S;                                      // the state being drawn: draw() and bind() set it, the helpers below read it
 export const bind = state => { S = state; };
@@ -494,7 +494,10 @@ function paySheet() {
   let what, amt;
   if (pay.type === 'due') { const a = m.alerts.find(x => x.id === pay.id), pl = m.plans.find(x => x.who === a.who); amt = a.amount; what = planName(pl); }
   else { const pr = prod(pay.id); amt = priceFor(m, pay.who, pay.id); what = `${t(pr.name)}${pr.kind === 'plan' ? `, $${amt} ${t(W.aMonth)}` : ''}`; }
-  return { title: esc(what), body: `${fam() ? `<p class="m-for"><span class="m-lab">${T(W.forWord)}</span> <b>${p.me ? T(W.me) : esc(p.name)}</b></p>` : ''}<p class="m-meta">${T(W.cardLine)}</p>
+  const when = pay.type === 'due' ? esc(f().wasDue(t(m.alerts.find(x => x.id === pay.id).since))) : T(W.payToday);
+  const card = irow('card', T(W.cardBrand), T(W.cardExp), `<button class="btn sm" data-act="mock">${T(W.change)}</button>`);   // pretend: Change does nothing
+  return { title: esc(what), body: `<div class="m-sum"><span class="m-time">$${amt}</span><span class="m-sumd">${when}</span></div>${fam() ? `<p class="m-for"><span class="m-lab">${T(W.forWord)}</span> <b>${p.me ? T(W.me) : esc(p.name)}</b></p>` : ''}
+    <div class="card m-rows m-paycard">${card}</div>
     <button class="btn pri lg m-wide" data-act="pay">${esc(f().payAmt(amt))}</button><p class="m-fine">${T(W.receiptLine)}</p>` };
 }
 function newsSheet() {

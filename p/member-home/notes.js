@@ -1,7 +1,7 @@
 /* Member home: the notes beside the phone. For the person reviewing the design, so English only. */
 
 export const PATTERNS = {
-  tabs: { name: 'Bottom tabs', tag: 'The pick', line: 'A bar at the bottom: Home, Schedule, Workouts and Me (her initials). A tab shows only when she has something for it. Schedule takes the place of the pinned Book button.' },
+  tabs: { name: 'Bottom tabs', tag: 'The pick', line: 'A bar at the bottom: Home, Schedule, Workouts and Me (shown as initials). A tab shows only when she has something for it. Schedule takes the place of the pinned Book button.' },
   book: { name: 'Home + Book', tag: 'Earlier pick', line: 'One home, in time order. One Book button pinned at the bottom. Everything else is under the gym\'s name at the top.' },
   menu: { name: 'Menu only', tag: 'Third', line: 'Like the staff app: a home, and a menu under the name. Booking is one of the menu lines, plus a row on the home.' },
 };
@@ -35,7 +35,7 @@ export const CORE = {
 };
 
 export const OWNER = {
-  barrio: 'Nothing for this screen. The logo comes from Settings and the bar stays Zana black because Barrio picked no color. Posting a news line is optional. Offers come from the gym\'s own price list.',
+  barrio: 'Nothing for this screen. Barrio set its logo and its red in Settings. The red paints the top bar and the news strip, nothing else. Posting a news line is optional. Offers come from the gym\'s own price list.',
   repecho: 'Nothing for this screen. Nico picked a logo and a color in Settings. The offer comes from his own price list.',
 };
 
@@ -59,7 +59,7 @@ export const NOTES = {
         'Fix 5: her plan card says she comes about twice a week, about $217 a month one by one, and offers Unlimited at $159. Switch to Unlimited opens a pretend checkout.',
         'Fix 3: on tonight\'s yoga, tap Cancel booking. It is more than 2 hours away, so the warning says the $25 stays as a credit. Cancel, then book Thursday: it uses the credit.',
         'Schedule is one tap from any screen. It opens on yoga, her usual.',
-        'Me (her initials) holds her bookings, payments, receipts and the language.',
+        'Me (shown as initials) holds her bookings, payments, receipts and the language.',
       ],
       weak: 'Three tabs while María at the same gym has four, so two friends see slightly different bars. That is the point of the rule, but it is worth knowing.',
     },

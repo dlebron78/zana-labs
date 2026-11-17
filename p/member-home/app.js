@@ -3,9 +3,9 @@
    Motion: sheets slide up and back down, a new screen fades in, a toast rises with a line that runs down while Undo is still possible,
    a status that just changed pops once, and a payment shows a short wait on its button. All of it stops when the device asks for less motion. */
 
-import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=4';
-import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms } from './views.js?v=4';
-import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=4';
+import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=5';
+import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms } from './views.js?v=5';
+import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=5';
 
 const $ = id => document.getElementById(id);
 const clone = x => JSON.parse(JSON.stringify(x));
@@ -73,7 +73,7 @@ function notesHtml() {
       <li><b>5.</b> A drop-in coming twice a week is offered Unlimited when it saves her money.</li>
       <li><b>2.</b> Past classes and best lifts up front: not done, later.</li>
     </ul>
-    <p class="n-fine"><b>Pretend:</b> nothing is charged, booked or sent. Members can't book or pay for themselves in Zana yet. Barrio's red and logo, Repecho and the people are made up. Coach photos stand in for staff profiles, which are not built yet (PHO-402, Staff photo and profile). The card on file, directions and sign out do nothing.</p>`;
+    <p class="n-fine"><b>Pretend:</b> nothing is charged, booked or sent. Members can't book or pay for themselves in Zana yet. Barrio's red and logo, Repecho and the people are made up. Coach photos stand in for staff profiles, which are not built yet (PHO-402, Staff photo and profile). Class descriptions are made up too: Zana has no field for them yet (PHO-479). The card on file, Change, directions and sign out do nothing.</p>`;
 }
 
 /* ---------- draw ---------- */

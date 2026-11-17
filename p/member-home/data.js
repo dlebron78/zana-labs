@@ -250,6 +250,7 @@ export const W = {
   payFailed: b('Payment failed', 'Pago fallido'),
   buy: b('Buy', 'Comprar'), offer: b('Offer', 'Oferta'), forWord: b('For', 'Para'),
   cardLine: b('Card on file, ending 4242', 'Tarjeta guardada, termina en 4242'),
+  payToday: b('Charged today', 'Se cobra hoy'),
   receiptLine: b('The receipt goes to your email.', 'El recibo llega a tu email.'),
   you: b('You', 'Tú'), me: b('Me', 'Yo'), forWhom: b('Booking for', 'Reserva para'),
   yourPlanDay: b('Your program', 'Tu programa'), week: b('Week', 'Semana'), of: b('of', 'de'), done: b('Done', 'Hecho'), withWord: b('with', 'con'),
@@ -306,6 +307,7 @@ export const F = {
     emptyLine: u => `Buy the next one to keep ${u === 'session' ? 'training' : 'booking'} without paying one by one.`,
     dueTitle: (name, mine) => (mine ? 'Your payment did not go through' : `${name}'s payment did not go through`),
     dueLine: (plan, amt, since) => `${plan}. $${amt} was due ${since}.`,
+    wasDue: since => `Was due ${since}`,
     toastBooked: when => `Booked for ${when}.`,
     toastLast: u => ` That was your last ${F.en.unit(u, 1)}.`,
     toastCharged: amt => ` $${amt} charged to your card.`,
@@ -367,6 +369,7 @@ export const F = {
     emptyLine: u => `Compra el próximo para seguir ${u === 'session' ? 'entrenando' : 'reservando'} sin pagar una por una.`,
     dueTitle: (name, mine) => (mine ? 'Tu pago no pasó' : `El pago de ${name} no pasó`),
     dueLine: (plan, amt, since) => `${plan}. $${amt} vencieron el ${since}.`,
+    wasDue: since => `Vencía el ${since}`,
     toastBooked: when => `Reserva hecha: ${when}${when.endsWith('.') ? '' : '.'}`,      // "p. m." already ends in a period
     toastLast: u => ` Era tu última ${F.es.unit(u, 1)}.`,
     toastCharged: amt => ` Se cobraron $${amt} a tu tarjeta.`,
