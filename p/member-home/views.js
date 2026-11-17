@@ -1,7 +1,7 @@
 /* Member home: what the phone draws. Pure text in, text out: no page access here, so the same code can be checked without a browser.
    The one rule behind every screen: a thing shows only when this person has one. Nothing is ever shown empty or locked. */
 
-import { DAYS, WD, GYMS, CLASSES, COACHES, WEEK, FULL, WORKOUTS, W, F } from './data.js?v=1';
+import { DAYS, WD, GYMS, CLASSES, COACHES, WEEK, FULL, WORKOUTS, W, F } from './data.js?v=2';
 
 let S;                                      // the state being drawn: draw() and bind() set it, the helpers below read it
 export const bind = state => { S = state; };
@@ -239,7 +239,7 @@ function sessionCard(s) {
 }
 const emptyCard = (title, line) => `<section class="m-none"><b>${esc(title)}</b><span>${esc(line)}</span></section>`;
 
-function weekRows(rest) {
+function weekRows(rest, canBook) {
   const m = me();
   const usual = (m.usual || []).filter(u => !m.bookings.some(x => x.who === u.who && bid(x) === bid(u)) && findClass(bid(u)));
   const rows = rest.map(x => ({ x, booked: true })).concat(usual.map(x => ({ x, booked: false }))).sort((a, c) => byWhen(a.x, c.x));
@@ -251,7 +251,7 @@ function weekRows(rest) {
     return booked
       ? `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${x.who}">${when}<span class="m-rt">${name}<span>${esc(COACHES[c.coach])}</span></span><span class="m-st ${x.wait ? 'q' : 'ok'}">${x.wait ? T(W.waiting) : I.check + T(W.booked)}</span></button>`
       : `<div class="m-row">${when}<span class="m-rt">${name}<span>${T(W.usual)}</span></span><button class="btn sm" data-act="quick" data-id="${c.id}" data-who="${x.who}">${T(W.book)}</button></div>`;
-  }).join('')}</div></section>`;
+  }).join('')}${canBook ? `<button class="m-row m-addrow" data-act="go" data-arg="schedule"><span class="m-rt"><b>+ ${T(W.bookAnother)}</b></span>${I.right}</button>` : ''}</div></section>`;
 }
 
 /* Her plan, in one card. The offer sits here, at the thing it is about, and only one at a time. */
@@ -287,7 +287,7 @@ function home() {
   if (next && !nextToday) out += nextCard(next);
   if (!next && h.book) out += emptyCard(t(W.nothingBooked), t(W.nothingBookedLine));
   if (S.nav === 'menu' && h.book) out += `<button class="btn lg m-wide" data-act="go" data-arg="schedule">${T(W.bookClass)}</button>`;
-  out += weekRows(m.bookings.filter(x => x !== next).sort(byWhen)) + planBlock(true);
+  out += weekRows(m.bookings.filter(x => x !== next).sort(byWhen), h.book) + planBlock(true);
   return `<div class="m-page${g.news ? ' m-hasnews' : ''}">${g.news ? newsStrip() : ''}${out}</div>`;
 }
 

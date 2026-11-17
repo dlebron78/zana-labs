@@ -1,9 +1,9 @@
 /* Member home: the clicks. Everything is pretend: no server, no payments, no messages.
    The link keeps the sample member, the layout and the language: ?m=marta&nav=book&lang=es */
 
-import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=1';
-import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast } from './views.js?v=1';
-import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=1';
+import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=2';
+import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast } from './views.js?v=2';
+import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=2';
 
 const $ = id => document.getElementById(id);
 const clone = x => JSON.parse(JSON.stringify(x));

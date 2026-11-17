@@ -77,7 +77,7 @@ export const NOTES = {
         'A blue notice on top: Thursday has a different coach. Got it clears it.',
         'Tonight\'s 6:00 PM class comes next with its workout open. The other three tracks are one line each. Tap one to open it.',
         'Tap Log score. Type 190 for the squat and 12:41 for the time, then Save. 190 beats her best, and the card says so.',
-        'Book a class stays at the bottom however long the workouts get. Try Wednesday at 6:00 PM: it is full, so the button becomes Join the waitlist.',
+        'Book a class stays at the bottom however long the workouts get, and This week ends with Book another class, which opens the same schedule. Try Wednesday at 6:00 PM: it is full, so the button becomes Join the waitlist.',
         'She is on the top plan, so she sees no offer.',
       ],
       weak: 'Her history and personal bests are two taps away: Tablado, then Workouts. On a day when all four tracks post, the home is long, though each extra track costs one line.',

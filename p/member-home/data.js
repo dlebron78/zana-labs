@@ -206,7 +206,7 @@ export const W = {
   news: b('News', 'Aviso'),
   needsYou: b('Needs you', 'Requiere tu atención'), forYou: b('For you', 'Para ti'), from: b('From', 'De'),
   gotIt: b('Got it', 'Entendido'), notNow: b('Not now', 'Ahora no'),
-  book: b('Book', 'Reservar'), bookClass: b('Book a class', 'Reservar clase'), booked: b('Booked', 'Reservada'),
+  book: b('Book', 'Reservar'), bookClass: b('Book a class', 'Reservar clase'), bookAnother: b('Book another class', 'Reservar otra clase'), booked: b('Booked', 'Reservada'),
   cancel: b('Cancel booking', 'Cancelar reserva'), cancelSession: b('Cancel this session', 'Cancelar esta sesión'),
   cantMakeIt: b('Can\'t make it?', '¿No puedes ir?'),
   full: b('Full', 'Llena'), waitJoin: b('Join the waitlist', 'Unirme a la lista de espera'), waitLeave: b('Leave the waitlist', 'Salir de la lista de espera'),

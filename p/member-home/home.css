@@ -275,3 +275,5 @@ button.m-row:hover { background: #FAFAF8; }
 @media (min-width: 760px) and (max-width: 899px) {
   main.stage { gap: 24px; padding: 20px 16px 40px; }
 }
+.m-addrow { min-height: 52px; }
+.m-addrow .m-rt b { font-weight: 600; }
