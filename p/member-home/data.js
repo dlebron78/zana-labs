@@ -1,5 +1,5 @@
 /* Member home: sample data. Everything here is made up.
-   Tablado is an invented training club. Repecho is the labs' sample solo trainer (see p/page-concepts).
+   Barrio Fitness is the made-up test gym Zana uses everywhere (Calle Loíza, San Juan). Repecho is the labs' sample solo trainer (see p/page-concepts).
    Words a business would type itself (class names, workouts, news) are written in both languages so the switch reads whole. */
 
 export const b = (en, es) => ({ en, es });
@@ -18,13 +18,14 @@ export const WD = {   // weekday names, 1 = Monday
 
 /* ---------- the two businesses ---------- */
 export const GYMS = {
-  tablado: {
-    id: 'tablado', name: 'Tablado', mark: 'T',
-    frame: null,                      // set no color, so the bar is Zana black
+  barrio: {
+    id: 'barrio', name: 'Barrio Fitness', short: 'Barrio', mark: '<svg viewBox=\'0 0 32 32\' aria-hidden=\'true\'><path d=\'M8 5h9.2c4.6 0 7.3 2.2 7.3 5.8 0 2.4-1.3 4-3.4 4.7 2.7.6 4.4 2.5 4.4 5.3 0 4-3 6.2-8 6.2H8zm5 4.2v5h3.6c1.9 0 3-.9 3-2.5s-1.1-2.5-3-2.5zm0 8.8v5.8h4.1c2.2 0 3.4-1 3.4-2.9s-1.2-2.9-3.4-2.9z\' fill=\'currentColor\'/></svg>',
+    frame: '#C4161C',                 // Barrio's red: it paints the bar, its notice strip and nothing else
+    addr: 'Calle Loíza 1950, San Juan',
     classes: true,                    // runs classes a member reserves herself
     hood: 'Santurce, San Juan',
     hours: [b('Monday to Friday, 5:30 AM to 8:30 PM', 'Lunes a viernes, 5:30 a. m. a 8:30 p. m.'), b('Saturday, 7:00 AM to 12:00 PM', 'Sábado, 7:00 a. m. a 12:00 p. m.'), b('Sunday, 9:30 AM to 11:30 AM', 'Domingo, 9:30 a. m. a 11:30 a. m.')],
-    email: 'hola@tablado.example',
+    email: 'hola@barrio.example', phone: '787-555-0100',
     news: {
       title: b('No classes on Thursday the 26th', 'No hay clases el jueves 26'),
       body: b('We close for Thanksgiving. Friday the 27th we are back at 6:00 AM with the usual schedule.', 'Cerramos por Acción de Gracias. El viernes 27 volvemos a las 6:00 a. m. con el horario de siempre.'),
@@ -61,11 +62,11 @@ export const GYMS = {
   },
 };
 
-/* ---------- Tablado's classes ---------- */
+/* ---------- Barrio's classes ---------- */
 export const CLASSES = {
-  ct: { name: b('Cross-training', 'Cross-training'), mins: 60, cap: 12, room: b('Main floor', 'Salón principal'),
+  ct: { name: b('CrossFit', 'CrossFit'), mins: 60, cap: 12, room: b('Main floor', 'Salón principal'),
     blurb: b('Strength and conditioning for every level. Each workout has a scaled option.', 'Fuerza y acondicionamiento para todos los niveles. Cada entreno trae una opción escalada.') },
-  wl: { name: b('Weightlifting', 'Levantamiento'), mins: 60, cap: 8, room: b('Platforms', 'Plataformas'),
+  wl: { name: b('Olympic lifting', 'Halterofilia'), mins: 60, cap: 8, room: b('Platforms', 'Plataformas'),
     blurb: b('Snatch and clean and jerk, with a coach on every lift.', 'Arranque y envión, con un coach en cada levantamiento.') },
   gy: { name: b('Gymnastics', 'Gimnasia'), mins: 45, cap: 8, room: b('Main floor', 'Salón principal'),
     blurb: b('Handstands, pulling strength and ring work, one step at a time.', 'Parada de manos, fuerza de jalón y anillas, paso a paso.') },
@@ -76,23 +77,25 @@ export const CLASSES = {
   te: { name: b('Teens', 'Teens'), mins: 50, cap: 10, room: b('Main floor', 'Salón principal'), minor: true,
     blurb: b('Ages 12 to 16. Movement basics, light weights and games.', 'De 12 a 16 años. Movimientos básicos, pesos livianos y juegos.') },
 };
-export const COACHES = { irene: 'Irene', tomas: 'Tomás', lucia: 'Lucía' };
+export const COACHES = { paola: 'Paola', diego: 'Diego', sofia: 'Sofía' };
+/* Coach photos wait on staff profiles [PHO-402, Backlog]. Until then a coach shows as initials; these photos show where they would go. */
+export const FACES = { paola: '../page-concepts/img/coach-paola.jpg', diego: '../page-concepts/img/coach-diego.jpg', sofia: '../page-concepts/img/coach-sofia.jpg' };
 
 /* The week, by weekday (1 = Monday). Each row: time, class, coach. */
-const TUE = [['06:00', 'ct', 'irene'], ['09:00', 'yo', 'lucia'], ['12:00', 'ct', 'tomas'], ['17:00', 'ct', 'tomas'], ['18:00', 'ct', 'irene'], ['18:30', 'yo', 'lucia'], ['19:00', 'wl', 'tomas']];
-const MON = [['06:00', 'ct', 'irene'], ['12:00', 'ct', 'tomas'], ['16:00', 'te', 'lucia'], ['17:00', 'ct', 'tomas'], ['18:00', 'ct', 'irene'], ['19:00', 'gy', 'tomas']];
+const TUE = [['06:00', 'ct', 'paola'], ['09:00', 'yo', 'sofia'], ['12:00', 'ct', 'diego'], ['17:00', 'ct', 'diego'], ['18:00', 'ct', 'paola'], ['18:30', 'yo', 'sofia'], ['19:00', 'wl', 'diego']];
+const MON = [['06:00', 'ct', 'paola'], ['12:00', 'ct', 'diego'], ['16:00', 'te', 'sofia'], ['17:00', 'ct', 'diego'], ['18:00', 'ct', 'paola'], ['19:00', 'gy', 'diego']];
 export const WEEK = {
   1: MON,
   2: TUE,
-  3: [['06:00', 'en', 'irene'], ['12:00', 'ct', 'tomas'], ['16:00', 'te', 'lucia'], ['17:00', 'ct', 'tomas'], ['18:00', 'ct', 'irene'], ['19:00', 'gy', 'tomas']],
-  4: [['06:00', 'ct', 'irene'], ['09:00', 'yo', 'lucia'], ['12:00', 'ct', 'tomas'], ['17:00', 'ct', 'irene'], ['18:00', 'ct', 'tomas'], ['18:30', 'yo', 'lucia'], ['19:00', 'wl', 'irene']],
-  5: [['06:00', 'ct', 'irene'], ['12:00', 'ct', 'tomas'], ['17:00', 'ct', 'tomas'], ['18:00', 'ct', 'irene']],
-  6: [['07:00', 'en', 'irene'], ['08:00', 'ct', 'tomas'], ['09:00', 'te', 'tomas'], ['09:00', 'yo', 'lucia'], ['10:00', 'wl', 'irene']],
-  7: [['10:00', 'yo', 'lucia']],
+  3: [['06:00', 'en', 'paola'], ['12:00', 'ct', 'diego'], ['16:00', 'te', 'sofia'], ['17:00', 'ct', 'diego'], ['18:00', 'ct', 'paola'], ['19:00', 'gy', 'diego']],
+  4: [['06:00', 'ct', 'paola'], ['09:00', 'yo', 'sofia'], ['12:00', 'ct', 'diego'], ['17:00', 'ct', 'paola'], ['18:00', 'ct', 'diego'], ['18:30', 'yo', 'sofia'], ['19:00', 'wl', 'paola']],
+  5: [['06:00', 'ct', 'paola'], ['12:00', 'ct', 'diego'], ['17:00', 'ct', 'diego'], ['18:00', 'ct', 'paola']],
+  6: [['07:00', 'en', 'paola'], ['08:00', 'ct', 'diego'], ['09:00', 'te', 'diego'], ['09:00', 'yo', 'sofia'], ['10:00', 'wl', 'paola']],
+  7: [['10:00', 'yo', 'sofia']],
 };
 export const FULL = '1-18:00-ct';      // one full class (Wednesday 6:00 PM), to show the waitlist
 
-/* ---------- today's workouts at Tablado, one per track ---------- */
+/* ---------- today's workouts at Barrio, one per track ---------- */
 export const WORKOUTS = {
   ct: { title: b('Squat day', 'Día de sentadilla'), parts: [
     { name: b('Warm-up', 'Calentamiento'), mins: 10, text: b('3 rounds: 200 m run, 10 air squats, 10 ring rows', '3 rondas: 200 m de carrera, 10 sentadillas, 10 remos en anillas') },
@@ -119,7 +122,7 @@ export const WORKOUTS = {
    likes: the classes she has booked before. The schedule opens on these. */
 export const MEMBERS = {
   ines: {
-    id: 'ines', first: 'Inés', full: 'Inés C.', ini: 'IC', email: 'ines@example.com', gym: 'tablado',
+    id: 'ines', first: 'Inés', full: 'Inés C.', ini: 'IC', email: 'ines@example.com', gym: 'barrio',
     people: [{ id: 'ines', name: 'Inés', me: true, likes: ['yo'] }],
     plans: [],
     bought: false,                    // she has never bought a pack, so the intro price is still hers
@@ -132,21 +135,21 @@ export const MEMBERS = {
     receipts: [{ d: b('Today', 'Hoy'), what: b('Single class', 'Clase suelta'), amt: 25 }, { d: b('Nov 12', '12 nov'), what: b('Single class', 'Clase suelta'), amt: 25 }, { d: b('Nov 10', '10 nov'), what: b('Single class', 'Clase suelta'), amt: 25 }],
     waiver: b('Oct 3', '3 oct'),
   },
-  marta: {
-    id: 'marta', first: 'Marta', full: 'Marta D.', ini: 'MD', email: 'marta@example.com', gym: 'tablado',
-    people: [{ id: 'marta', name: 'Marta', me: true, likes: ['ct', 'wl', 'gy', 'en'] }],
-    plans: [{ who: 'marta', kind: 'plan', pid: 'unl', renews: b('Dec 1', '1 dic') }],
+  maria: {
+    id: 'maria', first: 'María', full: 'María D.', ini: 'MD', email: 'maria@example.com', gym: 'barrio',
+    people: [{ id: 'maria', name: 'María', me: true, likes: ['ct', 'wl', 'gy', 'en'] }],
+    plans: [{ who: 'maria', kind: 'plan', pid: 'unl', renews: b('Dec 1', '1 dic') }],
     bought: true,
     tracks: ['ct', 'wl', 'gy', 'en'],   // the four tracks her plan covers
-    bookings: [{ who: 'marta', day: 0, time: '18:00', cls: 'ct' }, { who: 'marta', day: 2, time: '18:00', cls: 'ct' }],
+    bookings: [{ who: 'maria', day: 0, time: '18:00', cls: 'ct' }, { who: 'maria', day: 2, time: '18:00', cls: 'ct' }],
     usual: [],
     alerts: [],
-    notices: [{ id: 'coach', title: b('Coach change on Thursday', 'Cambio de coach el jueves'), body: b('Tomás leads your 6:00 PM class. Irene is back on Friday.', 'Tomás da tu clase de las 6:00 p. m. Irene vuelve el viernes.') }],
+    notices: [{ id: 'coach', title: b('Coach change on Thursday', 'Cambio de coach el jueves'), body: b('Diego leads your 6:00 PM class. Paola is back on Friday.', 'Diego da tu clase de las 6:00 p. m. Paola vuelve el viernes.') }],
     results: {},
     history: [
-      { d: b('Mon', 'lun'), what: b('Cross-training', 'Cross-training'), res: b('14:02 · Rx', '14:02 · Rx') },
-      { d: b('Sat', 'sáb'), what: b('Weightlifting', 'Levantamiento'), res: b('Snatch 95 lb', 'Arranque 95 lb') },
-      { d: b('Fri', 'vie'), what: b('Cross-training', 'Cross-training'), res: b('6 rounds + 4 · Scaled', '6 rondas + 4 · Escalado') },
+      { d: b('Mon', 'lun'), what: b('CrossFit', 'CrossFit'), res: b('14:02 · Rx', '14:02 · Rx') },
+      { d: b('Sat', 'sáb'), what: b('Olympic lifting', 'Halterofilia'), res: b('Snatch 95 lb', 'Arranque 95 lb') },
+      { d: b('Fri', 'vie'), what: b('CrossFit', 'CrossFit'), res: b('6 rounds + 4 · Scaled', '6 rondas + 4 · Escalado') },
     ],
     bests: [{ what: b('Back squat', 'Sentadilla trasera'), res: '185 lb', d: b('Oct 30', '30 oct') }, { what: b('Snatch', 'Arranque'), res: '95 lb', d: b('Nov 14', '14 nov') }],
     receipts: [{ d: b('Nov 1', '1 nov'), what: b('Unlimited', 'Ilimitado'), amt: 159 }, { d: b('Oct 1', '1 oct'), what: b('Unlimited', 'Ilimitado'), amt: 159 }],
@@ -183,7 +186,7 @@ export const MEMBERS = {
     waiver: b('Sep 14', '14 sep'),
   },
   carmen: {
-    id: 'carmen', first: 'Carmen', full: 'Carmen L.', ini: 'CL', email: 'carmen@example.com', gym: 'tablado',
+    id: 'carmen', first: 'Carmen', full: 'Carmen L.', ini: 'CL', email: 'carmen@example.com', gym: 'barrio',
     people: [{ id: 'carmen', name: 'Carmen', me: true, likes: ['yo'] }, { id: 'mateo', name: 'Mateo', age: 12, minor: true, likes: ['te'] }],
     plans: [
       { who: 'carmen', kind: 'pack', pid: 'p5', left: 1, until: b('Dec 12', '12 dic') },
@@ -199,7 +202,7 @@ export const MEMBERS = {
     waiver: b('Aug 30', '30 ago'),
   },
   luis: {
-    id: 'luis', first: 'Luis', full: 'Luis R.', ini: 'LR', email: 'luis@example.com', gym: 'tablado',
+    id: 'luis', first: 'Luis', full: 'Luis R.', ini: 'LR', email: 'luis@example.com', gym: 'barrio',
     people: [{ id: 'luis', name: 'Luis', me: true, likes: ['ct'] }],
     plans: [{ who: 'luis', kind: 'plan', pid: 'unl', renews: b('Dec 15', '15 dic'), due: true }],
     bought: true,
@@ -209,7 +212,7 @@ export const MEMBERS = {
     alerts: [{ id: 'due-luis', kind: 'due', who: 'luis', amount: 159, since: b('Nov 15', '15 nov') }],
     notices: [],
     results: {},
-    history: [{ d: b('Mon', 'lun'), what: b('Cross-training', 'Cross-training'), res: b('16:40 · Scaled', '16:40 · Escalado') }],
+    history: [{ d: b('Mon', 'lun'), what: b('CrossFit', 'CrossFit'), res: b('16:40 · Scaled', '16:40 · Escalado') }],
     bests: [{ what: b('Back squat', 'Sentadilla trasera'), res: '205 lb', d: b('Nov 2', '2 nov') }],
     receipts: [{ d: b('Oct 15', '15 oct'), what: b('Unlimited', 'Ilimitado'), amt: 159 }],
     waiver: b('Jun 2', '2 jun'),
@@ -267,6 +270,11 @@ export const W = {
   sketch: b('A sketch. It shows what lives here, not the final design.', 'Un boceto. Muestra qué vive aquí, no el diseño final.'),
   undo: b('Undo', 'Deshacer'),
   mockOnly: b('Not part of this mockup.', 'No es parte de esta maqueta.'),
+  cardBrand: b('Visa ending 4242', 'Visa que termina en 4242'), cardExp: b('Expires 08/28', 'Vence 08/28'), change: b('Change', 'Cambiar'),
+  pauseLine: b('The front desk gets your request.', 'La recepción recibe tu pedido.'),
+  directions: b('Directions', 'Cómo llegar'), callOrText: b('Call or text', 'Llama o escribe'), writeUs: b('Write to the gym', 'Escríbele al gym'),
+  coachWord: b('Coach', 'Coach'),
+  paying: b('Paying', 'Pagando'), booking: b('Booking', 'Reservando'), laptopUrl: 'barrio.zana.fit',
   meTab: b('Me', 'Yo'), upcoming: b('Your bookings', 'Tus reservas'),
   payFirst: b('Pay first', 'Paga primero'), keep: b('Keep it', 'Mantenerla'), yesCancel: b('Yes, cancel', 'Sí, cancelar'),
   cancelQ: b('Cancel this class?', '¿Cancelar esta clase?'),

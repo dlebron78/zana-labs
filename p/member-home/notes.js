@@ -35,14 +35,14 @@ export const CORE = {
 };
 
 export const OWNER = {
-  tablado: 'Nothing for this screen. The logo comes from Settings and the bar stays Zana black because Tablado picked no color. Posting a news line is optional. Offers come from the gym\'s own price list.',
+  barrio: 'Nothing for this screen. The logo comes from Settings and the bar stays Zana black because Barrio picked no color. Posting a news line is optional. Offers come from the gym\'s own price list.',
   repecho: 'Nothing for this screen. Nico picked a logo and a color in Settings. The offer comes from his own price list.',
 };
 
 export const NOTES = {
   ines: {
     title: 'Inés, yoga drop-in',
-    who: 'Inés comes to yoga at Tablado twice a week, Tuesday and Thursday at 6:30 PM. She has no plan. She pays $25 each time.',
+    who: 'Inés comes to yoga at Barrio twice a week, Tuesday and Thursday at 6:30 PM. She has no plan. She pays $25 each time.',
     book: {
       steps: [
         'Tonight\'s class is on top, already booked.',
@@ -61,7 +61,7 @@ export const NOTES = {
         'Schedule is one tap from any screen. It opens on yoga, her usual.',
         'Me (her initials) holds her bookings, payments, receipts and the language.',
       ],
-      weak: 'Three tabs while Marta at the same gym has four, so two friends see slightly different bars. That is the point of the rule, but it is worth knowing.',
+      weak: 'Three tabs while María at the same gym has four, so two friends see slightly different bars. That is the point of the rule, but it is worth knowing.',
     },
     menu: {
       steps: [
@@ -71,9 +71,9 @@ export const NOTES = {
       weak: 'On her short home the Book row is easy to see. On every other page, the thing she does twice a week sits behind the name.',
     },
   },
-  marta: {
-    title: 'Marta, on 4 tracks',
-    who: 'Marta has the Unlimited plan at Tablado. It covers four tracks: Cross-training, Weightlifting, Gymnastics and Endurance. She books the 6:00 PM class and logs her score after.',
+  maria: {
+    title: 'María, on 4 tracks',
+    who: 'María has the Unlimited plan at Barrio. It covers four tracks: CrossFit, Olympic lifting, Gymnastics and Endurance. She books the 6:00 PM class and logs her score after.',
     book: {
       steps: [
         'A blue notice on top: Thursday has a different coach. Got it clears it.',
@@ -82,7 +82,7 @@ export const NOTES = {
         'Book a class stays at the bottom however long the workouts get, and This week ends with Book another class, which opens the same schedule. Try Wednesday at 6:00 PM: it is full, so the button becomes Join the waitlist.',
         'She is on the top plan, so she sees no offer.',
       ],
-      weak: 'Her history and personal bests are two taps away: Tablado, then Workouts. On a day when all four tracks post, the home is long, though each extra track costs one line.',
+      weak: 'Her history and personal bests are two taps away: Barrio, then Workouts. On a day when all four tracks post, the home is long, though each extra track costs one line.',
     },
     tabs: {
       steps: [
@@ -140,7 +140,7 @@ export const NOTES = {
         'Her pack has 1 class left, so Your plan carries one offer: the next pack up.',
         'Tap Book on her usual yoga. It uses her last class, and a blue notice now offers the next pack. Not now sends the offer back down to her plan.',
         'Tap Book a class. The first question is who it is for: Me or Mateo. Pick Mateo and only Teens classes show.',
-        'Family, under Tablado, shows Mateo\'s plan and his signed waiver.',
+        'Family, under Barrio, shows Mateo\'s plan and his signed waiver.',
       ],
       weak: 'Zana has no screen today for a parent acting for a child, and no card for it. Adding a child still happens at the desk.',
     },
@@ -164,7 +164,7 @@ export const NOTES = {
   },
   luis: {
     title: 'Luis, overdue',
-    who: 'Luis is on Unlimited at Tablado. His $159 for this month did not go through on Nov 15. Use the In grace and Grace over switch at the top to see both states.',
+    who: 'Luis is on Unlimited at Barrio. His $159 for this month did not go through on Nov 15. Use the In grace and Grace over switch at the top to see both states.',
     tabs: {
       steps: [
         'In grace: a red card on top says the $159 is overdue and he can keep booking until Friday, Nov 20. His Thursday class stays booked and Book still works.',

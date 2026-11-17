@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>What a member sees when she signs in · Zana Labs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&display=swap">
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:16px}
+body{margin:0;background:#f6f5f2;color:#141413;font:400 18px/1.55 "Geist",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;height:52px;background:#0b0b0c;color:#fff}
+.top a{color:#fff;font-size:16px;font-weight:600;text-underline-offset:3px;white-space:nowrap}
+.top .b{text-decoration:none;font-weight:700}
+.top .b span{font-weight:500;color:#d6d6d2}
+.top .links{display:flex;gap:16px}
+@media (max-width:479.98px){.top .b span{display:none}}
+:focus-visible{outline:2.5px solid #2f6bff;outline-offset:2px}
+main{width:min(100% - 40px,760px);margin:0 auto;padding:40px 0 88px}
+h1{margin:0 0 10px;font-size:clamp(34px,5vw,48px);line-height:1.06;letter-spacing:-.03em;font-weight:700;text-wrap:balance}
+h2{margin:44px 0 12px;font-size:26px;line-height:1.15;letter-spacing:-.02em;font-weight:700;text-wrap:balance}
+h3{margin:0 0 6px;font-size:20px;line-height:1.2}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin-bottom:6px}
+a{color:inherit;text-underline-offset:3px}
+.sub{font-size:20px;line-height:1.4}
+.case{margin:18px 0;padding:16px 18px;background:#fff;border:1px solid #dcdad4;border-left:4px solid #141413;border-radius:10px}
+.case b:first-child{display:block;margin-bottom:2px;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+table{width:100%;margin:6px 0 14px;border-collapse:collapse;font-size:16px;line-height:1.4}
+th,td{padding:9px 12px 9px 0;border-bottom:1px solid #dcdad4;text-align:left;vertical-align:top}
+th:last-child,td:last-child{padding-right:0}
+th{font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+td:first-child{font-weight:600}
+.grp td{padding-top:22px;border-bottom:2px solid #141413;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.yes,.part,.no{font-weight:700}
+.id{white-space:nowrap;font-weight:700}
+.who{margin:12px 0;padding:18px 18px 8px;background:#fff;border:1px solid #dcdad4;border-radius:12px}
+.who h3{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px}
+.who h3 a{font-size:16px;font-weight:600}
+.who p{margin:0 0 10px}
+.who table{margin:0}
+.who tr:last-child td{border-bottom:0}
+.who td:first-child{width:8.5em}
+.pick{margin:18px 0;padding:18px;background:#141413;color:#fff;border-radius:12px}
+.pick p:last-child,.pick ul:last-child{margin-bottom:0}
+.pick a{color:#fff}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 14px}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 20px;background:#141413;color:#fff;border-radius:10px;font-size:16px;font-weight:600;text-decoration:none}
+.btn.alt{background:#fff;color:#141413;box-shadow:inset 0 0 0 1.5px #141413}
+.fine{font-size:16px;color:#55534d}
+/* a wide table becomes one card per row on a phone, each cell under its own label */
+@media (max-width:699.98px){
+  .rows thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .rows,.rows tbody,.rows tr,.rows td{display:block}
+  .rows tr{margin:0 0 10px;padding:12px 14px;background:#fff;border:1px solid #dcdad4;border-radius:10px}
+  .rows td{padding:0 0 6px;border:0}
+  .rows td:last-child{padding-bottom:0}
+  .rows td:first-child{font-size:18px;font-weight:700}
+  .rows td[data-l]::before{content:attr(data-l) ": ";font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .rows tr.grp{margin:22px 0 10px;padding:0 0 6px;background:none;border:0;border-bottom:2px solid #141413;border-radius:0}
+  .rows tr.grp td{padding:0;border:0;font-size:13px}
+  .who td:first-child{width:auto}
+}
+</style>
+</head>
+<body>
+<div class="top"><a class="b" href="./">Zana <span>member home</span></a><span class="links"><a href="./">Mockup</a></span></div>
+<main>
+<h1>What a member sees when she signs in</h1>
+<p style="padding:12px 14px;border-radius:12px;background:#EEF3FE;border:1px solid #CCDAF8"><b>Update, Nov 17.</b> Daniel picked the bottom menu: Home, Schedule, Workouts and Me, each shown only when the member has something for it. Schedule takes the place of the pinned Book button. Review fixes 1, 3, 4 and 5 are in the mockup behind a Fixes on and off switch, waiting on his ruling; fix 2 is later. The page below is the earlier write-up, kept as it was.</p>
+<p class="sub">A recommendation and a mockup. Nothing here is in production.</p>
+<div class="pick"><p><b>The short version</b></p>
+<ul>
+<li><b>My pick: one home, one Book button, one menu.</b> The home runs in time order. A black Book button stays pinned at the bottom. Everything else sits under the gym's name, the way the staff app already works on a phone.</li>
+<li><b>I would not build the tab bar.</b> It sorts the app by feature, and a member opens it to do one thing. It shows her workout and her plan in two places. It changes shape from one member to the next. Every new feature will ask for a fifth tab.</li>
+<li><b>Your list fits in all three layouts.</b> Plan and buying more, booking, workouts, news, warnings, selling. The difference is that in the pick, Book never scrolls away and an offer can never push it down.</li>
+<li>The owner sets up nothing for this screen.</li>
+<li><a href="#cards">Nine things the pick needs</a> have no card yet. <a href="#rulings">Three rulings</a> are yours.</li>
+</ul></div>
+<div class="btns"><a class="btn" href="./">Open the mockup</a><a class="btn alt" href="./?m=marta&amp;nav=tabs">The same member with tabs</a></div>
+
+<h2>The three layouts</h2>
+<ol>
+<li><b>Home + Book. My pick.</b> One home in time order: what needs her, what is now, what is next, this week, her plan. One black button pinned at the bottom, Book a class, shown only when she can book. The gym's name at the top opens a short menu.</li>
+<li><b>Bottom tabs. The proposal.</b> Home, Schedule, Workouts and Account in a bar at the bottom. The mockup shows it at its best: a tab hides when this member has nothing for it.</li>
+<li><b>Menu only.</b> The staff app's phone layout as it is today: a home, and a menu under the name. Book is a line in that menu and a row on the home.</li>
+</ol>
+<div class="case"><b>Picture it</b>Marta trains on four tracks. Tuesday at 5:40 PM she opens Zana to read tonight's workout and to book Thursday. In the pick she sees the workout and the Book button at the same time. With tabs she sees the workout on Home, again on Workouts, and books on a third tab. With menu only, the Book row sits under four workouts.</div>
+
+<h2>Your list, in each layout</h2>
+<table class="rows">
+<thead><tr><th>You asked for</th><th>Home + Book</th><th>Bottom tabs</th><th>Menu only</th></tr></thead>
+<tbody>
+<tr><td>Her plan, and buying more</td><td data-l="Home + Book">One card on the home. A tap opens her payments and the other prices.</td><td data-l="Bottom tabs">On Home, and again inside Account.</td><td data-l="Menu only">Same as the pick.</td></tr>
+<tr><td>Book</td><td data-l="Home + Book">Pinned at the bottom of the home. One tap. It never scrolls away.</td><td data-l="Bottom tabs">The Schedule tab. One tap from any screen.</td><td data-l="Menu only">Under the name: two taps, the first one hidden. The row on the home scrolls away.</td></tr>
+<tr><td>Workouts</td><td data-l="Home + Book">Inside today's class, on the home. Her other tracks are one line each. Her history is under the name.</td><td data-l="Bottom tabs">On Home, and again in the Workouts tab.</td><td data-l="Menu only">Same as the pick.</td></tr>
+<tr><td>News from the gym</td><td data-l="Home + Book">One line under the bar. A tap opens it. No news, no line.</td><td data-l="Bottom tabs">On Home only.</td><td data-l="Menu only">Same as the pick.</td></tr>
+<tr><td>Warnings</td><td data-l="Home + Book">Top of the home. Red first, then blue.</td><td data-l="Bottom tabs">On Home only. On another tab she needs a red dot to know.</td><td data-l="Menu only">Same as the pick.</td></tr>
+<tr><td>Selling</td><td data-l="Home + Book">One offer, at her plan and under the pay button. It cannot push Book down.</td><td data-l="Bottom tabs">A card on Home. The pull is toward a Shop tab.</td><td data-l="Menu only">Every card pushes the Book row further down.</td></tr>
+</tbody>
+</table>
+<p>To be fair to tabs: they serve the whole list. They serve part of it twice.</p>
+
+<h2>Four members, three layouts</h2>
+<p>Each one is in the mockup. The notes beside the phone say what to tap.</p>
+
+<div class="who">
+<h3>Inés, yoga drop-in <a href="./?m=ines">Try it</a></h3>
+<p>Books twice a week. No plan. Pays $25 each time.</p>
+<table class="rows"><tbody>
+<tr><td>Home + Book</td><td>She sees tonight's class, her usual Thursday class with a Book button, and one offer at "Pay per class". Booking Thursday is two taps: Book, then Book and pay $25. <b>What breaks:</b> little. "Your usual" needs two weeks of bookings first.</td></tr>
+<tr><td>Bottom tabs</td><td>The same home, and three tabs: Home, Schedule, Account. <b>What breaks:</b> nothing big for her. She opens Account about once a month, and her friend Marta sees four tabs at the same gym.</td></tr>
+<tr><td>Menu only</td><td>The same home, with Book as a row on the page. <b>What breaks:</b> on any other page, Book sits behind the name.</td></tr>
+</tbody></table>
+</div>
+
+<div class="who">
+<h3>Marta, on four tracks <a href="./?m=marta">Try it</a></h3>
+<p>Unlimited plan. Books the 6:00 PM class and logs her score after.</p>
+<table class="rows"><tbody>
+<tr><td>Home + Book</td><td>She sees a notice about Thursday's coach, tonight's class with its workout open, three more tracks as one line each, and Book pinned below. Logging is three taps: Log score, type, Save. <b>What breaks:</b> her history and personal bests are two taps away. The home is long on a four-track day.</td></tr>
+<tr><td>Bottom tabs</td><td>Home shows tonight's workout. The Workouts tab shows it again. <b>What breaks:</b> "where do I log it?" has two answers. Four tabs is already the limit, so events, a shop or a check-in code would each ask for a fifth.</td></tr>
+<tr><td>Menu only</td><td>The Book row sits under the notice, the workout and three tracks. <b>What breaks:</b> this is the problem you named. Four tracks push booking out of view.</td></tr>
+</tbody></table>
+</div>
+
+<div class="who">
+<h3>Rafa, one-on-one client <a href="./?m=rafa">Try it</a></h3>
+<p>Trains with Nico, a solo trainer. Bought 8 sessions. Follows a written program between sessions.</p>
+<table class="rows"><tbody>
+<tr><td>Home + Book</td><td>He sees the trainer's color and logo, a note from Nico, today's program day with four lines to tick, his next session, and "2 sessions left" with one offer. There is no Book button, because Nico books the sessions, and nothing empty stands in its place. <b>What breaks:</b> nothing.</td></tr>
+<tr><td>Bottom tabs</td><td>Three tabs: Home, Workouts, Account. Home and Workouts show the same program day. <b>What breaks:</b> a bar with one useful tab. It makes a small business look like a half-empty big one.</td></tr>
+<tr><td>Menu only</td><td>With nothing to book, this is the same screen as the pick.</td></tr>
+</tbody></table>
+</div>
+
+<div class="who">
+<h3>Carmen, parent of Mateo, 12 <a href="./?m=carmen">Try it</a></h3>
+<p>Pays for both: her own 5-class pack and his monthly plan. His last payment failed.</p>
+<table class="rows"><tbody>
+<tr><td>Home + Book</td><td>She sees a red card (Mateo's payment did not go through, Pay $65), Mateo's Saturday class with his name on it, her usual yoga with a Book button, and both plans in one card. Paying is two taps. Booking for Mateo: Book a class, Mateo, the class, Book. <b>What breaks:</b> Zana has no screen today for a parent acting for a child, and no card for it.</td></tr>
+<tr><td>Bottom tabs</td><td>Schedule asks "for whom". Account asks again for the two plans. <b>What breaks:</b> tabs sort by feature. Her question is "for whom", so the answer is repeated inside each tab.</td></tr>
+<tr><td>Menu only</td><td>Paying works the same. <b>What breaks:</b> booking for Mateo from another page is five taps, and the first one is hidden.</td></tr>
+</tbody></table>
+</div>
+
+<h2 id="selling">Where selling sits</h2>
+<ul>
+<li><b>One offer at a time.</b> It comes from the gym's own price list, so the owner sets up nothing.</li>
+<li><b>She pays one class at a time:</b> the smallest pack. At the gym's intro price, if it has one and she never bought a pack.</li>
+<li><b>Her pack has 2 or fewer left:</b> the next pack up, or the same one again when there is no bigger one.</li>
+<li><b>She is on a monthly plan:</b> no offer.</li>
+<li><b>Where:</b> at her plan card, and under the black button when she is about to pay for one class. That is the moment a pack is worth the most to her.</li>
+<li><b>It moves to the top only once:</b> when her pack runs out. In blue, never red, with a "Not now" that sends it back down to her plan.</li>
+<li><b>It can never crowd booking.</b> Book is pinned outside the page, so nothing above it can push it down.</li>
+</ul>
+<div class="case"><b>Picture it</b>Thursday, Inés taps Book on her usual class. The sheet says "Book and pay $25". Under that button: "First pack: 5 classes for $99. You save $26." One more tap buys it, and she is back on the same class, now covered by the pack.</div>
+<div class="case"><b>Picture it</b>Carmen's pack has 1 class left. Her plan card says so in bold and offers 10 classes for $210. She books Saturday. The pack is now empty, so a blue notice says so on top, with one button. She taps "Not now". The notice goes, and the offer waits at her plan.</div>
+
+<h2>The rule for what shows</h2>
+<p><b>A thing shows only when this person has one.</b> Nothing is shown empty, locked or grayed out. There is no switch for the owner to set. This is the rule the staff menu already follows (card PHO-358, "Shell sections come from what the gym uses, no switches", Done), applied to one person.</p>
+<table>
+<tr><th>Thing</th><th>Shows when</th></tr>
+<tr><td>News line</td><td>The gym posted one and it has not ended</td></tr>
+<tr><td>Red notice</td><td>Something goes wrong if she ignores it: a failed payment, a waiver to sign</td></tr>
+<tr><td>Blue notice</td><td>It can wait: a note from her coach, a coach change, a pack that just ran out</td></tr>
+<tr><td>Today's workout</td><td>Her plan covers a track, or a coach wrote her a program</td></tr>
+<tr><td>Next session</td><td>She has a one-on-one booked</td></tr>
+<tr><td>This week</td><td>She has more bookings, or a usual class she has not booked yet</td></tr>
+<tr><td>Your plan</td><td>Always. One line for each person she pays for</td></tr>
+<tr><td>Offer</td><td>The selling rule above</td></tr>
+<tr><td>Book button and Schedule</td><td>The business runs classes she can book herself</td></tr>
+<tr><td>Workouts, in the menu</td><td>She has a track or a program</td></tr>
+<tr><td>Family, and "for whom"</td><td>She books or pays for someone else</td></tr>
+</table>
+
+<h2>From 3 clients to 4 tracks and kids</h2>
+<ul>
+<li><b>A solo trainer with 3 clients.</b> A client sees the trainer's name and color, a note, today's program day, the next session and the sessions left. Five lines in the menu. No Book button, no schedule, no news line.</li>
+<li><b>The trainer adds one Saturday group class.</b> The Book button and a Schedule line appear for his clients. Nothing else moves.</li>
+<li><b>A gym with four tracks and kids.</b> The same home. It gets more rows, not more tabs. Family appears for parents only.</li>
+</ul>
+<p>Later features land in a place that already exists:</p>
+<ul>
+<li>The waitlist goes inside the class sheet (card <span class="id">PHO-396</span>, "The Waitlist, member self-serve join and leave"). The mockup shows it on Wednesday at 6:00 PM.</li>
+<li>A check-in code becomes one row on top on class day (card <span class="id">PHO-36</span>, "The Badge").</li>
+<li>Events become rows in the schedule (card <span class="id">PHO-321</span>, "Later: special event ticket").</li>
+<li>When a client can book a one-on-one, the same pinned button reads "Book a session" (card <span class="id">PHO-475</span>, "Later: a client books a 1:1 from the coach's open times").</li>
+<li>Texts change nothing on screen (card <span class="id">PHO-476</span>, "Later: texting and WhatsApp reminders").</li>
+<li>A shop is one offer line and one menu line. Never a tab.</li>
+</ul>
+
+<h2>What the owner sets up</h2>
+<p><b>Nothing, for this screen.</b> Four things are optional: a logo (in Settings today), a color for the bar, a news line, and an intro price. With none of them the home still works: a black bar, no news line, and the offer uses the normal pack price.</p>
+
+<h2>Where the pick is weak</h2>
+<ul>
+<li><b>History and personal bests are two taps away:</b> the name, then Workouts. Tabs make it one.</li>
+<li><b>Book is pinned on the home only.</b> From another page it is back, then Book. Tabs make it one tap from anywhere.</li>
+<li><b>The menu under the name is easy to miss.</b> So nothing she needs every week lives only there.</li>
+<li><b>The home is long on a four-track day.</b> Each extra track costs one line.</li>
+<li><b>The home needs discipline.</b> One offer. Red only for real trouble. At most two notices showing, the rest behind one line. The mockup does not build that last cap.</li>
+<li><b>"Your usual" needs two weeks of bookings.</b> A new member does not get it yet.</li>
+</ul>
+
+<h2 id="inventory">Everything a member could need</h2>
+<p>Card states read on November 17, 2026. "Staff only" means the piece exists in Zana today, but only staff can use it.</p>
+<table class="rows">
+<thead><tr><th>What</th><th>In Zana today</th><th>Card</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="3">Book</td></tr>
+<tr><td>See the schedule and book a class herself</td><td data-l="Today"><span class="part">Staff only</span></td><td data-l="Card"><span class="id">PHO-286</span> Storefront: a gym's public page (schedule, class packs, buy). Backlog</td></tr>
+<tr><td>See her bookings and cancel one</td><td data-l="Today"><span class="part">Staff only</span></td><td data-l="Card"><span class="no">No card</span></td></tr>
+<tr><td>Join and leave a waitlist</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="id">PHO-396</span> The Waitlist, member self-serve join and leave. Backlog. Its notices: <span class="id">PHO-253</span> Waitlist promotion and class-moved notices. Backlog</td></tr>
+<tr><td>Hold a spot</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="id">PHO-397</span> The Hold. Backlog</td></tr>
+<tr><td>See her one-on-one session and cancel it</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="id">PHO-365</span> 1:1 sessions as bookable time slots; the client sees and can cancel. Backlog</td></tr>
+<tr><td>Book a one-on-one herself</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="id">PHO-475</span> Later: a client books a 1:1 from the coach's open times. Backlog</td></tr>
+<tr><td>Events, and reserving a space</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="id">PHO-321</span> Later: special event ticket. Backlog. <span class="id">PHO-322</span> Later: reserving a space. Backlog</td></tr>
+<tr><td>Class descriptions while booking</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="id">PHO-479</span> Class descriptions on the business page and the member's booking screen. Backlog</td></tr>
+<tr><td>Late-cancel and no-show rules</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="id">PHO-404</span> No-shows and late-cancel penalties. Backlog</td></tr>
+
+<tr class="grp"><td colspan="3">Plan and money</td></tr>
+<tr><td>See her plan, her pack and the classes left</td><td data-l="Today"><span class="part">Staff only</span></td><td data-l="Card"><span class="no">No card</span> for the member's view</td></tr>
+<tr><td>Buy a pack or a plan, and buy more</td><td data-l="Today"><span class="part">At the desk</span></td><td data-l="Card"><span class="id">PHO-286</span> Storefront. Backlog. <span class="id">PHO-374</span> Design checkout as one piece. Backlog. <span class="id">PHO-240</span> Charge and save a card in one step. Backlog</td></tr>
+<tr><td>An offer, and an intro price</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="no">No card</span></td></tr>
+<tr><td>Pay a plan that is overdue</td><td data-l="Today"><span class="part">An email tells her</span> (<span class="id">PHO-221</span> Launch emails. Done)</td><td data-l="Card"><span class="no">No card</span> for paying in the app. Near: <span class="id">PHO-308</span> A client saves her own card from a link. Backlog. <span class="id">PHO-454</span> Later: send a pay link. Backlog</td></tr>
+<tr><td>Her receipts</td><td data-l="Today"><span class="part">One receipt page exists</span> (<span class="id">PHO-169</span> Produce and share a receipt. Done)</td><td data-l="Card"><span class="no">No card</span> for her list</td></tr>
+<tr><td>Change her card</td><td data-l="Today"><span class="part">At the desk</span></td><td data-l="Card"><span class="id">PHO-308</span> A client saves her own card from a link. Backlog</td></tr>
+<tr><td>Pause, switch or stop</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card">Staff side: <span class="id">PHO-400</span> Plan changes and the household. Backlog. Her request: <span class="id">PHO-323</span> Tasks, including "a member asks to pause". In Progress</td></tr>
+
+<tr class="grp"><td colspan="3">Training</td></tr>
+<tr><td>Today's workout for her tracks</td><td data-l="Today"><span class="part">Staff only</span> (<span class="id">PHO-267</span> People on programs: who sees which day. Done)</td><td data-l="Card"><span class="no">No card</span> for her own read</td></tr>
+<tr><td>Log her score</td><td data-l="Today"><span class="yes">Yes</span>, the saving part (<span class="id">PHO-268</span> Results, Versions and Variants. Done)</td><td data-l="Card">The screen sits with <span class="id">PHO-192</span> The final frontend. In Progress</td></tr>
+<tr><td>A program day with tick-offs</td><td data-l="Today"><span class="part">Staff only</span>, for reading the day (<span class="id">PHO-267</span> People on programs)</td><td data-l="Card"><span class="id">PHO-302</span> A Link's done tick as a Result kind. Backlog</td></tr>
+<tr><td>History and personal bests</td><td data-l="Today"><span class="part">The data exists</span></td><td data-l="Card"><span class="no">No card</span> for the screen. Benchmarks: <span class="id">PHO-294</span> Workout library and Benchmarks. Backlog</td></tr>
+<tr><td>A note from her coach</td><td data-l="Today"><span class="part">Coach reviews exist</span></td><td data-l="Card"><span class="no">No card</span> for her view</td></tr>
+<tr><td>Timers, swaps, the gym-TV board</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="id">PHO-292</span> Timers. <span class="id">PHO-269</span> Swaps. <span class="id">PHO-270</span> Gym-TV whiteboard with scores. All Backlog</td></tr>
+
+<tr class="grp"><td colspan="3">From the gym</td></tr>
+<tr><td>News the gym writes</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="no">No card</span></td></tr>
+<tr><td>Warnings and notices in the app</td><td data-l="Today"><span class="part">By email</span> (<span class="id">PHO-219</span> Messaging backbone. Done)</td><td data-l="Card"><span class="no">No card</span> for the app. Texts: <span class="id">PHO-476</span> Later: texting and WhatsApp reminders. Backlog</td></tr>
+<tr><td>Hours, address, contact</td><td data-l="Today"><span class="part">In Settings</span> (<span class="id">PHO-362</span> Gym settings: clock, logo, Black or Light. Done)</td><td data-l="Card"><span class="no">No card</span> for showing them to a member</td></tr>
+
+<tr class="grp"><td colspan="3">Family</td></tr>
+<tr><td>Add a child and sign the waiver</td><td data-l="Today"><span class="yes">Yes</span>, at the desk</td><td data-l="Card"><span class="id">PHO-440</span> Waiver improvements, including signing from a link. Backlog</td></tr>
+<tr><td>A parent books and pays for a child in the app</td><td data-l="Today"><span class="no">No</span>. The rule is written, the screen is not</td><td data-l="Card"><span class="no">No card</span>. Who pays: <span class="id">PHO-400</span> Plan changes and the household. Backlog. Consent: <span class="id">PHO-402</span> Person's extra details. Backlog</td></tr>
+
+<tr class="grp"><td colspan="3">Check-in and account</td></tr>
+<tr><td>Check in</td><td data-l="Today"><span class="yes">Yes</span>, at the desk (<span class="id">PHO-334</span> Check-in at the desk. Done)</td><td data-l="Card">Her own code: <span class="id">PHO-36</span> The Badge. Backlog</td></tr>
+<tr><td>Sign in and pick her gym</td><td data-l="Today"><span class="yes">Yes</span> (<span class="id">PHO-366</span> Sign-in, Zana home and Today. Done)</td><td data-l="Card"><span class="id">PHO-368</span> Sign-in with a 6-digit code. Backlog</td></tr>
+<tr><td>Her language</td><td data-l="Today"><span class="part">Partly.</span> The app has Spanish words, her choice is not stored</td><td data-l="Card"><span class="id">PHO-347</span> A person's own language, stored with them. Backlog. <span class="id">PHO-348</span> Spanish wording validation. Backlog</td></tr>
+<tr><td>Her signed documents</td><td data-l="Today"><span class="part">Staff only</span> (<span class="id">PHO-468</span> Legal documents, staff side. Merged)</td><td data-l="Card"><span class="id">PHO-440</span> Waiver improvements. Backlog</td></tr>
+<tr><td>Notice settings, editing her profile</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="no">No card</span></td></tr>
+<tr><td>A link that opens the right screen</td><td data-l="Today"><span class="no">No</span></td><td data-l="Card"><span class="id">PHO-449</span> Later: deep links. Backlog</td></tr>
+</tbody>
+</table>
+<p class="fine">Also with no card, and not needed by the pick: a kiosk, installing Zana like an app, streaks and community, group chat.</p>
+
+<h2 id="cards">What the pick needs that has no card</h2>
+<p>The member app as a whole sits under card PHO-192, "The final frontend", In Progress. These pieces have no card of their own.</p>
+<ol>
+<li><b>The member home and how she gets around it.</b> This decision.</li>
+<li><b>Her own read of her day.</b> Today's workout exists, but only staff can open it.</li>
+<li><b>Her bookings, and cancelling one herself.</b></li>
+<li><b>Her plan line and "buy more" from it.</b> Neighbors: PHO-286 "Storefront" and PHO-374 "Design checkout as one piece".</li>
+<li><b>The offer rule.</b> One offer, from the price list. An intro price is new: the price list design has none today.</li>
+<li><b>Paying an overdue plan inside the app.</b> Neighbors: PHO-308 "A client saves her own card from a link" and PHO-454 "Later: send a pay link".</li>
+<li><b>News the gym writes,</b> and the notices on top of the home.</li>
+<li><b>A parent acting for a child in the app:</b> book, pay, see.</li>
+<li><b>The history and personal bests screen.</b></li>
+</ol>
+<p>Smaller, and optional: the "your usual" one-tap rebook, and a color for the bar.</p>
+
+<h2>The design rules</h2>
+<p>The pick starts from the rules Zana already has: black or white says where you are and a color is only a status. The gym's color paints the bar and its menu, nothing else. One black button per screen. Focus by time. One sheet, nothing stacked. An action sits where its object is seen. Undo, not "Are you sure?". The same action keeps the same word: Book.</p>
+<p>The rules say the member app's way of getting around is still open. I would close it by adding three rules:</p>
+<ol>
+<li><b>Member app:</b> one home in time order. One pinned black button for her main action, shown only when she can do it. Everything else under the business's name. No tab bar.</li>
+<li><b>Notices:</b> red only when something goes wrong if she ignores it. Blue when it can wait.</li>
+<li><b>Offers:</b> one at a time, from the price list, at the thing it is about. Never red. On top only when a pack runs out.</li>
+</ol>
+
+<h2>How we would know it works</h2>
+<p>These are my proposals. There are no numbers yet to compare them with.</p>
+<ul>
+<li><b>Taps from opening Zana to a booked class:</b> 3 or fewer for half of all bookings. 1 for a usual class.</li>
+<li><b>Visits that never open the menu:</b> 8 in 10 or more. If it is lower, something is in the wrong place.</li>
+<li><b>Bookings she makes herself:</b> 7 in 10, two months after a gym switches. The rest are staff booking for her.</li>
+<li><b>Scores logged the same day,</b> among members who came to a track class: 4 in 10 as a first target.</li>
+<li><b>Overdue payments paid from the red card:</b> half of them within 2 days.</li>
+<li><b>Packs bought again within 3 days of running out:</b> 5 in 10. This one measures the offer.</li>
+</ul>
+
+<h2 id="rulings">Your rulings</h2>
+<ol>
+<li><b>No tab bar for members.</b> If you still want tabs, the mockup shows the best version I could make. Use the switch at the top.</li>
+<li><b>The selling rule,</b> and whether a gym may set an intro price on a first pack.</li>
+<li><b>One tap books when it costs her nothing more,</b> with Undo. When a booking charges her, the price always shows first.</li>
+</ol>
+
+<h2>What I checked and what I assumed</h2>
+<p><b>Checked.</b> I read the production code and the design rules, without changing them, and the cards. I ran every screen of the mockup for the four members, the three layouts and both languages, about 6,000 screens, looking for errors and missing words. I ran a scripted tap-through of each member's steps, about 400 checks. I read the layout code at phone width (390) and laptop width (1280).</p>
+<p><b>Not seen.</b> I had no browser, so nobody has looked at this page with their own eyes yet. Spacing and line breaks may need a pass.</p>
+<p><b>Assumed.</b></p>
+<ul>
+<li>A booking holds one class from a pack, and cancelling gives it back.</li>
+<li>A gym can pick a color for the bar. Settings has a logo and "Black or Light" today.</li>
+<li>A gym can set an intro price on a first pack.</li>
+<li>"Your usual" comes from her last two weeks of bookings.</li>
+<li>Cancelling shows no fee and no refund, because those rules are not decided (card PHO-404, "No-shows and late-cancel penalties", Backlog).</li>
+<li>The Spanish is a first pass. It says "Entreno" for workouts and "relevo" for waiver.</li>
+<li>Tablado and its people are made up. A web search found no gym of that name in Puerto Rico. Repecho is the labs' own sample trainer.</li>
+</ul>
+</main>
+</body>
+</html>

@@ -1,7 +1,7 @@
 /* Member home: what the phone draws. Pure text in, text out: no page access here, so the same code can be checked without a browser.
    The one rule behind every screen: a thing shows only when this person has one. Nothing is ever shown empty or locked. */
 
-import { DAYS, WD, GYMS, CLASSES, COACHES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=3';
+import { DAYS, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=4';
 
 let S;                                      // the state being drawn: draw() and bind() set it, the helpers below read it
 export const bind = state => { S = state; };
@@ -25,7 +25,33 @@ const I = {
   schedule: svg('<rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>'),
   workouts: svg('<path d="M7 7v10M4 9.5v5M17 7v10M20 9.5v5M7 12h10"/>'),
   account: svg('<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/>'),
+  pin: svg('<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>'),
+  clock: svg('<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>'),
+  phone: svg('<path d="M6.5 4h3l1.5 4-2 1.3a10 10 0 0 0 5.7 5.7L16 13l4 1.5v3a2 2 0 0 1-2.2 2A15.5 15.5 0 0 1 4.5 6.2 2 2 0 0 1 6.5 4z"/>'),
+  mail: svg('<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4 7 8 6 8-6"/>'),
+  card: svg('<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/>'),
+  receipt: svg('<path d="M6 3.5h12v17l-2.5-1.5-2 1.5-1.5-1.5-1.5 1.5-2-1.5L6 20.5z"/><path d="M9 8h6M9 11.5h6M9 15h3"/>'),
+  bell: svg('<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>'),
+  doc: svg('<path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M9.5 12.5h5M9.5 16h5"/>'),
+  pause: svg('<circle cx="12" cy="12" r="8"/><path d="M10 9v6M14 9v6"/>'),
+  people: svg('<circle cx="9" cy="9" r="3"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M16 14.2c2.6.2 4.5 2 4.5 4.8"/>'),
+  store: svg('<path d="M4.5 9.5 6 4.5h12l1.5 5"/><path d="M4.5 9.5h15a0 0 0 0 1 0 0 2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0z"/><path d="M5.5 12v8h13v-8M10 20v-4.5h4V20"/>'),
+  plan: svg('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 12.5h8M8 16h5"/>'),
+  out: svg('<path d="M14 4.5h4.5v15H14"/><path d="M10 8l-4 4 4 4M6 12h9"/>'),
+  globe: svg('<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.4 2.3 3.5 5 3.5 8s-1.1 5.7-3.5 8c-2.4-2.3-3.5-5-3.5-8s1.1-5.7 3.5-8z"/>'),
+  bolt: svg('<path d="M13 3.5 5.5 13.5H12l-1 7 7.5-10H12z"/>'),
 };
+
+/* A coach's face. Photos wait on staff profiles [PHO-402]; with no photo it is her first letter. */
+const face = (id, cls = '') => {
+  const n = COACHES[id] || String(id || '?');
+  return FACES[id] ? `<span class="m-face ${cls}"><img src="${FACES[id]}" alt="" loading="lazy" decoding="async"></span>`
+    : `<span class="m-face ${cls}" aria-hidden="true">${esc(n.charAt(0))}</span>`;
+};
+/* the status that just changed gets a small pop, once */
+const pop = (who, id) => (S.flash === `${who}:${id}` ? ' m-pop' : '');
+/* a row with an icon on the left: the smaller pages are built from these */
+const irow = (icon, title, sub, right = '', act = '') => `<${act ? 'button' : 'div'} class="m-row m-irow"${act}><span class="m-ic">${I[icon]}</span><span class="m-rt"><b>${title}</b>${sub ? `<span>${sub}</span>` : ''}</span>${right}</${act ? 'button' : 'div'}>`;
 
 /* ---------- time and dates ---------- */
 export function clock(hm) {
@@ -181,7 +207,8 @@ function bottom() {
   } else if (S.nav === 'book' && S.screen === 'home' && h.book) {
     bar = `<div class="m-bookbar"><button class="btn pri lg m-wide" data-act="go" data-arg="schedule">${T(W.bookClass)}</button></div>`;
   }
-  const toast = S.toast && !(S.toast.sheet && S.sheet) ? `<div class="m-toast" role="status"><span>${esc(S.toast.text)}</span>${S.toast.undo ? `<button data-act="undo">${T(W.undo)}</button>` : ''}</div>` : '';
+  const age = S.toast ? Math.max(0, (Date.now() - (S.toast.at || Date.now())) / 1000) : 0;
+  const toast = S.toast && !(S.toast.sheet && S.sheet) ? `<div class="m-toast" role="status" data-tid="${S.toast.at || 0}" style="--age:-${age.toFixed(2)}s">${S.toast.undo ? '' : `<span class="m-tok">${I.check}</span>`}<span>${esc(S.toast.text)}</span>${S.toast.undo ? `<button data-act="undo">${T(W.undo)}</button><i class="m-tline" aria-hidden="true"></i>` : ''}</div>` : '';
   return toast + bar;
 }
 
@@ -228,9 +255,9 @@ const logBtn = tr => `<button class="btn" data-act="sheet" data-kind="log" data-
 function nextCard(x) {
   const k = CLASSES[x.cls], c = findClass(bid(x)), m = me();
   const tr = x.day === 0 && (m.tracks || []).includes(x.cls) ? x.cls : null;      // today's booked class brings its workout with it
-  return `<section class="card m-next"><div class="m-nh"><span class="m-lab">${esc(whenWord(x.day))}</span><span class="m-pill ok">${I.check}${T(W.booked)}</span></div>
+  return `<section class="card m-next"><div class="m-nh"><span class="m-lab">${esc(whenWord(x.day))}</span><span class="m-pill ok${pop(x.who, bid(x))}">${I.check}${T(W.booked)}</span></div>
     <div class="m-nt"><span class="m-time">${clock(x.time)}</span><span class="m-what"><b>${T(k.name)}</b>${tag(person(x.who))}</span></div>
-    <p class="m-meta">${esc(COACHES[c.coach])} · ${k.mins} min · ${T(k.room)}</p>${tr ? workout(tr) : ''}
+    <p class="m-meta m-coach">${face(c.coach, 'sm')}<span>${esc(COACHES[c.coach])} · ${k.mins} min · ${T(k.room)}</span></p>${tr ? workout(tr) : ''}
     <div class="m-foot">${tr ? logBtn(tr) : ''}${cancelBtn(x, 'm-link')}</div></section>`;
 }
 /* Cancel: with fix 3, a booking she paid for asks first and says what she gets back. Leaving a waitlist never asks. */
@@ -280,7 +307,7 @@ function weekRows(rest, canBook) {
     const when = `<span class="m-rd"><b>${esc(dayShort(x.day))}</b><span>${clock(x.time)}</span></span>`;
     const name = `<b>${T(k.name)}${tag(p)}</b>`;
     return booked
-      ? `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${x.who}">${when}<span class="m-rt">${name}<span>${esc(COACHES[c.coach])}</span></span><span class="m-st ${x.wait ? 'q' : 'ok'}">${x.wait ? T(W.waiting) : I.check + T(W.booked)}</span></button>`
+      ? `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${x.who}">${when}<span class="m-rt">${name}<span class="m-sub">${face(c.coach, 'xs')}${esc(COACHES[c.coach])}</span></span><span class="m-st ${x.wait ? 'q' : 'ok'}${pop(x.who, c.id)}">${x.wait ? T(W.waiting) : I.check + T(W.booked)}</span></button>`
       : `<div class="m-row">${when}<span class="m-rt">${name}<span>${T(W.usual)}</span></span>${costOf(m, x.who).kind === 'blocked'
         ? `<button class="btn sm" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${x.who}">${T(W.payFirst)}</button>`
         : `<button class="btn sm" data-act="quick" data-id="${c.id}" data-who="${x.who}">${T(W.book)}</button>`}</div>`;
@@ -340,10 +367,10 @@ function schedule() {
   const strip = `<div class="m-days" role="group" aria-label="${T(W.schedule)}">${DAYS.map((d, i) => `<button data-act="day" data-arg="${i}" aria-pressed="${i === S.day}"><span>${esc(dayShort(i))}</span><b>${d.n}</b></button>`).join('')}</div>`;
   const rows = list.map(c => {
     const k = CLASSES[c.cls], x = bkOf(p.id, c), left = k.cap - taken(c), cost = costOf(m, p.id);
-    const right = x ? (x.wait ? `<span class="m-st q">${T(W.waiting)}</span>` : `<span class="m-st ok">${I.check}${T(W.booked)}</span>`)
+    const right = x ? (x.wait ? `<span class="m-st q${pop(p.id, c.id)}">${T(W.waiting)}</span>` : `<span class="m-st ok${pop(p.id, c.id)}">${I.check}${T(W.booked)}</span>`)
       : left <= 0 ? `<span class="m-st q">${T(W.full)}</span>` : cost.kind === 'blocked' ? `<span class="m-st bad">${T(W.payFirst)}</span>` : cost.kind === 'pay' ? `<span class="m-st q">$${cost.amount}</span>` : '';
     const spots = !x && left > 0 && left <= 3 ? ` · ${left} ${T(left === 1 ? W.spot : W.spots)}` : '';
-    return `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${p.id}"><span class="m-rd"><b>${clock(c.time)}</b></span><span class="m-rt"><b>${T(k.name)}</b><span>${esc(COACHES[c.coach])} · ${k.mins} min${spots}</span></span>${right}${I.right}</button>`;
+    return `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${p.id}"><span class="m-rd"><b>${clock(c.time)}</b></span><span class="m-rt"><b>${T(k.name)}</b><span class="m-sub">${face(c.coach, 'xs')}${esc(COACHES[c.coach])} · ${k.mins} min${spots}</span></span>${right}${I.right}</button>`;
   }).join('');
   const head = fam() && FX() && !p.me ? `${esc(f().classesFor(p.name))} · ${esc(dateLine(S.day))}` : esc(dateLine(S.day));
   return `<div class="m-page">${whoSeg}${strip}<section class="m-sec"><h2 class="m-lab">${head}</h2>${
@@ -352,7 +379,6 @@ function schedule() {
 }
 
 /* ---------- the smaller pages. Sketches: they show what lives where ---------- */
-const sketch = () => `<p class="m-sketch">${T(W.sketch)}</p>`;
 const kv = (k, v) => `<div class="m-kv"><span>${k}</span><span>${v}</span></div>`;
 const listCard = (label, rows) => (rows ? `<section class="m-sec"><h2 class="m-lab">${esc(label)}</h2><div class="card m-rows">${rows}</div></section>` : '');
 
@@ -366,7 +392,7 @@ function workoutsPage() {
   out += trackRows(tracks, t(W.todayWorkouts), bookedToday ? bookedToday.cls : tracks[0]);
   out += listCard(t(W.recent), (m.history || []).map(r => `<div class="m-row"><span class="m-rd"><b>${T(r.d)}</b></span><span class="m-rt"><b>${T(r.what)}</b><span>${T(r.res)}</span></span></div>`).join(''));
   out += listCard(t(W.bests), (m.bests || []).map(r => kv(`<b>${T(r.what)}</b>`, `${esc(r.res)} · ${T(r.d)}`)).join(''));
-  return `<div class="m-page">${out}${sketch()}</div>`;
+  return `<div class="m-page">${out}</div>`;
 }
 function planPage() {
   const m = me(), g = gym(), self = m.people[0], mine = m.plans.find(x => x.who === self.id);
@@ -374,38 +400,44 @@ function planPage() {
     const price = priceFor(m, self.id, pr.id), cur = mine && mine.pid === pr.id;
     return `<div class="m-row"><span class="m-rt"><b>${T(pr.name)}</b><span>$${price}${pr.kind === 'plan' ? ` ${T(W.aMonth)}` : ''}${price < pr.price ? ` · <s>$${pr.price}</s>` : ''}${cur ? ` · ${T(W.current)}` : ''}</span></span><button class="btn sm" data-act="sheet" data-kind="pay" data-pay="product" data-id="${pr.id}" data-who="${self.id}">${T(W.buy)}</button></div>`;
   }).join('') : '';
-  return `<div class="m-page">${planBlock(false)}${listCard(t(W.options), options)}${listCard(t(W.card), kv(T(W.cardLine), ''))}${
-    listCard(t(W.receipts), m.receipts.map(r => kv(`${T(r.d)} · ${T(r.what)}`, `$${r.amt}`)).join(''))}
-    <section class="m-sec"><h2 class="m-lab">${T(W.pause)}</h2><button class="btn m-start" data-act="pause">${T(W.askPause)}</button></section>${sketch()}</div>`;
+  const card = irow('card', T(W.cardBrand), T(W.cardExp), `<button class="btn sm" data-act="mock">${T(W.change)}</button>`);
+  const rec = m.receipts.map(r => irow('receipt', T(r.what), T(r.d), `<span class="m-amt">$${r.amt}</span>`)).join('');
+  return `<div class="m-page">${planBlock(false)}${listCard(t(W.options), options)}${listCard(t(W.card), card)}${listCard(t(W.receipts), rec)}
+    ${listCard(t(W.pause), irow('pause', T(W.askPause), T(W.pauseLine), I.right, ' data-act="pause"'))}</div>`;
 }
 function familyPage() {
   const m = me(), self = m.people[0];
   return `<div class="m-page">${m.people.filter(p => !p.me).map(p => {
     const pl = m.plans.find(x => x.who === p.id);
-    return `<section class="card"><div class="m-nt"><span class="m-what"><b>${esc(p.name)}</b></span><span class="m-meta">${p.age} ${T(W.years)}</span></div>
+    return `<section class="card m-kid"><div class="m-kidh"><span class="m-meava sm" aria-hidden="true">${esc(p.name.charAt(0))}</span><span class="m-rt"><b>${esc(p.name)}</b><span>${p.age} ${T(W.years)}</span></span></div>
       ${pl ? `<p class="m-meta">${esc(planName(pl))}${pl.due ? ` · <strong class="m-bad">${T(W.payFailed)}</strong>` : ` · ${esc(f().renews(t(pl.renews), pl.price))}`}</p>` : ''}
       <p class="m-meta">${esc(f().waiverBy(t(m.waiver), self.name))}</p>
       <div class="m-foot"><button class="btn" data-act="go" data-arg="schedule" data-who="${p.id}">${T(W.bookFor)} ${esc(p.name)}</button></div></section>`;
-  }).join('')}<p class="m-fine">${T(W.addChild)}</p>${sketch()}</div>`;
+  }).join('')}<p class="m-fine">${T(W.addChild)}</p></div>`;
 }
 function gymPage() {
   const g = gym();
-  return `<div class="m-page">${listCard(t(W.hours), g.hours.map(x => kv(T(x), '')).join(''))}${listCard(t(W.where), kv(esc(g.hood), ''))}${listCard(t(W.contact), kv(esc(g.email), ''))}${
-    listCard(t(W.allNews), g.news ? `<button class="m-row" data-act="sheet" data-kind="news"><span class="m-rt"><b>${T(g.news.title)}</b><span>${T(g.news.when)}</span></span>${I.right}</button>` : kv(T(W.noNews), ''))}${sketch()}</div>`;
+  const hours = g.hours.map(x => `<span class="m-hl">${T(x)}</span>`).join('');
+  const where = irow('pin', esc(g.addr || g.hood), g.addr ? esc(g.hood) : '', `<button class="btn sm" data-act="mock">${T(W.directions)}</button>`);
+  const reach = (g.phone ? irow('phone', esc(g.phone), T(W.callOrText), I.right, ' data-act="mock"') : '') + irow('mail', esc(g.email), T(W.writeUs), I.right, ' data-act="mock"');
+  const news = g.news ? `<button class="m-row m-irow" data-act="sheet" data-kind="news"><span class="m-ic">${I.bell}</span><span class="m-rt"><b>${T(g.news.title)}</b><span>${T(g.news.when)}</span></span>${I.right}</button>` : irow('bell', T(W.noNews), '');
+  return `<div class="m-page"><section class="m-gymhead"><span class="m-logo lg" aria-hidden="true">${g.mark}</span><span class="m-rt"><b>${esc(g.name)}</b><span>${esc(g.hood)}</span></span></section>
+    ${listCard(t(W.allNews), news)}${listCard(t(W.hours), `<div class="m-row m-irow"><span class="m-ic">${I.clock}</span><span class="m-rt m-hours">${hours}</span></div>`)}${listCard(t(W.where), where)}${listCard(t(W.contact), reach)}</div>`;
 }
 function accountPage() {
   const m = me(), g = gym(), h = has(m);
   const mine = S.nav === 'tabs' || FX();       // everything that is hers, under her initials
   const links = mine
-    ? `<div class="card m-rows">${[['plan', t(W.plan)], h.family && ['family', t(W.family)], S.nav === 'tabs' && ['gym', aboutName()]].filter(Boolean).map(([id, label]) => `<button class="m-row" data-act="go" data-arg="${id}"><span class="m-rt"><b>${esc(label)}</b></span>${I.right}</button>`).join('')}</div>` : '';
+    ? `<div class="card m-rows">${[['plan', 'plan', t(W.plan)], h.family && ['family', 'people', t(W.family)], S.nav === 'tabs' && ['gym', 'store', aboutName()]].filter(Boolean).map(([id, icon, label]) => `<button class="m-row m-irow" data-act="go" data-arg="${id}"><span class="m-ic">${I[icon]}</span><span class="m-rt"><b>${esc(label)}</b></span>${I.right}</button>`).join('')}</div>` : '';
   const bk = mine && h.book ? listCard(t(W.upcoming), m.bookings.slice().sort(byWhen).map(x => {
     const k = CLASSES[x.cls], c = findClass(bid(x));
-    return c ? `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${x.who}"><span class="m-rd"><b>${esc(dayShort(x.day))}</b><span>${clock(x.time)}</span></span><span class="m-rt"><b>${T(k.name)}${tag(person(x.who))}</b><span>${esc(COACHES[c.coach])}</span></span><span class="m-st ${x.wait ? 'q' : 'ok'}">${x.wait ? T(W.waiting) : I.check + T(W.booked)}</span></button>` : '';
+    return c ? `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${x.who}"><span class="m-rd"><b>${esc(dayShort(x.day))}</b><span>${clock(x.time)}</span></span><span class="m-rt"><b>${T(k.name)}${tag(person(x.who))}</b><span class="m-sub">${face(c.coach, 'xs')}${esc(COACHES[c.coach])}</span></span><span class="m-st ${x.wait ? 'q' : 'ok'}">${x.wait ? T(W.waiting) : I.check + T(W.booked)}</span></button>` : '';
   }).join('')) : '';
+  const lang = `<div class="m-row m-irow"><span class="m-ic">${I.globe}</span><span class="m-rt"><b>${T(W.language)}</b></span><span class="m-seg sm" role="group" aria-label="${T(W.language)}"><button data-act="lang" data-arg="en" aria-pressed="${S.lang === 'en'}">EN</button><button data-act="lang" data-arg="es" aria-pressed="${S.lang === 'es'}">ES</button></span></div>`;
+  const settings = lang + irow('bell', T(W.notifications), T(W.notifLine)) + irow('doc', T(W.documents), esc(f().waiver(t(m.waiver)))) + irow('store', T(W.yourGyms), esc(f().onlyPlace(g.name)));
   return `<div class="m-page"><section class="card m-meCard"><span class="m-meava" aria-hidden="true">${esc(m.ini)}</span><span class="m-rt"><b>${esc(m.full)}</b><span>${esc(m.email)}</span></span></section>${links}${bk}
-    <section class="m-sec"><h2 class="m-lab">${T(W.language)}</h2><span class="m-seg m-start" role="group" aria-label="${T(W.language)}"><button data-act="lang" data-arg="en" aria-pressed="${S.lang === 'en'}">English</button><button data-act="lang" data-arg="es" aria-pressed="${S.lang === 'es'}">Español</button></span></section>
-    ${listCard(t(W.notifications), kv(T(W.notifLine), ''))}${listCard(t(W.documents), kv(esc(f().waiver(t(m.waiver))), ''))}${listCard(t(W.yourGyms), kv(esc(f().onlyPlace(g.name)), ''))}
-    <button class="btn m-start" data-act="mock">${T(W.signOut)}</button>${sketch()}</div>`;
+    <section class="m-sec"><div class="card m-rows">${settings}</div></section>
+    <button class="m-out" data-act="mock">${I.out}${T(W.signOut)}</button><p class="m-ver">Zana · ${esc(g.name)}</p></div>`;
 }
 function body() {
   return ({ home, schedule, workouts: workoutsPage, plan: planPage, family: familyPage, gym: gymPage, account: accountPage }[S.screen] || home)();
@@ -430,7 +462,10 @@ function classSheet() {
     action = `<button class="btn pri lg m-wide" data-act="book" data-id="${c.id}" data-who="${p.id}">${T(W.book)}</button>`;
     fine = cost.kind === 'credit' ? f().usesCredit() : cost.kind === 'pack' ? f().uses(cost.plan.left, g.unit) : f().included(planName(cost.plan));
   }
-  return { title: T(k.name), body: `<p class="m-meta">${c.day === 0 ? `${T(W.today)} · ` : ''}${esc(dateLine(c.day))} · ${clock(c.time)} · ${k.mins} min</p><p class="m-meta">${esc(COACHES[c.coach])} · ${T(k.room)}</p><p class="m-desc">${T(k.blurb)}</p>${
+  const pct = Math.min(100, Math.round(tk / k.cap * 100));
+  const meter = `<div class="m-cap"><div class="m-meter${tk >= k.cap ? ' full' : ''}" aria-hidden="true"><span style="width:${pct}%"></span></div><span>${esc(f().spotsOf(tk, k.cap))}</span></div>`;
+  return { title: T(k.name), body: `<div class="m-sum"><span class="m-time">${clock(c.time)}</span><span class="m-sumd">${c.day === 0 ? `${T(W.today)} · ` : ''}${esc(dateLine(c.day))} · ${k.mins} min</span></div>
+    <div class="m-coachrow">${face(c.coach, 'md')}<span class="m-rt"><b>${esc(COACHES[c.coach])}</b><span>${T(W.coachWord)} · ${T(k.room)}</span></span></div>${meter}<p class="m-desc">${T(k.blurb)}</p>${
     fam() ? `<p class="m-for"><span class="m-lab">${T(W.forWhom)}</span> <b>${p.me ? T(W.me) : esc(p.name)}</b></p>` : ''}${state}${action}${fine ? `<p class="m-fine">${esc(fine)}</p>` : ''}${extra}` };
 }
 function cancelSheet() {
@@ -475,8 +510,8 @@ function sheet() {
   const v = ({ class: classSheet, cancel: cancelSheet, log: logSheet, pay: paySheet, news: newsSheet, session: sessionSheet }[S.sheet.kind])();
   /* a message that belongs to this sheet (she just paid from inside it) is said here: the bar at the bottom is covered */
   const said = S.toast && S.toast.sheet ? `<p class="m-state ok m-said" role="status">${I.check}<span>${esc(S.toast.text)}</span></p>` : '';
-  return `<div class="m-scrim" data-act="close"></div><div class="m-sheet" role="dialog" aria-modal="true" aria-labelledby="m-sheet-t" tabindex="-1">
-    <div class="m-sh"><h2 id="m-sheet-t">${v.title}</h2><button class="m-x" data-act="close" aria-label="${T(W.close)}">${I.x}</button></div>${said}${v.body}</div>`;
+  return `<div class="m-scrim" data-act="close"></div><div class="m-sheet" role="dialog" aria-modal="true" aria-labelledby="m-sheet-t" tabindex="-1" data-k="${S.sheet.kind}-${S.sheet.id || ''}">
+    <i class="m-grab" aria-hidden="true"></i><div class="m-sh"><h2 id="m-sheet-t">${v.title}</h2><button class="m-x" data-act="close" aria-label="${T(W.close)}">${I.x}</button></div>${said}${v.body}</div>`;
 }
 
 /* ---------- the bar color: the gym's color paints the bar and its menu, nothing else ---------- */

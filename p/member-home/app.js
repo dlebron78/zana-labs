@@ -1,9 +1,11 @@
 /* Member home: the clicks. Everything is pretend: no server, no payments, no messages.
-   The link keeps the sample member, the layout, the review fixes, the grace state and the language: ?m=marta&nav=tabs&fx=off&grace=out&lang=es */
+   The link keeps the sample member, the layout, the review fixes, the grace state, the device and the language: ?m=maria&nav=tabs&fx=off&grace=out&dev=laptop&lang=es
+   Motion: sheets slide up and back down, a new screen fades in, a toast rises with a line that runs down while Undo is still possible,
+   a status that just changed pops once, and a payment shows a short wait on its button. All of it stops when the device asks for less motion. */
 
-import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=3';
-import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms } from './views.js?v=3';
-import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=3';
+import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=4';
+import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms } from './views.js?v=4';
+import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=4';
 
 const $ = id => document.getElementById(id);
 const clone = x => JSON.parse(JSON.stringify(x));
@@ -11,10 +13,11 @@ const Q = new URLSearchParams(location.search);
 const fresh = () => ({ screen: 'home', day: 0, who: null, all: false, open: undefined, menu: false, sheet: null, toast: null });
 
 const S = {
-  m: Object.hasOwn(MEMBERS, Q.get('m') || '') ? Q.get('m') : 'marta',
+  m: Object.hasOwn(MEMBERS, Q.get('m') || '') ? Q.get('m') : 'maria',
   nav: Object.hasOwn(PATTERNS, Q.get('nav') || '') ? Q.get('nav') : 'tabs',      // Daniel: the bottom menu is the pick
   fx: Q.get('fx') === 'off' ? 'off' : 'on',          // review fixes 1, 3, 4 and 5
   grace: Q.get('grace') === 'out' ? 'out' : 'in',    // an overdue member: still inside the gym's grace, or past it
+  dev: Q.get('dev') === 'laptop' ? 'laptop' : 'phone', // how the member page looks on a phone, or opened on a laptop
   lang: Q.get('lang') === 'es' ? 'es' : 'en',
   db: clone(MEMBERS),              // each sample member's things; taps change this copy only
   ...fresh(),
@@ -26,16 +29,21 @@ const me = () => S.db[S.m];
 const f = () => F[S.lang];
 const t = x => (typeof x === 'object' ? (x[S.lang] ?? x.en) : x);
 
-let undoFn = null, toastTimer = 0, lastKey = '', opener = null;
+let undoFn = null, toastTimer = 0, lastKey = '', opener = null, lastToast = 0, busy = false;
+const calm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* A short message at the bottom, with Undo when the tap can be taken back. Payments never get an Undo. */
 function toast(text, undo) {
-  S.toast = { text, undo: !!undo };
+  S.toast = { text, undo: !!undo, at: Date.now() };
   undoFn = undo || null;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {      // remove it quietly: a full redraw here could wipe a score she is typing
     S.toast = null; undoFn = null;
-    phone.querySelectorAll('.m-toast, .m-said').forEach(el => el.remove());
+    phone.querySelectorAll('.m-toast, .m-said').forEach(el => {
+      if (calm()) { el.remove(); return; }
+      el.classList.add('m-leave');
+      setTimeout(() => el.remove(), 220);
+    });
   }, 8000);
 }
 function clearToast() { S.toast = null; undoFn = null; clearTimeout(toastTimer); }
@@ -60,12 +68,12 @@ function notesHtml() {
     <h3>Review fixes (${S.fx === 'off' ? 'off' : 'on'})</h3>
     <ul class="n-fx">
       <li><b>1.</b> Her own things live under her initials (the Me tab), not under the gym's name.</li>
-      <li><b>3.</b> Cancelling a class she paid for asks first and says what comes back. Tablado's cancel window is 2 hours, the default canon gives it when a gym turns it on. It is 4:15 PM in this mockup.</li>
+      <li><b>3.</b> Cancelling a class she paid for asks first and says what comes back. Barrio's cancel window is 2 hours, the default canon gives it when a gym turns it on. It is 4:15 PM in this mockup.</li>
       <li><b>4.</b> A parent sees "Book a class for Mateo" on Home and a big Booking for switch on Schedule.</li>
       <li><b>5.</b> A drop-in coming twice a week is offered Unlimited when it saves her money.</li>
       <li><b>2.</b> Past classes and best lifts up front: not done, later.</li>
     </ul>
-    <p class="n-fine"><b>Pretend:</b> nothing is charged, booked or sent. Members can't book or pay for themselves in Zana yet. Tablado, Repecho and the people are made up.</p>`;
+    <p class="n-fine"><b>Pretend:</b> nothing is charged, booked or sent. Members can't book or pay for themselves in Zana yet. Barrio's red and logo, Repecho and the people are made up. Coach photos stand in for staff profiles, which are not built yet (PHO-402, Staff photo and profile). The card on file, directions and sign out do nothing.</p>`;
 }
 
 /* ---------- draw ---------- */
@@ -73,9 +81,12 @@ const keyOf = el => (el && el.dataset && el.dataset.act ? Object.entries(el.data
 
 function render() {
   const active = document.activeElement;
-  const key = phone.contains(active) ? keyOf(active) : null, hadSheet = !!layer.querySelector('.m-sheet');
+  const key = phone.contains(active) ? keyOf(active) : null, hadSheet = !!layer.querySelector('.m-sheet:not(.m-leave)');
+  const oldLayer = [...layer.children].filter(el => !el.classList.contains('m-leave')), oldKey = (layer.querySelector('.m-sheet:not(.m-leave)') || {}).dataset?.k;
   const v = draw(S);
   phone.lang = S.lang;
+  phone.classList.toggle('is-laptop', S.dev === 'laptop');
+  document.body.classList.toggle('mh-laptop', S.dev === 'laptop');
   phone.style.setProperty('--f', v.frame.bg);
   phone.style.setProperty('--onf', v.frame.on);
   phone.style.setProperty('--onf2', v.frame.on2);
@@ -84,22 +95,37 @@ function render() {
   const sk = `${S.m}/${S.nav}/${S.screen}`, y = scroll.scrollTop;
   scroll.innerHTML = v.body;
   scroll.scrollTop = sk === lastKey ? y : 0;      // a new screen starts at its top, a redraw of the same one stays put
+  if (sk !== lastKey && lastKey && scroll.firstElementChild) scroll.firstElementChild.classList.add('m-enter');
   lastKey = sk;
   bottomEl.innerHTML = v.bottom;
+  const tEl = bottomEl.querySelector('.m-toast');
+  if (tEl && +tEl.dataset.tid !== lastToast) tEl.classList.add('m-enter');
+  lastToast = S.toast ? S.toast.at : 0;
   layer.innerHTML = v.layer;
+  const newSheet = layer.querySelector('.m-sheet');
+  if (newSheet && !hadSheet) layer.querySelectorAll('.m-scrim, .m-sheet').forEach(el => el.classList.add('m-enter'));
+  else if (newSheet && oldKey && newSheet.dataset.k !== oldKey) newSheet.classList.add('m-swap');      // one sheet into the next: the content changes, the sheet stays
+  if (hadSheet && !newSheet && !calm()) {        // the old sheet slides back down over the new screen, then goes
+    oldLayer.filter(el => el.matches('.m-scrim, .m-sheet')).forEach(el => {
+      el.classList.remove('m-enter', 'm-swap'); el.classList.add('m-leave'); el.removeAttribute('data-act'); el.setAttribute('aria-hidden', 'true'); el.inert = true;
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), 260);
+    });
+  }
+  S.flash = null;
   notes.innerHTML = notesHtml();
   document.querySelectorAll('[data-set]').forEach(el => {
     const [k, val] = el.dataset.set.split(':');
     el.setAttribute('aria-pressed', String(S[k] === val));
   });
   /* keep the keyboard where it was: into a sheet when one opens, back to its button when it closes */
-  const sheetEl = layer.querySelector('.m-sheet');
+  const sheetEl = layer.querySelector('.m-sheet:not(.m-leave)');
   let target = null;
   if (sheetEl && !hadSheet) target = sheetEl;
   else if (!sheetEl && hadSheet && opener) { target = phone.querySelector(opener); opener = null; }
   else if (key) target = phone.querySelector(key);
   if (target) target.focus({ preventScroll: true });
-  try { history.replaceState(null, '', `?m=${S.m}&nav=${S.nav}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.lang === 'es' ? '&lang=es' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
+  try { history.replaceState(null, '', `?m=${S.m}&nav=${S.nav}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.dev === 'laptop' ? '&dev=laptop' : ''}${S.lang === 'es' ? '&lang=es' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
 }
 
 /* ---------- what a tap does ---------- */
@@ -118,6 +144,7 @@ function doBook(who, id) {
   if (cost.kind === 'credit') { m.credits -= 1; x.credit = true; }
   m.bookings.push(x);
   S.sheet = null;
+  S.flash = `${who}:${id}`;
   const last = x.pack && cost.plan.left === 0, p = m.people.find(y => y.id === who);
   const said = p && !p.me ? f().toastBookedFor(p.name, whenToast(c.day, c.time)) : f().toastBooked(whenToast(c.day, c.time));
   toast(said + (last ? f().toastLast(GYMS[m.gym].unit) : ''), () => drop(m, x, x.credit ? 'credit' : 'pack'));
@@ -164,12 +191,14 @@ const ACT = {
     m.bookings.push({ who: a.who, day: c.day, time: c.time, cls: c.cls, paid: amt });
     m.receipts.unshift({ d: W.today, what: b('Single class', 'Clase suelta'), amt });
     S.sheet = null;
+    S.flash = `${a.who}:${a.id}`;
     toast(f().toastBooked(whenToast(c.day, c.time)) + f().toastCharged(amt));
   },
   wait(a) {
     const m = me(), c = findClass(a.id), x = { who: a.who, day: c.day, time: c.time, cls: c.cls, wait: true };
     m.bookings.push(x);
     S.sheet = null;
+    S.flash = `${a.who}:${a.id}`;
     toast(f().toastWait(), () => drop(m, x));
   },
   cancel(a) {
@@ -240,11 +269,22 @@ const ACT = {
   undo() { if (undoFn) undoFn(); clearToast(); },
 };
 
+const WAIT = { pay: 900, bookpay: 900, book: 380 };      // pretend: the time a real charge or booking takes
 phone.addEventListener('click', e => {
   const el = e.target.closest('[data-act]');
-  if (!el || !phone.contains(el)) return;
+  if (!el || !phone.contains(el) || busy) return;
   const fn = ACT[el.dataset.act];
-  if (fn && fn(el.dataset, el) !== false) render();
+  if (!fn) return;
+  const ms = WAIT[el.dataset.act];
+  if (ms && el.closest('.m-sheet') && !calm()) {
+    busy = true;
+    el.classList.add('m-busy'); el.setAttribute('aria-busy', 'true');
+    el.dataset.label = el.textContent;
+    el.innerHTML = `<i class="m-spin" aria-hidden="true"></i><span>${el.dataset.act === 'book' ? t(W.booking) : t(W.paying)}</span>`;
+    setTimeout(() => { busy = false; if (fn(el.dataset, el) !== false) render(); }, ms);
+    return;
+  }
+  if (fn(el.dataset, el) !== false) render();
 });
 
 /* ---------- the viewer around the phone ---------- */
@@ -264,7 +304,7 @@ document.addEventListener('click', e => {
   if (set) {
     const [k, v] = set.dataset.set.split(':');
     S[k] = v;
-    if (k !== 'lang') { Object.assign(S, fresh()); clearToast(); }      // a new member or layout starts on the home
+    if (k !== 'lang' && k !== 'dev') { Object.assign(S, fresh()); clearToast(); }      // a new member or layout starts on the home; language and device keep her place
     render();
   } else if (act && DO[act.dataset.do]) DO[act.dataset.do]();
 });
