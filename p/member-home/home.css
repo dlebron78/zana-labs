@@ -227,7 +227,8 @@ button.m-row:active { background: var(--fill); }
 .m-wkb:disabled { opacity: .3; }
 .m-days button { position: relative; }
 .m-days button:disabled { opacity: .35; }
-.m-days button.m-off:not([aria-pressed="true"]) b { color: var(--text3); }
+.m-days button.m-off:not([aria-pressed="true"]) { color: #B4B4AF; }
+.m-days button.m-off:not([aria-pressed="true"]) b { color: #B4B4AF; font-weight: 600; }
 .m-lock { position: absolute; top: 5px; right: 5px; display: grid; font-style: normal; }
 .m-lock .m-i { width: 11px; height: 11px; stroke-width: 2.4; }
 .m-hint { margin: 0 0 8px; font-size: 14px; color: var(--text3); }

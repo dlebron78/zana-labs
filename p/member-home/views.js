@@ -1,7 +1,7 @@
 /* Member home: what the phone draws. Pure text in, text out: no page access here, so the same code can be checked without a browser.
    The one rule behind every screen: a thing shows only when this person has one. Nothing is ever shown empty or locked. */
 
-import { DAYS, WEEKS, BOOK_AHEAD, CLOSED, WODS, NOT_READY, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=8';
+import { DAYS, WEEKS, BOOK_AHEAD, CLOSED, WODS, NOT_READY, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=9';
 
 let S;                                      // the state being drawn: draw() and bind() set it, the helpers below read it
 export const bind = state => { S = state; };
@@ -109,7 +109,7 @@ function weekBar(act, sel, state) {
   return `<div class="m-week"><div class="m-wkh">${arrow(-1, 'back', W.prevWeek)}<p><b>${T(wk ? W.nextWeek : W.thisWeek)}</b><span>${esc(range)}</span></p>${arrow(1, 'right', W.nextWeek)}</div>
     <div class="m-days" role="group" aria-label="${esc(range)}">${days.map(i => {
       const s = state(i);
-      return `<button data-act="${act}" data-arg="${i}" aria-pressed="${i === sel}"${s === 'past' ? ' disabled' : ''}${s === 'off' ? ' class="m-off"' : ''}><span>${esc(dayShort(i))}</span><b>${DAYS[i].n}</b>${s === 'off' && act === 'wday' ? `<i class="m-lock" aria-hidden="true">${I.lock}</i>` : ''}</button>`;
+      return `<button data-act="${act}" data-arg="${i}" aria-pressed="${i === sel}"${s === 'past' ? ' disabled' : ''}${s === 'off' ? ' class="m-off"' : ''}><span>${esc(dayShort(i))}</span><b>${DAYS[i].n}</b></button>`;
     }).join('')}</div></div>`;
 }
 const opensOn = d => (d - BOOK_AHEAD === 1 ? t(W.opensTomorrow) : f().opensOn(`${dayShort(d - BOOK_AHEAD)} ${DAYS[d - BOOK_AHEAD].n}`));
@@ -395,7 +395,7 @@ function schedule() {
   const whoSeg = !fam() ? '' : FX()
     ? `<div class="m-whobig" role="group" aria-label="${T(W.forWhom)}"><p class="m-lab">${T(W.forWhom)}</p><div>${m.people.map(x => `<button data-act="who" data-arg="${x.id}" aria-pressed="${x.id === p.id}"><span class="m-whoava" aria-hidden="true">${esc(x.name.charAt(0))}</span><span><b>${esc(x.name)}</b><span>${x.me ? T(W.you) : `${x.age} ${T(W.years)}`}</span></span></button>`).join('')}</div></div>`
     : `<div class="m-who"><span class="m-lab">${T(W.forWhom)}</span><span class="m-seg" role="group" aria-label="${T(W.forWhom)}">${m.people.map(x => `<button data-act="who" data-arg="${x.id}" aria-pressed="${x.id === p.id}">${x.me ? T(W.me) : esc(x.name)}</button>`).join('')}</span></div>`;
-  const strip = weekBar('day', S.day, i => (i < 0 ? 'past' : i > BOOK_AHEAD || CLOSED[i] ? 'off' : ''));
+  const strip = weekBar('day', S.day, i => (i < 0 ? 'past' : listFor(p, i).all.length ? '' : 'off'));      // a day with no classes is dimmed
   const later = S.day > BOOK_AHEAD;
   const rows = list.map(c => {
     if (later) {      // past the 7 days a member can book: she sees the class, and when it opens
@@ -429,8 +429,8 @@ function workoutsPage() {
   }
   if (tracks.length) {      // the week, Monday to Sunday. A day shows once its Program releases it
     const d = S.wday, r = released(d);
-    out += weekBar('wday', d, i => (released(i).ok ? '' : 'off'));
-    if (!r.ok) out += `<section class="m-none m-locked">${I.lock}<b>${esc(r.title)}</b><span>${esc(r.line)}</span></section>`;
+    out += weekBar('wday', d, i => (released(i).ok && tracks.some(id => WODS[i] && WODS[i][id]) ? '' : 'off'));      // a day with no workout to show is dimmed, as on the schedule
+    if (!r.ok) out += `<section class="m-none"><b>${esc(r.title)}</b><span>${esc(r.line)}</span></section>`;
     else {
       const ids = tracks.filter(id => WODS[d] && WODS[d][id]);
       out += ids.length ? trackRows(ids, d === 0 ? t(W.todayWorkouts) : dateLine(d), d === 0 && bookedToday ? bookedToday.cls : ids[0], d)
