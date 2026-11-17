@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Zana page framework</title>
+<meta name="description" content="Demo: gym pages that Zana can build by itself from a logo, a few photos, one color, the schedule and the prices.">
+<!-- Three font families in this demo: Geist (body, and Zana's own face), Archivo (wide and tall headings), Fraunces (serif headings).
+     Loaded from Google Fonts here because this is a labs page. In the product they would be self-hosted. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Fraunces:ital,opsz,wght@0,9..144,500..700;1,9..144,500..700&family=Geist:wght@400..800&display=swap">
+<link rel="stylesheet" href="page.css?v=1">
+<link rel="stylesheet" href="viewer.css?v=1">
+</head>
+<body>
+<header class="vw-top" id="vw-top"></header>
+<main id="stage"></main>
+<button type="button" class="vw-fab" id="vw-fab" aria-controls="vw-panel" aria-expanded="false">Adjust</button>
+<aside class="vw-panel" id="vw-panel" aria-label="Adjust this page"></aside>
+<noscript><p class="vw-noscript">This demo builds its pages in the browser, so it needs JavaScript switched on.</p></noscript>
+<script type="module" src="app.js?v=1"></script>
+</body>
+</html>
