@@ -24,13 +24,13 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 .vw-ico { width: 18px; height: 18px; flex: none; }
 
 /* the floating Adjust button (phones) */
-.vw-fab { position: fixed; z-index: 75; left: 12px; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 48px; min-height: 48px; padding: 0 18px 0 14px; border: 1.5px solid #fff; border-radius: 999px; background: #0b0b0c; color: #fff; font-size: 16px; font-weight: 600; box-shadow: 0 8px 26px rgba(0,0,0,.4); }
+.vw-fab { position: fixed; z-index: 55; left: 12px; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 48px; min-height: 48px; padding: 0 18px 0 14px; border: 1.5px solid #fff; border-radius: 999px; background: #0b0b0c; color: #fff; font-size: 16px; font-weight: 600; box-shadow: 0 8px 26px rgba(0,0,0,.4); }
 .vw-fab[aria-expanded="true"] { display: none; }
 .vw-fab.is-small { padding: 0; }
 .vw-fab.is-small span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* ---------- the Adjust panel: a bottom sheet on a phone, a floating card on a laptop ---------- */
-.vw-panel { position: fixed; z-index: 80; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; max-height: min(64svh, 560px); background: #fff; color: #111; border-radius: 18px 18px 0 0; box-shadow: 0 -12px 44px rgba(0,0,0,.38); font-size: 16px; line-height: 1.4; transform: translateY(105%); visibility: hidden; transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .2s ease, visibility 0s linear .3s; }
+.vw-panel { position: fixed; z-index: 80; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; max-height: min(54svh, 520px); background: #fff; color: #111; border-radius: 18px 18px 0 0; box-shadow: 0 -12px 44px rgba(0,0,0,.38); font-size: 16px; line-height: 1.4; transform: translateY(105%); visibility: hidden; transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .2s ease, visibility 0s linear .3s; }
 .vw-panel.is-open { transform: none; visibility: visible; transition-delay: 0s; }
 .vw-panel__head { display: flex; align-items: center; gap: 8px; padding: 8px 10px 0 12px; border-bottom: 1px solid #e3e3df; }
 .vw-ptabs { display: flex; flex: 1; gap: 2px; }

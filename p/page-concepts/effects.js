@@ -196,7 +196,7 @@ function pin(root) {
     const wide = window.matchMedia('(min-width: 1000px)'); let io;
     const build = () => {
       if (io) io.disconnect();
-      io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && show(+e.target.dataset.i)), { rootMargin: wide.matches ? '-50% 0px -50% 0px' : '-56% 0px -44% 0px' });
+      io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && show(+e.target.dataset.i)), { rootMargin: wide.matches ? '-50% 0px -50% 0px' : '-66% 0px -34% 0px' });
       items.forEach(el => io.observe(el));
     };
     build(); wide.addEventListener('change', build);

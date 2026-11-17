@@ -340,7 +340,10 @@
 .zp-row__spots { grid-area: spots; font-size: var(--small); font-weight: 600; }
 .zp-row .zp-btn { grid-area: btn; }
 @media (min-width: 860px) {
-  .zp-row { grid-template-columns: 136px minmax(0, 1.3fr) minmax(0, 1.2fr) minmax(0, .9fr) auto; grid-template-areas: "time name who spots btn"; padding: 14px 0; }
+  /* the day's rows share one set of columns, so coach, spots and button line up down the list even when one button is wider */
+  .zp-rows { grid-template-columns: 136px minmax(0, 1.3fr) minmax(0, 1.2fr) minmax(0, .9fr) auto; column-gap: 14px; }
+  .zp-rows > * { grid-column: 1 / -1; }
+  .zp-row { grid-template-columns: 136px minmax(0, 1.3fr) minmax(0, 1.2fr) minmax(0, .9fr) auto; grid-template-columns: subgrid; grid-template-areas: "time name who spots btn"; padding: 14px 0; }
   .zp-row__time { align-self: center; padding: 0; font-size: 24px; }
   .zp-row__who { font-size: var(--body); gap: 12px; }
   .zp-row__who .zp-av { width: 40px; }

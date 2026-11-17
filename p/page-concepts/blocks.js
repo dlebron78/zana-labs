@@ -391,7 +391,7 @@ export function coaches(gym, x, o = {}) {
   if (!gym.coaches || !gym.coaches.length) return '';
   return `<section class="zp-sec${o.band ? ' zp-sec--band' : ''}" data-block="coaches" id="coaches"><div class="zp-in">
     ${head(S.tCoaches, esc(S.hCoaches), { side: arrowBtns(S) })}
-    <div class="zp-coaches" style="--cols:${Math.min(5, Math.max(4, gym.coaches.length))}" data-fx-slide>${gym.coaches.map((c, i) => `<article class="zp-coach" data-rise style="--i:${i}">
+    <div class="zp-coaches" style="--cols:${Math.min(5, Math.max(3, gym.coaches.length))}" data-fx-slide>${gym.coaches.map((c, i) => `<article class="zp-coach" data-rise style="--i:${i}">
       ${avatar(c, 'zp-coach__ph')}
       <h3 class="zp-h3">${esc(c.name)}</h3>
       <p class="zp-coach__role">${esc(L(c.role))}</p>
