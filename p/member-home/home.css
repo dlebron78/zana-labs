@@ -31,7 +31,7 @@ body.mh { margin: 0; min-height: 100vh; display: flex; flex-direction: column; b
 
 /* ---------- the stage: the phone, and the notes beside it ---------- */
 main.stage { flex: 1; display: grid; grid-template-columns: 390px minmax(0, 520px); gap: 40px; justify-content: center; align-items: start; padding: 24px 24px 48px; }
-.phone { position: sticky; top: 16px; display: flex; flex-direction: column; width: 390px; height: min(800px, calc(100vh - 150px)); min-height: 460px; overflow: hidden;
+.phone { position: sticky; top: 16px; display: flex; flex-direction: column; width: 390px; height: min(800px, calc(100vh - 210px)); min-height: 460px; overflow: hidden;
   background: var(--page); border: 1px solid #CFCFCA; border-radius: 28px; box-shadow: 0 24px 60px rgba(17, 17, 17, .16);
   --f: #0E0E0E; --onf: #FFFFFF; --onf2: #A3A3A0; --wash: rgba(255, 255, 255, .14); --done: #1A7342; --done-soft: #E2F3E7; --welcome: #2450BF; --welcome-soft: #EEF3FE; --welcome-line: #CCDAF8; }
 
@@ -312,3 +312,5 @@ button.m-row:hover { background: #FAFAF8; }
 .m-meCard .m-rt b { font-size: 17px; }
 .m-meCard .m-rt span { font-size: 14px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; }
 .notes .n-fx { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; }
+.vw-pair { display: flex; flex-wrap: wrap; gap: 8px 12px; max-width: 100%; }
+@media (max-width: 759px) { .vw-pair { flex-wrap: nowrap; gap: 6px; } .vw-pair .vw-seg button { padding: 0 8px; } }
