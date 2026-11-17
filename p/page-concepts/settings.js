@@ -3,8 +3,8 @@
    owner.js turns those into the settings in force, and the preview frame draws them.
    What an owner may change, and how far, is decided in owner.js. This file only draws the controls. */
 
-import { FX } from './recipes.js?v=11';
-import { OWNER_GYM, STYLES, SPACES, SIZES, OWNER_FX, TOP, LOCKED, STYLE, resolve, tokensOf, coverUse, photoCards, scaleOf } from './owner.js?v=11';
+import { FX } from './recipes.js?v=12';
+import { OWNER_GYM, STYLES, SPACES, SIZES, OWNER_FX, TOP, LOCKED, STYLE, resolve, tokensOf, coverUse, photoCards, scaleOf } from './owner.js?v=12';
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -70,7 +70,7 @@ const T = {
     gSpace: ['Spacing and type size', 'How much room the page has, and how big the headlines are. Both stay inside a safe range.'],
     space: 'Spacing', spaceName: { compact: 'Compact', comfortable: 'Comfortable', airy: 'Airy' },
     size: 'Headline size', sizeName: { s: 'Small', m: 'Medium', l: 'Large' },
-    sizeNote: (lap, ph, top) => `Now: ${lap} px on a laptop, ${ph} px on a phone. Body text stays at 18 px, and headlines stay between 2.5 and ${top} times that, so the two always look like a pair.`,
+    sizeNote: (lap, ph, top) => `Now: ${lap}\u00a0px on a laptop, ${ph}\u00a0px on a phone. Body text stays at 18\u00a0px, and headlines stay between 2.5 and ${top} times that, so the two always look like a pair.`,
 
     gFx: ['Effects', 'Motion on your page. Visitors who ask their phone for less motion get a still version of each one.'],
     fxSafe: 'Safe for everyone', fxExtra: 'Extra motion',
@@ -171,7 +171,7 @@ const T = {
     gSpace: ['Espaciado y tamaño de letra', 'Cuánto aire tiene la página y qué tan grandes son los titulares. Ambos se quedan dentro de un rango seguro.'],
     space: 'Espaciado', spaceName: { compact: 'Compacto', comfortable: 'Cómodo', airy: 'Amplio' },
     size: 'Tamaño de los titulares', sizeName: { s: 'Pequeño', m: 'Mediano', l: 'Grande' },
-    sizeNote: (lap, ph, top) => `Ahora: ${lap} px en una computadora y ${ph} px en un teléfono. El texto normal se queda en 18 px y los titulares entre 2.5 y ${top} veces ese tamaño, para que siempre combinen.`,
+    sizeNote: (lap, ph, top) => `Ahora: ${lap}\u00a0px en una computadora y ${ph}\u00a0px en un teléfono. El texto normal se queda en 18\u00a0px y los titulares entre 2.5 y ${top} veces ese tamaño, para que siempre combinen.`,
 
     gFx: ['Efectos', 'Movimiento en tu página. Quien pide menos movimiento en su teléfono ve una versión fija de cada uno.'],
     fxSafe: 'Seguros para todos', fxExtra: 'Movimiento extra',
@@ -368,7 +368,7 @@ function gSpace(s) {
   const d = s.defaults, f = tokensOf(s).facts;
   return card('space', 3, W.gSpace, `
     ${field(W.space, seg('space', SPACES.map(k => [k, W.spaceName[k]]), s.space, W.space) + status('space', s.changed.space, W.spaceName[d.space]))}
-    ${field(W.size, seg('size', SIZES.map(k => [k, W.sizeName[k], Math.round(18 * scaleOf(s.style, k)) + ' px']), s.size, W.size)
+    ${field(W.size, seg('size', SIZES.map(k => [k, W.sizeName[k], Math.round(18 * scaleOf(s.style, k)) + '\u00a0px']), s.size, W.size)
       + `<p class="st-note">${esc(W.sizeNote(f.h1Laptop, f.h1Phone, scaleOf(s.style, 'l')))}</p>` + status('size', s.changed.size, W.sizeName[d.size]))}`);
 }
 
@@ -450,7 +450,7 @@ function mountFrame() {
   if (frame) return;
   frame = document.createElement('iframe');
   frame.title = W.pvTitle;
-  frame.src = 'preview.html?v=11';
+  frame.src = 'preview.html?v=12';
   $('#st-holder').append(frame);
   fit();
 }

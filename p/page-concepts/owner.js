@@ -9,10 +9,10 @@
    Light or dark, corners, the heading typeface and the photo look are not here on purpose: they stay with the style.
    The settings screen (settings.js) and its preview (preview.js) both read these rules, so they cannot disagree. */
 
-import { GYMS } from './data.js?v=11';
-import { RECIPES, ORDER, FX_DEFAULTS } from './recipes.js?v=11';
-import { HEROES } from './blocks.js?v=11';
-import { buildTokens } from './tokens.js?v=11';
+import { GYMS } from './data.js?v=12';
+import { RECIPES, ORDER, FX_DEFAULTS } from './recipes.js?v=12';
+import { HEROES } from './blocks.js?v=12';
+import { buildTokens } from './tokens.js?v=12';
 
 const P = '../gym-page/img/';
 
