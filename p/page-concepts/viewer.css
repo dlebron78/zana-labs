@@ -3,9 +3,9 @@
 :root { --chrome-h: 0px; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-.vw-top, .vw-top *, .vw-panel, .vw-panel *, .vw-fab { box-sizing: border-box; }
-.vw-top button, .vw-panel button, .vw-fab { font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.vw-top :focus-visible, .vw-panel :focus-visible, .vw-fab:focus-visible { outline: 2.5px solid #2f6bff; outline-offset: 2px; }
+.vw-top, .vw-top *, .vw-note, .vw-note *, .vw-panel, .vw-panel *, .vw-fab { box-sizing: border-box; }
+.vw-top button, .vw-note button, .vw-panel button, .vw-fab { font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.vw-top :focus-visible, .vw-note :focus-visible, .vw-panel :focus-visible, .vw-fab:focus-visible { outline: 2.5px solid #2f6bff; outline-offset: 2px; }
 .vw-noscript { margin: 0; padding: 24px; color: #fff; font-size: 18px; }
 
 /* ---------- top bar: sample tabs. On a phone it scrolls away with the page. ---------- */
@@ -17,9 +17,25 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 .vw-brand { grid-area: 1 / 1; }
 .vw-end { grid-area: 1 / 2; display: flex; align-items: center; gap: 16px; }
 .vw-link { color: #fff; font-size: 16px; font-weight: 600; text-underline-offset: 3px; white-space: nowrap; }
-.vw-tabs { grid-area: 2 / 1 / 3 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-.vw-tab { min-height: 42px; padding: 0 4px; border: 1.5px solid #47474a; border-radius: 10px; background: transparent; color: #f1f1ee; font-size: 16px; font-weight: 600; }
+/* the second row: five sample tabs (they scroll sideways on a narrow phone) and the Launch version switch, which drops under them when there is no room */
+.vw-mid { grid-area: 2 / 1 / 3 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.vw-tabs { flex: 1 1 340px; display: flex; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.vw-tabs::-webkit-scrollbar { display: none; }
+.vw-tab { flex: 1 0 auto; min-height: 42px; padding: 0 12px; border: 1.5px solid #47474a; border-radius: 10px; background: transparent; color: #f1f1ee; font-size: 16px; font-weight: 600; white-space: nowrap; }
 .vw-tab[aria-pressed="true"] { background: #fff; border-color: #fff; color: #0b0b0c; }
+.vw-tab:disabled { border-style: dashed; color: #a8a8a3; text-decoration: line-through; cursor: not-allowed; }
+.vw-launch { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 14px 0 10px; border: 1.5px solid #47474a; border-radius: 999px; background: transparent; color: #f1f1ee; font-size: 16px; font-weight: 600; white-space: nowrap; }
+.vw-launch i { position: relative; flex: none; width: 36px; height: 22px; border-radius: 999px; background: #5a5a5e; transition: background-color .2s ease; }
+.vw-launch i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s ease; }
+.vw-launch[aria-checked="true"] { background: #fff; border-color: #fff; color: #0b0b0c; }
+.vw-launch[aria-checked="true"] i { background: #0b0b0c; }
+.vw-launch[aria-checked="true"] i::after { transform: translateX(14px); }
+/* one line under the top bar that says what is being shown when it is not the full sample. It scrolls away with the page. */
+.vw-note { position: relative; z-index: 60; padding: 10px 12px; background: #fff; color: #0b0b0c; border-bottom: 1px solid #0b0b0c; font-size: 15px; line-height: 1.4; }
+.vw-note[hidden] { display: none; }
+.vw-note p { max-width: 1296px; margin: 0 auto; }
+.vw-note p + p { margin-top: 6px; }
+.vw-note button { padding: 0; border: 0; background: none; color: inherit; font-size: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .vw-adjust { display: none; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1.5px solid #fff; border-radius: 999px; background: #fff; color: #0b0b0c; font-size: 16px; font-weight: 600; }
 .vw-adjust[aria-expanded="true"] { background: transparent; color: #fff; }
 .vw-ico { width: 18px; height: 18px; flex: none; }
@@ -28,7 +44,7 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
    The page reads --chrome-below and lifts its own Book button and notices above the strip. */
 .vw-fab { position: fixed; z-index: 55; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: calc(46px + env(safe-area-inset-bottom, 0px)); padding: 0 16px env(safe-area-inset-bottom, 0px); border: 0; border-top: 1px solid #47474a; background: #0b0b0c; color: #fff; font-size: 16px; font-weight: 600; }
 .vw-fab:focus-visible { outline-offset: -5px; }
-@media (max-width: 899.98px) {
+@media (max-width: 1099.98px) {
   html:not(.vw-bare) { --chrome-below: calc(46px + env(safe-area-inset-bottom, 0px)); --chrome-safe: 0px; }
   html:not(.vw-bare) body { padding-bottom: var(--chrome-below); }
 }
@@ -56,6 +72,8 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 .vw-samples small { font-size: 14px; color: #33332f; }
 .vw-samples button[aria-pressed="true"] { background: #111; border-color: #111; color: #fff; }
 .vw-samples button[aria-pressed="true"] small { color: #fff; }
+.vw-samples button:disabled { border-style: dashed; color: #6b6b66; cursor: not-allowed; }
+.vw-samples button:disabled small { color: #6b6b66; }
 .vw-swatches { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .vw-swatch { width: 44px; height: 44px; padding: 0; border: 3px solid #fff; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1.5px #bdbdb8; }
 .vw-swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px #111; }
@@ -79,12 +97,15 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 .vw-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .vw-row button { min-height: 46px; padding: 0 10px; border: 1.5px solid #111; border-radius: 10px; background: #fff; color: #111; font-size: 16px; font-weight: 600; }
 
-@media (min-width: 900px) {
+@media (min-width: 1100px) {
   :root { --chrome-h: 52px; }
   .vw-top { position: sticky; top: 0; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; height: 52px; padding: 0 16px; }
-  .vw-brand, .vw-end, .vw-tabs { grid-area: auto; }
-  .vw-tabs { display: flex; justify-content: center; gap: 6px; }
-  .vw-tab { min-height: 36px; padding: 0 18px; border-radius: 999px; }
+  .vw-brand, .vw-end, .vw-mid { grid-area: auto; }
+  .vw-mid { flex-wrap: nowrap; justify-content: center; gap: 12px; }
+  .vw-tabs { flex: none; overflow: visible; }
+  .vw-tab { flex: none; min-height: 36px; padding: 0 15px; border-radius: 999px; }
+  .vw-launch { min-height: 36px; }
+  .vw-note { padding-inline: 16px; }
   .vw-end { justify-content: flex-end; gap: 18px; }
   .vw-adjust { display: inline-flex; }
   /* the Adjust button draws the eye for a few seconds when the page first opens. A ring, not a bubble, so nothing sits on the page. */
@@ -97,12 +118,13 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 
 /* ui=0: the page alone, the way a visitor would see it */
 html.vw-bare { --chrome-h: 0px; --chrome-above: 0px; }
-html.vw-bare .vw-top, html.vw-bare .vw-fab, html.vw-bare .vw-panel { display: none; }
+html.vw-bare .vw-top, html.vw-bare .vw-note, html.vw-bare .vw-fab, html.vw-bare .vw-panel { display: none; }
 
 /* the top bar's second word shows where there is room for it beside the two links */
-@media (min-width: 480px) and (max-width: 899.98px), (min-width: 1080px) { .vw-brand span { display: inline; } }
+@media (min-width: 480px) and (max-width: 1099.98px), (min-width: 1280px) { .vw-brand span { display: inline; } }
+@media (min-width: 1280px) { .vw-tab { padding: 0 18px; } }
 @keyframes vw-ring { from { box-shadow: 0 0 0 0 rgba(255,255,255,.75); } to { box-shadow: 0 0 0 14px rgba(255,255,255,0); } }
-@media (min-width: 1200px) { .vw-more { display: inline; } }
+@media (min-width: 1400px) { .vw-more { display: inline; } }
 /* on a full HD screen or wider the panel starts open, so it is a touch slimmer there and clears the page's widest content */
 @media (min-width: 1920px) { .vw-panel { right: 8px; width: 336px; } }
-@media (prefers-reduced-motion: reduce) { html.vw-hint-on .vw-adjust[aria-expanded="false"] { animation: none; box-shadow: 0 0 0 4px rgba(255,255,255,.4); } .vw-panel, .vw-sw i, .vw-sw i::after, .vw-blk i, .vw-blk i::after { transition: none; } }
+@media (prefers-reduced-motion: reduce) { html.vw-hint-on .vw-adjust[aria-expanded="false"] { animation: none; box-shadow: 0 0 0 4px rgba(255,255,255,.4); } .vw-panel, .vw-sw i, .vw-sw i::after, .vw-blk i, .vw-blk i::after, .vw-launch i, .vw-launch i::after { transition: none; } }

@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:,">
-<title>How Zana builds a gym page</title>
+<title>How Zana draws a business page</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&display=swap">
 <style>
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:16px}
 body{margin:0;background:#f6f5f2;color:#141413;font:400 18px/1.55 "Geist",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;height:52px;background:#0b0b0c;color:#fff}
 .top a{color:#fff;font-size:16px;font-weight:600;text-underline-offset:3px;white-space:nowrap}
@@ -19,92 +19,179 @@ body{margin:0;background:#f6f5f2;color:#141413;font:400 18px/1.55 "Geist",system
 .top .b span{font-weight:500;color:#d6d6d2}
 .top .links{display:flex;gap:16px}
 @media (max-width:479.98px){.top .b span{display:none}}
-main{width:min(100% - 40px,740px);margin:0 auto;padding:40px 0 88px}
+:focus-visible{outline:2.5px solid #2f6bff;outline-offset:2px}
+main{width:min(100% - 40px,760px);margin:0 auto;padding:40px 0 88px}
 h1{margin:0 0 10px;font-size:clamp(34px,5vw,48px);line-height:1.06;letter-spacing:-.03em;font-weight:700;text-wrap:balance}
-h2{margin:44px 0 12px;font-size:26px;line-height:1.15;letter-spacing:-.02em;font-weight:700}
+h2{margin:44px 0 12px;font-size:26px;line-height:1.15;letter-spacing:-.02em;font-weight:700;text-wrap:balance}
 p{margin:0 0 14px}
-ul{margin:0 0 14px;padding-left:22px}
+ul,ol{margin:0 0 14px;padding-left:22px}
 li{margin-bottom:6px}
-a{color:inherit}
+a{color:inherit;text-underline-offset:3px}
+.sub{font-size:20px;line-height:1.4}
 .case{margin:18px 0;padding:16px 18px;background:#fff;border:1px solid #dcdad4;border-left:4px solid #141413;border-radius:10px}
-.case b{display:block;margin-bottom:2px;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.case b:first-child{display:block;margin-bottom:2px;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
 table{width:100%;margin:6px 0 14px;border-collapse:collapse;font-size:16px;line-height:1.4}
-th,td{padding:9px 10px 9px 0;border-bottom:1px solid #dcdad4;text-align:left;vertical-align:top}
+th,td{padding:9px 12px 9px 0;border-bottom:1px solid #dcdad4;text-align:left;vertical-align:top}
+th:last-child,td:last-child{padding-right:0}
 th{font-size:13px;letter-spacing:.08em;text-transform:uppercase}
-.on{font-weight:700}
-.phase{margin:12px 0;padding:18px;background:#fff;border:1px solid #dcdad4;border-radius:12px}
-.phase h3{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;margin:0 0 8px;font-size:20px;line-height:1.2}
-.phase p{margin:0}
+td.n{white-space:nowrap;text-align:right;font-weight:700}
+.yes,.part,.no{font-weight:700}
+.phase{margin:12px 0;padding:18px 18px 8px;background:#fff;border:1px solid #dcdad4;border-radius:12px}
+.phase h3{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;margin:0 0 6px;font-size:20px;line-height:1.2}
+.phase p{margin:0 0 10px}
+.phase table{margin:0}
+.phase tr:last-child td{border-bottom:0}
+.phase .bill{margin-top:10px}
 .pick{margin:18px 0;padding:18px;background:#141413;color:#fff;border-radius:12px}
-.pick p:last-child{margin:0}
-.btn{display:inline-flex;align-items:center;min-height:48px;margin-top:6px;padding:0 20px;background:#141413;color:#fff;border-radius:10px;font-size:16px;font-weight:600;text-decoration:none}
+.pick p:last-child,.pick ul:last-child{margin-bottom:0}
+.pick a{color:#fff}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 14px}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 20px;background:#141413;color:#fff;border-radius:10px;font-size:16px;font-weight:600;text-decoration:none}
+.btn.alt{background:#fff;color:#141413;box-shadow:inset 0 0 0 1.5px #141413}
+/* the wide table becomes one card per row on a phone, each cell under its own label */
+@media (max-width:699.98px){
+  .rows thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .rows,.rows tbody,.rows tr,.rows td{display:block}
+  .rows tr{margin:0 0 10px;padding:12px 14px;background:#fff;border:1px solid #dcdad4;border-radius:10px}
+  .rows td{padding:0 0 6px;border:0}
+  .rows td:last-child{padding-bottom:0}
+  .rows td:first-child{font-size:18px;font-weight:700}
+  .rows td[data-l]::before{content:attr(data-l) ": ";font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+}
 </style>
 </head>
 <body>
 <div class="top"><a class="b" href="./">Zana <span>page framework</span></a><span class="links"><a href="settings.html">Owner settings</a><a href="./">Samples</a></span></div>
 <main>
-<h1>How Zana builds a gym page</h1>
+<h1>How Zana draws a business page</h1>
+<p class="sub">A demo and a plan. Nothing here is in production.</p>
+<div class="pick"><p><b>The short version</b></p>
+<ul>
+<li>One page per business, drawn from what Zana already knows about it.</li>
+<li>Honest cost: about 14 weeks for one developer. I said 6 before.</li>
+<li>My pick: build only phase 1 now, about 5 weeks. One renderer, two styles, and Zana staff set the color, logo and cover photo.</li>
+<li>Three rulings are yours: <a href="#launch">the launch list</a>, <a href="#fonts">fonts</a> and <a href="#plan">video</a>.</li>
+</ul></div>
 
 <h2>The idea</h2>
-<p>Think of toy bricks. Zana keeps a box of <b>blocks</b>, a paint set called <b>tokens</b> and motion switches called <b>effects</b>. A page is a <b>recipe</b>: which blocks, in what order, painted how. Gym data sits apart, so any recipe fits any gym.</p>
-<div class="case"><b>Picture it</b>Marisol opens a pilates studio in Ocean Park. Tuesday night she uploads her logo and six photos, picks terracotta and the Calm style. Her schedule and prices are already in Zana, so the page builds itself. Wednesday the link is in her social bio.</div>
+<p>Think of toy bricks. Zana keeps a box of <b>blocks</b>, a paint set called <b>tokens</b> and motion switches called <b>effects</b>. A page is a <b>recipe</b>: which blocks, in what order, painted how. Business data sits apart, so any recipe fits any business.</p>
+<div class="case"><b>Picture it</b>Marisol opens a pilates studio. Her classes, times and prices are already in Zana, so the schedule and the price list fill in with no typing. Her photos, her class descriptions and the sentence about her studio are not. Somebody has to add those. My first plan left that cost out.</div>
 
-<h2>Blocks</h2>
-<p>Seventeen, plus the Book button: menu bar, five heroes (film, slideshow, split, framed photo, three tiles), offer strip, statement, class cards, two schedules, price cards, coaches, reviews, first visit, booking bar, footer.</p>
-<p>Zana writes the headline and facts from the data. A block with nothing to show hides itself. No coach photo? Initials.</p>
-
-<h2>Tokens</h2>
-<ul>
-<li><b>Color.</b> One brand color in, a readable set out. A guard fixes weak contrast, so pale yellow still works.</li>
-<li><b>Light or dark.</b></li>
-<li><b>Type.</b> Four heading voices. The headline stays 2.5 to 3 times the body. Body is 17 to 18px.</li>
-<li><b>Spacing.</b> Compact, comfortable, airy.</li>
-<li><b>Corners.</b> Square, soft, round.</li>
-<li><b>Photos.</b> Original, black and white, brand tinted.</li>
-</ul>
-
-<h2>Effects</h2>
-<table>
-<tr><th>Effect</th><th>Default</th><th>With reduced motion</th></tr>
-<tr><td>Fade and rise</td><td class="on">On</td><td>Simply there</td></tr>
-<tr><td>Book button follows you</td><td class="on">On</td><td>Appears, no slide</td></tr>
-<tr><td>Menu bar change</td><td class="on">On</td><td>Changes instantly</td></tr>
-<tr><td>Headline lights up</td><td>Owner</td><td>Fully lit</td></tr>
-<tr><td>Moving hero</td><td>Owner</td><td>One still photo</td></tr>
-<tr><td>Moving text strip</td><td>Owner</td><td>One still line</td></tr>
-<tr><td>Sliding card row</td><td>Owner</td><td>Plain grid</td></tr>
-<tr><td>Changing word</td><td>Owner</td><td>Fixed headline</td></tr>
-<tr><td>Pinned section</td><td>Owner</td><td>Plain cards</td></tr>
+<h2>Where the content comes from</h2>
+<table class="rows">
+<thead><tr><th>Section</th><th>Needs</th><th>In Zana today</th><th>Who adds the rest</th></tr></thead>
+<tbody>
+<tr><td>Menu bar and footer</td><td data-l="Needs">Name, logo, address, hours, email, phone, social links</td><td data-l="In Zana today"><span class="part">Mostly.</span> No phone, no social links</td><td data-l="Who adds the rest">Owner, once</td></tr>
+<tr><td>Hero</td><td data-l="Needs">Headline, one line, a cover photo or video</td><td data-l="In Zana today"><span class="no">No.</span> No tagline, no cover photo, no neighborhood</td><td data-l="Who adds the rest">Zana drafts the words. Staff or owner adds the photo</td></tr>
+<tr><td>Statement</td><td data-l="Needs">A short pitch and up to four facts</td><td data-l="In Zana today"><span class="part">Partly.</span> The facts are counted from classes and prices. No pitch</td><td data-l="Who adds the rest">Zana drafts, owner edits</td></tr>
+<tr><td>Class cards</td><td data-l="Needs">Name, length, description, level, photo</td><td data-l="In Zana today"><span class="part">Partly.</span> Name and length only</td><td data-l="Who adds the rest">Owner, for each class</td></tr>
+<tr><td>Schedule</td><td data-l="Needs">Day, time, class, coach, spots left</td><td data-l="In Zana today"><span class="yes">Yes</span></td><td data-l="Who adds the rest">Nobody</td></tr>
+<tr><td>Price cards</td><td data-l="Needs">Name, price, how often, what you get, a "most popular" mark</td><td data-l="In Zana today"><span class="part">Partly.</span> Name, price, how often, visits, tax</td><td data-l="Who adds the rest">Owner, for each price</td></tr>
+<tr><td>Coaches</td><td data-l="Needs">Name, photo, role</td><td data-l="In Zana today"><span class="part">Partly.</span> Name only</td><td data-l="Who adds the rest">Owner or coach</td></tr>
+<tr><td>First visit</td><td data-l="Needs">Three steps and one photo</td><td data-l="In Zana today"><span class="no">No</span></td><td data-l="Who adds the rest">Zana writes the steps, owner edits</td></tr>
+<tr><td>Offer strip and booking bar</td><td data-l="Needs">An offer, such as a free first class</td><td data-l="In Zana today"><span class="no">No</span></td><td data-l="Who adds the rest">Owner</td></tr>
+<tr><td>Reviews</td><td data-l="Needs">A quote and a first name</td><td data-l="In Zana today"><span class="no">No</span></td><td data-l="Who adds the rest">Owner, with the client's OK</td></tr>
+<tr><td>A second language</td><td data-l="Needs">Every typed word, twice</td><td data-l="In Zana today"><span class="no">No.</span> A business has one language</td><td data-l="Who adds the rest">Owner</td></tr>
+</tbody>
 </table>
-<p>Video shows a still photo first and never loads on a slow connection.</p>
+<p>Two things are missing under all of it.</p>
+<ul>
+<li><b>A public read.</b> Nothing in Zana hands a business's week and prices to a visitor who is not logged in.</li>
+<li><b>A page drawn on the server.</b> The app draws its screens in the browser, like a shop window that stays dark until you walk in. A link pasted in a chat shows no preview, and the first screen is slow on a phone.</li>
+</ul>
+<p>The headline and the pitch are drafts Zana writes from the data. Staff read them in phase 1. Owners edit them from phase 2. A promise (free first class, no card needed, tax included) shows only when the data says so.</p>
+<p>A section with nothing to show is left out, and so is its menu link. Three test accounts prove it: <a href="./?r=timetable&amp;gym=empty">no classes</a>, <a href="./?r=timetable&amp;gym=one">one class</a>, <a href="./?r=timetable&amp;gym=many">eight classes with long names</a>.</p>
+
+<h2>The parts</h2>
+<p><b>Blocks.</b> Seventeen, plus the Book button: menu bar, five heroes (film, slideshow, split, framed photo, three tiles), offer strip, statement, class cards, two schedules, price cards, coaches, reviews, first visit, booking bar, footer.</p>
+<p><b>Tokens.</b> One brand color, with a guard that fixes weak contrast. Light or dark. Spacing, corners and photo look. Type: the headline stays 2.5 to 3 times the body, and the first headline of Film and Mono grows to 4 times on a wide screen.</p>
+<p><b>Effects.</b> Nothing waits hidden for one, so a print, a screen capture or a link preview always gets the whole page.</p>
+<table>
+<tr><th>Effect</th><th>Phase</th><th>With reduced motion</th></tr>
+<tr><td>Fade and rise</td><td class="yes">1</td><td>Simply there</td></tr>
+<tr><td>Book button follows you</td><td class="yes">1</td><td>Appears, no slide</td></tr>
+<tr><td>Menu bar change</td><td class="yes">1</td><td>Changes instantly</td></tr>
+<tr><td>Moving hero</td><td>2 slideshow, 3 video</td><td>One still photo</td></tr>
+<tr><td>Headline lights up</td><td>3</td><td>Fully lit</td></tr>
+<tr><td>Moving text strip</td><td>3</td><td>One still line</td></tr>
+<tr><td>Sliding card row</td><td>3</td><td>Plain grid</td></tr>
+<tr><td>Changing word</td><td>3</td><td>Fixed headline</td></tr>
+<tr><td>Pinned section</td><td>3</td><td>Plain cards</td></tr>
+</table>
+
+<h2>The line against a website builder</h2>
+<p>Zana does booking and landing pages, never a site builder. So: <b>one page per business, a fixed list of sections, and the owner turns the optional ones on or off.</b> No free text blocks, no second page, no custom code, no layout to drag.</p>
+<div class="case"><b>Picture it</b>An owner asks for a "Summer challenge" section. The answer is no. It goes in the offer strip, one line, or it waits.</div>
+<p>Section order is the first step across that line. It is in the mock. I would cut it.</p>
+
+<h2 id="launch">What ships first: your ruling</h2>
+<p>I propose this launch list.</p>
+<ul>
+<li><b>Two styles, which are really one dial.</b> Timetable for a gym: the schedule leads. Solo for a trainer on a phone: prices lead, and the page says sessions, never classes.</li>
+<li><b>Seven sections:</b> menu bar, hero, schedule, statement, class cards, prices, footer. Plus the Book button.</li>
+<li><b>Three effects:</b> the phase 1 rows above.</li>
+<li><b>Only what Zana already holds.</b> Zana staff set the color, the logo and one cover photo. No owner screen.</li>
+</ul>
+<div class="btns"><a class="btn" href="./?r=timetable&amp;launch=1">Launch version: gym</a><a class="btn" href="./?r=solo&amp;launch=1">Launch version: trainer</a></div>
+<p>The samples show more than this. Their <b>Launch version</b> switch strips any page down to this list. <a href="./?r=solo">The full trainer sample</a> shows where Solo goes in phase 2.</p>
 
 <h2>Owner settings</h2>
-<p>Owners see a recipe as a <b>style</b>. It sets every default. The owner changes a short list, each within limits, each with a reset. <a href="settings.html">Try the mock</a>.</p>
+<p>Phase 2. Owners see a recipe as a <b>style</b>. It sets every default, and the owner changes a short list within limits. <a href="settings.html">Try the mock</a>. What it still gets wrong:</p>
 <ul>
-<li><b>At launch:</b> style, brand color, logo, cover photo, spacing, headline size, sections on or off, four effect switches, photo hero.</li>
-<li><b>Later:</b> slideshow and video hero, four more effect switches, section order.</li>
-<li><b>Stays with the style:</b> light or dark, corners, typeface, photo look.</li>
+<li>Eight effect switches should be one <b>Motion</b> control: Full, Calm, Off.</li>
+<li>Headline size shows numbers. Hide them: small, medium, large is enough.</li>
+<li>Missing: editing the headline and the offer, Instagram and WhatsApp links, the page's languages, where a photo is cropped, a share link or QR code, and unpublish.</li>
+<li>The Solo style is not in it.</li>
 </ul>
-<p>My pushback: section order can wait. Styles already order a page well, and order is the knob most likely to bury the schedule.</p>
 
-<h2>Build plan</h2>
-<p>One developer with Claude Code. Opus at high effort builds, Fable reviews. Rough numbers.</p>
-<div class="phase"><h3><span>1. Foundation</span><span>About 3.5 weeks</span></h3><p>Tokens. Twelve blocks: menu bar, three still heroes, offer strip, statement, class cards, both schedules, price cards, coaches, footer. Book button. Four effects. The launch settings with live preview. Photo upload. English and Spanish.</p></div>
-<div class="phase"><h3><span>2. Rich media</span><span>About 2.5 weeks</span></h3><p>Video upload and compression. Slideshow and framed heroes. Five more effects. Booking bar, reviews, first visit. Brand tinted photos. The later settings.</p></div>
-<p>Everything up front: about 6 weeks before any gym has a page.</p>
-<div class="pick"><p><b>My pick: foundation first.</b> All four looks ship in phase 1 with still photos and the core blocks. Video is the slow, risky part: heavy files, picky phones.</p><p>Example: a boxing gym that signs up in week four gets its page that day. Its video hero arrives later, nothing to redo.</p></div>
+<h2 id="fonts">Fonts: ask this first</h2>
+<p>It decides how different the styles can be.</p>
+<ol>
+<li><b>Geist only.</b> Zana's rule today. Styles differ by size, weight, color and layout. Calm loses its serif, Mono its tall capitals.</li>
+<li><b>Geist plus one display family.</b> Archivo is one file whose letters slide from tall and narrow to wide. Mono keeps its look and a wide look becomes possible. Calm goes without a serif.</li>
+<li><b>Three families.</b> Calm keeps its serif. Three files to host and load.</li>
+</ol>
+<p>My pick is 2. Phase 1 does not wait on it: both launch styles use Geist alone.</p>
+
+<h2 id="plan">Build plan</h2>
+<p>The 6 weeks I gave before counted the drawing, not the plumbing and not the typing. Rough numbers, in weeks of one developer.</p>
+<div class="phase"><h3><span>1. The page on real data</span><span>About 5 weeks</span></h3>
+<p>Staff set it up. <a href="./?r=timetable&amp;launch=1">See the launch version</a>.</p>
+<table>
+<tr><td>The public read: week, classes and prices with no login</td><td class="n">1</td></tr>
+<tr><td>The page drawn on the server, so link previews and a fast first screen work</td><td class="n">1</td></tr>
+<tr><td>The renderer: tokens, two styles, seven sections, three effects, the page's own words in English and Spanish</td><td class="n">1.5</td></tr>
+<tr><td>Cover photo: one new field, resized on upload. Logo upload exists but stops at half a megabyte</td><td class="n">0.5</td></tr>
+<tr><td>Booking hand-off: Book and a tapped class open booking with that class chosen</td><td class="n">0.5</td></tr>
+<tr><td>Measurement: visits, Book taps and bookings, by source</td><td class="n">0.5</td></tr>
+</table></div>
+<div class="phase"><h3><span>2. Owners do it themselves</span><span>About 7 weeks</span></h3>
+<table>
+<tr><td>Owner settings screen with live preview, publish and unpublish</td><td class="n">2</td></tr>
+<tr><td>The missing content fields and the screens to type them: pitch, class descriptions and levels, coach roles, what each price includes, first visit steps, offer, reviews, phone, social links</td><td class="n">1.5</td></tr>
+<tr><td>A second language for everything typed</td><td class="n">1</td></tr>
+<tr><td>Photo library: storage, resize, crop point</td><td class="n">1</td></tr>
+<tr><td>Film, Calm and Mono, their sections and the slideshow hero</td><td class="n">1.5</td></tr>
+</table></div>
+<div class="phase"><h3><span>3. Video and extra effects</span><span>About 2 weeks, plus a bill</span></h3>
+<table>
+<tr><td>Video hero through a bought video service: upload, still frame, playback. Zana never builds its own video pipeline</td><td class="n">1</td></tr>
+<tr><td>Five more effects</td><td class="n">1</td></tr>
+</table>
+<p class="bill">The bill: list prices today run near $5 a month for each 1,000 minutes stored and $1 for each 1,000 minutes watched. A 20 second video watched 3,000 times is 1,000 minutes, so about $1.</p></div>
+<p><b>What it pushes back.</b> Five weeks of one developer is between a third and a half of the team for over a month, so everything else on the launch list moves about 2 weeks. The public read and the hand-off, 1.5 of those 5 weeks, are owed by the public schedule in any case. Phases 2 and 3 are 9 more weeks: almost 4 weeks of the whole team, taken from booking, billing, training and messages.</p>
+<div class="pick"><p><b>My pick: foundation first, and smaller than I first said.</b></p>
+<p>Phase 1 only, for the first customers. Staff set color, logo and cover by hand: a handful of businesses does not justify a settings screen. Phase 2 when the numbers below ask for it. Phase 3 last, with video bought.</p>
+<p>Example: a trainer signs up on a Monday. Staff pick her color and upload her logo and one photo. Ten minutes. Her link works that day: prices first, her open times, Book. She never sees a settings screen.</p></div>
+<p>The case against even phase 1: the first customers need booking and billing to work before they need a prettier window. If the launch list is tight, build only the 1.5 weeks that are owed anyway and show a plain schedule.</p>
 
 <h2>How we know it works</h2>
 <ul>
-<li>70% of new gyms publish a page in their first week.</li>
-<li>Setup takes under 10 minutes.</li>
-<li>5% of page visits end in a booking or a purchase.</li>
-<li>The page shows in under 2.5 seconds on a phone.</li>
+<li><b>Phase 1.</b> A stranger goes from the link to a booked class in under 2 minutes. The first screen shows in under 2.5 seconds on a phone. A pasted link shows the business name, one line and a photo. 5% of page visits end in a booking or a purchase.</li>
+<li><b>Start phase 2 when</b> 10 businesses have a page, or staff spend more than an hour a week setting pages up. If under 2% of visits book after 8 weeks, fix the page before building more of it.</li>
+<li><b>Phase 2.</b> 70% of new businesses publish in their first week, in under 10 minutes, with no help from staff.</li>
 </ul>
-
-<h2>One decision for you</h2>
-<p>Calm uses a serif, Mono a tall condensed face. Zana's rule is one self-hosted typeface. Allow three on public gym pages, or ship those two in Geist with less character.</p>
-<a class="btn" href="./">Open the samples</a>
+<div class="btns"><a class="btn" href="./">Open the samples</a><a class="btn alt" href="./?r=timetable&amp;launch=1">Launch version</a></div>
 </main>
 </body>
 </html>

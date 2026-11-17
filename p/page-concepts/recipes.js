@@ -3,7 +3,7 @@
      blocks  which blocks, in what order
      tokens  how it is painted: light or dark, heading voice, size, spacing, corners, photo look
      fx      which effects are switched on, on top of the safe defaults
-   A recipe holds no gym. Give it any gym from data.js and the page fills itself. */
+   A recipe holds no business. Give it any business from data.js and the page fills from that data. */
 
 /* The effects library, in the order the control panel lists them.
    on: true means safe to leave on for everyone. The rest are switches an owner turns on.
@@ -21,7 +21,7 @@ export const FX = [
 ];
 export const FX_DEFAULTS = Object.fromEntries(FX.map(f => [f.id, f.on]));
 
-export const ORDER = ['film', 'timetable', 'calm', 'mono'];
+export const ORDER = ['film', 'timetable', 'calm', 'mono', 'solo'];
 
 export const RECIPES = {
 
@@ -33,7 +33,7 @@ export const RECIPES = {
     needs: 'Logo, one color, one short silent video (or four photos), classes, schedule, prices.',
     try: 'Scroll down slowly. The pitch lights up word by word, then one photo holds still while the classes scroll past it.',
     voice: 'roof', follow: 'pill',
-    tokens: { mode: 'dark', ground: 'neutral', type: 'wide', scale: 2.75, space: 'airy', corners: 'square', photo: 'original' },
+    tokens: { mode: 'dark', ground: 'neutral', type: 'wide', scale: 2.75, lift: 1.25, space: 'airy', corners: 'square', photo: 'original' },   // lift: on wide screens the hero headline alone grows to about 4 times the body text
     fx: { lightup: true, hero: true, pin: true },
     blocks: [
       'menuBar', 'heroFilm', ['offerStrip', { variant: 'thin', tone: 'line' }], 'statement',
@@ -42,19 +42,19 @@ export const RECIPES = {
     ],
   },
 
-  /* 2. The schedule is the design. */
+  /* 2. The schedule is the design. One idea: the times are the biggest type on the page, like a station timetable. */
   timetable: {
     id: 'timetable', gym: 'salanorte', name: 'Timetable',
-    line: 'The schedule is the page. You can book from the first screen.',
+    line: 'The schedule is the page, set like a station timetable: the times are the biggest type. You can book from the first screen.',
     suits: 'A class studio that lives on its timetable. Works with no photos at all.',
     needs: 'Logo, one color, classes, schedule, prices. Coach photos help. No other photos needed.',
-    try: 'Watch the headline: one word keeps changing. In the schedule the day picker stays on screen. The class and coach cards are rows you swipe.',
+    try: 'The first screen is today\'s board: three times you can book. Watch the headline: one word keeps changing. In the schedule the day picker stays on screen.',
     voice: 'next', follow: 'duo',
     tokens: { mode: 'light', ground: 'neutral', type: 'plain', scale: 2.75, space: 'comfortable', corners: 'soft', photo: 'original' },
     fx: { word: true, slide: true, pin: true },
     blocks: [
-      ['offerStrip', { variant: 'thin', tone: 'accent' }], 'menuBar', ['heroSplit', { side: 'today' }],
-      ['scheduleCards', { band: true }], 'statement', ['classCards', { variant: 'plain' }], 'coaches',
+      ['offerStrip', { variant: 'thin', tone: 'accent' }], 'menuBar', ['heroSplit', { side: 'board' }],
+      ['scheduleList', { band: true, big: true }], 'statement', ['classCards', { variant: 'plain' }], 'coaches',
       ['firstVisit', { variant: 'split', photo: 0, band: true }], 'priceCards', ['reviews', { band: true }], 'footer',
     ],
   },
@@ -84,12 +84,28 @@ export const RECIPES = {
     needs: 'Logo, one color, three or four photos (any quality: they turn black and white), classes, schedule, prices.',
     try: 'The hero steps through three photos, one per class. Under it the class names roll past in outlined capitals.',
     voice: 'lines', follow: 'bar',
-    tokens: { mode: 'dark', ground: 'pure', type: 'condensed', scale: 3.1, space: 'compact', corners: 'square', photo: 'bw' },
+    tokens: { mode: 'dark', ground: 'pure', type: 'condensed', scale: 3.1, lift: .9, space: 'compact', corners: 'square', photo: 'bw' },
     fx: { hero: true, strip: true },
     blocks: [
       'menuBar', 'heroSlideshow', ['offerStrip', { variant: 'loud' }], 'statement',
       ['classCards', { variant: 'plain' }], ['scheduleList', { band: true }], ['firstVisit', { variant: 'band', photo: 3 }],
       'coaches', ['priceCards', { band: true }], 'reviews', 'footer',
+    ],
+  },
+
+  /* 5. One trainer, prices first. */
+  solo: {
+    id: 'solo', gym: 'repecho', name: 'Solo',
+    line: 'One trainer on a phone. Prices come first, then the open times. The page says sessions, never classes.',
+    suits: 'A personal trainer or coach who works alone.',
+    needs: 'A name, one color, prices and open hours. One photo helps. No other photos, no second typeface.',
+    try: 'The first button is See prices, and the prices sit right under the first screen. Nothing on this page talks about classes or room size.',
+    voice: 'solo', follow: 'duo',
+    tokens: { mode: 'light', ground: 'pure', type: 'plain', scale: 2.75, space: 'comfortable', corners: 'round', photo: 'original' },
+    fx: {},
+    blocks: [
+      'menuBar', ['heroSplit', { side: 'photo' }], ['priceCards', { band: true }], 'statement',
+      ['classCards', { variant: 'plain' }], ['scheduleList', { band: true }], ['firstVisit', { variant: 'split', photo: 1 }], ['reviews', { band: true }], 'footer',
     ],
   },
 };

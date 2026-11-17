@@ -20,15 +20,28 @@ export const WORDS = {
     withCoach: 'with', min: 'min', next: 'Next', seeTimes: 'See times', openFloor: 'Open floor',
     tClasses: 'Classes', tWeek: 'This week', tPrices: 'Prices', tCoaches: 'Coaches', tReviews: 'Members say', tFirst: 'First visit', tAbout: 'About', tFind: 'Find us', tHours: 'Hours', tContact: 'Contact',
     hClasses: n => `${['', 'One way', 'Two ways', 'Three ways', 'Four ways', 'Five ways', 'Six ways'][n] || n + ' ways'} to train`,
-    hSchedule: 'Pick a time', hPrices: 'Simple prices', hCoaches: 'Who you train with', hReviews: 'In their words', hFirst: 'Your first class is free', hFind: 'Come by',
+    hSchedule: 'Pick a time', hPrices: 'Simple prices', hCoaches: 'Who you train with', hReviews: 'In their words', hFirst: 'Your first class is free', hFirstPlain: 'Your first visit', hFind: 'Come by',
     steps: ['Pick any class on the schedule.', 'Book it in two taps. No card needed.', 'Show up ten minutes early and say hi.'],
-    tax: 'Prices include IVU.', perMonth: '/ month', from: p => `from ${p}`, free: 'First class free', then: p => `then from ${p}`,
-    fClasses: 'classes a week', fCap: 'people per class, at most', fFirst: 'first class of the day', fSingle: 'for a single class',
+    stepsPlain: ['Pick any class on the schedule.', 'Book it in two taps.', 'Show up ten minutes early and say hi.'],
+    tax: name => `Prices include ${name}.`, perMonth: '/ month', from: p => `from ${p}`, free: 'First class free', then: p => `then from ${p}`,
+    fClasses: 'classes a week', fCap: 'people per class, at most', fFirst: 'first class of the day', fSingle: 'for a single class', fFrom: 'lowest price',
     newHere: 'New here?', bookIt: 'Book it', noClasses: 'No classes this day.', noMatch: 'None of these this day. Try another day.',
     toast: 'In the real page, booking opens here.', maps: 'Open in Maps', made: 'Page made with Zana. Demo: this gym, its people and their words are invented.',
     switchTo: 'Ver en español', menu: 'Menu', pause: 'Pause video', play: 'Play video', prev: 'Back', nextCard: 'Forward',
     bbClass: 'Class', bbDay: 'Day', bbAny: 'Any class', bbGo: 'See times', showing: 'Showing', clear: 'Show all',
     coachOf: 'Coach',
+    /* a personal trainer sells sessions, not classes: these replace the words above */
+    session: {
+      nav: { classes: 'Training', schedule: 'Open times' },
+      book: 'Book a session', see: 'See open times', seeTimes: 'See open times', tClasses: 'Training', hClasses: () => 'How we can train',
+      tWeek: 'Open times', hSchedule: 'Pick an open time', tReviews: 'Clients say', tFirst: 'First session',
+      hFirst: 'Your first session is free', hFirstPlain: 'Your first session',
+      steps: ['Pick an open time this week.', 'Book it in two taps. No card needed.', 'Come as you are. We start with a short chat about your goals.'],
+      stepsPlain: ['Pick an open time this week.', 'Book it in two taps.', 'Come as you are. We start with a short chat about your goals.'],
+      fClasses: 'open times this week', fFirst: 'first session of the day', fSingle: 'for a single session',
+      noClasses: 'No open times this day.', bbClass: 'Session', bbAny: 'Any session',
+      made: 'Page made with Zana. Demo: this trainer, the clients and their words are invented.',
+    },
   },
   es: {
     nav: { classes: 'Clases', schedule: 'Horario', coaches: 'Coaches', prices: 'Precios', find: 'Dónde estamos' },
@@ -37,33 +50,50 @@ export const WORDS = {
     withCoach: 'con', min: 'min', next: 'Próxima', seeTimes: 'Ver horarios', openFloor: 'Piso abierto',
     tClasses: 'Clases', tWeek: 'Esta semana', tPrices: 'Precios', tCoaches: 'Coaches', tReviews: 'Lo que dicen', tFirst: 'Primera visita', tAbout: 'Sobre', tFind: 'Dónde estamos', tHours: 'Horario', tContact: 'Contacto',
     hClasses: n => `${['', 'Una forma', 'Dos formas', 'Tres formas', 'Cuatro formas', 'Cinco formas', 'Seis formas'][n] || n + ' formas'} de entrenar`,
-    hSchedule: 'Elige una hora', hPrices: 'Precios claros', hCoaches: 'Con quién entrenas', hReviews: 'En sus palabras', hFirst: 'Tu primera clase es gratis', hFind: 'Pasa por aquí',
+    hSchedule: 'Elige una hora', hPrices: 'Precios claros', hCoaches: 'Con quién entrenas', hReviews: 'En sus palabras', hFirst: 'Tu primera clase es gratis', hFirstPlain: 'Tu primera visita', hFind: 'Pasa por aquí',
     steps: ['Elige cualquier clase del horario.', 'Resérvala en dos toques. Sin tarjeta.', 'Llega diez minutos antes y saluda.'],
-    tax: 'Los precios incluyen IVU.', perMonth: '/ mes', from: p => `desde ${p}`, free: 'Primera clase gratis', then: p => `luego desde ${p}`,
-    fClasses: 'clases por semana', fCap: 'personas por clase, como máximo', fFirst: 'primera clase del día', fSingle: 'por una clase suelta',
+    stepsPlain: ['Elige cualquier clase del horario.', 'Resérvala en dos toques.', 'Llega diez minutos antes y saluda.'],
+    tax: name => `Los precios incluyen ${name}.`, perMonth: '/ mes', from: p => `desde ${p}`, free: 'Primera clase gratis', then: p => `luego desde ${p}`,
+    fClasses: 'clases por semana', fCap: 'personas por clase, como máximo', fFirst: 'primera clase del día', fSingle: 'por una clase suelta', fFrom: 'precio más bajo',
     newHere: '¿Primera vez?', bookIt: 'Resérvala', noClasses: 'No hay clases este día.', noMatch: 'No hay de estas este día. Prueba otro día.',
     toast: 'En la página real, aquí abre la reserva.', maps: 'Abrir en Mapas', made: 'Página hecha con Zana. Demo: este gimnasio, su gente y sus palabras son inventados.',
     switchTo: 'View in English', menu: 'Menú', pause: 'Pausar video', play: 'Reproducir video', prev: 'Atrás', nextCard: 'Adelante',
     bbClass: 'Clase', bbDay: 'Día', bbAny: 'Cualquier clase', bbGo: 'Ver horarios', showing: 'Mostrando', clear: 'Ver todas',
     coachOf: 'Coach',
+    session: {
+      nav: { classes: 'Entrenamiento', schedule: 'Horas libres' },
+      book: 'Reserva una sesión', see: 'Ver horas libres', seeTimes: 'Ver horas libres', tClasses: 'Entrenamiento', hClasses: () => 'Cómo podemos entrenar',
+      tWeek: 'Horas libres', hSchedule: 'Elige una hora libre', tReviews: 'Lo que dicen', tFirst: 'Primera sesión',
+      hFirst: 'Tu primera sesión es gratis', hFirstPlain: 'Tu primera sesión',
+      steps: ['Elige una hora libre esta semana.', 'Resérvala en dos toques. Sin tarjeta.', 'Ven como estés. Empezamos con una charla corta sobre tus metas.'],
+      stepsPlain: ['Elige una hora libre esta semana.', 'Resérvala en dos toques.', 'Ven como estés. Empezamos con una charla corta sobre tus metas.'],
+      fClasses: 'horas libres esta semana', fFirst: 'primera sesión del día', fSingle: 'por una sesión suelta',
+      noClasses: 'No hay horas libres este día.', bbClass: 'Sesión', bbAny: 'Cualquier sesión',
+      made: 'Página hecha con Zana. Demo: esta persona, sus clientes y sus palabras son inventados.',
+    },
   },
 };
 
 /* ---------- words Zana writes from the data. The owner types none of this. ----------
    Four voices. Each has a headline (with and without a changing word), a line under it, and a short pitch. */
+/* A sentence is built from parts. A part whose fact is missing is left out, so the page never says "0 classes" or "from $Infinity",
+   and never promises a free class the business does not offer. These words are a first draft: in the product the owner can edit them. */
+const say = (...parts) => parts.filter(Boolean).join(' ');
+/* a trainer's headline: what they do, then where or with whom. Neither is needed: the first line stands alone. */
+const soloHead = (a, b) => (b ? [esc(a), esc(b + '.')] : [esc(a + '.')]);
 const COPY = {
   roof: {
     head: {
-      en: (n, g, x) => [x.fx.word ? x.slot(n.map(w => cap(w) + '.')) : esc(cap(list(n.slice(0, 3).map(low), 'and')) + '.'), esc(`Under one roof in ${g.hood}.`)],
-      es: (n, g, x) => [x.fx.word ? x.slot(n.map(w => cap(w) + '.')) : esc(cap(list(n.slice(0, 3).map(low), 'y')) + '.'), esc(`Bajo un mismo techo en ${g.hood}.`)],
+      en: (n, g, x) => [x.fx.word ? x.slot(n.map(w => cap(w) + '.')) : esc(cap(list(n.slice(0, 3).map(low), 'and')) + '.'), esc(g.hood ? `Under one roof in ${g.hood}.` : 'Under one roof.')],
+      es: (n, g, x) => [x.fx.word ? x.slot(n.map(w => cap(w) + '.')) : esc(cap(list(n.slice(0, 3).map(low), 'y')) + '.'), esc(g.hood ? `Bajo un mismo techo en ${g.hood}.` : 'Bajo un mismo techo.')],
     },
     lead: {
-      en: f => `${f.n} coached classes a week, never more than ${f.cap} people in the room. Your first one is free.`,
-      es: f => `${f.n} clases con coach cada semana, nunca más de ${f.cap} personas en el salón. La primera es gratis.`,
+      en: f => say(f.n && `${f.n} ${f.coached ? 'coached ' : ''}classes a week${f.cap > 1 ? `, never more than ${f.cap} people in the room` : ''}.`, f.free && 'Your first one is free.'),
+      es: f => say(f.n && `${f.n} clases ${f.coached ? 'con coach ' : ''}cada semana${f.cap > 1 ? `, nunca más de ${f.cap} personas en el salón` : ''}.`, f.free && 'La primera es gratis.'),
     },
     stmt: {
-      en: f => `${f.ways} to train, ${f.n} classes a week, one membership. Groups stay small, so your coach knows your name and your numbers. Come once for free and decide after.`,
-      es: f => `${f.ways} de entrenar, ${f.n} clases por semana, una sola membresía. Los grupos son pequeños, así tu coach conoce tu nombre y tus números. Ven una vez gratis y decide después.`,
+      en: f => say(f.n && f.ways && `${f.ways} to train, ${f.n} classes a week${f.member ? ', one membership' : ''}.`, f.small && f.coached && 'Groups stay small, so your coach knows your name and your numbers.', f.free && 'Come once for free and decide after.'),
+      es: f => say(f.n && f.ways && `${f.ways} de entrenar, ${f.n} clases por semana${f.member ? ', una sola membresía' : ''}.`, f.small && f.coached && 'Los grupos son pequeños, así tu coach conoce tu nombre y tus números.', f.free && 'Ven una vez gratis y decide después.'),
     },
   },
   next: {
@@ -72,12 +102,12 @@ const COPY = {
       es: (n, g, x) => (x.fx.word ? [esc('Reserva tu lugar en'), x.slot(n.map(w => cap(w) + '.'))] : [esc(`${x.facts.n} clases esta semana.`), esc('Reserva la tuya en dos toques.')]),
     },
     lead: {
-      en: () => 'Small groups, real coaches and a time that fits your day. Your first class is free.',
-      es: () => 'Grupos pequeños, coaches de verdad y una hora que cabe en tu día. Tu primera clase es gratis.',
+      en: f => say(f.n && (f.small && f.coached ? 'Small groups, real coaches and a time that fits your day.' : 'Pick a time that fits your day.'), f.free && 'Your first class is free.'),
+      es: f => say(f.n && (f.small && f.coached ? 'Grupos pequeños, coaches de verdad y una hora que cabe en tu día.' : 'Elige una hora que quepa en tu día.'), f.free && 'Tu primera clase es gratis.'),
     },
     stmt: {
-      en: f => `Pick a class, book it in two taps and show up. ${f.n} classes every week with ${f.coaches} coaches who know your name. Your first one is on us.`,
-      es: f => `Elige una clase, resérvala en dos toques y llega. ${f.n} clases cada semana con ${f.coaches} coaches que saben tu nombre. La primera va por nosotros.`,
+      en: f => say(f.n && `Pick a class, book it in two taps and show up. ${f.n} classes every week${f.team > 1 ? ` with ${f.coaches} coaches who know your name` : ''}.`, f.free && 'Your first one is on us.'),
+      es: f => say(f.n && `Elige una clase, resérvala en dos toques y llega. ${f.n} clases cada semana${f.team > 1 ? ` con ${f.coaches} coaches que saben tu nombre` : ''}.`, f.free && 'La primera va por nosotros.'),
     },
   },
   pace: {
@@ -86,26 +116,41 @@ const COPY = {
       es: (n, g, x) => [x.fx.word ? x.slot(n.map(w => cap(w) + ',')) : esc(cap(list(x.shorts.slice(0, 2).map(low), 'y')) + ','), '<em>a tu propio ritmo.</em>'],
     },
     lead: {
-      en: (f, g) => `Small classes in ${g.hood}, for every level. Come once for free and see how it feels.`,
-      es: (f, g) => `Clases pequeñas en ${g.hood}, para todos los niveles. Ven una vez gratis y mira cómo se siente.`,
+      en: (f, g) => say(f.n && `${f.small ? 'Small classes' : 'Classes'}${g.hood ? ` in ${g.hood}` : ''}${f.levels ? ', for every level' : ''}.`, f.free && 'Come once for free and see how it feels.'),
+      es: (f, g) => say(f.n && `${f.small ? 'Clases pequeñas' : 'Clases'}${g.hood ? ` en ${g.hood}` : ''}${f.levels ? ', para todos los niveles' : ''}.`, f.free && 'Ven una vez gratis y mira cómo se siente.'),
     },
     stmt: {
-      en: f => `A quiet room, a small group and a teacher who sees you. ${f.n} classes a week, from first-timers to daily practice. Your first class is free.`,
-      es: f => `Un salón tranquilo, un grupo pequeño y alguien que te guía de cerca. ${f.n} clases por semana, para quien empieza y para quien practica a diario. Tu primera clase es gratis.`,
+      en: f => say(f.small && 'A quiet room, a small group and a teacher who sees you.', f.n && `${f.n} classes a week${f.levels ? ', from first-timers to daily practice' : ''}.`, f.free && 'Your first class is free.'),
+      es: f => say(f.small && 'Un salón tranquilo, un grupo pequeño y alguien que te guía de cerca.', f.n && `${f.n} clases por semana${f.levels ? ', para quien empieza y para quien practica a diario' : ''}.`, f.free && 'Tu primera clase es gratis.'),
     },
   },
   lines: {
     head: {
-      en: (n, g, x) => (x.fx.word ? [x.slot(n.map(w => cap(w) + '.')), esc(`In ${g.hood}.`)] : n.slice(0, 3).map(w => esc(cap(w) + '.'))),
-      es: (n, g, x) => (x.fx.word ? [x.slot(n.map(w => cap(w) + '.')), esc(`En ${g.hood}.`)] : n.slice(0, 3).map(w => esc(cap(w) + '.'))),
+      en: (n, g, x) => (x.fx.word ? [x.slot(n.map(w => cap(w) + '.')), g.hood && esc(`In ${g.hood}.`)].filter(Boolean) : n.slice(0, 3).map(w => esc(cap(w) + '.'))),
+      es: (n, g, x) => (x.fx.word ? [x.slot(n.map(w => cap(w) + '.')), g.hood && esc(`En ${g.hood}.`)].filter(Boolean) : n.slice(0, 3).map(w => esc(cap(w) + '.'))),
     },
     lead: {
-      en: f => `${f.n} classes a week. ${f.cap} people at most. Your first one is free.`,
-      es: f => `${f.n} clases por semana. Máximo ${f.cap} personas. La primera es gratis.`,
+      en: f => say(f.n && `${f.n} classes a week.`, f.cap > 1 && `${f.cap} people at most.`, f.free && 'Your first one is free.'),
+      es: f => say(f.n && `${f.n} clases por semana.`, f.cap > 1 && `Máximo ${f.cap} personas.`, f.free && 'La primera es gratis.'),
     },
     stmt: {
-      en: f => `Show up, work, go home. ${f.n} classes a week, ${f.cap} people at most and a coach on every round. Your first class is free.`,
-      es: f => `Llega, trabaja y vete a casa. ${f.n} clases por semana, máximo ${f.cap} personas y un coach en cada ronda. Tu primera clase es gratis.`,
+      en: f => say(f.n && `Show up, work, go home. ${f.n} classes a week${f.cap > 1 ? `, ${f.cap} people at most` : ''}${f.coached ? ' and a coach on every round' : ''}.`, f.free && 'Your first class is free.'),
+      es: f => say(f.n && `Llega, trabaja y vete a casa. ${f.n} clases por semana${f.cap > 1 ? `, máximo ${f.cap} personas` : ''}${f.coached ? ' y un coach en cada ronda' : ''}.`, f.free && 'Tu primera clase es gratis.'),
+    },
+  },
+  /* one person who trains people one at a time: no classes, no room size, prices up front */
+  solo: {
+    head: {
+      en: (n, g, x) => soloHead(x.facts.cap > 2 ? 'Personal training' : 'One-on-one training', g.hood ? `in ${g.hood}` : g.owner ? `with ${g.owner}` : ''),
+      es: (n, g, x) => soloHead(x.facts.cap > 2 ? 'Entrenamiento personal' : 'Entrenamiento uno a uno', g.hood ? `en ${g.hood}` : g.owner ? `con ${g.owner}` : ''),
+    },
+    lead: {
+      en: f => say(f.from && `Sessions from ${f.from}.`, f.free && 'Your first one is free.', f.n > 1 && `${f.n} open times this week.`),
+      es: f => say(f.from && `Sesiones desde ${f.from}.`, f.free && 'La primera es gratis.', f.n > 1 && `${f.n} horas libres esta semana.`),
+    },
+    stmt: {
+      en: (f, g) => say(g.owner && `I am ${g.owner}.`, (f.n || f.from) && `I train ${f.cap > 2 ? `one person or a group of up to ${f.cap}` : f.cap === 2 ? 'one person or a pair' : 'one person'} at a time${g.hood ? ` in ${g.hood}` : ''}.`, (f.n || f.from) && 'Every session is planned for you and changes as you get stronger.', f.free && 'The first session is free, so we can both see if it is a good fit.'),
+      es: (f, g) => say(g.owner && `Soy ${g.owner}.`, (f.n || f.from) && `Entreno a ${f.cap > 2 ? `una persona o a un grupo de hasta ${f.cap}` : f.cap === 2 ? 'una persona o a una pareja' : 'una persona'} a la vez${g.hood ? ` en ${g.hood}` : ''}.`, (f.n || f.from) && 'Cada sesión se planifica para ti y cambia a medida que avanzas.', f.free && 'La primera sesión es gratis, para ver si nos entendemos.'),
     },
   },
 };
@@ -116,11 +161,12 @@ export const VOICES = Object.keys(COPY);
    An uploaded image shows as it is, or (one color) painted in the text color: the image is used as a stencil, so it shows on any background. */
 const logo = gym => {
   const l = gym.logo;
-  const pic = !l.src ? `<svg viewBox="0 0 32 32" aria-hidden="true">${l.mark}</svg><span class="zp-logo__w">${esc(l.word)}</span>`
+  const pic = !l.src ? `${l.mark ? `<svg viewBox="0 0 32 32" aria-hidden="true">${l.mark}</svg>` : ''}<span class="zp-logo__w">${esc(l.word || gym.name)}</span>`
     : l.mono ? `<span class="zp-logo__pic zp-logo__pic--mono" style="--logo:url('${esc(l.src)}');aspect-ratio:${+l.ratio || 3}"></span>`
     : `<img class="zp-logo__pic" src="${esc(l.src)}" alt="">`;
   return `<a class="zp-logo" href="#top" aria-label="${esc(gym.name)}">${pic}</a>`;
 };
+const oneLang = gym => !!gym.langs && gym.langs.length < 2;   // the business is set up in one language, so there is nothing to switch to
 const initials = name => name.split(/\s+/).map(w => w.charAt(0)).join('').slice(0, 2).toUpperCase();
 const avatar = (c, cls = '') => (c && c.photo
   ? `<span class="zp-av ${cls}"><img class="zp-img" src="${c.photo}" alt="" loading="lazy"></span>`
@@ -136,21 +182,32 @@ const wide = gym => gym.photos.filter(p => p.shape === 'wide');
 const slideStack = pics => pics.map((s, i) => `<div class="zp-slide${i ? '' : ' is-on'}"><img class="zp-img" src="${s.src}" alt=""${s.pos ? ` style="object-position:${s.pos}"` : ''} ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></div>`).join('');
 const arrowBtns = S => `<div class="zp-arrows"><button type="button" class="zp-arrow" data-dir="-1" aria-label="${esc(S.prev)}">${ARROW}</button><button type="button" class="zp-arrow" data-dir="1" aria-label="${esc(S.nextCard)}">${ARROW}</button></div>`;
 
+/* The drafted headline names the classes. With no classes, or with names too long to set in headline type,
+   it falls back to the business name and what it is. */
 function headline(gym, x) {
   const c = COPY[x.voice] || COPY.roof;
-  return c.head[x.lang](x.names, gym, x).map(l => `<span class="zp-line">${l}</span>`).join(' ');
+  const used = x.fx.word ? x.names : x.names.slice(0, 3);
+  const fits = x.voice === 'solo' ? !!(x.facts.n || x.facts.from) : used.length > 0 && x.facts.n > 0 && used.every(w => w.length <= 18);   // a neighborhood is not needed: each voice leaves it out when the business has none
+  const where = [x.L(gym.kind), gym.hood].filter(Boolean).join(x.lang === 'es' ? ' en ' : ' in ');
+  const lines = fits ? c.head[x.lang](x.names, gym, x) : [esc(gym.name + '.'), where && esc(where + '.')].filter(Boolean);
+  return lines.map(l => `<span class="zp-line">${l}</span>`).join(' ');
 }
-const leadLine = (gym, x) => (COPY[x.voice] || COPY.roof).lead[x.lang](x.facts, gym);
+const leadLine = (gym, x) => (COPY[x.voice] || COPY.roof).lead[x.lang](x.facts, gym, x);
 
 function heroCopy(gym, x) {
-  const { S } = x;
+  const { S } = x, lead = leadLine(gym, x);
+  const prices = { href: '#prices', label: S.seePrices };
+  /* a page that leads with prices puts that button first. A button is only there when it leads somewhere. */
+  const one = gym.lead === 'prices' && x.hasPrices ? prices : x.cta;
+  const two = !one ? null : one.href !== '#prices' && x.hasPrices ? prices : one.href === '#prices' && x.hasSched ? { href: '#schedule', label: S.book } : null;
+  const tag = [gym.area, x.L(gym.kind)].filter(Boolean).join(' · ');
   return `<div class="zp-hero__copy">
-    <p class="zp-tag">${esc(gym.area)} · ${esc(x.L(gym.kind))}</p>
+    ${tag ? `<p class="zp-tag">${esc(tag)}</p>` : ''}
     <h1 class="zp-h1">${headline(gym, x)}</h1>
-    <p class="zp-lead">${esc(leadLine(gym, x))}</p>
-    ${x.pillAlways ? '' : `<div class="zp-btns" data-follow-start>
-      <a class="zp-btn" href="#schedule">${esc(S.book)}</a>
-      <a class="zp-btn zp-btn--ghost" href="#prices">${esc(S.seePrices)}</a>
+    ${lead ? `<p class="zp-lead">${esc(lead)}</p>` : ''}
+    ${x.pillAlways || !one ? '' : `<div class="zp-btns" data-follow-start>
+      <a class="zp-btn" href="${one.href}">${esc(one.label)}</a>
+      ${two ? `<a class="zp-btn zp-btn--ghost" href="${two.href}">${esc(two.label)}</a>` : ''}
     </div>`}
   </div>`;
 }
@@ -161,8 +218,8 @@ function sessionBits(s, x) {
   const fullUp = s.left === 0;
   return {
     cls, co, fullUp, t: x.time(s.time),
-    who: co ? `${S.withCoach} ${person(co.name)}` : S.openFloor,
-    spots: fullUp ? S.full : S.left(s.left),
+    who: co ? `${S.withCoach} ${person(co.name)}` : x.solo ? '' : S.openFloor,
+    spots: fullUp ? S.full : s.left == null || x.solo ? '' : S.left(s.left),   // no size set, or a one-person hour: nothing to say about spots
     btn: `<a class="zp-btn zp-btn--sm${fullUp ? ' zp-btn--ghost' : ''}" href="#" data-act="reserve">${esc(fullUp ? S.wait : S.bookShort)}</a>`,
     name: L(cls.name),
   };
@@ -181,12 +238,12 @@ export function menuBar(gym, x) {
       ${logo(gym)}
       <nav class="zp-nav" aria-label="${esc(S.menu)}">${links}</nav>
       <div class="zp-bar__end">
-        <button class="zp-lang" type="button" data-act="lang" aria-label="${esc(S.switchTo)}">${x.lang === 'en' ? 'ES' : 'EN'}</button>
-        <a class="zp-btn zp-btn--sm zp-bar__book" href="#schedule"><span class="zp-w">${esc(S.book)}</span><span class="zp-n">${esc(S.bookShort)}</span></a>
-        <button class="zp-menu" type="button" data-act="menu" aria-expanded="false" aria-label="${esc(S.menu)}"><i></i></button>
+        ${oneLang(gym) ? '' : `<button class="zp-lang" type="button" data-act="lang" aria-label="${esc(S.switchTo)}">${x.lang === 'en' ? 'ES' : 'EN'}</button>`}
+        ${x.cta ? `<a class="zp-btn zp-btn--sm zp-bar__book" href="${x.cta.href}"><span class="zp-w">${esc(x.cta.label)}</span><span class="zp-n">${esc(x.cta.short)}</span></a>` : ''}
+        ${links ? `<button class="zp-menu" type="button" data-act="menu" aria-expanded="false" aria-label="${esc(S.menu)}"><i></i></button>` : ''}
       </div>
     </div>
-    <div class="zp-drawer">${links}<a class="zp-btn zp-btn--block" href="#schedule">${esc(S.book)}</a></div></div>
+    <div class="zp-drawer">${links}${x.cta ? `<a class="zp-btn zp-btn--block" href="${x.cta.href}">${esc(x.cta.label)}</a>` : ''}</div></div>
   </header>`;
 }
 
@@ -227,22 +284,32 @@ export function heroSlideshow(gym, x) {
 /* Hero 3: split. Words on the left. On the right, today's next classes ready to book, or one photo. */
 export function heroSplit(gym, x, o = {}) {
   const { S } = x;
-  let side;
-  const pic = gym.photos[0];
-  if (o.side === 'photo' && pic) side = photo(pic.src, { cls: 'zp-split__ph', pos: pic.pos, eager: true });
-  else {
-    const d = x.days.find(day => day.sessions.length) || x.days[0];
+  let side = '', board = false;
+  const pic = gym.photos[0], d = x.days.find(day => day.sessions.length);
+  if ((o.side === 'photo' || !d) && pic) side = photo(pic.src, { cls: 'zp-split__ph', pos: pic.pos, eager: true });
+  else if (d && o.side === 'board') {
+    /* the board: the day's next classes set like a station timetable. The times are the biggest type on the page. */
+    board = true;
+    side = `<div class="zp-board">
+      <div class="zp-board__head"><p class="zp-tag">${esc(d.label)} · ${esc(d.date)}</p>${x.hasSched ? `<a class="zp-link" href="#schedule">${esc(S.see)}</a>` : ''}</div>
+      ${d.sessions.slice(0, 3).map(s => { const b = sessionBits(s, x); return `<article class="zp-board__row${b.fullUp ? ' is-full' : ''}">
+        <p class="zp-board__time zp-num">${clock(b.t)}</p>
+        <div class="zp-board__main"><p class="zp-board__name">${esc(b.name)}</p><p class="zp-board__meta">${esc([b.who || (b.cls.mins && `${b.cls.mins} ${S.min}`), b.spots].filter(Boolean).join(' · '))}</p></div>
+        ${b.btn}
+      </article>`; }).join('')}
+    </div>`;
+  } else if (d) {
     side = `<div class="zp-today">
-      <div class="zp-today__head"><p class="zp-tag">${esc(d.label)} · ${esc(d.date)}</p><a class="zp-link" href="#schedule">${esc(S.see)}</a></div>
+      <div class="zp-today__head"><p class="zp-tag">${esc(d.label)} · ${esc(d.date)}</p>${x.hasSched ? `<a class="zp-link" href="#schedule">${esc(S.see)}</a>` : ''}</div>
       ${d.sessions.slice(0, 3).map(s => { const b = sessionBits(s, x); return `<article class="zp-mini">
         ${avatar(b.co)}
-        <div class="zp-mini__main"><p class="zp-mini__time zp-num">${clock(b.t)}</p><p class="zp-mini__name">${esc(b.name)}</p><p class="zp-mini__meta">${esc(b.who)} · ${esc(b.spots)}</p></div>
+        <div class="zp-mini__main"><p class="zp-mini__time zp-num">${clock(b.t)}</p><p class="zp-mini__name">${esc(b.name)}</p><p class="zp-mini__meta">${esc([b.who || (b.cls.mins && `${b.cls.mins} ${S.min}`), b.spots].filter(Boolean).join(' · '))}</p></div>
         ${b.btn}
       </article>`; }).join('')}
     </div>`;
   }
   return `<section class="zp-hero zp-hero--split" data-block="heroSplit" id="top">
-    <div class="zp-hero__in zp-split">${heroCopy(gym, x)}<div class="zp-split__side">${side}</div></div>
+    <div class="zp-hero__in zp-split${side ? '' : ' is-alone'}${board ? ' zp-split--board' : ''}">${heroCopy(gym, x)}${side ? `<div class="zp-split__side">${side}</div>` : ''}</div>
   </section>`;
 }
 
@@ -254,7 +321,7 @@ export function heroFramed(gym, x) {
   if (!pics.length) return heroSplit(gym, x, { side: 'today' });
   return `<section class="zp-hero zp-hero--framed" data-block="heroFramed" id="top">
     <div class="zp-hero__in zp-framed">${heroCopy(gym, x)}
-      <div class="zp-framed__ph"><div class="zp-ph" data-fx-hero="slides">${slideStack(pics)}</div><span class="zp-chip zp-framed__offer">${esc(x.L(gym.offer))}</span></div>
+      <div class="zp-framed__ph"><div class="zp-ph" data-fx-hero="slides">${slideStack(pics)}</div>${x.L(gym.offer) ? `<span class="zp-chip zp-framed__offer">${esc(x.L(gym.offer))}</span>` : ''}</div>
     </div>
   </section>`;
 }
@@ -267,7 +334,7 @@ export function heroTiles(gym, x) {
   const pos = p => (p.pos ? ` style="object-position:${p.pos}"` : '');
   return `<section class="zp-hero zp-hero--tiles" data-block="heroTiles" id="top">
     <div class="zp-hero__in zp-tiles">${heroCopy(gym, x)}
-      <div class="zp-tiles__grid" style="--n:${pics.length}" data-fx-hero="tiles">${pics.map((p, i) => `<figure class="zp-tile"><div class="zp-ph"><img class="zp-img" src="${p.src}" alt=""${pos(p)} fetchpriority="high">${alts[i] ? `<img class="zp-img zp-tile__alt" data-src="${alts[i].src}" alt=""${pos(alts[i])}>` : ''}</div>${i === 1 ? `<figcaption class="zp-tile__badge"><span class="zp-chip">${esc(x.L(gym.offer))}</span></figcaption>` : ''}</figure>`).join('')}</div>
+      <div class="zp-tiles__grid" style="--n:${pics.length}" data-fx-hero="tiles">${pics.map((p, i) => `<figure class="zp-tile"><div class="zp-ph"><img class="zp-img" src="${p.src}" alt=""${pos(p)} fetchpriority="high">${alts[i] ? `<img class="zp-img zp-tile__alt" data-src="${alts[i].src}" alt=""${pos(alts[i])}>` : ''}</div>${i === 1 && x.L(gym.offer) ? `<figcaption class="zp-tile__badge"><span class="zp-chip">${esc(x.L(gym.offer))}</span></figcaption>` : ''}</figure>`).join('')}</div>
     </div>
   </section>`;
 }
@@ -275,16 +342,17 @@ export function heroTiles(gym, x) {
 /* Offer strip. Thin: one line with the offer. Loud: class names in headline type. The "moving text strip" effect sets it rolling. */
 export function offerStrip(gym, x, o = {}) {
   const { S, L } = x, f = x.facts;
-  const loud = o.variant === 'loud';
+  const loud = o.variant === 'loud', offer = L(gym.offer);
+  if (loud ? !x.names.length : !offer) return '';   // nothing to say, so no strip
   let still, seq;
   if (loud) {
-    const words = [...x.names, L(gym.offer)];
+    const words = [...x.names, offer].filter(Boolean);
     seq = words.map((w, i) => `<span class="${i % 2 ? 'o' : ''}">${esc(w)}</span><span class="zp-strip__x" aria-hidden="true">/</span>`).join('');
     still = x.names.slice(0, 3).map((w, i) => `<span class="${i % 2 ? 'o' : ''}">${esc(w)}</span>`).join('<span class="zp-strip__x" aria-hidden="true">/</span>');
   } else {
-    const bits = [L(gym.offer), `${f.n} ${S.fClasses}`, cap(S.from(f.from)), gym.area];
+    const bits = [offer, f.n && `${f.n} ${S.fClasses}`, f.from && cap(S.from(f.from)), gym.area].filter(Boolean);
     seq = bits.map(t => `<span>${esc(t)}</span><span class="zp-strip__x" aria-hidden="true">·</span>`).join('');
-    still = `<span>${esc(S.newHere)} ${esc(L(gym.offer))}.</span> <a class="zp-link" href="#schedule">${esc(S.bookIt)}</a>`;
+    still = `<span>${esc(S.newHere)} ${esc(offer)}.</span>${x.cta ? ` <a class="zp-link" href="${x.cta.href}">${esc(x.hasSched ? S.bookIt : x.cta.label)}</a>` : ''}`;
   }
   const grp = `<div class="zp-strip__grp">${seq.repeat(loud ? 3 : 4)}</div>`;
   return `<div class="zp-strip zp-strip--${loud ? 'loud' : 'thin'} zp-strip--${o.tone || 'band'}" data-block="offerStrip" data-fx-strip>
@@ -297,12 +365,14 @@ export function offerStrip(gym, x, o = {}) {
    The "lights up" effect brightens it word by word as you scroll. */
 export function statement(gym, x) {
   const { S } = x, f = x.facts;
-  const text = (COPY[x.voice] || COPY.roof).stmt[x.lang](f, gym);
-  const facts = [[f.n, S.fClasses], [f.cap, S.fCap], [f.first, S.fFirst], [f.from, S.fSingle]];
+  const text = (COPY[x.voice] || COPY.roof).stmt[x.lang](f, gym, x);
+  /* only the facts that could be counted. A one-person hour has no "people per class". */
+  const facts = [[f.n, S.fClasses], [!x.solo && f.cap > 1 && f.cap, S.fCap], [f.first, S.fFirst], [f.from, f.single ? S.fSingle : S.fFrom]].filter(([v]) => v);
+  if (!text && !facts.length) return '';
   return `<section class="zp-sec zp-stmt" data-block="statement" id="about"><div class="zp-in">
     <p class="zp-tag" data-rise>${esc(S.tAbout)} ${esc(gym.name)}</p>
-    <p class="zp-stmt__text" data-fx-lightup data-rise>${esc(text)}</p>
-    <dl class="zp-facts">${facts.map(([v, l], i) => `<div class="zp-fact" data-rise style="--i:${i}"><dd class="zp-num">${esc(v)}</dd><dt class="zp-tag">${esc(l)}</dt></div>`).join('')}</dl>
+    ${text ? `<p class="zp-stmt__text" data-fx-lightup data-rise>${esc(text)}</p>` : ''}
+    ${facts.length ? `<dl class="zp-facts">${facts.map(([v, l], i) => `<div class="zp-fact" data-rise style="--i:${i}"><dd class="zp-num">${esc(v)}</dd><dt class="zp-tag">${esc(l)}</dt></div>`).join('')}</dl>` : ''}
   </div></section>`;
 }
 
@@ -313,8 +383,9 @@ export function classCards(gym, x, o = {}) {
   const cs = gym.classes; if (!cs.length) return '';
   const withPhotos = o.variant !== 'plain' && cs.every(c => c.photo);
   const pinned = x.fx.pin && o.pin !== false && cs.every(c => c.photo);
-  const meta = c => `${c.mins} ${S.min} · ${L(c.level)}`;
-  const next = c => (x.nextOf[c.id] ? `<p class="zp-next"><span>${esc(S.next)}: ${esc(x.nextOf[c.id])}</span><a class="zp-link" href="#schedule" data-pick="${c.id}">${esc(S.seeTimes)}</a></p>` : '');
+  const meta = c => [c.mins && `${c.mins} ${S.min}`, L(c.level)].filter(Boolean).join(' · ');
+  const n = cs.length, cols = n <= 4 ? n : n % 4 === 0 || n % 4 === 3 ? 4 : 3;
+  const next = c => (x.hasSched && x.nextOf[c.id] ? `<p class="zp-next"><span>${esc(S.next)}: ${esc(x.nextOf[c.id])}</span><a class="zp-link" href="#schedule" data-pick="${c.id}">${esc(S.seeTimes)}</a></p>` : '');
   let body;
   if (pinned) {
     body = `<div class="zp-pin" data-fx-pin>
@@ -323,17 +394,17 @@ export function classCards(gym, x, o = {}) {
         ${photo(c.photo, { cls: 'zp-pin__inline', pos: c.pos, alt: L(c.name) })}
         <p class="zp-tag">${pad2(i + 1)} / ${pad2(cs.length)} · ${esc(meta(c))}</p>
         <h3 class="zp-h2">${esc(L(c.name))}</h3>
-        <p>${esc(L(c.blurb))}</p>
+        ${L(c.blurb) ? `<p>${esc(L(c.blurb))}</p>` : ''}
         ${next(c)}
       </article>`).join('')}</div>
     </div>`;
   } else {
-    body = `<div class="zp-cards${withPhotos ? '' : ' zp-cards--plain'}" style="--cols:${cs.length === 4 ? 4 : cs.length === 2 ? 2 : 3}"${o.slide !== false ? ' data-fx-slide' : ''}>${cs.map((c, i) => `<article class="zp-class" data-rise style="--i:${i}">
+    body = `<div class="zp-cards${withPhotos ? '' : ' zp-cards--plain'}${n === 1 ? ' is-one' : ''}" style="--cols:${cols}"${o.slide !== false ? ' data-fx-slide' : ''}>${cs.map((c, i) => `<article class="zp-class" data-rise style="--i:${i}">
       ${withPhotos ? photo(c.photo, { cls: 'zp-class__ph', pos: c.pos, alt: L(c.name) }) : ''}
       <div class="zp-class__body">
         <p class="zp-tag">${withPhotos ? '' : pad2(i + 1) + ' · '}${esc(meta(c))}</p>
         <h3 class="zp-h3">${esc(L(c.name))}</h3>
-        <p>${esc(L(c.blurb))}</p>
+        ${L(c.blurb) ? `<p>${esc(L(c.blurb))}</p>` : ''}
         ${next(c)}
       </div>
     </article>`).join('')}</div>`;
@@ -347,6 +418,7 @@ export function classCards(gym, x, o = {}) {
 /* Schedule, two ways. Both show seven days from today with a Book button on every class. */
 function scheduleShell(gym, x, o, name, sessionHtml, wrapCls) {
   const { S } = x;
+  if (!x.hasSched) return '';   // no classes on the calendar, so no schedule section and no link to one
   const tabs = x.days.map((d, i) => `<button type="button" class="zp-day${i === x.day0 ? ' is-on' : ''}" data-day="${i}"><b>${esc(d.label)}</b><small>${esc(d.date)}</small></button>`).join('');
   const panels = x.days.map((d, i) => `<div class="zp-daypanel ${wrapCls}" data-day="${i}"${i === x.day0 ? '' : ' hidden'}>${d.sessions.length ? d.sessions.map(s => sessionHtml(s)).join('') : ''}<p class="zp-empty"${d.sessions.length ? ' hidden' : ''}>${esc(S.noClasses)}</p></div>`).join('');
   return `<section class="zp-sec zp-sched${o.band ? ' zp-sec--band' : ''}" data-block="${name}" id="schedule"><div class="zp-in">
@@ -364,7 +436,7 @@ export function scheduleCards(gym, x, o = {}) {
     <p class="zp-sess__time zp-num">${clock(b.t)}</p>
     ${avatar(b.co, 'zp-sess__ph')}
     <h3 class="zp-h3 zp-sess__name">${esc(b.name)}</h3>
-    <p class="zp-sess__meta">${b.cls.mins} ${esc(S.min)} · ${esc(b.who)}</p>
+    <p class="zp-sess__meta">${esc([b.cls.mins && `${b.cls.mins} ${S.min}`, b.who].filter(Boolean).join(' · '))}</p>
     <div class="zp-sess__foot"><span class="zp-spots">${esc(b.spots)}</span>${b.btn}</div>
   </article>`; }, 'zp-sessgrid');
 }
@@ -372,13 +444,13 @@ export function scheduleCards(gym, x, o = {}) {
 /* Schedule as a plain list: one line per class. */
 export function scheduleList(gym, x, o = {}) {
   const { S } = x;
-  return scheduleShell(gym, x, o, 'scheduleList', s => { const b = sessionBits(s, x); return `<article class="zp-row" data-cls="${s.cls}">
+  return scheduleShell(gym, x, o, 'scheduleList', s => { const b = sessionBits(s, x); return `<article class="zp-row${b.fullUp ? ' is-full' : ''}" data-cls="${s.cls}">
     <p class="zp-row__time zp-num">${clock(b.t)}</p>
-    <p class="zp-row__name">${esc(b.name)} <span>${b.cls.mins} ${esc(S.min)}</span></p>
-    <p class="zp-row__who">${avatar(b.co)}<span>${esc(b.co ? person(b.co.name) : S.openFloor)}</span></p>
+    <p class="zp-row__name">${esc(b.name)}${b.cls.mins ? ` <span>${b.cls.mins} ${esc(S.min)}</span>` : ''}</p>
+    <p class="zp-row__who">${x.solo ? '' : `${avatar(b.co)}<span>${esc(b.co ? person(b.co.name) : S.openFloor)}</span>`}</p>
     <p class="zp-row__spots">${esc(b.spots)}</p>
     ${b.btn}
-  </article>`; }, 'zp-rows');
+  </article>`; }, `zp-rows${o.big ? ' zp-rows--big' : ''}${x.solo ? ' zp-rows--solo' : ''}`);
 }
 
 /* Price cards: three equal cards, name, price in the brand color, one line, three ticks, a full-width Buy button
@@ -386,17 +458,18 @@ export function scheduleList(gym, x, o = {}) {
 export function priceCards(gym, x, o = {}) {
   const { S, L } = x;
   if (!gym.prices || !gym.prices.length) return '';
+  const n = gym.prices.length;
   return `<section class="zp-sec${o.band ? ' zp-sec--band' : ''}" data-block="priceCards" id="prices"><div class="zp-in">
     ${head(S.tPrices, esc(S.hPrices))}
-    <div class="zp-plans" style="--cols:${Math.min(3, gym.prices.length)}">${gym.prices.map((p, i) => `<article class="zp-plan${p.featured ? ' is-feat' : ''}" data-rise style="--i:${i}">
+    <div class="zp-plans${n === 1 ? ' is-one' : ''}" style="--cols:${n === 4 ? 2 : Math.min(3, n)}">${gym.prices.map((p, i) => `<article class="zp-plan${p.featured ? ' is-feat' : ''}" data-rise style="--i:${i}">
       ${p.featured ? `<span class="zp-plan__tab">${esc(S.popular)}</span>` : ''}
       <h3 class="zp-h3 zp-plan__name">${esc(L(p.name))}</h3>
       <p class="zp-plan__price">${esc(x.money(p.price))}${p.monthly ? ` <small>${esc(S.perMonth)}</small>` : ''}</p>
-      <p class="zp-plan__line">${esc(L(p.line))}</p>
-      <ul class="zp-ticks">${p.ticks.map(t => `<li>${TICK}<span>${esc(L(t))}</span></li>`).join('')}</ul>
+      ${L(p.line) ? `<p class="zp-plan__line">${esc(L(p.line))}</p>` : ''}
+      ${(p.ticks || []).length ? `<ul class="zp-ticks">${p.ticks.map(t => `<li>${TICK}<span>${esc(L(t))}</span></li>`).join('')}</ul>` : ''}
       <a class="zp-btn zp-btn--block" href="#" data-act="reserve">${esc(S.buy)}</a>
     </article>`).join('')}</div>
-    <p class="zp-note">${esc(S.tax)}</p>
+    ${gym.tax && gym.tax.included ? `<p class="zp-note">${esc(S.tax(gym.tax.name))}</p>` : ''}
   </div></section>`;
 }
 
@@ -409,7 +482,7 @@ export function coaches(gym, x, o = {}) {
     <div class="zp-coaches" style="--cols:${Math.min(5, Math.max(3, gym.coaches.length))}" data-fx-slide>${gym.coaches.map((c, i) => `<article class="zp-coach" data-rise style="--i:${i}">
       ${avatar(c, 'zp-coach__ph')}
       <h3 class="zp-h3">${esc(person(c.name))}</h3>
-      <p class="zp-coach__role">${esc(L(c.role))}</p>
+      ${L(c.role) ? `<p class="zp-coach__role">${esc(L(c.role))}</p>` : ''}
     </article>`).join('')}</div>
   </div></section>`;
 }
@@ -427,11 +500,12 @@ export function reviews(gym, x, o = {}) {
 /* First visit: the offer and three steps. As a full-width photo band, or as a photo beside the words. */
 export function firstVisit(gym, x, o = {}) {
   const { S, L } = x;
-  const pic = gym.photos[o.photo || 0];
+  if (!x.hasSched) return '';   // the steps start at the schedule, so with no schedule there is nothing to explain
+  const pic = gym.photos[o.photo || 0], free = x.facts.free;   // no photo at that spot: the steps stand alone instead of repeating the cover
   const words = `<div class="zp-first__copy" data-rise>
     <p class="zp-tag">${esc(S.tFirst)}</p>
-    <h2 class="zp-h2">${esc(S.hFirst)}</h2>
-    <ol class="zp-steps">${S.steps.map((s, i) => `<li><span class="zp-num">${i + 1}</span><span>${esc(s)}</span></li>`).join('')}</ol>
+    <h2 class="zp-h2">${esc(free ? S.hFirst : S.hFirstPlain)}</h2>
+    <ol class="zp-steps">${(x.facts.noCard ? S.steps : S.stepsPlain).map((s, i) => `<li><span class="zp-num">${i + 1}</span><span>${esc(s)}</span></li>`).join('')}</ol>
     <div class="zp-btns"><a class="zp-btn" href="#schedule">${esc(S.book)}</a></div>
   </div>`;
   if (o.variant === 'band' && pic) {
@@ -448,11 +522,13 @@ export function firstVisit(gym, x, o = {}) {
 /* Booking bar: pick a class and a day, jump to those times. */
 export function bookingBar(gym, x) {
   const { S, L } = x;
+  if (!x.hasSched) return '';
+  const note = [x.facts.from && cap(S.from(x.facts.from)), L(gym.offer)].filter(Boolean).join(' · ');
   return `<div class="zp-bookbar" data-block="bookingBar"><form class="zp-bookbar__in" data-act="find">
     <label><span class="zp-tag">${esc(S.bbClass)}</span><select name="cls"><option value="">${esc(S.bbAny)}</option>${gym.classes.map(c => `<option value="${c.id}">${esc(L(c.name))}</option>`).join('')}</select></label>
     <label><span class="zp-tag">${esc(S.bbDay)}</span><select name="day">${x.days.map((d, i) => `<option value="${i}"${i === x.day0 ? ' selected' : ''}>${esc(d.label)}, ${esc(d.date)}</option>`).join('')}</select></label>
     <button class="zp-btn" type="submit">${esc(S.bbGo)}</button>
-    <p class="zp-bookbar__note">${esc(cap(S.from(x.facts.from)))} · ${esc(L(gym.offer))}</p>
+    ${note ? `<p class="zp-bookbar__note">${esc(note)}</p>` : ''}
   </form></div>`;
 }
 
@@ -461,10 +537,10 @@ export function footer(gym, x) {
   const { S, L } = x, p = gym.place;
   return `<footer class="zp-foot" data-block="footer" id="find"><div class="zp-in">
     <div class="zp-foot__grid">
-      <div class="zp-foot__brand">${logo(gym)}<p>${esc(x.L(gym.kind))}. ${esc(gym.area)}.</p><a class="zp-btn" href="#schedule">${esc(S.book)}</a></div>
-      <div><p class="zp-tag">${esc(S.tFind)}</p><p>${p.addr.map(esc).join('<br>')}</p><p><a class="zp-link" href="#" data-act="noop">${esc(S.maps)}</a></p></div>
-      <div><p class="zp-tag">${esc(S.tHours)}</p><p>${p.hours.map(h => esc(glue(L(h)))).join('<br>')}</p></div>
-      <div><p class="zp-tag">${esc(S.tContact)}</p><p>${esc(p.phone)}<br>${esc(p.email)}</p><p><button class="zp-link" type="button" data-act="lang">${esc(S.switchTo)}</button></p></div>
+      <div class="zp-foot__brand">${logo(gym)}${x.L(gym.kind) || gym.area ? `<p>${[x.L(gym.kind), gym.area].filter(Boolean).map(t => esc(t) + '.').join(' ')}</p>` : ''}${x.cta && x.cta.href !== '#find' ? `<a class="zp-btn" href="${x.cta.href}">${esc(x.cta.label)}</a>` : ''}</div>
+      ${p.addr.length ? `<div><p class="zp-tag">${esc(S.tFind)}</p><p>${p.addr.map(esc).join('<br>')}</p><p><a class="zp-link" href="#" data-act="noop">${esc(S.maps)}</a></p></div>` : ''}
+      ${p.hours.length ? `<div><p class="zp-tag">${esc(S.tHours)}</p><p>${p.hours.map(h => esc(glue(L(h)))).join('<br>')}</p></div>` : ''}
+      ${p.phone || p.email || !oneLang(gym) ? `<div><p class="zp-tag">${esc(S.tContact)}</p>${p.phone || p.email ? `<p>${[p.phone, p.email].filter(Boolean).map(esc).join('<br>')}</p>` : ''}${oneLang(gym) ? '' : `<p><button class="zp-link" type="button" data-act="lang">${esc(S.switchTo)}</button></p>`}</div>` : ''}
     </div>
     <p class="zp-foot__made">${esc(S.made)}</p>
   </div></footer>`;
@@ -473,12 +549,13 @@ export function footer(gym, x) {
 /* The Book button that follows you. Three shapes: a pill with the price, a pill with two actions, a full bar.
    It is not in the recipe's block list: the page adds it when the "follows you" effect is on. */
 export function followBook(gym, x, variant = 'pill') {
-  const { S, L } = x, f = x.facts;
-  const btn = `<a class="zp-btn zp-follow__btn" href="#schedule"><span class="zp-w">${esc(S.book)}</span><span class="zp-n">${esc(S.bookShort)}</span></a>`;
+  const { S, L } = x, f = x.facts, c = x.cta, offer = L(gym.offer);
+  const btn = `<a class="zp-btn zp-follow__btn" href="${c.href}"><span class="zp-w">${esc(c.label)}</span><span class="zp-n">${esc(c.short)}</span></a>`;
+  const price = x.hasPrices && c.href !== '#prices';   // the price link is only there when it leads somewhere the button does not
   const inner = variant === 'duo'
-    ? `${btn}<a class="zp-follow__alt" href="#prices">${esc(S.nav.prices)} · ${esc(S.from(f.from))}</a>`
-    : `<a class="zp-follow__txt" href="#prices"><b>${esc(L(gym.offer))}</b><span>${esc(S.then(f.from))}</span></a>${btn}`;
-  return `<div class="zp-follow zp-follow--${variant}" data-fx-book role="complementary" aria-label="${esc(S.book)}">${inner}</div>`;
+    ? `${btn}${price ? `<a class="zp-follow__alt" href="#prices">${esc(S.nav.prices)} · ${esc(S.from(f.from))}</a>` : ''}`
+    : `${price ? `<a class="zp-follow__txt" href="#prices"><b>${esc(offer || S.nav.prices)}</b><span>${esc(offer ? S.then(f.from) : S.from(f.from))}</span></a>` : ''}${btn}`;
+  return `<div class="zp-follow zp-follow--${variant}${price ? '' : ' is-bare'}" data-fx-book role="complementary" aria-label="${esc(c.label)}">${inner}</div>`;
 }
 
 export const BLOCKS = { menuBar, heroFilm, heroSlideshow, heroSplit, heroFramed, heroTiles, offerStrip, statement, classCards, scheduleCards, scheduleList, priceCards, coaches, reviews, firstVisit, bookingBar, footer };

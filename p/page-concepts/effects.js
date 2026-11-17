@@ -1,7 +1,8 @@
 /* effects.js: the effects library.
    Each effect is one small function: it gets the page, switches itself on, and returns a function that switches it off.
    None of them hides content while waiting: a page with every effect off, or with reduced motion,
-   shows the same words, photos and buttons, just still.
+   shows the same words, photos and buttons, just still. The same goes for a page nobody scrolls:
+   a link preview, a print or a full-page capture gets every word at full strength.
    No libraries. Scroll effects use the browser's own IntersectionObserver. */
 
 const SLIDE_MS = 5200;    // how long each hero photo stays
@@ -18,13 +19,25 @@ export function setSlide(sec, i, byVisitor = false) {
   if (byVisitor) sec.dispatchEvent(new CustomEvent('zp:slide'));
 }
 
-/* 1. Fade and rise. Only parts still below the screen get the waiting state, so nothing you can see ever blinks. */
+/* 1. Fade and rise. Nothing waits hidden. A part below the screen plays a short fade as it arrives at the bottom edge,
+      starting a moment before it shows. So a page that is never scrolled (a link preview, a print, a full-page capture)
+      has every part in place. A jump (a menu link, Page Down, a capture tool stepping down the page) skips the fade. */
 function rise(root) {
   const els = [...root.querySelectorAll('[data-rise]')], vh = window.innerHeight;
-  const done = el => { el.classList.add('zp-go'); el.classList.remove('zp-pre'); io.unobserve(el); setTimeout(() => el.classList.remove('zp-go'), 1600); };
-  const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && done(e.target)), { rootMargin: '0px 0px -6% 0px', threshold: 0.05 });
-  els.forEach(el => { if (el.getBoundingClientRect().top > vh * 0.96) { el.classList.add('zp-pre'); io.observe(el); } });
-  return () => { io.disconnect(); els.forEach(el => el.classList.remove('zp-pre', 'zp-go')); };
+  let lastY = window.scrollY, jumped = false;
+  const timers = new Set();
+  const play = el => {
+    io.unobserve(el);
+    if (jumped) return;
+    el.classList.add('zp-go');
+    const t = setTimeout(() => { el.classList.remove('zp-go'); timers.delete(t); }, 1700);   // the class never outlives the fade
+    timers.add(t);
+  };
+  const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && play(e.target)), { rootMargin: '0px 0px 72px 0px' });
+  const onScroll = () => { const y = window.scrollY; jumped = Math.abs(y - lastY) > window.innerHeight * 0.7; lastY = y; };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  els.forEach(el => { if (el.getBoundingClientRect().top > vh + 72) io.observe(el); });
+  return () => { io.disconnect(); window.removeEventListener('scroll', onScroll); timers.forEach(clearTimeout); els.forEach(el => el.classList.remove('zp-go')); };
 }
 
 /* 2. The Book button that follows you. It waits until the hero's own buttons have scrolled away,
@@ -32,7 +45,8 @@ function rise(root) {
 function book(root, env) {
   const el = root.querySelector('[data-fx-book]'); if (!el) return null;
   const start = root.querySelector('[data-follow-start]'), sched = root.querySelector('.zp-sched'), foot = root.querySelector('.zp-foot');
-  let past = !start; const hide = new Set();
+  const pinned = root.querySelector('[data-fx-pin]'), wide = window.matchMedia('(min-width: 1000px)');
+  let past = !start, overPin = false; const hide = new Set();
   const show = () => el.classList.toggle('is-off', !(past && hide.size === 0));
   const ios = [];
   const watch = (target, margin, fn) => { if (!target) return; const io = new IntersectionObserver(([e]) => { fn(e); show(); }, { rootMargin: margin }); io.observe(target); ios.push(io); };
@@ -40,8 +54,13 @@ function book(root, env) {
   watch(start, `-${top}px 0px 0px 0px`, e => { past = !e.isIntersecting && e.boundingClientRect.top < top + 1; });
   watch(sched, '-42% 0px -42% 0px', e => { e.isIntersecting ? hide.add('sched') : hide.delete('sched'); });
   watch(foot, '0px 0px -96px 0px', e => { e.isIntersecting ? hide.add('foot') : hide.delete('foot'); });
+  /* on a laptop the pinned section holds a photo still at the left and the pill would sit on top of it, so the pill steps aside there too.
+     Each class in that section has its own "See times" link. On a phone the photo is a strip at the top and the pill stays. */
+  const pinSync = () => { overPin && wide.matches ? hide.add('pin') : hide.delete('pin'); show(); };
+  watch(pinned, '-45% 0px -45% 0px', e => { overPin = e.isIntersecting; pinSync(); });
+  wide.addEventListener('change', pinSync);
   show();
-  return () => { ios.forEach(io => io.disconnect()); el.classList.add('is-off'); };
+  return () => { ios.forEach(io => io.disconnect()); wide.removeEventListener('change', pinSync); el.classList.add('is-off'); };
 }
 
 /* 3. Menu bar change. A marker sits where the bar starts; once it has scrolled away the bar turns solid and slimmer. */
@@ -60,13 +79,16 @@ function lightup(root) {
   el.innerHTML = text.split(/\s+/).filter(Boolean).map(w => `<span class="zp-word">${escText(w)}</span>`).join(' ');
   el.classList.add('is-lightup');
   const words = [...el.children]; let lit = -1, frame = 0, near = true;
+  /* A pitch that starts below the screen stays fully lit until the visitor first scrolls. Until then nobody can see it,
+     and a page that is never scrolled (a preview, a print, a capture) gets the words at full strength, not dimmed. */
+  let armed = el.getBoundingClientRect().top < window.innerHeight;
   const paint = () => {
     frame = 0;
     const r = el.getBoundingClientRect(), vh = window.innerHeight;
-    const n = Math.round(clamp((vh * 0.9 - r.top) / (vh * 0.4 + r.height), 0, 1) * words.length);
+    const n = armed ? Math.round(clamp((vh * 0.9 - r.top) / (vh * 0.4 + r.height), 0, 1) * words.length) : words.length;
     if (n !== lit) { words.forEach((w, i) => w.classList.toggle('is-lit', i < n)); lit = n; }
   };
-  const onScroll = () => { if (near && !frame) frame = requestAnimationFrame(paint); };
+  const onScroll = e => { if (e && e.type === 'scroll') armed = true; if (near && !frame) frame = requestAnimationFrame(paint); };
   const io = new IntersectionObserver(([e]) => { near = e.isIntersecting; onScroll(); }, { rootMargin: '25% 0px 25% 0px' });
   io.observe(el); window.addEventListener('scroll', onScroll, { passive: true }); window.addEventListener('resize', onScroll);
   paint();

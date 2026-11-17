@@ -3,9 +3,9 @@
    2. runs the recipe's blocks in order and joins what they return
    3. wires the few things a visitor can press (day tabs, hero tabs, the phone menu, language, Book) */
 
-import { BLOCKS, WORDS, BLOCK_NAMES, HEROES, SCHEDULES, followBook, esc } from './blocks.js?v=14';
-import { buildTokens } from './tokens.js?v=14';
-import { setSlide } from './effects.js?v=14';
+import { BLOCKS, WORDS, BLOCK_NAMES, HEROES, SCHEDULES, followBook, esc } from './blocks.js?v=15';
+import { buildTokens } from './tokens.js?v=15';
+import { setSlide } from './effects.js?v=15';
 
 const pad2 = n => String(n).padStart(2, '0');
 const capFirst = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -15,9 +15,11 @@ const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^
 
 /* Everything a block may ask for besides the gym itself. */
 export function makeContext(gym, { lang = 'en', fx = {}, voice = 'roof', follow = 'pill', blocks = [], now = new Date() }) {
+  if (gym.langs && gym.langs.length && !gym.langs.includes(lang)) lang = gym.langs[0];   // a business set up in one language shows that language
   if (!WORDS[lang]) lang = 'en';
-  const S = WORDS[lang];
-  const L = o => (o == null ? '' : typeof o === 'string' ? o : (o[lang] ?? o.en ?? ''));
+  const solo = gym.unit === 'session';   // a personal trainer sells sessions, not classes, and the words change with that
+  const S = solo ? { ...WORDS[lang], ...WORDS[lang].session, nav: { ...WORDS[lang].nav, ...WORDS[lang].session.nav } } : WORDS[lang];
+  const L = o => (o == null ? '' : typeof o === 'string' ? o : (o[lang] ?? o.en ?? o.es ?? ''));
   const money = n => '$' + n;
   const time = t => { const [h, m] = t.split(':').map(Number); return { clock: `${h % 12 || 12}:${pad2(m)}`, ap: lang === 'es' ? (h < 12 ? 'a.\u00a0m.' : 'p.\u00a0m.') : (h < 12 ? 'AM' : 'PM') }; };   /* \u00a0 keeps "a. m." on one line */
   const timeStr = t => { const v = time(t); return `${v.clock}\u00a0${v.ap}`; };
@@ -27,55 +29,85 @@ export function makeContext(gym, { lang = 'en', fx = {}, voice = 'roof', follow 
   const locale = lang === 'es' ? 'es-PR' : 'en-US';
   const wd = new Intl.DateTimeFormat(locale, { weekday: 'short' }), md = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' });
   const nowHM = pad2(now.getHours()) + ':' + pad2(now.getMinutes());
+  const classes = gym.classes || [], known = new Set(classes.map(c => c.id));
+  const rows = (gym.schedule || []).filter(s => s && s.time && known.has(s.cls));   // a row whose class was deleted is left out, not drawn broken
   const days = [];
   for (let i = 0; i < 7; i++) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
     const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-    const sessions = gym.schedule
+    const sessions = rows
       .filter(s => s.dow === d.getDay() && (i > 0 || s.time > nowHM))
       .sort((a, b) => a.time.localeCompare(b.time))
       .map(s => {
         const h = hash(gym.id + key + s.time + s.cls), r = h % 100;
-        const left = r < 11 ? 0 : r < 36 ? 1 + ((h >>> 9) % 3) : Math.max(4, Math.round(s.cap * (0.28 + ((h >>> 5) % 45) / 100)));
+        /* left is null when the class has no size set: the page then says nothing about spots instead of inventing a number */
+        const left = !(s.cap > 0) ? null : solo ? (r < 42 ? 0 : s.cap)   // a trainer's hour is taken or open
+          : Math.min(s.cap, r < 11 ? 0 : r < 36 ? 1 + ((h >>> 9) % 3) : Math.max(4, Math.round(s.cap * (0.28 + ((h >>> 5) % 45) / 100))));
         return { ...s, left };
-      });
+      })
+      .filter(s => !(solo && s.left === 0));   // a trainer's taken hour is simply not listed
     days.push({ label: i === 0 ? S.today : capFirst(wd.format(d).replace('.', '')), date: capFirst(md.format(d).replace('.', '')), sessions });
   }
   const day0 = Math.max(0, days.findIndex(d => d.sessions.length));
   const nextOf = {};
   days.forEach(d => d.sessions.forEach(s => { if (!nextOf[s.cls]) nextOf[s.cls] = `${d.label} ${timeStr(s.time)}`; }));
 
-  /* facts for the words: counted from the schedule and the prices, never typed by the owner */
-  const coached = gym.schedule.filter(s => s.coach), sized = coached.length ? coached : gym.schedule;
-  const singles = gym.prices.filter(p => !p.monthly);
+  /* facts for the words: counted from the schedule and the prices, never typed by the owner.
+     A fact that cannot be counted stays empty (0 or ''), and the words that would use it are left out. */
+  /* "coached classes" are counted when most of the week has a coach on it (an open-gym hour or two does not change that).
+     When most rows have no coach, every row counts and the page does not call them coached. */
+  const withCoach = rows.filter(s => s.coach), coached = withCoach.length >= rows.length * 0.6 ? withCoach : [], sized = coached.length ? coached : rows;
+  const caps = sized.map(s => s.cap).filter(c => c > 0);
+  const priced = (gym.prices || []).filter(p => p && Number.isFinite(p.price));
+  const singles = priced.filter(p => !p.monthly);
+  const cheapest = priced.length ? (singles.length ? singles : priced).reduce((a, p) => (p.price < a.price ? p : a)) : null;
+  const team = gym.coaches || [], photos = gym.photos || [];
+  const cap = caps.length ? Math.max(...caps) : 0;
   const facts = {
-    n: sized.length,
-    cap: Math.max(...sized.map(s => s.cap)),
-    first: timeStr(gym.schedule.map(s => s.time).sort()[0]),
-    from: money(Math.min(...(singles.length ? singles : gym.prices).map(p => p.price))),
-    ways: WAYS[lang][gym.classes.length] || `${gym.classes.length} ${lang === 'es' ? 'formas' : 'ways'}`,
-    coaches: COUNT[lang][gym.coaches.length] || String(gym.coaches.length),
+    n: solo ? days.reduce((a, d) => a + d.sessions.length, 0) : sized.length,   // a trainer counts the hours still open in the next seven days
+    cap,
+    small: cap > 1 && cap <= 25,                    // only a counted room size lets the page say "small groups"
+    member: priced.some(p => p.monthly),            // a monthly price exists, so the page may say "one membership"
+    team: team.length,
+    levels: classes.some(c => c.level),
+    noCard: gym.cardToBook === false,               // the business said booking takes no card, so the page may say so
+    first: rows.length ? timeStr(rows.map(s => s.time).sort()[0]) : '',
+    from: cheapest ? money(cheapest.price) : '',
+    single: !cheapest || !(cheapest.credits > 1),   // the lowest price buys one visit, so the page may call it "a single class"
+    ways: classes.length ? WAYS[lang][classes.length] || `${classes.length} ${lang === 'es' ? 'formas' : 'ways'}` : '',
+    coaches: COUNT[lang][team.length] || String(team.length),
+    coached: coached.length > 0,
+    free: !!gym.firstFree,                          // a free first visit exists, so the page may promise it
   };
 
+  /* the menu only links to sections that have something to show */
   const has = n => blocks.some(b => b[0] === n);
+  const hasSched = (has('scheduleCards') || has('scheduleList')) && rows.length > 0, hasPrices = has('priceCards') && priced.length > 0;
+  const place = gym.place || {}, hasPlace = !!((place.addr && place.addr.length) || place.phone || place.email);
   const nav = [
-    has('classCards') && { id: 'classes', label: S.nav.classes },
-    (has('scheduleCards') || has('scheduleList')) && { id: 'schedule', label: S.nav.schedule },
-    has('coaches') && { id: 'coaches', label: S.nav.coaches },
-    has('priceCards') && { id: 'prices', label: S.nav.prices },
-    has('footer') && { id: 'find', label: S.nav.find },
+    has('classCards') && classes.length > 0 && { id: 'classes', label: S.nav.classes },
+    hasSched && { id: 'schedule', label: S.nav.schedule },
+    has('coaches') && team.length > 0 && { id: 'coaches', label: S.nav.coaches },
+    hasPrices && { id: 'prices', label: S.nav.prices },
+    has('footer') && hasPlace && { id: 'find', label: S.nav.find },
   ].filter(Boolean);
+  if (gym.lead === 'prices') nav.sort((a, b) => (b.id === 'prices') - (a.id === 'prices'));   // a page that leads with prices lists them first
+  /* where the main button leads: the schedule when there is one, else the prices, else the address. With none of the three there is no button. */
+  const cta = hasSched ? { href: '#schedule', label: S.book, short: S.bookShort }
+    : hasPrices ? { href: '#prices', label: S.seePrices, short: S.nav.prices }
+    : has('footer') && hasPlace ? { href: '#find', label: S.nav.find, short: S.nav.find } : null;
 
   /* the changing word: every word is in the page, stacked in one spot. Without the effect only the first one shows. */
   const slot = words => `<span class="zp-swap" data-fx-word>${words.map((w, i) => `<span class="zp-swap__w${i ? '' : ' is-on'}"${i ? ' aria-hidden="true"' : ''}>${esc(w)}</span>`).join('')}</span>`;
 
   return {
-    lang, S, L, money, time, fx, voice, follow, days, day0, nextOf, facts, nav, slot,
-    names: gym.classes.map(c => L(c.name)),
-    shorts: [...new Set(gym.classes.map(c => L(c.short || c.name)))],
-    classById: Object.fromEntries(gym.classes.map(c => [c.id, c])),
-    coachById: Object.fromEntries(gym.coaches.map(c => [c.id, c])),
-    overMedia: has('heroFilm') || has('heroSlideshow'),
+    lang, S, L, money, time, fx, voice, follow, days, day0, nextOf, facts, nav, slot, solo, cta, hasSched, hasPrices,
+    names: classes.map(c => L(c.name)),
+    shorts: [...new Set(classes.map(c => L(c.short || c.name)))],
+    classById: Object.fromEntries(classes.map(c => [c.id, c])),
+    coachById: Object.fromEntries(team.map(c => [c.id, c])),
+    /* the menu bar only sits clear over the hero when the hero really has a photo or a video behind it */
+    overMedia: (has('heroFilm') && (!!gym.video || photos.length > 0)) || (has('heroSlideshow') && (classes.filter(c => c.photo).length > 1 || photos.length > 0)),
     pillAlways: !!fx.book && follow === 'pill',      // the price pill is on screen from the start, so the hero needs no buttons of its own
   };
 }
@@ -89,7 +121,14 @@ const defs = duo => `<svg class="zp-defs" aria-hidden="true" focusable="false"><
       tokens  token choices that replace the recipe's
       hero / sched  swap the recipe's hero or schedule block for another one
       off     positions in the recipe's block list to leave out */
+/* A business may be missing almost anything. The gaps are filled once here, so no block has to ask whether a list exists. */
+const tidy = g => ({
+  ...g, photos: g.photos || [], classes: g.classes || [], schedule: g.schedule || [], coaches: g.coaches || [], reviews: g.reviews || [],
+  prices: (g.prices || []).filter(p => p && Number.isFinite(p.price)), logo: g.logo || { word: g.name }, place: { addr: [], hours: [], ...(g.place || {}) },
+});
+
 export function buildPage(recipe, gym, o = {}) {
+  gym = tidy(gym);
   const fx = o.fx || {}, follow = o.follow || recipe.follow || 'pill';
   const blocks = recipe.blocks
     .map((b, i) => {
@@ -99,12 +138,15 @@ export function buildPage(recipe, gym, o = {}) {
       return [name, opt, i];
     })
     .filter(b => !(o.off && o.off.has(b[2])) && BLOCKS[b[0]]);
-  const x = makeContext(gym, { lang: o.lang, fx, voice: recipe.voice, follow, blocks, now: o.now });
+  /* the voice follows the business: a personal trainer always speaks in the first person about sessions,
+     and a gym on the prices-first layout speaks like the timetable does */
+  const voice = gym.unit === 'session' ? 'solo' : recipe.voice === 'solo' ? 'next' : recipe.voice;
+  const x = makeContext(gym, { lang: o.lang, fx, voice, follow, blocks, now: o.now });
   const tokens = buildTokens({ ...recipe.tokens, ...(o.tokens || {}) }, o.brand || gym.brand);
   const html = `<div class="zp" id="zp" lang="${x.lang}" data-recipe="${esc(recipe.id)}" data-fx="${Object.keys(fx).filter(k => fx[k]).join(' ')}">
 ${defs(tokens.duo)}
 ${blocks.map(([name, opt]) => BLOCKS[name](gym, x, opt)).join('\n')}
-${fx.book ? followBook(gym, x, follow) : ''}
+${fx.book && x.cta ? followBook(gym, x, follow) : ''}
 <p class="zp-toast" role="status" aria-live="polite"></p>
 </div>`;
   return { html, tokens, x, blocks, gym, recipe, follow };

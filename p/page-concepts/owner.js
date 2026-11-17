@@ -9,10 +9,10 @@
    Light or dark, corners, the heading typeface and the photo look are not here on purpose: they stay with the style.
    The settings screen (settings.js) and its preview (preview.js) both read these rules, so they cannot disagree. */
 
-import { GYMS } from './data.js?v=14';
-import { RECIPES, ORDER, FX_DEFAULTS } from './recipes.js?v=14';
-import { HEROES } from './blocks.js?v=14';
-import { buildTokens } from './tokens.js?v=14';
+import { GYMS } from './data.js?v=15';
+import { RECIPES, ORDER, FX_DEFAULTS } from './recipes.js?v=15';
+import { HEROES } from './blocks.js?v=15';
+import { buildTokens } from './tokens.js?v=15';
 
 const P = '../gym-page/img/';
 
@@ -22,7 +22,7 @@ export const OWNER_GYM = {
   photos: [...GYMS.litoral.photos, { src: P + 'coach-plan.jpg', shape: 'wide', pos: '45% 40%' }, { src: P + 'box-ropes.jpg', shape: 'wide', pos: '60% 45%' }],
 };
 
-export const STYLES = ORDER;                                       // film, timetable, calm, mono
+export const STYLES = ORDER.filter(id => id !== 'solo');           // film, timetable, calm, mono. The solo trainer page has its own short list, not built in this mock
 export const SPACES = ['compact', 'comfortable', 'airy'];
 export const SIZES = ['s', 'm', 'l'];                              // headline size, three steps inside the safe range
 export const OWNER_FX = ['rise', 'book', 'bar', 'lightup', 'strip', 'slide', 'word', 'pin'];   // "moving hero" is decided by the hero type instead
@@ -50,7 +50,7 @@ export const STYLE = {
    Each entry: the block, its options, whether it moves, and how the cover photo is used ("none" when it is not). */
 const HERO = {
   film:      { photo: ['heroFilm', {}, false, 'fill'], slideshow: ['heroFilm', { slides: true }, true, 'first'], video: ['heroFilm', {}, true, 'poster'] },
-  timetable: { today: ['heroSplit', { side: 'today' }, false, 'none'], photo: ['heroSplit', { side: 'photo' }, false, 'beside'], slideshow: ['heroFramed', {}, true, 'first'], video: ['heroFilm', {}, true, 'poster'] },
+  timetable: { today: ['heroSplit', { side: 'board' }, false, 'none'], photo: ['heroSplit', { side: 'photo' }, false, 'beside'], slideshow: ['heroFramed', {}, true, 'first'], video: ['heroFilm', {}, true, 'poster'] },
   calm:      { photo: ['heroTiles', {}, false, 'tile'], slideshow: ['heroTiles', {}, true, 'tile'], video: ['heroFilm', {}, true, 'poster'] },
   mono:      { photo: ['heroFilm', {}, false, 'fill'], slideshow: ['heroSlideshow', {}, true, 'none'], video: ['heroFilm', {}, true, 'poster'] },
 };

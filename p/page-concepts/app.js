@@ -2,15 +2,16 @@
    All it does: pick a recipe, keep track of what the viewer changed, and ask the framework to draw.
    The framework itself is data.js, tokens.js, blocks.js, effects.js, recipes.js and page.js. */
 
-import { GYMS } from './data.js?v=14';
-import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=14';
-import { buildTokens, CHOICES } from './tokens.js?v=14';
-import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=14';
-import { mountEffects } from './effects.js?v=14';
-import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=14';
+import { GYMS, STRESS } from './data.js?v=15';
+import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=15';
+import { buildTokens, CHOICES } from './tokens.js?v=15';
+import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=15';
+import { mountEffects } from './effects.js?v=15';
+import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=15';
+import { SHIP, LAUNCH_STYLES, launchCut, launchFx } from './launch.js?v=15';
 
 const $ = (s, el = document) => el.querySelector(s);
-const stage = $('#stage'), topBar = $('#vw-top'), panel = $('#vw-panel'), fab = $('#vw-fab');
+const stage = $('#stage'), topBar = $('#vw-top'), note = $('#vw-note'), panel = $('#vw-panel'), fab = $('#vw-fab');
 const Q = new URLSearchParams(location.search);
 if (Q.get('debug') === '1') {
   const box = document.createElement('pre');
@@ -22,7 +23,7 @@ if (Q.get('debug') === '1') {
   window.addEventListener('unhandledrejection', e => say('rejection: ' + ((e.reason && e.reason.message) || e.reason)));
   for (const k of ['error', 'warn']) { const was = console[k]; console[k] = (...a) => { say(k + ': ' + a.map(x => (x && x.message) || x).join(' ')); was.apply(console, a); }; }
 }
-const mqWide = window.matchMedia('(min-width: 900px)'), mqStill = window.matchMedia('(prefers-reduced-motion: reduce)');
+const mqWide = window.matchMedia('(min-width: 1100px)'), mqStill = window.matchMedia('(prefers-reduced-motion: reduce)');
 const HERO_KEYS = { film: 'heroFilm', slideshow: 'heroSlideshow', split: 'heroSplit', framed: 'heroFramed', tiles: 'heroTiles' };
 const SCHED_KEYS = { cards: 'scheduleCards', list: 'scheduleList' };
 const HERO_NAMES = { heroFilm: 'Film', heroSlideshow: 'Slideshow with tabs', heroSplit: 'Split, with today\'s classes', heroFramed: 'Framed photo', heroTiles: 'Three tiles' };
@@ -30,12 +31,17 @@ const keyOf = (map, v) => Object.keys(map).find(k => map[k] === v);
 const hex = v => (/^#?[0-9a-f]{6}$/i.test(v || '') ? '#' + v.replace('#', '').toUpperCase() : null);
 const ICON = '<svg class="vw-ico" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h6m4 0h4M2 13h3m4 0h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="5" r="2.1" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="7" cy="13" r="2.1" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
 
-/* ---------- what the viewer has chosen. Empty means "as the recipe says". ---------- */
-const state = { r: 'film', lang: 'en', brand: null, tokens: {}, fx: {}, hero: null, sched: null, follow: null, off: new Set(), outline: false, rm: false, bare: false, open: false, tab: 'look' };
+/* ---------- what the viewer has chosen. Empty means "as the recipe says".
+   launch: show only what ships in the first cut. gym: a thin test account in place of the sample's own business. */
+const state = { r: 'film', lang: 'en', launch: false, gym: null, brand: null, tokens: {}, fx: {}, hero: null, sched: null, follow: null, off: new Set(), outline: false, rm: false, bare: false, open: false, tab: 'look' };
+const KEYS_ON = Q.get('keys') === '1';   // the single-key shortcuts only work with keys=1 in the link, so a stray key press cannot change a demo
 
 function readUrl() {
   if (RECIPES[Q.get('r')]) state.r = Q.get('r');
   if (Q.get('lang') === 'es') state.lang = 'es';
+  state.launch = Q.get('launch') === '1';
+  if (state.launch && SHIP.style[state.r] !== 1) state.r = LAUNCH_STYLES[0];
+  if (STRESS[Q.get('gym')]) state.gym = Q.get('gym');
   state.brand = hex(Q.get('c'));
   for (const k of ['mode', 'photo', 'space', 'corners', 'type', 'ground']) { const v = Q.get(k); if (v && CHOICES[k].includes(v)) state.tokens[k] = v; }
   const size = parseFloat(Q.get('scale')); if (size >= 2.5 && size <= 3.1) state.tokens.scale = size;
@@ -56,9 +62,18 @@ function readUrl() {
   if (['look', 'motion', 'blocks'].includes(Q.get('tab'))) state.tab = Q.get('tab');
 }
 
-const recipe = () => RECIPES[state.r];
-const gymOf = () => GYMS[recipe().gym];
-const wantFx = () => ({ ...FX_DEFAULTS, ...recipe().fx, ...state.fx });                 // what is switched on
+/* The recipe and the business being shown. Usually the sample's own. A test account swaps the business;
+   the launch version cuts both down to phase 1 (see launch.js). Worked out once per draw. */
+let REC = null, GYM = null;
+function sync() {
+  const r = RECIPES[state.r];
+  let g = state.gym ? STRESS[state.gym] : GYMS[r.gym];
+  if (state.gym && r.id === 'solo') g = { ...g, unit: 'session', lead: 'prices' };       // the same thin account, as a trainer's
+  ({ recipe: REC, gym: GYM } = state.launch ? launchCut(r, g, state.lang) : { recipe: r, gym: g });
+}
+const recipe = () => REC;
+const gymOf = () => GYM;
+const wantFx = () => { const w = { ...FX_DEFAULTS, ...recipe().fx, ...state.fx }; return state.launch ? launchFx(w) : w; };   // what is switched on
 const still = () => state.rm || mqStill.matches;                                         // reduced motion, real or previewed
 const liveFx = () => { const w = wantFx(); return still() ? { book: w.book, bar: w.bar } : w; };   // what really runs
 const stick = () => (mqWide.matches && !state.bare ? 52 : 0);                            // height of the demo's sticky top bar
@@ -69,9 +84,11 @@ function writeUrl() {
   const rec = recipe(), gym = gymOf(), p = new URLSearchParams();
   p.set('r', state.r);
   if (state.lang === 'es') p.set('lang', 'es');
+  if (state.launch) p.set('launch', '1');
+  if (state.gym) p.set('gym', state.gym);
   if (state.brand && state.brand !== gym.brand.toUpperCase()) p.set('c', state.brand.slice(1));
   for (const [k, v] of Object.entries(state.tokens)) if (v !== rec.tokens[k]) p.set(k, v);
-  const want = wantFx(), base = { ...FX_DEFAULTS, ...rec.fx };
+  const want = wantFx(), base = fxBase();
   if (FX.some(f => want[f.id] !== base[f.id])) { const on = FX.filter(f => want[f.id]).map(f => f.id); p.set('fx', on.length === FX.length ? 'all' : on.length ? on.join(',') : 'none'); }
   if (state.hero) p.set('hero', keyOf(HERO_KEYS, state.hero));
   if (state.sched) p.set('sched', keyOf(SCHED_KEYS, state.sched));
@@ -81,6 +98,7 @@ function writeUrl() {
   if (state.rm) p.set('rm', '1');
   if (state.bare) p.set('ui', '0');
   if (Q.has('panel')) p.set('panel', state.open ? '1' : '0');
+  if (KEYS_ON) p.set('keys', '1');
   history.replaceState(null, '', location.pathname + '?' + p.toString().replace(/%2C/g, ','));
 }
 
@@ -106,11 +124,12 @@ function restore(a) {
 
 /* a full redraw: blocks, language or effects changed */
 function draw(keep = true) {
+  sync();
   const rec = recipe(), gym = gymOf();
   const at = keep && root ? anchor() : null;
   if (unmount) unmount();
   if (unwire) unwire();
-  drawTop(); measure();                                                          // the top bar first: the page needs its height
+  drawTop(); drawNote(); measure();                                              // the top bar first: the page needs its height
   page = buildPage(rec, gym, { lang: state.lang, fx: liveFx(), tokens: state.tokens, brand: state.brand, hero: state.hero, sched: state.sched, follow: state.follow, off: state.off });
   stage.innerHTML = page.html;
   root = stage.firstElementChild;
@@ -138,24 +157,42 @@ function paint(redrawPanel = true) {
 /* ---------- the demo's controls ---------- */
 function drawTop() {
   topBar.innerHTML = `<a class="vw-brand" href="./"><b>Zana</b><span>page framework</span></a>
-    <div class="vw-tabs" role="group" aria-label="Sample page">${ORDER.map(id => `<button type="button" class="vw-tab" data-do="r" data-v="${id}" aria-pressed="${id === state.r}">${RECIPES[id].name}</button>`).join('')}</div>
+    <div class="vw-mid"><div class="vw-tabs" role="group" aria-label="Sample page">${ORDER.map(id => `<button type="button" class="vw-tab" data-do="r" data-v="${id}" aria-pressed="${id === state.r}"${later(id) ? ' disabled title="Not in the launch version. It comes with the owner settings screen."' : ''}>${RECIPES[id].name}</button>`).join('')}</div>
+    <button type="button" class="vw-launch" role="switch" aria-checked="${state.launch}" data-do="launch" title="Show only what ships in the first cut"><i></i><span>Launch version</span></button></div>
     <div class="vw-end"><a class="vw-link" href="settings.html">Owner settings</a><a class="vw-link" href="spec.html">How it works</a><button type="button" class="vw-adjust" data-do="toggle" aria-expanded="${state.open}">${ICON}<span>Adjust<span class="vw-more"> this page</span></span></button></div>`;
 }
+
+/* a line under the top bar that says what is being shown, whenever it is not the full sample */
+function drawNote() {
+  const bits = [];
+  if (state.launch) bits.push(`<b>Launch version.</b> Only what ships in the first cut: ${LAUNCH_STYLES.map(id => RECIPES[id].name).join(' and ')}, built from what Zana already holds. Staff set the color, logo and cover photo. No owner screen yet. <button type="button" data-do="launch">Show the full sample</button>`);
+  if (state.gym) bits.push(`<b>Test account: ${STRESS[state.gym].label.toLowerCase()}.</b> Spanish only, no photos, only what Zana stores today. <button type="button" data-do="gym" data-v="">Back to the sample's own business</button>`);
+  note.innerHTML = bits.map(t => `<p>${t}</p>`).join('');
+  note.hidden = !bits.length || state.bare;
+}
+const later = id => state.launch && SHIP.style[id] !== 1;
+const fxBase = () => { const b = { ...FX_DEFAULTS, ...recipe().fx }; return state.launch ? launchFx(b) : b; };
 
 const seg = (label, key, opts, cur) => `<div class="vw-group"><p class="vw-label">${label}</p><div class="vw-seg" role="group" aria-label="${label}">${opts.map(([v, t]) => `<button type="button" data-do="${key}" data-v="${v}" aria-pressed="${String(v) === String(cur)}">${t}</button>`).join('')}</div></div>`;
 const toggle = (key, v, on, name, what, off = false) => `<button type="button" class="vw-sw" role="switch" aria-checked="${!!on}" data-do="${key}" data-v="${v}"${off ? ' disabled' : ''}><span><b>${name}</b><small>${what}</small></span><i></i></button>`;
 
 function lookTab() {
   const rec = recipe(), gym = gymOf(), t = page.tokens.choice, brand = (state.brand || gym.brand).toUpperCase();
-  const colors = [[gym.brand, `${gym.brandNames[0].en}, this gym's own color`], [gym.brand2, `${gym.brandNames[1].en}, a second color to try`], ['#111111', 'Black'], ['#0E8F7E', 'Teal'], ['#7A4DFF', 'Violet']];
+  const names = gym.brandNames || [];
+  const colors = [[gym.brand, `${names[0] ? names[0].en + ', t' : 'T'}his business's own color`], ...(gym.brand2 ? [[gym.brand2, `${names[1] ? names[1].en + ', a' : 'A'} second color to try`]] : []), ['#111111', 'Black'], ['#0E8F7E', 'Teal'], ['#7A4DFF', 'Violet']];
   const top = t.type === 'condensed' ? 3.1 : 3;
   const named = colors.find(([c]) => c.toUpperCase() === brand);
   return `
     <div class="vw-group"><p class="vw-label">Sample page</p>
-      <div class="vw-samples">${ORDER.map(id => `<button type="button" data-do="r" data-v="${id}" aria-pressed="${id === state.r}"><b>${RECIPES[id].name}</b><small>${GYMS[RECIPES[id].gym].name}</small></button>`).join('')}</div>
+      <div class="vw-samples">${ORDER.map(id => `<button type="button" data-do="r" data-v="${id}" aria-pressed="${id === state.r}"${later(id) ? ' disabled' : ''}><b>${RECIPES[id].name}</b><small>${later(id) ? 'Later' : GYMS[RECIPES[id].gym].name}</small></button>`).join('')}</div>
       <p class="vw-help"><b>${rec.name}.</b> ${rec.line} Suits: ${rec.suits.charAt(0).toLowerCase() + rec.suits.slice(1)}</p>
-      <p class="vw-try"><b>Try this.</b> ${rec.try}</p>
+      ${state.launch || state.gym ? '' : `<p class="vw-try"><b>Try this.</b> ${rec.try}</p>`}
     </div>
+    <div class="vw-group"><p class="vw-label">What ships first</p>
+      ${toggle('launch', '1', state.launch, 'Launch version', 'Only the first cut: two styles, the sections Zana can fill today, three safe effects. No words or photos an owner would have to add.')}
+    </div>
+    ${seg('Business data', 'gym', [['', 'Own'], ...Object.entries(STRESS).map(([k, g]) => [k, g.label])], state.gym || '')}
+    <p class="vw-help">The three test accounts hold only what Zana stores today: no classes, one class, or eight with long names. Spanish only, no photos. Use them to check that nothing breaks.</p>
     <div class="vw-group"><p class="vw-label">Brand color</p>
       <div class="vw-swatches">${colors.map(([c, n]) => `<button type="button" class="vw-swatch" style="--c:${c}" data-do="c" data-v="${c}" aria-pressed="${c.toUpperCase() === brand}" aria-label="${n}" title="${n}"></button>`).join('')}
         <label class="vw-pick"><input type="color" value="${brand}" data-do="pick" aria-label="Pick any color"><span>Any color</span></label></div>
@@ -167,7 +204,7 @@ function lookTab() {
     ${seg('Corners', 'corners', [['square', 'Square'], ['soft', 'Soft'], ['round', 'Round']], t.corners)}
     ${seg('Heading voice', 'type', [['wide', 'Wide'], ['plain', 'Plain'], ['serif', 'Serif'], ['condensed', 'Tall caps']], t.type)}
     ${seg('Headline size on a laptop', 'scale', [2.5, 2.75, top].map(s => [s, Math.round(18 * s) + 'px']), t.scale >= 3 ? top : t.scale)}
-    <p class="vw-help">Body text is 18px. The headline stays between 2.5 and 3 times that, so the two always look like a pair.</p>
+    <p class="vw-help">Body text is 18px. Headings stay between 2.5 and 3 times that, so the two always look like a pair. One exception to try: on Film and Mono the headline over the photo grows to about 4 times on a wide screen${page.tokens.facts.heroWide > page.tokens.facts.h1Laptop ? ` (${page.tokens.facts.heroWide}px here)` : ''}.</p>
     ${seg('Language', 'lang', [['en', 'English'], ['es', 'Español']], state.lang)}
     <div class="vw-row"><button type="button" data-do="reset">Reset this sample</button><button type="button" data-do="copy">Copy link</button></div>
     <p class="vw-help">This panel is a viewer: it shows every knob the framework has. The short list a gym owner would get is in the <a href="settings.html">owner settings mock</a>.</p>`;
@@ -179,14 +216,15 @@ function motionTab() {
   const ok = {
     rise: true, book: true, bar: has('menuBar'), lightup: has('statement'), strip: has('offerStrip'), slide: has('classCards') || has('coaches'),
     hero: ['heroFilm', 'heroSlideshow', 'heroFramed', 'heroTiles'].some(has), word: HEROES.some(has),
-    pin: (has('classCards') && gym.classes.every(c => c.photo)) || SCHEDULES.some(has),
+    pin: (has('classCards') && (gym.classes || []).length > 0 && gym.classes.every(c => c.photo)) || SCHEDULES.some(has),
   };
+  if (state.launch) for (const f of FX) if (SHIP.fx[f.id] !== 1) ok[f.id] = false;
   const why = {
     bar: 'Needs the menu bar block, which is off.', lightup: 'Needs the statement block, which is off.', strip: 'Needs the offer strip block, which is off.',
     slide: 'Needs class cards or coaches, which are off.', hero: 'This hero has no photo or video. Pick another hero under Blocks.', word: 'Needs a hero block.', pin: 'Needs class photos or a schedule.',
   };
-  const row = f => toggle('fx', f.id, want[f.id] && ok[f.id], f.name, !ok[f.id] ? why[f.id] : rm ? `Still version: ${f.still}` : f.what, !ok[f.id]);
-  const base = { ...FX_DEFAULTS, ...recipe().fx };
+  const row = f => toggle('fx', f.id, want[f.id] && ok[f.id], f.name, !ok[f.id] ? (state.launch && SHIP.fx[f.id] !== 1 ? 'Not in the launch version.' : why[f.id]) : rm ? `Still version: ${f.still}` : f.what, !ok[f.id]);
+  const base = fxBase();
   const set = FX.every(f => want[f.id] === base[f.id]) ? 'own' : FX.every(f => want[f.id] === f.on) ? 'safe' : FX.every(f => want[f.id]) ? 'all' : FX.every(f => !want[f.id]) ? 'none' : '';
   return `
     ${rm ? `<p class="vw-banner">Reduced motion is ${state.rm ? 'being previewed' : 'on in this browser'}. Each effect shows its still version. Nothing is hidden.</p>` : ''}
@@ -202,7 +240,7 @@ function blocksTab() {
   return `
     <p class="vw-help">A page is a list of blocks, top to bottom. Switch one off and the page closes up around it. A block with nothing to show hides by itself.</p>
     <div class="vw-group"><p class="vw-label">Blocks on this page</p>${rows}</div>
-    ${hero ? `<div class="vw-group"><p class="vw-label">Swap the hero</p><div class="vw-list">${HEROES.map(h => `<button type="button" data-do="hero" data-v="${h}" aria-pressed="${h === hero}">${HERO_NAMES[h]}</button>`).join('')}</div></div>` : ''}
+    ${hero && !state.launch ? `<div class="vw-group"><p class="vw-label">Swap the hero</p><div class="vw-list">${HEROES.map(h => `<button type="button" data-do="hero" data-v="${h}" aria-pressed="${h === hero}">${HERO_NAMES[h]}</button>`).join('')}</div></div>` : ''}
     ${sched ? seg('Schedule style', 'sched', [['scheduleCards', 'Cards with coach'], ['scheduleList', 'Plain list']], sched) : ''}
     ${seg('Book button that follows you', 'follow', [['pill', 'Pill with price'], ['duo', 'Two actions'], ['bar', 'Full bar']], page.follow)}
     <div class="vw-group">${toggle('outline', '1', state.outline, 'Show block names', 'Outlines each block on the page and names it.')}</div>`;
@@ -230,12 +268,17 @@ function act(k, v, el) {
   switch (k) {
     case 'toggle': state.open = !state.open; hintOff(); syncOpen(); return;
     case 'tab': state.tab = v; drawPanel(true); return;
-    case 'r': if (v !== state.r) { Object.assign(state, { r: v, brand: null, tokens: {}, fx: {}, hero: null, sched: null, follow: null, off: new Set() }); draw(false); } return;
+    case 'r': if (v !== state.r && RECIPES[v] && !later(v)) { Object.assign(state, { r: v, brand: null, tokens: {}, fx: {}, hero: null, sched: null, follow: null, off: new Set() }); draw(false); } return;
+    case 'launch':                                           // the first cut only. The viewer's own changes are dropped: they were made on a different page
+      Object.assign(state, { launch: !state.launch, fx: {}, hero: null, sched: null, follow: null, off: new Set() });
+      if (state.launch && SHIP.style[state.r] !== 1) Object.assign(state, { r: LAUNCH_STYLES[0], brand: null, tokens: {} });
+      draw(false); return;
+    case 'gym': { const g = STRESS[v] ? v : null; if (g !== state.gym) { Object.assign(state, { gym: g, brand: null, off: new Set() }); draw(false); } return; }
     case 'c': state.brand = v.toUpperCase(); paint(); return;
     case 'mode': case 'photo': case 'space': case 'corners': case 'type': state.tokens[k] = v; paint(); return;
     case 'scale': state.tokens.scale = +v; paint(); return;
     case 'lang': if (v !== state.lang) { state.lang = v; draw(); } return;
-    case 'fx': state.fx[v] = !wantFx()[v]; draw(); return;
+    case 'fx': if (!(state.launch && SHIP.fx[v] !== 1)) { state.fx[v] = !wantFx()[v]; draw(); } return;
     case 'fxset': state.fx = v === 'own' ? {} : Object.fromEntries(FX.map(f => [f.id, v === 'all' ? true : v === 'none' ? false : f.on])); draw(); return;
     case 'rm': state.rm = !state.rm; draw(); return;
     case 'outline': state.outline = !state.outline; root.classList.toggle('is-outlined', state.outline); writeUrl(); drawPanel(); return;
@@ -243,7 +286,7 @@ function act(k, v, el) {
     case 'hero': state.hero = v === baseOf(HEROES) ? null : v; draw(); return;
     case 'sched': state.sched = v === baseOf(SCHEDULES) ? null : v; draw(); return;
     case 'follow': state.follow = v === recipe().follow ? null : v; draw(); return;
-    case 'reset': Object.assign(state, { brand: null, tokens: {}, fx: {}, hero: null, sched: null, follow: null, off: new Set(), rm: false, outline: false }); draw(); return;
+    case 'reset': Object.assign(state, { gym: null, brand: null, tokens: {}, fx: {}, hero: null, sched: null, follow: null, off: new Set(), rm: false, outline: false }); draw(); return;
     case 'copy': {
       const done = msg => { el.textContent = msg; setTimeout(() => { if (el.isConnected) el.textContent = 'Copy link'; }, 1800); };
       (navigator.clipboard ? navigator.clipboard.writeText(location.href) : Promise.reject()).then(() => done('Copied'), () => done('Copy from the address bar'));
@@ -254,6 +297,7 @@ function act(k, v, el) {
 
 const onClick = e => { const b = e.target.closest('[data-do]'); if (!b || b.disabled || b.dataset.do === 'pick') return; act(b.dataset.do, b.dataset.v, b); };
 topBar.addEventListener('click', onClick);
+note.addEventListener('click', onClick);
 panel.addEventListener('click', onClick);
 fab.addEventListener('click', () => act('toggle'));
 /* the color picker repaints while you drag; the panel itself is only redrawn when you let go */
@@ -261,20 +305,23 @@ panel.addEventListener('input', e => { if (e.target.matches('[data-do="pick"]'))
 panel.addEventListener('change', e => { if (e.target.matches('[data-do="pick"]')) drawPanel(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.open) act('toggle'); });
 
-/* keyboard shortcuts, for showing the demo from a laptop:
-   1 to 4 sample · L language · D light or dark · B brand color · P photos · S spacing · C corners · T heading voice
-   M motion set · Shift+1 to 9 one effect · R reduced motion · H hero · K schedule · F Book button · O block names
-   A Adjust panel · G next panel tab · U hide or show the demo controls · 0 reset */
+/* keyboard shortcuts, for driving the demo from a laptop. They only work with keys=1 in the link:
+   without it a stray key press during a demo changes nothing.
+   1 to 5 sample · V launch version · X next test account · L language · D light or dark · B brand color · P photos · S spacing
+   C corners · T heading voice · M motion set · Shift+1 to 9 one effect · R reduced motion · H hero · K schedule · F Book button
+   O block names · A Adjust panel · G next panel tab · U hide or show the demo controls · 0 reset */
 const next = (list, cur) => list[(list.indexOf(cur) + 1) % list.length];
 const KEYS = {
   l: () => act('lang', state.lang === 'en' ? 'es' : 'en'),
   d: () => act('mode', next(CHOICES.mode, page.tokens.choice.mode)),
-  b: () => { const g = gymOf(); act('c', next([g.brand, g.brand2, '#111111', '#0E8F7E', '#7A4DFF'].map(c => c.toUpperCase()), (state.brand || g.brand).toUpperCase())); },
+  b: () => { const g = gymOf(); act('c', next([g.brand, g.brand2, '#111111', '#0E8F7E', '#7A4DFF'].filter(Boolean).map(c => c.toUpperCase()), (state.brand || g.brand).toUpperCase())); },
+  v: () => act('launch'),
+  x: () => act('gym', next(['', ...Object.keys(STRESS)], state.gym || '')),
   p: () => act('photo', next(CHOICES.photo, page.tokens.choice.photo)),
   s: () => act('space', next(CHOICES.space, page.tokens.choice.space)),
   c: () => act('corners', next(CHOICES.corners, page.tokens.choice.corners)),
   t: () => act('type', next(CHOICES.type, page.tokens.choice.type)),
-  m: () => { const w = wantFx(), base = { ...FX_DEFAULTS, ...recipe().fx }; const cur = FX.every(f => w[f.id] === base[f.id]) ? 'own' : FX.every(f => w[f.id]) ? 'all' : FX.every(f => !w[f.id]) ? 'none' : 'safe'; act('fxset', next(['own', 'all', 'none', 'safe'], cur)); },
+  m: () => { const w = wantFx(), base = fxBase(); const cur = FX.every(f => w[f.id] === base[f.id]) ? 'own' : FX.every(f => w[f.id]) ? 'all' : FX.every(f => !w[f.id]) ? 'none' : 'safe'; act('fxset', next(['own', 'all', 'none', 'safe'], cur)); },
   r: () => act('rm'),
   h: () => act('hero', next(HEROES, state.hero || baseOf(HEROES))),
   k: () => act('sched', next(SCHEDULES, state.sched || baseOf(SCHEDULES))),
@@ -285,7 +332,7 @@ const KEYS = {
   u: () => { state.bare = !state.bare; document.documentElement.classList.toggle('vw-bare', state.bare); draw(); },
   0: () => act('reset'),
 };
-document.addEventListener('keydown', e => {
+if (KEYS_ON) document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
   if (e.target instanceof Element && e.target.closest('input, select, textarea, [contenteditable]')) return;
   const digit = /^Digit([1-9])$/.exec(e.code || '');
@@ -295,7 +342,7 @@ document.addEventListener('keydown', e => {
   if (fn) { e.preventDefault(); fn(); }
 });
 mqWide.addEventListener('change', () => draw());
-function measure() { document.documentElement.style.setProperty('--chrome-above', (mqWide.matches || state.bare ? 0 : topBar.offsetHeight) + 'px'); }
+function measure() { document.documentElement.style.setProperty('--chrome-above', ((mqWide.matches || state.bare ? 0 : topBar.offsetHeight) + (note.hidden ? 0 : note.offsetHeight)) + 'px'); }
 window.addEventListener('resize', measure);
 mqStill.addEventListener('change', () => draw());
 

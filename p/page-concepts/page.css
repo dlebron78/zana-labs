@@ -27,7 +27,11 @@
 .zp :where(button) { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .zp [hidden] { display: none !important; }
 .zp [id] { scroll-margin-top: calc(var(--under) + 14px); }
-.zp :focus-visible { outline: 2.5px solid var(--accText); outline-offset: 3px; }
+.zp :focus-visible { outline: 2.5px solid var(--focus, var(--accText)); outline-offset: 3px; }
+/* where the ring would land on the brand color, on a photo or on the ink pill, it takes a color that shows there */
+.zp-strip--accent :focus-visible, .zp-plan__tab:focus-visible { outline-color: var(--focusOnAcc, currentColor); }
+.zp-hero--full :focus-visible, .zp-first--band :focus-visible, .zp-bar[data-over="1"]:not(.is-stuck):not(.is-open) :focus-visible { outline-color: #fff; }
+.zp-follow :focus-visible { outline-color: var(--focusOnInk, var(--bg)); }
 .zp ::selection { background: var(--acc); color: var(--accInk); }
 .zp-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .zp-mark { position: absolute; width: 1px; height: 48px; pointer-events: none; }
@@ -38,6 +42,8 @@
 }
 .zp-h1, .zp-h2, .zp-h3, .zp-stmt__text, .zp-tab b { text-transform: var(--hcase); line-height: var(--hlh); text-wrap: balance; }
 .zp-h1 { font-size: var(--h1); }
+.zp-hero--full .zp-h1 { font-size: var(--h1-hero, var(--h1)); }   /* over a full-screen photo or video a style may let this one headline grow on wide screens */
+.zp-h1, .zp-h2, .zp-h3, .zp-row__name, .zp-board__name, .zp-mini__name, .zp-tab b, .zp-plan__line, .zp-ticks span { overflow-wrap: anywhere; }   /* a very long name wraps, it never pushes the page wide */
 .zp-h2 { font-size: var(--h2); }
 .zp-h3 { font-size: var(--h3); line-height: 1.14; }
 .zp-h1 em, .zp-h2 em { font-style: var(--em); font-weight: inherit; }
@@ -92,16 +98,16 @@
 .zp-bar.is-stuck .zp-bar__bg { background: var(--barBg); color: var(--ink); box-shadow: 0 1px 0 var(--line); -webkit-backdrop-filter: saturate(1.5) blur(16px); backdrop-filter: saturate(1.5) blur(16px); }
 .zp-bar.is-stuck .zp-bar__in { height: var(--bar-slim); }
 .zp-bar.is-open .zp-bar__bg { background: var(--bg); color: var(--ink); box-shadow: 0 1px 0 var(--line), var(--shadow); }
-.zp-logo { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; margin-right: auto; color: inherit; text-decoration: none; }
+.zp-logo { display: inline-flex; align-items: center; gap: 10px; min-width: 0; min-height: 44px; margin-right: auto; color: inherit; text-decoration: none; }
 .zp-logo svg { flex: none; width: 28px; height: 28px; }
-.zp-logo__w { font-size: 21px; line-height: 1; letter-spacing: var(--logo-track); text-transform: var(--hcase); white-space: nowrap; }
+.zp-logo__w { overflow: hidden; padding-block: .15em; font-size: 21px; line-height: 1; letter-spacing: var(--logo-track); text-transform: var(--hcase); white-space: nowrap; text-overflow: ellipsis; }   /* a long name is cut with three dots in the menu bar and wraps in the footer */
 /* an uploaded logo. One color: the picture is a stencil filled with the text color, so it follows the menu bar from clear to solid */
 .zp-logo__pic { display: block; flex: none; width: auto; height: 32px; max-width: min(190px, 46vw); object-fit: contain; }
 .zp-logo__pic--mono { background-color: currentColor; -webkit-mask: var(--logo) center / contain no-repeat; mask: var(--logo) center / contain no-repeat; }
-.zp-nav { display: none; gap: clamp(18px, 2.4vw, 34px); margin-right: clamp(6px, 1.6vw, 22px); }
+.zp-nav { display: none; flex: none; gap: clamp(18px, 2.4vw, 34px); margin-right: clamp(6px, 1.6vw, 22px); }
 .zp-nav a, .zp-drawer > a:not(.zp-btn) { font-size: 16px; font-weight: 600; text-decoration: none; }
 .zp-nav a:hover { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 6px; }
-.zp-bar__end { display: flex; align-items: center; gap: 8px; }
+.zp-bar__end { display: flex; flex: none; align-items: center; gap: 8px; }
 .zp-lang { min-width: 44px; height: 40px; padding: 0 8px; border: 1.5px solid currentColor; border-radius: var(--r-btn); background: transparent; font-size: 15px; font-weight: 700; letter-spacing: .04em; }
 .zp-bar[data-over="1"]:not(.is-stuck):not(.is-open) .zp-bar__book { border-color: var(--accMediaEdge); }
 .zp-menu { display: grid; place-items: center; width: 44px; height: 40px; padding: 0; border: 0; background: transparent; }
@@ -137,6 +143,7 @@
 .zp-scrim { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, rgba(0,0,0,.58) 0%, rgba(0,0,0,.16) 22%, rgba(0,0,0,.36) 46%, rgba(0,0,0,.7) 74%, rgba(0,0,0,.88) 100%); }
 .zp-hero--full .zp-hero__in { width: min(100%, 1328px); margin-inline: auto; padding: calc(var(--bar-h) + 76px) var(--gut) clamp(108px, 15vh, 150px); }
 .zp-hero--slides .zp-hero__in { padding-bottom: clamp(128px, 20vh, 176px); }
+.zp-hero--full .zp-hero__copy { max-width: min(100%, 1120px); }
 .zp-hero--full .zp-tag, .zp-hero--full .zp-lead { color: #fff; }
 .zp-hero--full .zp-h1, .zp-hero--full .zp-lead { text-shadow: 0 1px 28px rgba(0,0,0,.4); }
 .zp-hero--full .zp-btn { border-color: var(--accMediaEdge); }
@@ -159,6 +166,26 @@
 .zp-hero--split .zp-hero__in, .zp-hero--framed .zp-hero__in, .zp-hero--tiles .zp-hero__in { width: min(100%, 1328px); margin-inline: auto; padding: clamp(28px, 5vw, 76px) var(--gut) var(--sec); }
 .zp-split, .zp-tiles { display: grid; gap: clamp(32px, 5vw, 80px); align-items: center; }
 .zp-split__ph { aspect-ratio: 4 / 3; }
+/* the board: today's next classes, set like a station timetable. The times are the biggest type on the page.
+   Its rows go from stacked to one line by the board's own width, not the screen's. */
+.zp-board { container-type: inline-size; border-top: 3px solid var(--ink); }
+.zp-board__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 12px 0 4px; }
+.zp-board__head .zp-link { font-size: var(--small); white-space: nowrap; }
+.zp-board__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "time btn" "main btn"; gap: 6px 14px; align-items: center; padding: 14px 0 16px; border-top: 1px solid var(--line-strong); }
+.zp-board__row:last-child { border-bottom: 3px solid var(--ink); }
+.zp-board__time { grid-area: time; font-size: clamp(44px, 13cqi, 76px); line-height: .92; letter-spacing: -.04em; }
+.zp-board__time > span { margin-left: .14em; font-size: max(.27em, 13px); letter-spacing: .03em; }
+.zp-board__main { grid-area: main; display: grid; gap: 2px; min-width: 0; }
+.zp-board__name { font-size: 1.1em; font-weight: 600; line-height: 1.25; }
+.zp-board__meta { font-size: var(--small); line-height: 1.35; color: var(--ink2); }
+.zp-board__row .zp-btn { grid-area: btn; }
+.zp-board__row.is-full .zp-board__time { color: var(--ink2); }
+@container (min-width: 520px) {
+  .zp-board__row { grid-template-columns: 3.55em minmax(0, 1fr) auto; grid-template-areas: "time main btn"; column-gap: 20px; padding: 16px 0 18px; font-size: clamp(60px, 13cqi, 76px); }
+  .zp-board__time { font-size: 1em; }
+  .zp-board__main, .zp-board__row .zp-btn { font-size: var(--body); }
+  .zp-board__row .zp-btn { font-size: 16px; }
+}
 .zp-today { display: grid; padding: var(--pad); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: var(--shadow); }
 .zp-today__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 14px; }
 .zp-today__head .zp-link { font-size: var(--small); white-space: nowrap; }
@@ -190,6 +217,8 @@
 @media (min-width: 700px) { .zp-framed__ph .zp-ph { aspect-ratio: 21 / 9; } }
 @media (min-width: 1000px) {
   .zp-split { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); }
+  .zp-split.is-alone { grid-template-columns: minmax(0, 1fr); }
+  .zp-split--board { grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: clamp(32px, 4vw, 64px); }
   .zp-split__ph { aspect-ratio: 4 / 4.4; }
   .zp-tiles { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); }
 }
@@ -252,7 +281,7 @@
 .zp-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); padding-top: var(--gap); border-top: 1px solid var(--line-strong); }
 .zp-fact { display: grid; gap: 6px; align-content: start; }
 .zp-fact dd { font-size: var(--h2); line-height: 1.05; }
-@media (min-width: 860px) { .zp-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 860px) { .zp-facts { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); } }   /* as many columns as there are facts */
 
 /* ---------- class cards ---------- */
 .zp-cards { display: grid; gap: var(--gap); }
@@ -268,6 +297,7 @@
   .zp-class__ph { aspect-ratio: 4 / 5; }
 }
 @media (min-width: 1000px) { .zp-cards { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); } }
+@media (min-width: 700px) { .zp-cards.is-one { grid-template-columns: minmax(0, 560px); } }   /* one class: one card at a sensible width, not stretched across the page */
 
 /* sliding card row (class cards and coaches) */
 .zp .is-slider { display: flex; gap: var(--gap); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(-1 * var(--gut)); padding: 0 var(--gut) 4px; scroll-padding-inline: var(--gut); }
@@ -294,7 +324,6 @@
   .zp-pin { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
   .zp-pin__media { top: calc(var(--under) + 24px); margin: 0; padding: 0; background: none; }
   .zp-pin__frame { height: min(calc(100svh - var(--under) - 48px), 640px); }
-  .zp[data-fx~="book"] .zp-pin__frame { height: min(calc(100svh - var(--under) - 132px), 640px); }
   .zp-pin__item { align-content: center; min-height: min(74svh, 580px); padding-block: 0; border-bottom: 0; }
 }
 
@@ -347,6 +376,13 @@
 .zp-row__who .zp-av--init { font-size: 11px; }
 .zp-row__spots { grid-area: spots; font-size: var(--small); font-weight: 600; }
 .zp-row .zp-btn { grid-area: btn; }
+/* a trainer's open hours: no coach and no spots to show, so those two parts are not drawn */
+.zp-rows--solo .zp-row__who, .zp-rows--solo .zp-row__spots { display: none; }
+/* big: the time is the display type of the row */
+.zp-rows--big .zp-row { padding: 14px 0 16px; }
+.zp-rows--big .zp-row__time { align-self: center; font-size: clamp(30px, 8vw, 40px); line-height: .95; letter-spacing: -.035em; }
+.zp-rows--big .zp-row__time > span { margin-left: .12em; font-size: max(.34em, 13px); letter-spacing: .03em; }
+.zp-rows--big .zp-row.is-full .zp-row__time { color: var(--ink2); }
 @media (min-width: 860px) {
   /* the day's rows share one set of columns, so coach, spots and button line up down the list even when one button is wider */
   .zp-rows { grid-template-columns: 136px minmax(0, 1.3fr) minmax(0, 1.2fr) minmax(0, .9fr) auto; column-gap: 14px; }
@@ -356,6 +392,13 @@
   .zp-row__who { font-size: var(--body); gap: 12px; }
   .zp-row__who .zp-av { width: 40px; }
   .zp-row__who .zp-av--init { font-size: 14px; }
+  .zp-rows--solo, .zp-rows--solo .zp-row { grid-template-columns: 136px minmax(0, 1fr) auto; }
+  .zp-rows--solo .zp-row { grid-template-columns: subgrid; grid-template-areas: "time name btn"; }
+  .zp-rows--big { grid-template-columns: auto minmax(0, 1.35fr) minmax(0, 1.15fr) minmax(0, .8fr) auto; column-gap: clamp(16px, 2.2vw, 32px); }
+  .zp-rows--big .zp-row { grid-template-columns: 236px minmax(0, 1.35fr) minmax(0, 1.15fr) minmax(0, .8fr) auto; grid-template-columns: subgrid; padding: 16px 0 18px; }
+  .zp-rows--big .zp-row__time { font-size: clamp(48px, 5vw, 64px); }
+  .zp-rows--big .zp-row__time > span { font-size: max(.28em, 13px); }
+  .zp-rows--big .zp-row__name { font-size: 1.12em; }
 }
 
 /* ---------- price cards ---------- */
@@ -371,6 +414,7 @@
 .zp-tick { width: 18px; height: 18px; margin-top: 3px; color: var(--accTextS); }
 .zp-plan .zp-btn { margin-top: auto; }
 @media (min-width: 860px) { .zp-plans { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); } }
+@media (min-width: 700px) { .zp-plans.is-one { grid-template-columns: minmax(0, 440px); } }
 
 /* ---------- coaches ---------- */
 .zp-coaches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); }
@@ -414,6 +458,7 @@
 .zp-foot__grid { display: grid; gap: calc(var(--gap) * 1.6) var(--gap); }
 .zp-foot__grid > div { display: grid; gap: 10px; align-content: start; justify-items: start; min-width: 0; }
 .zp-foot__brand .zp-logo { margin: 0; }
+.zp-foot__brand .zp-logo__w { white-space: normal; line-height: 1.15; }
 .zp-foot__brand .zp-btn { margin-top: 8px; }
 .zp-foot__made { margin-top: calc(var(--gap) * 2); padding-top: var(--gap); border-top: 1px solid var(--line); font-size: var(--small); color: var(--ink2); }
 @media (min-width: 700px) { .zp-foot__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -432,21 +477,33 @@
 .zp-follow__txt span { font-size: 15px; font-weight: 500; }
 .zp-follow__btn { min-height: 46px; background: var(--pillBtn); color: var(--pillBtnInk); border-color: transparent; }
 .zp-follow__alt { padding-right: 14px; font-size: 16px; font-weight: 600; text-underline-offset: 3px; white-space: nowrap; }
-.zp-follow--duo { gap: 14px; padding: 8px; }
+.zp-follow--duo, .zp-follow.is-bare { gap: 14px; padding: 8px; }
 .zp-follow--bar { left: 0; right: 0; bottom: var(--below); transform: none; justify-content: space-between; max-width: none; padding: 10px var(--gut) calc(10px + var(--safe)); border-radius: 0; box-shadow: 0 -1px 0 var(--line-strong); }
 .zp-follow--bar.is-off { transform: translateY(100%); }
 .zp-toast { position: fixed; z-index: 60; left: 50%; bottom: calc(96px + var(--below)); transform: translate(-50%, 12px); width: max-content; max-width: calc(100vw - 32px); padding: 12px 18px; background: var(--ink); color: var(--bg); border-radius: var(--r-chip); box-shadow: var(--shadow); font-size: 16px; font-weight: 600; line-height: 1.35; text-align: center; opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; }
 .zp[data-corners="round"] .zp-toast { border-radius: 24px; }
 .zp-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 
-/* ---------- fade and rise: only parts below the screen wait, and they wait in place ---------- */
-.zp-pre { opacity: 0; transform: translateY(24px); }
-.zp-go { transition: opacity .7s ease calc(var(--i, 0) * 80ms), transform .8s cubic-bezier(.2,.7,.2,1) calc(var(--i, 0) * 80ms); }
+/* ---------- fade and rise: nothing waits hidden. A part plays this once, as it arrives at the bottom of the screen.
+   A page that is captured, printed or previewed without anyone scrolling shows every part, because no part starts out invisible. ---------- */
+.zp-go { animation: zp-rise .8s cubic-bezier(.2,.7,.2,1) calc(var(--i, 0) * 80ms) backwards; }
+@keyframes zp-rise { from { opacity: 0; transform: translateY(24px); } }
 
 /* ---------- reduced motion: nothing animates, nothing is hidden ---------- */
 .zp--still *, .zp--still *::before, .zp--still *::after { animation: none !important; transition: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .zp *, .zp *::before, .zp *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- print and "save as PDF": the whole page, still, with nothing floating over it ---------- */
+@media print {
+  .zp *, .zp *::before, .zp *::after { animation: none !important; transition: none !important; }
+  .zp-follow, .zp-toast, .zp-pause, .zp-menu, .zp-arrows, .zp-strip__track { display: none !important; }
+  .zp-strip--thin.is-moving .zp-strip__still { display: block !important; }
+  .zp-strip--loud.is-moving .zp-strip__still { display: flex !important; }
+  .zp-bar, .zp-days, .zp-pin__media { position: static !important; }
+  .zp-stmt__text.is-lightup .zp-word { color: var(--ink) !important; }
+  .zp-swap.is-live .zp-swap__w:not(.is-on) { visibility: hidden !important; }
 }
 
 /* ---------- demo only: show where each block starts and ends ---------- */

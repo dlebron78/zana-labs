@@ -1,7 +1,8 @@
-/* data.js: what an owner supplies. Four invented gyms.
+/* data.js: what a business supplies. Four invented gyms and one invented personal trainer.
    Name, logo, one brand color (plus a second to try), photos, maybe a video, classes, the week's schedule,
    coaches, prices, a few member quotes and the address. No layout, no fonts, no effects in here.
-   Every gym, person and quote below is made up for this demo. */
+   Every business, person and quote below is made up for this demo.
+   At the end: three thin test accounts (STRESS) that hold only what Zana stores today. */
 
 const P = '../gym-page/img/';   // free stock photos (Unsplash License), shared with the older gym page prototype
 const C = 'img/';               // portraits cropped from those photos
@@ -43,6 +44,7 @@ export const GYMS = {
       { src: P + 'gym-spin.jpg', shape: 'wide' }, { src: P + 'yoga-class.jpg', shape: 'wide' },
     ],
     offer: b('First class free', 'Primera clase gratis'),
+    firstFree: true, cardToBook: false, tax: { name: 'IVU', included: true },   // what the page may promise comes from the business's own setup, never from the template
     classes: [
       { id: 'strength', name: b('Strength', 'Fuerza'), mins: 60, level: ALL, photo: P + 'trainer-client.jpg', pos: '40% 50%',
         blurb: b('Barbells, kettlebells and a coach who checks every lift. You leave knowing what to do next time.', 'Barras, pesas rusas y un coach que revisa cada levantamiento. Sales sabiendo qué hacer la próxima vez.') },
@@ -96,6 +98,7 @@ export const GYMS = {
       { src: P + 'gym-spin.jpg', shape: 'wide' }, { src: P + 'coach-woman.jpg', shape: 'tall', pos: '50% 30%' }, { src: P + 'box-ropes.jpg', shape: 'wide' },
     ],
     offer: b('First class free', 'Primera clase gratis'),
+    firstFree: true, cardToBook: false, tax: { name: 'IVU', included: true },   // what the page may promise comes from the business's own setup, never from the template
     classes: [
       { id: 'cycling', name: b('Cycling', 'Cycling'), mins: 45, level: ALL,
         blurb: b('Hills, sprints and a playlist worth the sweat. Shoes are at the front desk.', 'Cuestas, sprints y una playlist que vale el sudor. Las zapatillas están en recepción.') },
@@ -151,6 +154,7 @@ export const GYMS = {
       { src: P + 'yoga-stretch.jpg', shape: 'tall' }, { src: P + 'yoga-flow.jpg', shape: 'wide' },
     ],
     offer: b('First class free', 'Primera clase gratis'),
+    firstFree: true, cardToBook: false, tax: { name: 'IVU', included: true },   // what the page may promise comes from the business's own setup, never from the template
     classes: [
       { id: 'flow', name: b('Yoga flow', 'Yoga flow'), short: b('Yoga', 'Yoga'), mins: 60, level: ALL, photo: P + 'yoga-flow.jpg', pos: '58% 40%',
         blurb: b('A steady, breath-led flow that builds strength and calm. Mats and props provided.', 'Un flow pausado, guiado por la respiración, que da fuerza y calma. Mats y accesorios incluidos.') },
@@ -202,6 +206,7 @@ export const GYMS = {
       { src: P + 'box-rig.jpg', shape: 'tall', pos: '50% 55%' }, { src: P + 'coach-plan.jpg', shape: 'wide', pos: '45% 40%' }, { src: P + 'coach-man.jpg', shape: 'wide' },
     ],
     offer: b('First class free', 'Primera clase gratis'),
+    firstFree: true, cardToBook: false, tax: { name: 'IVU', included: true },   // what the page may promise comes from the business's own setup, never from the template
     classes: [
       { id: 'boxing', name: b('Boxing', 'Boxeo'), mins: 60, level: BEG, photo: P + 'box-ropes.jpg', pos: '62% 45%',
         blurb: b('Twelve rounds of bag work, footwork and core. No sparring, no ego.', 'Doce rondas de saco, juego de pies y abdomen. Sin sparring y sin ego.') },
@@ -235,6 +240,105 @@ export const GYMS = {
     place: {
       addr: ['Calle Cerra', 'Santurce, San Juan, PR 00907'], phone: '787-555-0156', email: 'hola@tramo.example',
       hours: [b('Mon to Fri, 5 AM to 9 PM', 'Lun a vie, 5 a. m. a 9 p. m.'), b('Saturday, 7:30 AM to 12 PM', 'Sábado, 7:30 a. m. a 12 p. m.')],
+    },
+  },
+
+  /* ------------------------------------------------------------------ 5 */
+  repecho: {
+    id: 'repecho', name: 'Repecho', owner: 'Nico',
+    unit: 'session',     // sells one-on-one sessions, not classes: the page's words change with this
+    lead: 'prices',      // what leads the page: prices here, the schedule everywhere else
+    kind: b('Personal training', 'Entrenamiento personal'),
+    hood: 'Miramar', area: 'Miramar, San Juan',
+    brand: '#1E8E5A', brand2: '#F0B429', brandNames: [b('Green', 'Verde'), b('Amber', 'Ámbar')],
+    logo: { word: 'Repecho', mark: '<path d="M3 25h8l9-16h9" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>' },
+    photos: [{ src: P + 'coach-plan.jpg', shape: 'wide', pos: '45% 40%' }, { src: P + 'trainer-client.jpg', shape: 'wide', pos: '55% 50%' }],
+    offer: b('First session free', 'Primera sesión gratis'),
+    firstFree: true, cardToBook: false, tax: { name: 'IVU', included: true },
+    classes: [
+      { id: 'pt', name: b('One-on-one', 'Uno a uno'), mins: 60,
+        blurb: b('One hour with all of my attention. We work on the goal you came with.', 'Una hora con toda mi atención. Trabajamos en la meta con la que llegaste.') },
+      { id: 'duo', name: b('Train as a pair', 'En pareja'), mins: 60,
+        blurb: b('Bring someone you like training with. You share the hour and the cost.', 'Trae a alguien con quien te guste entrenar. Comparten la hora y el costo.') },
+      { id: 'mob', name: b('Mobility', 'Movilidad'), mins: 30,
+        blurb: b('Thirty minutes to loosen hips, back and shoulders. Good after a long day at a desk.', 'Treinta minutos para soltar caderas, espalda y hombros. Ideal después de un día largo de escritorio.') },
+    ],
+    coaches: [],
+    schedule: week([
+      ['12345', '06:00', 'pt', null, 1], ['12345', '07:15', 'pt', null, 1], ['135', '12:15', 'mob', null, 1], ['24', '12:15', 'pt', null, 1],
+      ['12345', '17:30', 'pt', null, 1], ['135', '18:45', 'pt', null, 1], ['24', '18:45', 'duo', null, 2],
+      ['6', '08:00', 'pt', null, 1], ['6', '09:15', 'duo', null, 2], ['6', '10:30', 'mob', null, 1],
+    ]),
+    prices: [
+      { name: b('Single session', 'Sesión suelta'), price: 45, line: b('One hour, one-on-one.', 'Una hora, uno a uno.'),
+        ticks: [b('Any open time', 'Cualquier hora libre'), b('Use it within 30 days', 'Úsala en 30 días'), b('Move it up to 12 hours before', 'Muévela hasta 12 horas antes')] },
+      { name: b('8 sessions', '8 sesiones'), price: 320, credits: 8, featured: true, line: b('Twice a week for a month.', 'Dos veces por semana durante un mes.'),
+        ticks: [b('$40 a session', '$40 por sesión'), b('Use them within 2 months', 'Úsalas en 2 meses'), b('A written plan for the days between', 'Un plan escrito para los días entre sesiones')] },
+      { name: b('Monthly plan', 'Plan mensual'), price: 420, monthly: true, line: b('Three sessions a week.', 'Tres sesiones por semana.'),
+        ticks: [b('12 sessions a month', '12 sesiones al mes'), b('A written plan for the days between', 'Un plan escrito para los días entre sesiones'), b('Pause once a year', 'Pausa una vez al año')] },
+    ],
+    reviews: [
+      { who: 'Marisol T.', q: b('In January I could not do one push-up. Last week I did eight.', 'En enero no podía hacer ni una flexión. La semana pasada hice ocho.') },
+      { who: 'Rubén C.', q: b('The plan fits my week, not the other way around.', 'El plan se ajusta a mi semana, no al revés.') },
+      { who: 'Ivette G.', q: b('The first hour was mostly questions. Nobody had asked me those before.', 'La primera hora fue casi toda de preguntas. Nadie me las había hecho antes.') },
+    ],
+    place: {
+      addr: ['Avenida Ponce de León', 'Miramar, San Juan, PR 00907'], phone: '787-555-0178', email: 'hola@repecho.example',
+      hours: [b('Mon to Fri, 6 AM to 8 PM', 'Lun a vie, 6 a. m. a 8 p. m.'), b('Saturday, 8 AM to 12 PM', 'Sábado, 8 a. m. a 12 p. m.')],
+    },
+  },
+};
+
+/* ---------------------------------------------------------------------
+   Test accounts, not demo businesses. Each holds only what Zana stores today:
+   a class is a name, a length and a room size; a price is a name and an amount; the business has one language.
+   No photos, no descriptions, no quotes, Spanish only. The viewer swaps them in to check that nothing breaks. */
+export const STRESS = {
+  /* a business that has typed its name and nothing else */
+  empty: {
+    id: 'stress-empty', label: 'Empty', name: 'Prueba Vacía', langs: ['es'], brand: '#6B4EE6',
+    classes: [], schedule: [], prices: [],
+  },
+  /* one class with a very long name and no room size, one price, and a schedule row whose class was deleted */
+  one: {
+    id: 'stress-one', label: 'One of each', name: 'Prueba Uno', langs: ['es'], brand: '#6B4EE6',
+    kind: 'Estudio', hood: 'Río Piedras', area: 'Río Piedras, San Juan',
+    classes: [{ id: 'a', name: 'Entrenamiento funcional de alta intensidad para principiantes', mins: 50 }],
+    schedule: week([['135', '18:30', 'a', null, 0], ['24', '07:00', 'borrada', null, 10]]),
+    prices: [{ name: 'Clase suelta', price: 15 }],
+    place: { addr: ['Avenida Universidad', 'Río Piedras, San Juan, PR 00925'], email: 'hola@pruebauno.example' },
+  },
+  /* eight classes with long names, five prices, a long business name, one coach with a long name and no photo */
+  many: {
+    id: 'stress-many', label: 'A lot', name: 'Centro Integral de Movimiento Prueba Ocho', langs: ['es'], brand: '#6B4EE6',
+    kind: 'Centro de entrenamiento', hood: 'Bayamón', area: 'Bayamón, Puerto Rico',
+    classes: [
+      { id: 'c1', name: 'Entrenamiento funcional de alta intensidad', mins: 50 },
+      { id: 'c2', name: 'Yoga restaurativo y respiración consciente', mins: 60 },
+      { id: 'c3', name: 'Pilates de suelo para espalda y abdomen', mins: 55 },
+      { id: 'c4', name: 'Boxeo técnico para principiantes absolutos', mins: 60 },
+      { id: 'c5', name: 'Movilidad articular y estiramiento profundo', mins: 45 },
+      { id: 'c6', name: 'Fuerza con barra: sentadilla, press y peso muerto', mins: 75 },
+      { id: 'c7', name: 'Cycling de resistencia con intervalos largos', mins: 45 },
+      { id: 'c8', name: 'Acondicionamiento para corredores de fondo', mins: 60 },
+    ],
+    coaches: [{ id: 'mf', name: 'María Fernanda del Valle Rodríguez' }],
+    schedule: week([
+      ['12345', '05:30', 'c1', 'mf', 12], ['135', '06:45', 'c6', null, 0], ['24', '06:45', 'c7', null, 20],
+      ['12345', '09:00', 'c2', 'mf', 0], ['1234567', '12:00', 'c5', null, 15], ['135', '17:00', 'c4', 'mf', 16],
+      ['24', '17:00', 'c3', null, 0], ['12345', '18:15', 'c1', 'mf', 12], ['1234', '19:30', 'c8', null, 30],
+      ['67', '08:00', 'c2', null, 0], ['6', '09:15', 'c6', 'mf', 8], ['3', '20:45', 'borrada', null, 10],
+    ]),
+    prices: [
+      { name: 'Clase suelta', price: 18 },
+      { name: 'Paquete de 5 clases', price: 80, credits: 5 },
+      { name: 'Paquete de 10 clases válido por tres meses', price: 150, credits: 10, featured: true },
+      { name: 'Mensualidad ilimitada', price: 99, monthly: true, ticks: ['Clases ilimitadas'] },
+      { name: 'Mensualidad familiar para dos personas', price: 170, monthly: true, line: 'Dos personas de la misma casa.' },
+    ],
+    place: {
+      addr: ['Carretera 167, kilómetro 18.4, Centro Comercial Plaza del Parque, local 12', 'Bayamón, PR 00957'], phone: '787-555-0102',
+      hours: ['Lunes a viernes, 5:00 a. m. a 10:00 p. m.', 'Sábados, domingos y días feriados, 7:00 a. m. a 2:00 p. m.'],
     },
   },
 };

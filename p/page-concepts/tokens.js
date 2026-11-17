@@ -8,7 +8,7 @@ export const toHex = a => '#' + a.map(v => Math.round(Math.max(0, Math.min(255, 
 export const mix = (a, b, t) => { const A = hx(a), B = hx(b); return toHex(A.map((v, i) => v + (B[i] - v) * t)); };
 export const lum = c => { const v = hx(c).map(x => { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; };
 export const contrast = (a, b) => { const A = lum(a), B = lum(b); return (Math.max(A, B) + .05) / (Math.min(A, B) + .05); };
-export const textOn = c => contrast(c, '#FFFFFF') >= contrast(c, '#111111') ? '#FFFFFF' : '#111111';
+export const textOn = c => contrast(c, '#FFFFFF') >= contrast(c, '#000000') ? '#FFFFFF' : '#000000';   // pure black or pure white, whichever reads better on the color
 /* nudge a color toward black or white (whichever helps) until it reaches the ratio against bg */
 export function readable(c, bg, ratio) {
   if (contrast(c, bg) >= ratio) return c;
@@ -26,6 +26,8 @@ export const CHOICES = {
   ground: ['neutral', 'tinted', 'pure'],          // the page color: plain, a hint of the brand color, or pure black / white
   type: ['wide', 'plain', 'serif', 'condensed'],  // the voice of the headings
   scale: [2.5, 2.75, 3],                           // heading size as a multiple of body size. Guarded: never under 2.5, never over 3 (3.1 for condensed)
+  /* lift (a number, set by a style, not a choice): how much bigger the headline over a full-screen photo or video may get
+     on a wide screen. Only that one headline grows, to about 4 times the body text; every other heading keeps the scale. */
   space: ['compact', 'comfortable', 'airy'],
   corners: ['square', 'soft', 'round'],
   photo: ['original', 'bw', 'tint'],
@@ -96,6 +98,8 @@ export function palette(brand, mode, ground) {
     '--acc': acc, '--accInk': accInk, '--accEdge': accEdge, '--accText': accText, '--accTextS': accTextS,
     '--accMediaEdge': accMediaEdge, '--planEdge': mix(surface, accTextS, .42),
     '--pillBtn': pillBtn, '--pillBtnInk': pillBtnInk,
+    /* the focus ring: the brand color where it shows, and a color that is sure to show on a brand-colored surface and on the ink pill */
+    '--focus': accText, '--focusOnAcc': accInk, '--focusOnInk': contrast(acc, ink) >= 3 ? acc : bg,
     '--shadow': dark ? '0 14px 36px rgba(0,0,0,.6)' : '0 14px 36px rgba(20,20,19,.16)',
   };
 }
@@ -126,6 +130,8 @@ export function buildTokens(choice, brand) {
   const h2Max = Math.round(h1Max * .72), h2Min = Math.max(26, Math.round(h1Min * .78));
   const h3Max = Math.round(22 * V.h3k), h3Min = Math.round(20 * V.h3k);
 
+  /* the headline over a full-screen hero: the same size as any headline up to a laptop, then it keeps growing to scale + lift on a wide screen (1440px) */
+  const lift = clamp(+c.lift || 0, 0, 1.5), heroMax = Math.round(18 * Math.min(scale + lift, 4.4));
   const px = v => (typeof v === 'number' ? v + 'px' : v);
   const vars = {
     ...palette(brand, c.mode, c.ground),
@@ -133,6 +139,7 @@ export function buildTokens(choice, brand) {
     '--logo-track': V.logoTrack,
     '--body': fluid(17, 18), '--small': fluid(15, 16), '--tag': fluid(12.5, 13),
     '--h1': fluid(h1Min, h1Max), '--h2': fluid(h2Min, h2Max), '--h3': fluid(h3Min, h3Max),
+    '--h1-hero': lift ? fluid(h1Min, heroMax, 420, 1440) : fluid(h1Min, h1Max),
     '--stmt': fluid(Math.round(h2Min * .96), Math.round(h2Max * 1.04)),
     '--sec': fluid(S.sec[0], S.sec[1]), '--gap': fluid(S.gap[0], S.gap[1]), '--pad': fluid(S.pad[0], S.pad[1]), '--head': fluid(S.head[0], S.head[1]),
     '--gut': fluid(20, 64),
@@ -142,7 +149,7 @@ export function buildTokens(choice, brand) {
     vars,
     attrs: { mode: c.mode, photo: c.photo, corners: c.corners, space: c.space, type: c.type },
     duo: duotone(brand),
-    facts: { h1Laptop: h1Max, h1Phone: h1Min, body: 18, ratio: +(h1Max / 18).toFixed(2) },
+    facts: { h1Laptop: h1Max, h1Phone: h1Min, body: 18, ratio: +(h1Max / 18).toFixed(2), heroWide: lift ? heroMax : h1Max, heroRatio: +((lift ? heroMax : h1Max) / 18).toFixed(2) },
     choice: { ...c, scale },
   };
 }

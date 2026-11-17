@@ -3,8 +3,9 @@
    owner.js turns those into the settings in force, and the preview frame draws them.
    What an owner may change, and how far, is decided in owner.js. This file only draws the controls. */
 
-import { FX } from './recipes.js?v=14';
-import { OWNER_GYM, STYLES, SPACES, SIZES, OWNER_FX, TOP, LOCKED, STYLE, resolve, tokensOf, coverUse, photoCards, scaleOf } from './owner.js?v=14';
+import { FX } from './recipes.js?v=15';
+import { SHIP } from './launch.js?v=15';
+import { OWNER_GYM, STYLES, SPACES, SIZES, OWNER_FX, TOP, LOCKED, STYLE, resolve, tokensOf, coverUse, photoCards, scaleOf } from './owner.js?v=15';
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -18,8 +19,8 @@ const gym = OWNER_GYM;
 const T = {
   en: {
     labs: 'Labs mock: the settings screen a gym owner would use. Nothing is saved.',
-    samples: 'Sample pages', spec: 'How it works', plan: 'Launch plan',
-    planKey: 'Launch: in the first version. Later: in the second phase.', launch: 'Launch', later: 'Later',
+    samples: 'Sample pages', spec: 'How it works', plan: 'Build phases',
+    planKey: 'This screen is phase 2. In phase 1 there is no owner screen: Zana staff set the color, logo and cover photo. Phase 3 adds video from a bought service and the extra effects.', launch: 'Phase 2', later: 'Phase 3',
     title: 'Business page settings', crumb: 'Business page', publish: 'Publish', publishToast: 'This is a mock. Nothing was saved or published.',
     vSettings: 'Settings', vPreview: 'Preview', language: 'Language',
     h1: 'Your business page',
@@ -119,8 +120,8 @@ const T = {
   },
   es: {
     labs: 'Maqueta de labs: la pantalla de ajustes que usaría el dueño de un gimnasio. No se guarda nada.',
-    samples: 'Páginas de muestra', spec: 'Cómo funciona', plan: 'Plan de lanzamiento',
-    planKey: 'Lanzamiento: en la primera versión. Después: en la segunda fase.', launch: 'Lanzamiento', later: 'Después',
+    samples: 'Páginas de muestra', spec: 'Cómo funciona', plan: 'Fases',
+    planKey: 'Esta pantalla es la fase 2. En la fase 1 no hay pantalla para el dueño: el equipo de Zana pone el color, el logo y la foto de portada. La fase 3 suma video de un servicio comprado y los efectos extra.', launch: 'Fase 2', later: 'Fase 3',
     title: 'Ajustes de la página del negocio', crumb: 'Página del negocio', publish: 'Publicar', publishToast: 'Esto es una maqueta. No se guardó ni se publicó nada.',
     vSettings: 'Ajustes', vPreview: 'Vista previa', language: 'Idioma',
     h1: 'La página de tu negocio',
@@ -221,12 +222,8 @@ const T = {
 };
 let W = T.en;
 
-/* What ships when, for the "launch plan" tags. Kept in step with spec.html. */
-const SHIP = {
-  hero: { today: 'launch', photo: 'launch', slideshow: 'later', video: 'later' },
-  fx: { rise: 'launch', book: 'launch', bar: 'launch', lightup: 'launch', strip: 'later', slide: 'later', word: 'later', pin: 'later' },
-  sec: { first: 'later', reviews: 'later', bookbar: 'later' },
-};
+/* What ships when comes from launch.js, the same map the samples viewer reads for its "Launch version" switch.
+   This whole screen is phase 2, so a tag here only tells phase 2 from phase 3. */
 
 /* ---------- small drawings ---------- */
 const I = {
@@ -305,7 +302,7 @@ function writeUrl() {
 }
 
 /* ---------- the pieces every group uses ---------- */
-const tag = ship => (state.plan ? `<span class="st-ship st-ship--${ship}">${W[ship]}</span>` : '');
+const tag = ship => { const k = ship === 3 || ship === 'later' ? 'later' : 'launch'; return state.plan ? `<span class="st-ship st-ship--${k}">${W[k]}</span>` : ''; };
 const card = (id, n, [title, help], body, ship) => `<section class="st-card" id="g-${id}" aria-labelledby="h-${id}"><header class="st-card__head"><span class="st-n" aria-hidden="true">${n}</span><div><h2 id="h-${id}">${esc(title)}${ship ? tag(ship) : ''}</h2><p>${esc(help)}</p></div></header>${body}</section>`;
 const field = (label, body, ship = 'launch') => `<div class="st-field"><div class="st-field__top"><h3>${esc(label)}</h3>${tag(ship)}</div>${body}</div>`;
 const seg = (key, opts, now, label) => `<div class="st-seg" role="group" aria-label="${esc(label)}">${opts.map(([v, main, sub]) => `<button type="button" data-do="${key}" data-v="${v}" data-id="${key}:${v}" aria-pressed="${v === now}"><b>${esc(main)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</button>`).join('')}</div>`;
@@ -450,7 +447,7 @@ function mountFrame() {
   if (frame) return;
   frame = document.createElement('iframe');
   frame.title = W.pvTitle;
-  frame.src = 'preview.html?v=14';
+  frame.src = 'preview.html?v=15';
   $('#st-holder').append(frame);
   fit();
 }
