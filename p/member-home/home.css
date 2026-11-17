@@ -23,13 +23,13 @@ body.mh { margin: 0; height: 100%; overflow: hidden; background: var(--page); ov
 }
 
 /* ---------- the sample menu: one small button in a corner, outside the app ---------- */
-.dm-fab { position: fixed; z-index: 40; right: 14px; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 20px; background: rgba(17, 17, 17, .78); color: #fff; box-shadow: 0 6px 18px rgba(17, 17, 17, .28); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity .2s, transform .2s; }
+.dm-fab { position: fixed; z-index: 40; right: 14px; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 20px; background: rgba(17, 17, 17, .78); color: #fff; box-shadow: 0 6px 18px rgba(17, 17, 17, .28); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity .2s, transform .2s; }
 .dm-fab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .dm-fab[aria-expanded="true"] { background: #fff; color: #111; }
 .mh-cover .dm-fab { opacity: 0; transform: scale(.8); pointer-events: none; }
 .dm-fab:focus-visible { outline: 2.5px solid #7aa2ff; outline-offset: 2px; }
 
-.dm { position: fixed; z-index: 45; right: 12px; bottom: calc(130px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; width: min(372px, calc(100vw - 24px)); max-height: calc(100dvh - 150px - env(safe-area-inset-bottom, 0px)); overflow-y: auto; padding: 14px 14px 16px; border-radius: 18px; background: #0b0b0c; color: #fff; box-shadow: 0 24px 60px rgba(0, 0, 0, .4); scrollbar-width: none; animation: m-rise .2s var(--ease-out, ease-out); }
+.dm { position: fixed; z-index: 45; right: 12px; bottom: calc(140px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; width: min(372px, calc(100vw - 24px)); max-height: calc(100dvh - 150px - env(safe-area-inset-bottom, 0px)); overflow-y: auto; padding: 14px 14px 16px; border-radius: 18px; background: #0b0b0c; color: #fff; box-shadow: 0 24px 60px rgba(0, 0, 0, .4); scrollbar-width: none; animation: m-rise .2s var(--ease-out, ease-out); }
 .dm-h { display: flex; align-items: center; gap: 8px; }
 .dm-h b { font-size: 15px; font-weight: 700; }
 .dm-h span { color: #a9a9a4; font-size: 13px; }
@@ -247,16 +247,16 @@ button.m-row:active { background: var(--fill); }
 .m-bottom { position: relative; z-index: 5; flex: none; }
 .m-bookbar { padding: 10px 16px 30px; border-top: 1px solid var(--line); background: rgba(255, 255, 255, .94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
 .m-tabbar { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); padding: 6px 8px 24px; border-top: 1px solid var(--line); background: rgba(255, 255, 255, .94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
-.m-tabbar button { display: grid; align-content: center; justify-items: center; gap: 4px; height: 54px; border: 0; background: none; color: #77776F; font-size: 12.5px; font-weight: 500; transition: color .15s; }
+.m-tabbar button { display: grid; align-content: center; justify-items: center; gap: 5px; height: 64px; border: 0; background: none; color: #77776F; font-size: 14px; font-weight: 500; transition: color .15s; }
 .m-tabbar button:active .m-tabi { transform: scale(.88); }
 .m-tabbar button[aria-current="page"] { color: var(--ink); font-weight: 650; }
-.m-tabi { position: relative; display: grid; place-items: center; width: 56px; height: 30px; border-radius: 15px; transition: background .2s, transform .12s; }
+.m-tabi { position: relative; display: grid; place-items: center; width: 64px; height: 34px; border-radius: 17px; transition: background .2s, transform .12s; }
 .m-tabbar button[aria-current="page"] .m-tabi { background: var(--fill); }
-.m-tabbar .m-i { width: 22px; height: 22px; }
+.m-tabbar .m-i { width: 26px; height: 26px; }
 .m-tabbar button[aria-current="page"] .m-i { stroke-width: 2.2; }
-.m-tabme { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1.6px solid currentColor; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+.m-tabme { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1.8px solid currentColor; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
 .m-tabbar button[aria-current="page"] .m-tabme { background: var(--ink); border-color: var(--ink); color: #fff; }
-.m-dot { position: absolute; top: 2px; right: 12px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px #fff; }
+.m-dot { position: absolute; top: 3px; right: 15px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px #fff; }
 
 /* the message at the bottom. With Undo, a thin line runs down while it can still be taken back */
 .m-toast { position: absolute; left: 12px; right: 12px; bottom: calc(100% + 12px); display: flex; align-items: center; gap: 10px; overflow: hidden; padding: 13px 14px; border-radius: 14px; background: #111; color: #fff; font-size: 16px; line-height: 1.35; box-shadow: 0 16px 40px rgba(17, 17, 17, .35); }
@@ -443,11 +443,11 @@ button.m-row:active { background: var(--fill); }
   .m-news { margin: 0; border-radius: 12px; border-top: 0; }
   .m-h1 { font-size: 44px; }
   .m-tabbar { display: flex; justify-content: center; gap: 4px; padding: 0 24px; border-top: 0; border-bottom: 1px solid var(--line); background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; }
-  .m-tabbar button { grid-auto-flow: column; gap: 8px; height: 52px; padding: 0 16px; border-radius: 0; font-size: 17px; box-shadow: inset 0 -2px 0 transparent; }
+  .m-tabbar button { grid-auto-flow: column; gap: 10px; height: 60px; padding: 0 20px; border-radius: 0; font-size: 18px; box-shadow: inset 0 -2px 0 transparent; }
   .m-tabbar button[aria-current="page"] { box-shadow: inset 0 -2px 0 var(--ink); }
   .m-tabi { width: auto; height: auto; background: none !important; }
-  .m-tabbar .m-i { width: 20px; height: 20px; }
-  .m-tabme { width: 22px; height: 22px; font-size: 10px; }
+  .m-tabbar .m-i { width: 24px; height: 24px; }
+  .m-tabme { width: 26px; height: 26px; font-size: 11px; }
   .m-dot { top: -3px; right: -5px; }
   .m-toast { position: fixed; left: calc(50% - 200px); right: auto; bottom: 28px; width: 400px; }
   .m-scrim.m-under, .m-menu { top: 64px; }
