@@ -2,16 +2,26 @@
    All it does: pick a recipe, keep track of what the viewer changed, and ask the framework to draw.
    The framework itself is data.js, tokens.js, blocks.js, effects.js, recipes.js and page.js. */
 
-import { GYMS } from './data.js';
-import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js';
-import { buildTokens, CHOICES } from './tokens.js';
-import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js';
-import { mountEffects } from './effects.js';
-import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js';
+import { GYMS } from './data.js?v=2';
+import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=2';
+import { buildTokens, CHOICES } from './tokens.js?v=2';
+import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=2';
+import { mountEffects } from './effects.js?v=2';
+import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=2';
 
 const $ = (s, el = document) => el.querySelector(s);
 const stage = $('#stage'), topBar = $('#vw-top'), panel = $('#vw-panel'), fab = $('#vw-fab');
 const Q = new URLSearchParams(location.search);
+if (Q.get('debug') === '1') {
+  const box = document.createElement('pre');
+  box.style.cssText = 'position:fixed;z-index:999;left:8px;bottom:8px;max-width:min(92vw,720px);max-height:40vh;overflow:auto;margin:0;padding:8px 10px;background:#fff;color:#a40020;border:2px solid #a40020;font:12px/1.4 ui-monospace,monospace;white-space:pre-wrap';
+  box.textContent = 'debug: nothing to report';
+  document.body.appendChild(box);
+  const say = m => { box.textContent = (box.textContent.startsWith('debug:') ? '' : box.textContent + '\n') + m; };
+  window.addEventListener('error', e => say(e.message ? `error: ${e.message} (${(e.filename || '').split('/').pop()}:${e.lineno})` : `failed to load: ${(e.target && (e.target.currentSrc || e.target.src || e.target.href)) || 'a file'}`), true);
+  window.addEventListener('unhandledrejection', e => say('rejection: ' + ((e.reason && e.reason.message) || e.reason)));
+  for (const k of ['error', 'warn']) { const was = console[k]; console[k] = (...a) => { say(k + ': ' + a.map(x => (x && x.message) || x).join(' ')); was.apply(console, a); }; }
+}
 const mqWide = window.matchMedia('(min-width: 900px)'), mqStill = window.matchMedia('(prefers-reduced-motion: reduce)');
 const HERO_KEYS = { film: 'heroFilm', slideshow: 'heroSlideshow', split: 'heroSplit', framed: 'heroFramed', tiles: 'heroTiles' };
 const SCHED_KEYS = { cards: 'scheduleCards', list: 'scheduleList' };
@@ -246,6 +256,40 @@ fab.addEventListener('click', () => act('toggle'));
 panel.addEventListener('input', e => { if (e.target.matches('[data-do="pick"]')) { state.brand = e.target.value.toUpperCase(); paint(false); } });
 panel.addEventListener('change', e => { if (e.target.matches('[data-do="pick"]')) drawPanel(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.open) act('toggle'); });
+
+/* keyboard shortcuts, for showing the demo from a laptop:
+   1 to 4 sample · L language · D light or dark · B brand color · P photos · S spacing · C corners · T heading voice
+   M motion set · Shift+1 to 9 one effect · R reduced motion · H hero · K schedule · F Book button · O block names
+   A Adjust panel · G next panel tab · U hide or show the demo controls · 0 reset */
+const next = (list, cur) => list[(list.indexOf(cur) + 1) % list.length];
+const KEYS = {
+  l: () => act('lang', state.lang === 'en' ? 'es' : 'en'),
+  d: () => act('mode', next(CHOICES.mode, page.tokens.choice.mode)),
+  b: () => { const g = gymOf(); act('c', next([g.brand, g.brand2, '#111111', '#0E8F7E', '#7A4DFF'].map(c => c.toUpperCase()), (state.brand || g.brand).toUpperCase())); },
+  p: () => act('photo', next(CHOICES.photo, page.tokens.choice.photo)),
+  s: () => act('space', next(CHOICES.space, page.tokens.choice.space)),
+  c: () => act('corners', next(CHOICES.corners, page.tokens.choice.corners)),
+  t: () => act('type', next(CHOICES.type, page.tokens.choice.type)),
+  m: () => { const w = wantFx(), base = { ...FX_DEFAULTS, ...recipe().fx }; const cur = FX.every(f => w[f.id] === base[f.id]) ? 'own' : FX.every(f => w[f.id]) ? 'all' : FX.every(f => !w[f.id]) ? 'none' : 'safe'; act('fxset', next(['own', 'all', 'none', 'safe'], cur)); },
+  r: () => act('rm'),
+  h: () => act('hero', next(HEROES, state.hero || baseOf(HEROES))),
+  k: () => act('sched', next(SCHEDULES, state.sched || baseOf(SCHEDULES))),
+  f: () => act('follow', next(['pill', 'duo', 'bar'], page.follow)),
+  o: () => act('outline'),
+  a: () => act('toggle'),
+  g: () => { state.open = true; act('tab', next(['look', 'motion', 'blocks'], state.tab)); },
+  u: () => { state.bare = !state.bare; document.documentElement.classList.toggle('vw-bare', state.bare); draw(); },
+  0: () => act('reset'),
+};
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+  if (e.target instanceof Element && e.target.closest('input, select, textarea, [contenteditable]')) return;
+  const digit = /^Digit([1-9])$/.exec(e.code || '');
+  if (digit && e.shiftKey) { const f = FX[+digit[1] - 1]; if (f) { e.preventDefault(); act('fx', f.id); } return; }
+  if (digit && +digit[1] <= ORDER.length) { e.preventDefault(); act('r', ORDER[+digit[1] - 1]); return; }
+  const fn = !e.shiftKey && KEYS[e.key.toLowerCase()];
+  if (fn) { e.preventDefault(); fn(); }
+});
 mqWide.addEventListener('change', () => draw());
 mqStill.addEventListener('change', () => draw());
 
