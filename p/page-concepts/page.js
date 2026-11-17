@@ -3,9 +3,9 @@
    2. runs the recipe's blocks in order and joins what they return
    3. wires the few things a visitor can press (day tabs, hero tabs, the phone menu, language, Book) */
 
-import { BLOCKS, WORDS, BLOCK_NAMES, HEROES, SCHEDULES, followBook, esc } from './blocks.js?v=15';
-import { buildTokens } from './tokens.js?v=15';
-import { setSlide } from './effects.js?v=15';
+import { BLOCKS, WORDS, BLOCK_NAMES, HEROES, SCHEDULES, followBook, esc } from './blocks.js?v=16';
+import { buildTokens } from './tokens.js?v=16';
+import { setSlide } from './effects.js?v=16';
 
 const pad2 = n => String(n).padStart(2, '0');
 const capFirst = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -218,6 +218,13 @@ export function wirePage(root, page, hooks = {}) {
     const f = e.target.closest('form[data-act="find"]'); if (!f) return;
     e.preventDefault(); setFilter(f.elements.cls.value); setDay(+f.elements.day.value); goTo('schedule');
   };
+  /* Photos below the first screen load when the visitor gets near them. A moment after the page settles the rest load too,
+     and at once before a print, so a print or a full-page capture shows photos and not gray boxes.
+     A visitor who asked to save data, or is on a slow line, keeps the lazy loading. */
+  const loadAll = () => root.querySelectorAll('img[loading="lazy"]').forEach(img => { img.loading = 'eager'; });
+  const line = navigator.connection || {};
+  const lazyT = line.saveData || /2g/.test(line.effectiveType || '') ? 0 : setTimeout(loadAll, 2500);
+  window.addEventListener('beforeprint', loadAll);
   root.addEventListener('click', onClick); root.addEventListener('submit', onSubmit);
-  return () => { root.removeEventListener('click', onClick); root.removeEventListener('submit', onSubmit); clearTimeout(toastT); };
+  return () => { root.removeEventListener('click', onClick); root.removeEventListener('submit', onSubmit); window.removeEventListener('beforeprint', loadAll); clearTimeout(toastT); clearTimeout(lazyT); };
 }

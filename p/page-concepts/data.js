@@ -52,7 +52,7 @@ export const GYMS = {
         blurb: b('Forty-five minutes on the bike, lights low and music up. You set your own resistance.', 'Cuarenta y cinco minutos en la bici, luces bajas y música alta. Tú decides tu resistencia.') },
       { id: 'yoga', name: b('Yoga', 'Yoga'), mins: 60, level: BEG, photo: P + 'yoga-class.jpg', pos: '50% 40%',
         blurb: b('A steady flow to open up what the week closed. Mats and blocks are in the room.', 'Un flow pausado para soltar lo que la semana apretó. Hay mats y bloques en el salón.') },
-      { id: 'open', name: b('Open gym', 'Gimnasio abierto'), mins: 90, level: b('Members', 'Miembros'), photo: P + 'gym-floor.jpg', pos: '60% 50%',
+      { id: 'open', open: true, name: b('Open gym', 'Gimnasio abierto'), mins: 90, level: b('Members', 'Miembros'), photo: P + 'gym-floor.jpg', pos: '60% 50%',
         blurb: b('The floor is yours: racks, machines and free weights, with a coach on hand for questions.', 'El piso es tuyo: racks, máquinas y peso libre, con un coach cerca para tus preguntas.') },
     ],
     coaches: [

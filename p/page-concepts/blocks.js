@@ -218,7 +218,8 @@ function sessionBits(s, x) {
   const fullUp = s.left === 0;
   return {
     cls, co, fullUp, t: x.time(s.time),
-    who: co ? `${S.withCoach} ${person(co.name)}` : x.solo ? '' : S.openFloor,
+    open: !co && !x.solo && !!cls.open,              // the business marks this class as open floor: no coach on purpose
+    who: co ? `${S.withCoach} ${person(co.name)}` : !x.solo && cls.open ? S.openFloor : '',   // a row with no coach says nothing about one
     spots: fullUp ? S.full : s.left == null || x.solo ? '' : S.left(s.left),   // no size set, or a one-person hour: nothing to say about spots
     btn: `<a class="zp-btn zp-btn--sm${fullUp ? ' zp-btn--ghost' : ''}" href="#" data-act="reserve">${esc(fullUp ? S.wait : S.bookShort)}</a>`,
     name: L(cls.name),
@@ -236,7 +237,7 @@ export function menuBar(gym, x) {
   return `<header class="zp-bar" data-block="menuBar" data-over="${x.overMedia ? 1 : 0}">
     <div class="zp-bar__bg"><div class="zp-bar__in">
       ${logo(gym)}
-      <nav class="zp-nav" aria-label="${esc(S.menu)}">${links}</nav>
+      ${links ? `<nav class="zp-nav" aria-label="${esc(S.menu)}">${links}</nav>` : ''}
       <div class="zp-bar__end">
         ${oneLang(gym) ? '' : `<button class="zp-lang" type="button" data-act="lang" aria-label="${esc(S.switchTo)}">${x.lang === 'en' ? 'ES' : 'EN'}</button>`}
         ${x.cta ? `<a class="zp-btn zp-btn--sm zp-bar__book" href="${x.cta.href}"><span class="zp-w">${esc(x.cta.label)}</span><span class="zp-n">${esc(x.cta.short)}</span></a>` : ''}
@@ -447,7 +448,7 @@ export function scheduleList(gym, x, o = {}) {
   return scheduleShell(gym, x, o, 'scheduleList', s => { const b = sessionBits(s, x); return `<article class="zp-row${b.fullUp ? ' is-full' : ''}" data-cls="${s.cls}">
     <p class="zp-row__time zp-num">${clock(b.t)}</p>
     <p class="zp-row__name">${esc(b.name)}${b.cls.mins ? ` <span>${b.cls.mins} ${esc(S.min)}</span>` : ''}</p>
-    <p class="zp-row__who">${x.solo ? '' : `${avatar(b.co)}<span>${esc(b.co ? person(b.co.name) : S.openFloor)}</span>`}</p>
+    <p class="zp-row__who">${b.co || b.open ? `${avatar(b.co)}<span>${esc(b.co ? person(b.co.name) : S.openFloor)}</span>` : ''}</p>
     <p class="zp-row__spots">${esc(b.spots)}</p>
     ${b.btn}
   </article>`; }, `zp-rows${o.big ? ' zp-rows--big' : ''}${x.solo ? ' zp-rows--solo' : ''}`);
