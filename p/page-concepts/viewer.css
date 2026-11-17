@@ -86,6 +86,10 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
   .vw-tab { min-height: 36px; padding: 0 18px; border-radius: 999px; }
   .vw-end { justify-content: flex-end; gap: 18px; }
   .vw-adjust { display: inline-flex; }
+  /* a short pointer under the Adjust button when the page first opens */
+  .vw-adjust { position: relative; }
+  html.vw-hint-on .vw-adjust[aria-expanded="false"]::after { content: "Change color, spacing, corners and effects here"; position: absolute; top: calc(100% + 14px); right: 0; width: max-content; max-width: 260px; padding: 10px 14px; border-radius: 12px; background: #fff; color: #0b0b0c; font-size: 15px; font-weight: 600; line-height: 1.35; text-align: left; white-space: normal; box-shadow: 0 10px 34px rgba(0,0,0,.34); pointer-events: none; animation: vw-hint .4s ease both; }
+  html.vw-hint-on .vw-adjust[aria-expanded="false"]::before { content: ""; position: absolute; top: calc(100% + 8px); right: 26px; width: 14px; height: 14px; background: #fff; transform: rotate(45deg); pointer-events: none; animation: vw-hint .4s ease both; }
   .vw-fab { display: none; }
   .vw-panel { left: auto; right: 12px; top: 130px; bottom: auto; width: 344px; max-height: calc(100svh - 142px); border-radius: 16px; box-shadow: 0 16px 50px rgba(0,0,0,.42); transform: translateY(-8px); opacity: 0; }
   .vw-panel.is-open { opacity: 1; }
@@ -95,4 +99,5 @@ body { margin: 0; background: #0b0b0c; font-family: "Geist", system-ui, -apple-s
 html.vw-bare { --chrome-h: 0px; --chrome-above: 0px; }
 html.vw-bare .vw-top, html.vw-bare .vw-fab, html.vw-bare .vw-panel { display: none; }
 
-@media (prefers-reduced-motion: reduce) { .vw-panel, .vw-sw i, .vw-sw i::after, .vw-blk i, .vw-blk i::after { transition: none; } }
+@keyframes vw-hint { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { html.vw-hint-on .vw-adjust::after, html.vw-hint-on .vw-adjust::before { animation: none; } .vw-panel, .vw-sw i, .vw-sw i::after, .vw-blk i, .vw-blk i::after { transition: none; } }

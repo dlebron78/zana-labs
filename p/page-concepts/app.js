@@ -2,12 +2,12 @@
    All it does: pick a recipe, keep track of what the viewer changed, and ask the framework to draw.
    The framework itself is data.js, tokens.js, blocks.js, effects.js, recipes.js and page.js. */
 
-import { GYMS } from './data.js?v=6';
-import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=6';
-import { buildTokens, CHOICES } from './tokens.js?v=6';
-import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=6';
-import { mountEffects } from './effects.js?v=6';
-import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=6';
+import { GYMS } from './data.js?v=7';
+import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=7';
+import { buildTokens, CHOICES } from './tokens.js?v=7';
+import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=7';
+import { mountEffects } from './effects.js?v=7';
+import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=7';
 
 const $ = (s, el = document) => el.querySelector(s);
 const stage = $('#stage'), topBar = $('#vw-top'), panel = $('#vw-panel'), fab = $('#vw-fab');
@@ -51,7 +51,8 @@ function readUrl() {
   state.outline = Q.get('outline') === '1';
   state.rm = Q.get('rm') === '1';
   state.bare = Q.get('ui') === '0';
-  state.open = Q.has('panel') ? Q.get('panel') === '1' : window.matchMedia('(min-width: 1100px)').matches;
+  /* the panel starts open only where it fits beside the page instead of on top of it; panel=1 in the link forces it open */
+  state.open = Q.has('panel') ? Q.get('panel') === '1' : window.matchMedia('(min-width: 1900px)').matches;
   if (['look', 'motion', 'blocks'].includes(Q.get('tab'))) state.tab = Q.get('tab');
 }
 
@@ -216,6 +217,7 @@ function drawPanel(resetScroll = false) {
   if (key) { const el = panel.querySelector(`[data-do="${key[0]}"]${key[1] != null ? `[data-v="${CSS.escape(key[1])}"]` : ''}`); if (el) el.focus({ preventScroll: true }); }
   syncOpen();
 }
+function hintOff() { document.documentElement.classList.remove('vw-hint-on'); }
 function syncOpen() {
   panel.classList.toggle('is-open', state.open);
   panel.setAttribute('aria-hidden', String(!state.open));
@@ -225,7 +227,7 @@ function syncOpen() {
 
 function act(k, v, el) {
   switch (k) {
-    case 'toggle': state.open = !state.open; syncOpen(); return;
+    case 'toggle': state.open = !state.open; hintOff(); syncOpen(); return;
     case 'tab': state.tab = v; drawPanel(true); return;
     case 'r': if (v !== state.r) { Object.assign(state, { r: v, brand: null, tokens: {}, fx: {}, hero: null, sched: null, follow: null, off: new Set() }); draw(false); } return;
     case 'c': state.brand = v.toUpperCase(); paint(); return;
@@ -301,5 +303,6 @@ readUrl();
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 document.documentElement.classList.toggle('vw-bare', state.bare);
 fab.innerHTML = `${ICON}<span>Adjust this page</span>`;
+if (!state.open && !state.bare) { document.documentElement.classList.add('vw-hint-on'); setTimeout(hintOff, 9000); }   /* a short pointer to the Adjust button, once per visit */
 draw(false);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.dispatchEvent(new Event('resize')));
