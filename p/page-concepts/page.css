@@ -9,6 +9,8 @@
   --bar-h: 68px; --bar-slim: 56px;
   --stick: var(--chrome-h, 0px);             /* anything sticky above the page (the demo's own top bar) */
   --above: var(--chrome-above, 0px);          /* anything above the page that scrolls away with it */
+  --below: var(--chrome-below, 0px);          /* anything docked under the page (the demo's Adjust strip on phones) */
+  --safe: var(--chrome-safe, env(safe-area-inset-bottom, 0px));
   --under: var(--stick);                      /* where sticky parts of the page may start */
   position: relative; overflow-x: clip; min-height: 100vh;
   background: var(--bg); color: var(--ink);
@@ -122,7 +124,7 @@
 .zp-hero__copy { display: grid; gap: clamp(14px, 1.6vw, 20px); justify-items: start; max-width: 760px; }
 
 /* film and slideshow: full-bleed media, words at the bottom left */
-.zp-hero--full { display: grid; align-items: end; min-height: clamp(560px, calc(100svh - var(--stick) - var(--above)), 900px); overflow: hidden; isolation: isolate; background: #0b0b0b; color: #fff; }
+.zp-hero--full { display: grid; align-items: end; min-height: clamp(560px, calc(100svh - var(--stick) - var(--above) - var(--below)), 900px); overflow: hidden; isolation: isolate; background: #0b0b0b; color: #fff; }
 .zp-hero__media { position: absolute; inset: 0; z-index: -2; }
 .zp-hero__media picture, .zp-hero__media .zp-img, .zp-slide, .zp-slide .zp-img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .zp-hero__media video { opacity: 0; transition: opacity .9s ease; }
@@ -413,7 +415,7 @@
 
 /* ---------- the Book button that follows you ---------- */
 .zp-follow {
-  position: fixed; z-index: 45; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 0);
+  position: fixed; z-index: 45; left: 50%; bottom: calc(14px + var(--below) + var(--safe)); transform: translate(-50%, 0);
   display: flex; align-items: center; gap: 16px; max-width: calc(100vw - 24px); padding: 8px 8px 8px 22px;
   background: var(--ink); color: var(--bg); border-radius: var(--r-pill); box-shadow: var(--shadow);
   transition: transform .45s cubic-bezier(.2,.8,.2,1), opacity .3s ease, visibility 0s linear 0s;
@@ -425,9 +427,9 @@
 .zp-follow__btn { min-height: 46px; background: var(--pillBtn); color: var(--pillBtnInk); border-color: transparent; }
 .zp-follow__alt { padding-right: 14px; font-size: 16px; font-weight: 600; text-underline-offset: 3px; white-space: nowrap; }
 .zp-follow--duo { gap: 14px; padding: 8px; }
-.zp-follow--bar { left: 0; right: 0; bottom: 0; transform: none; justify-content: space-between; max-width: none; padding: 10px var(--gut) calc(10px + env(safe-area-inset-bottom, 0px)); border-radius: 0; box-shadow: 0 -1px 0 var(--line-strong); }
+.zp-follow--bar { left: 0; right: 0; bottom: var(--below); transform: none; justify-content: space-between; max-width: none; padding: 10px var(--gut) calc(10px + var(--safe)); border-radius: 0; box-shadow: 0 -1px 0 var(--line-strong); }
 .zp-follow--bar.is-off { transform: translateY(100%); }
-.zp-toast { position: fixed; z-index: 60; left: 50%; bottom: 96px; transform: translate(-50%, 12px); width: max-content; max-width: calc(100vw - 32px); padding: 12px 18px; background: var(--ink); color: var(--bg); border-radius: var(--r-chip); box-shadow: var(--shadow); font-size: 16px; font-weight: 600; line-height: 1.35; text-align: center; opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; }
+.zp-toast { position: fixed; z-index: 60; left: 50%; bottom: calc(96px + var(--below)); transform: translate(-50%, 12px); width: max-content; max-width: calc(100vw - 32px); padding: 12px 18px; background: var(--ink); color: var(--bg); border-radius: var(--r-chip); box-shadow: var(--shadow); font-size: 16px; font-weight: 600; line-height: 1.35; text-align: center; opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; }
 .zp[data-corners="round"] .zp-toast { border-radius: 24px; }
 .zp-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 
