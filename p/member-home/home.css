@@ -155,7 +155,7 @@ b.m-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .m-rows > .m-row:first-child, .m-acc > .m-row { border-top: 0; }
 button.m-row:active { background: var(--fill); }
 @media (hover: hover) { button.m-row:hover { background: #FAFAF8; } button.m-row:active { background: var(--fill); } }
-.m-rd { flex: none; display: grid; width: 76px; line-height: 1.25; }
+.m-rd { flex: none; display: grid; width: 90px; line-height: 1.25; }
 .m-rd > b { font-size: 17px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .m-rd > span { font-size: 14px; color: var(--text2); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .m-rt { flex: 1; display: grid; gap: 2px; min-width: 0; }
