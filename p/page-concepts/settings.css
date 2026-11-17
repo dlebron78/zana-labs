@@ -197,8 +197,9 @@ body.st-dragging .st-grip { cursor: grabbing; }
 .st-pv__bar { display: flex; align-items: center; gap: 12px; min-height: 46px; }
 .st-pv__bar h2 { font-size: 18px; font-weight: 700; }
 .st-pv__bar p { color: var(--ink2); font-size: 15px; }
-.st-pv__bar .st-seg { width: 230px; margin-left: auto; }
-.st-pv__bar .st-seg button { min-height: 38px; }
+.st-pv__bar .st-seg { min-width: 230px; margin-left: auto; }
+.st-pv__bar .st-seg button { min-height: 38px; padding: 5px 16px; }
+@media (max-width: 1179.98px) { .st-pv__bar p { display: none; } }
 .st-pv__pane { display: grid; place-items: start center; min-height: 0; overflow: hidden; }
 .st-pv__holder { position: relative; box-sizing: content-box; overflow: hidden; background: #0b0b0c; }
 .st-pv__holder iframe { position: absolute; left: 0; top: 0; border: 0; background: #0b0b0c; transform-origin: 0 0; }

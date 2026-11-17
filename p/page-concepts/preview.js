@@ -2,9 +2,9 @@
    It keeps no settings of its own. The settings screen sends the settings in force and this draws them with the framework,
    exactly the way a visitor's browser would. Because it is a frame, the page reacts to the frame's width: a phone-wide frame gets the phone layout. */
 
-import { buildPage, applyTokens, wirePage } from './page.js?v=12';
-import { mountEffects } from './effects.js?v=12';
-import { compose, tokensOf, resolve, blocksOf } from './owner.js?v=12';
+import { buildPage, applyTokens, wirePage } from './page.js?v=13';
+import { mountEffects } from './effects.js?v=13';
+import { compose, tokensOf, resolve, blocksOf } from './owner.js?v=13';
 
 const stage = document.getElementById('stage');
 const mqStill = window.matchMedia('(prefers-reduced-motion: reduce)');

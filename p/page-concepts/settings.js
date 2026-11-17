@@ -3,8 +3,8 @@
    owner.js turns those into the settings in force, and the preview frame draws them.
    What an owner may change, and how far, is decided in owner.js. This file only draws the controls. */
 
-import { FX } from './recipes.js?v=12';
-import { OWNER_GYM, STYLES, SPACES, SIZES, OWNER_FX, TOP, LOCKED, STYLE, resolve, tokensOf, coverUse, photoCards, scaleOf } from './owner.js?v=12';
+import { FX } from './recipes.js?v=13';
+import { OWNER_GYM, STYLES, SPACES, SIZES, OWNER_FX, TOP, LOCKED, STYLE, resolve, tokensOf, coverUse, photoCards, scaleOf } from './owner.js?v=13';
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -450,25 +450,32 @@ function mountFrame() {
   if (frame) return;
   frame = document.createElement('iframe');
   frame.title = W.pvTitle;
-  frame.src = 'preview.html?v=12';
+  frame.src = 'preview.html?v=13';
   $('#st-holder').append(frame);
   fit();
 }
 
-/* size the frame: a phone at its real width, or a 1280px laptop scaled down to fit the space */
+/* size the frame: a phone at its real width, or a 1280px laptop scaled down to fit the space.
+   The space is measured, never assumed: the note above the screen can wrap, and the window can change. */
+let fitKey = '';
 function fit() {
   const holder = $('#st-holder'), pane = $('#st-pane');
   const mode = !mqWide.matches ? 'full' : state.device;
-  holder.className = 'st-pv__holder is-' + mode;
-  holder.style.cssText = '';
-  if (frame) frame.style.cssText = '';
+  let hold = '', inner = '';
   if (mode !== 'full') {
     const W0 = pane.clientWidth, H0 = pane.clientHeight;
-    let w, h, k = 1;
-    if (mode === 'phone') { w = 390; h = Math.round(Math.max(420, Math.min(H0 - 20, 800))); }
+    let w, h, k;
+    if (mode === 'phone') { w = 390; k = Math.max(.5, Math.min(1, (W0 - 20) / w)); h = Math.round(Math.max(340, Math.min((H0 - 20) / k, 800))); }   // 20: the bezel
     else { w = 1280; k = Math.min(1, (W0 - 2) / w); h = Math.round(Math.max(640, Math.min(900, (H0 - 2) / k))); }
-    holder.style.cssText = `width:${Math.floor(w * k)}px;height:${Math.floor(h * k)}px`;
-    if (frame) frame.style.cssText = `width:${w}px;height:${h}px;transform:scale(${k})`;
+    hold = `width:${Math.floor(w * k)}px;height:${Math.floor(h * k)}px`;
+    inner = `width:${w}px;height:${h}px;transform:scale(${k})`;
+  }
+  const key = [mode, hold, inner, !!frame].join('|');
+  if (key !== fitKey) {
+    fitKey = key;
+    holder.className = 'st-pv__holder is-' + mode;
+    holder.style.cssText = hold;
+    if (frame) frame.style.cssText = inner;
   }
   const changed = mode !== fitMode; fitMode = mode;
   return changed;
@@ -488,6 +495,7 @@ function send(extra = {}) {
 }
 /* the layout changed (a resize, the phone and laptop switch, Settings and Preview): size the frame again and have it redraw if its shape changed */
 function relayout() {
+  document.documentElement.style.setProperty('--labs-h', $('#st-labs').offsetHeight + 'px');
   const changed = fit();
   if (shown() && (changed || stale)) requestAnimationFrame(() => send({ redraw: true }));
 }
@@ -660,9 +668,12 @@ readUrl();
 render();
 if (Q.get('frame') !== 'late') mountFrame();
 let resizeT = 0;
-window.addEventListener('resize', () => { cancelAnimationFrame(resizeT); resizeT = requestAnimationFrame(relayout); });
+const refit = () => { cancelAnimationFrame(resizeT); resizeT = requestAnimationFrame(relayout); };
+window.addEventListener('resize', refit);
 mqWide.addEventListener('change', relayout);
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { document.documentElement.style.setProperty('--labs-h', $('#st-labs').offsetHeight + 'px'); relayout(); });   // the note may wrap differently once the typeface is in
+/* the space for the preview also changes without a resize: the note above wraps when the language or the typeface changes */
+if ('ResizeObserver' in window) { const ro = new ResizeObserver(refit); ro.observe($('#st-labs')); ro.observe($('#st-pane')); }
+else if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
 
 /* Test aids, off unless the link asks for them (keys=1). They press the same controls a click does, so a check can be run from the keyboard.
    frame=late holds the preview back until "i" is pressed. */
