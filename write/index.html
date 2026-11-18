@@ -227,7 +227,7 @@ function orderFor(name){var all=[['write','sentence','stack'],['write','stack','
  if(!name)return all[Math.floor(Math.random()*6)].slice();
  var h=0,s=String(name).trim().toLowerCase();for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return all[h%6].slice();}
 if(GUIDED){G=labs.store.get('guided',null);
- if(!G||Q.get('restart')!==null){var o=orderFor(labs.tester);G={order:o,round:0,started:Date.now(),done:[],finished:false};labs.store.set('guided',G);}
+ if(!G||Q.get('restart')!==null){var o=orderFor(labs.tester);G={order:o,round:0,started:Date.now(),done:[],finished:false,synced:!!(window.LABS_CONFIG||{}).posthogKey};labs.store.set('guided',G);}
  ONE=G.order[Math.min(G.round,2)];M=ONE;START='blank';P=blank();READY=false;labs.store.set('day-'+VN[M],null);}
 function saveG(){labs.store.set('guided',G);}
 /* testers from before tracking was on: send their saved rounds once, the first time they reopen the link with tracking on */
@@ -248,7 +248,7 @@ function rateRound(meta){var a=$('after'),val=null;
  $('rnext').addEventListener('click',function(){if(!val)return;meta.natural=val;meta.note=$('rnote').value;labs.track('round_done',meta);G.done.push({version:meta.version,natural:val,p:(JSON.parse(meta.text)||[])[0]||null});saveG();nextRound();});
  a.scrollIntoView({behavior:'smooth',block:'start'});}
 function tapQ(key,q,opts){return '<div style="display:grid;gap:8px"><b style="font-size:15px">'+q+' <span style="font-weight:400;color:var(--text2);font-size:14px">(optional)</span></b><div class="rate opts" data-q="'+key+'">'+opts.map(function(o){return '<button type="button">'+o+'</button>';}).join('')+'</div></div>';}
-function showFinal(){G.finished=true;saveG();labs.track('all_rounds_done');
+function showFinal(){if(!G.finished)labs.track('all_rounds_done');G.finished=true;saveG(); /* counted once, not again each time they reopen the link */
  document.querySelector('.cols').hidden=true;$('task').hidden=true;$('idea').hidden=true;$('h1').textContent='Last few questions';
  var pick=null,a=$('after');
  a.innerHTML='<div class="after"><h2>Which way would you use?</h2><p>Your three rounds, as you wrote them.</p><div class="picks">'+G.order.map(function(m,k){var d=G.done[k]||{};return '<button class="pick" type="button" data-m="'+m+'"><span class="ph">Round '+(k+1)+(d.natural?' <small>you rated it '+d.natural+' of 5</small>':'')+'</span>'+miniFor(m,d.p)+'</button>';}).join('')+
