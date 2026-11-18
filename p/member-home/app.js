@@ -5,8 +5,8 @@
    Motion: sheets slide up and back down, a new screen fades in, a toast rises with a line that runs down while Undo is still possible,
    a status that just changed pops once, and a payment shows a short wait on its button. All of it stops when the device asks for less motion. */
 
-import { b, MEMBERS, GYMS, WORKOUTS, W, F, CARDS, TEST_CARDS, DECLINES } from './data.js?v=10';
-import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms, curCard } from './views.js?v=10';
+import { b, MEMBERS, GYMS, WORKOUTS, W, F, CARDS, TEST_CARDS, DECLINES } from './data.js?v=11';
+import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms, curCard } from './views.js?v=11';
 import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=10';
 
 const $ = id => document.getElementById(id);

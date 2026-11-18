@@ -494,7 +494,7 @@ export const CARDS = { ines: [VISA], maria: [VISA, MC], rafa: [VISA], carmen: [V
   MEMBERS.carmen.receipts[1].who = 'mateo';
 }
 /* Test numbers, the way payment services ship them: one that goes through, one that the bank declines. */
-export const TEST_CARDS = { ok: { no: '4242 4242 4242 4242', exp: '12/29', cvc: '123', zip: '00907' }, bad: { no: '4000 0000 0000 0002', exp: '12/29', cvc: '123', zip: '00907' } };
+export const TEST_CARDS = { ok: { no: '4000 0566 5566 5556', exp: '12/29', cvc: '123', zip: '00907' }, bad: { no: '4000 0000 0000 0002', exp: '12/29', cvc: '123', zip: '00907' } };
 export const DECLINES = ['4000000000000002'];
 
 Object.assign(W, {
