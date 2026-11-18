@@ -163,7 +163,12 @@ h1{margin:4px 0 20px;font-size:40px;font-weight:700;letter-spacing:-.03em;line-h
 .away .tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#777}
 .away .bx .btn{width:100%}
 
-@media (min-width:761px){body.wzopen .page{margin-right:520px}}
+@media (min-width:761px){
+  body.wzopen.panel .page{margin-right:520px}
+  .wz.modal{left:50%;right:auto;top:50%!important;transform:translate(-50%,-50%);width:600px;height:min(660px,calc(var(--vh) - 48px));border:1px solid var(--line);border-radius:20px;box-shadow:0 24px 60px rgba(17,17,17,.28)}
+  .scrim{position:fixed;inset:0;background:rgba(17,17,17,.38);z-index:39}
+}
+@media (max-width:760px){.scrim{display:none}}
 @media (max-width:760px){
   .band{display:none}
   .phd{display:flex;align-items:center;gap:10px;height:56px;padding:0 16px;background:var(--frame);color:#fff;font-weight:700;position:sticky;top:0;z-index:5}
@@ -203,9 +208,11 @@ h1{margin:4px 0 20px;font-size:40px;font-weight:700;letter-spacing:-.03em;line-h
     <b>Mock controls · not part of the design</b>
     <div class="r">Address <span class="mseg" id="m-where"><button data-v="pr">San Juan, PR</button><button data-v="us">Miami, FL</button></span></div>
     <div class="r">Group classes <span class="mseg" id="m-cls"><button data-v="1">Yes</button><button data-v="0">No</button></span> Staff <span class="mseg" id="m-staff"><button data-v="1">Yes</button><button data-v="0">No</button></span></div>
+    <div class="r">On a laptop <span class="mseg" id="m-box"><button data-v="panel">Side panel</button><button data-v="modal">Centered modal</button></span></div>
     <div class="r"><button class="btn sm" id="m-reset">Start over, as just signed up</button></div>
   </div>
 </main>
+<div class="scrim" id="scrim" hidden></div>
 <div class="wz" id="wz" role="dialog" aria-modal="false" aria-labelledby="wzt" hidden></div>
 <div class="away" id="away" hidden></div>
 <div class="toast" id="toast" hidden></div>
@@ -222,7 +229,7 @@ const TOP=['ATH Móvil','Cash','Venmo','Zelle','PayPal','Cash App'];
 const MORE=['Check','Bank transfer','Own card terminal','Payment link'];
 const PAYTO={'ATH Móvil':['Phone or pATH','787 555 0142'],'Venmo':['Venmo username','@barriofitness'],'Zelle':['Email or phone','pagos@barrio.fit'],'PayPal':['PayPal email','pagos@barrio.fit'],'Cash App':['$Cashtag','$barriofit'],'Bank transfer':['Bank and account','Banco Popular · 1234'],'Payment link':['Link','https://pay.barrio.fit']};
 
-let S;
+let S;let BOX='panel';
 function fresh(keep){
   S={where:keep?S.where:'pr',classes:keep?S.classes:true,staff:keep?S.staff:true,
     methods:[],others:[],more:false,otherName:'',payto:{},card:'none',tax:null,basis:null,rates:[],
@@ -279,7 +286,9 @@ function move(dir){
 function finishStep(st){S.status[S.cur]=st;move(1);}
 
 function drawWz(){
-  const wz=$('#wz');wz.hidden=!S.open;document.body.classList.toggle('wzopen',S.open);if(!S.open)return;
+  const wz=$('#wz');wz.hidden=!S.open;document.body.classList.toggle('wzopen',S.open);
+  document.body.classList.toggle('panel',BOX==='panel');wz.classList.toggle('modal',BOX==='modal');wz.setAttribute('aria-modal',BOX==='modal');
+  $('#scrim').hidden=!(S.open&&BOX==='modal');fit();if(!S.open)return;
   const list=ids();
   if(S.cur==='end'){wz.innerHTML=head(null)+'<div class="wb">'+viewEnd()+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="go-today">Go to Today</button></div>';
     $('#go-today').onclick=closeWz;$('#wz-x').onclick=closeWz;return;}
@@ -528,15 +537,18 @@ let tt;function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;c
 function drawAll(){drawToday();drawWz();drawMock();}
 function drawMock(){
   const set=(id,v)=>document.querySelectorAll(id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
-  set('#m-where',S.where);set('#m-cls',S.classes?'1':'0');set('#m-staff',S.staff?'1':'0');
+  set('#m-where',S.where);set('#m-box',BOX);set('#m-cls',S.classes?'1':'0');set('#m-staff',S.staff?'1':'0');
 }
 document.querySelectorAll('#m-where button').forEach(b=>b.onclick=()=>{S.where=b.dataset.v;ratesFor();drawAll();});
 document.querySelectorAll('#m-cls button').forEach(b=>b.onclick=()=>{S.classes=b.dataset.v==='1';if(!S.classes&&S.cur==='class')S.cur='join';drawAll();});
 document.querySelectorAll('#m-staff button').forEach(b=>b.onclick=()=>{S.staff=b.dataset.v==='1';if(!S.staff&&S.cur==='staff')S.cur='join';drawAll();});
+document.querySelectorAll('#m-box button').forEach(b=>b.onclick=()=>{BOX=b.dataset.v;S.open=true;drawAll();});
+$('#scrim').onclick=()=>closeWz();
 $('#m-reset').onclick=()=>{fresh(true);drawAll();};
 $('#dateline').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
 /* the panel fits the visible screen, keyboard included, so it never scrolls */
-function fit(){const v=window.visualViewport;document.documentElement.style.setProperty('--vh',(v?v.height:innerHeight)+'px');const w=$('#wz');if(w&&v)w.style.top=v.offsetTop+'px';}
+function fit(){const v=window.visualViewport;document.documentElement.style.setProperty('--vh',(v?v.height:innerHeight)+'px');const w=$('#wz');if(!w)return;
+  if(BOX==='modal'&&innerWidth>760){w.style.top='';}else if(v){w.style.top=v.offsetTop+'px';}}
 if(window.visualViewport){visualViewport.addEventListener('resize',fit);visualViewport.addEventListener('scroll',fit);}addEventListener('resize',fit);fit();
 fresh();drawAll();
 </script>
