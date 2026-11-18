@@ -1,7 +1,7 @@
 /* Member home: what the phone draws. Pure text in, text out: no page access here, so the same code can be checked without a browser.
    The one rule behind every screen: a thing shows only when this person has one. Nothing is ever shown empty or locked. */
 
-import { DAYS, WEEKS, BOOK_AHEAD, CLOSED, WODS, NOT_READY, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=9';
+import { DAYS, WEEKS, BOOK_AHEAD, CLOSED, WODS, NOT_READY, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=10';
 
 let S;                                      // the state being drawn: draw() and bind() set it, the helpers below read it
 export const bind = state => { S = state; };
@@ -40,6 +40,7 @@ const I = {
   out: svg('<path d="M14 4.5h4.5v15H14"/><path d="M10 8l-4 4 4 4M6 12h9"/>'),
   globe: svg('<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.4 2.3 3.5 5 3.5 8s-1.1 5.7-3.5 8c-2.4-2.3-3.5-5-3.5-8s1.1-5.7 3.5-8z"/>'),
   lock: svg('<rect x="5.5" y="10.5" width="13" height="9.5" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>'),
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
   bolt: svg('<path d="M13 3.5 5.5 13.5H12l-1 7 7.5-10H12z"/>'),
 };
 
@@ -53,6 +54,18 @@ const face = (id, cls = '') => {
 const pop = (who, id) => (S.flash === `${who}:${id}` ? ' m-pop' : '');
 /* a row with an icon on the left: the smaller pages are built from these */
 const irow = (icon, title, sub, right = '', act = '') => `<${act ? 'button' : 'div'} class="m-row m-irow"${act}><span class="m-ic">${I[icon]}</span><span class="m-rt"><b>${title}</b>${sub ? `<span>${sub}</span>` : ''}</span>${right}</${act ? 'button' : 'div'}>`;
+
+/* ---------- cards on file ---------- */
+const cardById = id => me().cards.find(c => c.id === id);
+export const curCard = () => (S.sheet && S.sheet.card && cardById(S.sheet.card)) || cardById(me().card) || me().cards[0] || null;
+const cardName = c => f().cardName(c.brand, c.last4);
+/* the card form: the first card, or another one. Nothing typed here leaves the phone; it is all pretend */
+function cardForm(withSave) {
+  const fl = (id, label, ph, mode, ac, cls = '') => `<div class="m-cff${cls}"><label for="cf-${id}">${T(label)}</label><input class="m-in" id="cf-${id}" data-cf="${id}" inputmode="${mode}" autocomplete="${ac}" placeholder="${ph}" spellcheck="false"></div>`;
+  return `<div class="m-cf">${fl('no', W.cardNo, '1234 1234 1234 1234', 'numeric', 'cc-number', ' m-cfw')}${fl('exp', W.expires, 'MM/YY', 'numeric', 'cc-exp')}${fl('cvc', W.cvc, '123', 'numeric', 'cc-csc')}${fl('zip', W.zip, '00907', 'numeric', 'postal-code')}</div>
+    <p class="m-err" id="cf-err" role="alert" hidden></p>${withSave ? `<label class="m-check"><input type="checkbox" id="cf-save" checked><span>${T(W.saveCard)}</span></label>` : ''}
+    <p class="m-test">${T(W.testLead)} <button type="button" data-act="testcard" data-arg="ok">${T(W.testOk)}</button> ${T(W.orW)} <button type="button" data-act="testcard" data-arg="bad">${T(W.testBad)}</button></p>`;
+}
 
 /* ---------- time and dates ---------- */
 export function clock(hm) {
@@ -203,7 +216,7 @@ function tabs() {                             // the pick: a bar at the bottom. 
 }
 const isTab = s => ['home', 'schedule', 'workouts', 'account'].includes(s);
 const titleOf = s => (s === 'gym' ? aboutName() : s === 'account' && S.nav === 'tabs' ? t(W.meTab) : t(W[s]));
-const underMe = s => ['plan', 'family'].includes(s) && (S.nav === 'tabs' || FX());     // pages reached from her initials go back there
+const underMe = s => ['plan', 'family', 'receipts'].includes(s) && (S.nav === 'tabs' || FX());     // pages reached from her initials go back there
 
 /* ---------- the bar on top ---------- */
 function top() {
@@ -361,7 +374,8 @@ function planBlock(link) {
     else if (pl.kind === 'pack') { title = planName(pl); line = `${pl.left <= 2 ? `<strong>${esc(f().left(pl.left, g.unit))}</strong>` : esc(f().left(pl.left, g.unit))}${pl.left > 0 ? ` · ${esc(f().useBy(t(pl.until)))}` : ''}`; }
     else { title = planName(pl); line = pl.due ? `<strong class="m-bad">${T(W.payFailed)}</strong>` : esc(f().renews(t(pl.renews), pl.price || prod(pl.pid).price)); }
     const inner = `<span class="m-rt"><b>${esc(title)}${tag(p)}</b><span>${line}</span></span>`;
-    rows.push(link ? `<button class="m-row" data-act="go" data-arg="plan">${inner}${I.right}</button>` : `<div class="m-row">${inner}</div>`);
+    const more = pl && pl.kind === 'pack' ? `<button class="btn sm" data-act="sheet" data-kind="packs" data-who="${p.id}">${T(W.buyMore)}</button>` : '';
+    rows.push(link ? `<button class="m-row" data-act="go" data-arg="plan">${inner}${I.right}</button>` : `<div class="m-row">${inner}${more}</div>`);
     const o = offerFor(m, p.id);
     /* while the notice on top carries the offer, it is not said twice down here */
     if (o && !(o.empty && !pl.quiet)) { const c = offerCopy(o); rows.push(`<div class="m-offer"><p class="m-lab">${T(W.offer)}</p><div><b>${esc(c.title)}</b><p>${esc(c.line)}</p></div>${buyBtn(o, p.id)}</div>`); }
@@ -447,10 +461,17 @@ function planPage() {
     const price = priceFor(m, self.id, pr.id), cur = mine && mine.pid === pr.id;
     return `<div class="m-row"><span class="m-rt"><b>${T(pr.name)}</b><span>$${price}${pr.kind === 'plan' ? ` ${T(W.aMonth)}` : ''}${price < pr.price ? ` · <s>$${pr.price}</s>` : ''}${cur ? ` · ${T(W.current)}` : ''}</span></span><button class="btn sm" data-act="sheet" data-kind="pay" data-pay="product" data-id="${pr.id}" data-who="${self.id}">${T(W.buy)}</button></div>`;
   }).join('') : '';
-  const card = irow('card', T(W.cardBrand), T(W.cardExp), `<button class="btn sm" data-act="mock">${T(W.change)}</button>`);
-  const rec = m.receipts.map(r => irow('receipt', T(r.what), T(r.d), `<span class="m-amt">$${r.amt}</span>`)).join('');
+  const cc = curCard();
+  const card = cc ? irow('card', esc(cardName(cc)), esc(f().cardExp(cc.exp)), `<button class="btn sm" data-act="sheet" data-kind="cards">${T(W.change)}</button>`)
+    : irow('card', T(W.noCard), T(W.noCardLine), `<button class="btn sm" data-act="sheet" data-kind="addcard">${T(W.addCard)}</button>`);
+  const rec = m.receipts.slice(0, 2).map(recRow).join('') + (m.receipts.length > 2 ? `<button class="m-row m-irow" data-act="go" data-arg="receipts"><span class="m-ic">${I.receipt}</span><span class="m-rt"><b>${T(W.allReceipts)}</b></span><span class="m-count">${m.receipts.length}</span>${I.right}</button>` : '');
   return `<div class="m-page">${planBlock(false)}${listCard(t(W.options), options)}${listCard(t(W.card), card)}${listCard(t(W.receipts), rec)}
     ${listCard(t(W.pause), irow('pause', T(W.askPause), T(W.pauseLine), I.right, ' data-act="pause"'))}</div>`;
+}
+const recRow = r => `<button class="m-row m-irow" data-act="sheet" data-kind="receipt" data-id="${r.no}"><span class="m-ic">${I.receipt}</span><span class="m-rt"><b>${T(r.what)}${r.who && fam() ? tag(person(r.who)) : ''}</b><span>${T(r.d)}</span></span><span class="m-amt">$${r.amt}</span>${I.right}</button>`;
+function receiptsPage() {
+  const m = me();
+  return `<div class="m-page">${m.receipts.length ? `<section class="m-sec"><div class="card m-rows">${m.receipts.map(recRow).join('')}</div></section>` : emptyCard(t(W.noReceipts), '')}</div>`;
 }
 function familyPage() {
   const m = me(), self = m.people[0];
@@ -475,7 +496,7 @@ function accountPage() {
   const m = me(), g = gym(), h = has(m);
   const mine = S.nav === 'tabs' || FX();       // everything that is hers, under her initials
   const links = mine
-    ? `<div class="card m-rows">${[['plan', 'plan', t(W.plan)], h.family && ['family', 'people', t(W.family)], S.nav === 'tabs' && ['gym', 'store', aboutName()]].filter(Boolean).map(([id, icon, label]) => `<button class="m-row m-irow" data-act="go" data-arg="${id}"><span class="m-ic">${I[icon]}</span><span class="m-rt"><b>${esc(label)}</b></span>${I.right}</button>`).join('')}</div>` : '';
+    ? `<div class="card m-rows">${[['plan', 'plan', t(W.plan)], ['receipts', 'receipt', t(W.receipts)], h.family && ['family', 'people', t(W.family)], S.nav === 'tabs' && ['gym', 'store', aboutName()]].filter(Boolean).map(([id, icon, label]) => `<button class="m-row m-irow" data-act="go" data-arg="${id}"><span class="m-ic">${I[icon]}</span><span class="m-rt"><b>${esc(label)}</b></span>${I.right}</button>`).join('')}</div>` : '';
   const bk = mine && h.book ? listCard(t(W.upcoming), m.bookings.slice().sort(byWhen).map(x => {
     const k = CLASSES[x.cls], c = findClass(bid(x));
     return c ? `<button class="m-row" data-act="sheet" data-kind="class" data-id="${c.id}" data-who="${x.who}"><span class="m-rd"><b>${esc(dayShort(x.day))}</b><span>${clock(x.time)}</span></span><span class="m-rt"><b>${T(k.name)}${tag(person(x.who))}</b><span class="m-sub">${face(c.coach, 'xs')}${esc(COACHES[c.coach])}</span></span><span class="m-st ${x.wait ? 'q' : 'ok'}">${x.wait ? T(W.waiting) : I.check + T(W.booked)}</span></button>` : '';
@@ -487,7 +508,7 @@ function accountPage() {
     <button class="m-out" data-act="mock">${I.out}${T(W.signOut)}</button><p class="m-ver">Zana · ${esc(g.name)}</p></div>`;
 }
 function body() {
-  return ({ home, schedule, workouts: workoutsPage, plan: planPage, family: familyPage, gym: gymPage, account: accountPage }[S.screen] || home)();
+  return ({ home, schedule, workouts: workoutsPage, plan: planPage, receipts: receiptsPage, family: familyPage, gym: gymPage, account: accountPage }[S.screen] || home)();
 }
 
 /* ---------- the one pop-up: a sheet from the bottom. One black button in each ---------- */
@@ -503,7 +524,7 @@ function classSheet() {
   }
   else if (tk >= k.cap) { state = `<p class="m-state q">${T(W.full)}. ${esc(f().spotsOf(tk, k.cap))}.</p>`; action = `<button class="btn pri lg m-wide" data-act="wait" data-id="${c.id}" data-who="${p.id}">${T(W.waitJoin)}</button>`; fine = t(W.waitNote); }
   else if (cost.kind === 'pay') {
-    action = `<button class="btn pri lg m-wide" data-act="bookpay" data-id="${c.id}" data-who="${p.id}">${esc(f().bookPay(cost.amount))}</button>`; fine = f().charged(cost.amount);
+    action = `<button class="btn pri lg m-wide" data-act="bookpay" data-id="${c.id}" data-who="${p.id}">${esc(f().bookPay(cost.amount))}</button>`; fine = curCard() ? f().chargedTo(cost.amount, cardName(curCard())) : f().chargedNext(cost.amount);
     if (o) extra = `<div class="m-offer m-inset"><p class="m-lab">${T(W.offer)}</p><div><b>${esc(offerCopy(o).title)}</b><p>${esc(offerCopy(o).line)}</p></div>${buyBtn(o, p.id)}</div>`;   // the offer sits under the button, never in front of it
   } else {
     action = `<button class="btn pri lg m-wide" data-act="book" data-id="${c.id}" data-who="${p.id}">${T(W.book)}</button>`;
@@ -537,15 +558,60 @@ function logSheet() {
   return { title: `${T(W.logTitle)}`, body: `<p class="m-meta">${T(CLASSES[tr].name)} · ${T(w.title)}</p>${fields}<p class="m-err" id="m-log-err" hidden>${T(W.logEmpty)}</p><button class="btn pri lg m-wide" data-act="savelog">${T(W.save)}</button>` };
 }
 function paySheet() {
-  const m = me(), pay = S.sheet.pay, p = person(pay.who);
-  let what, amt;
-  if (pay.type === 'due') { const a = m.alerts.find(x => x.id === pay.id), pl = m.plans.find(x => x.who === a.who); amt = a.amount; what = planName(pl); }
-  else { const pr = prod(pay.id); amt = priceFor(m, pay.who, pay.id); what = `${t(pr.name)}${pr.kind === 'plan' ? `, $${amt} ${t(W.aMonth)}` : ''}`; }
-  const when = pay.type === 'due' ? esc(f().wasDue(t(m.alerts.find(x => x.id === pay.id).since))) : T(W.payToday);
-  const card = irow('card', T(W.cardBrand), T(W.cardExp), `<button class="btn sm" data-act="mock">${T(W.change)}</button>`);   // pretend: Change does nothing
-  return { title: esc(what), body: `<div class="m-sum"><span class="m-time">$${amt}</span><span class="m-sumd">${when}</span></div>${fam() ? `<p class="m-for"><span class="m-lab">${T(W.forWord)}</span> <b>${p.me ? T(W.me) : esc(p.name)}</b></p>` : ''}
-    <div class="card m-rows m-paycard">${card}</div>
-    <button class="btn pri lg m-wide" data-act="pay">${esc(f().payAmt(amt))}</button><p class="m-fine">${T(W.receiptLine)}</p>` };
+  const m = me(), pay = S.sheet.pay, p = person(pay.who), g = gym();
+  let what, amt, when, line = '';
+  if (pay.type === 'due') { const a = m.alerts.find(x => x.id === pay.id), pl = m.plans.find(x => x.who === a.who); amt = a.amount; what = planName(pl); when = esc(f().wasDue(t(a.since))); }
+  else if (pay.type === 'class') { const c = findClass(pay.id); amt = g.single; what = t(CLASSES[c.cls].name); when = `${c.day === 0 ? `${T(W.today)} · ` : ''}${esc(dateLine(c.day))} · ${clock(c.time)}`; }
+  else {
+    const pr = prod(pay.id); amt = priceFor(m, pay.who, pay.id); what = `${t(pr.name)}${pr.kind === 'plan' ? `, $${amt} ${t(W.aMonth)}` : ''}`; when = T(W.payToday);
+    if (pr.kind === 'pack') line = `<p class="m-meta">${esc(f().packLine(pr.n, g.unit, Math.round(amt / pr.n), S.lang === 'es' ? '15 feb' : 'Feb 15'))}</p>`;
+  }
+  const d = S.sheet.declined, cc = curCard(), form = !m.cards.length;
+  const state = d ? `<div class="m-warn bad m-decl"><b>${esc(f().declined(d.name))}</b><span>${T(d.n > 1 ? W.declinedAgain : W.declinedLine)}</span></div>` : '';
+  const card = form ? cardForm(true) : `<div class="card m-rows m-paycard">${irow('card', esc(cardName(cc)), esc(f().cardExp(cc.exp)), `<button class="btn sm" data-act="sheet" data-kind="cards">${T(W.change)}</button>`)}</div>`;
+  const action = d && !form
+    ? `<button class="btn pri lg m-wide" data-act="sheet" data-kind="cards">${T(W.useAnother)}</button><button class="m-link m-center" data-act="pay">${T(W.tryAgain)}</button>`
+    : `<button class="btn pri lg m-wide" data-act="pay">${esc(pay.type === 'class' ? f().bookPay(amt) : f().payAmt(amt))}</button><p class="m-fine">${T(W.receiptLine)}</p>`;
+  return { title: esc(what), body: `<div class="m-sum"><span class="m-time">$${amt}</span><span class="m-sumd">${when}</span></div>${line}${fam() ? `<p class="m-for"><span class="m-lab">${T(W.forWord)}</span> <b>${p.me ? T(W.me) : esc(p.name)}</b></p>` : ''}
+    ${state}${card}${action}` };
+}
+/* Buy more: pick a pack, then pay for it on the next sheet */
+function packsSheet() {
+  const m = me(), g = gym(), who = S.sheet.who, o = offerFor(m, who), mine = m.plans.find(x => x.who === who);
+  const packs = g.products.filter(x => x.kind === 'pack');
+  const each = pr => Math.round(priceFor(m, who, pr.id) / pr.n);
+  const best = packs.reduce((a, x) => (each(x) < each(a) ? x : a), packs[0]);
+  const ids = g.products.map(x => x.id), pick = ids.includes(S.sheet.pick) ? S.sheet.pick : (o && ids.includes(o.pid) ? o.pid : best.id);
+  const opt = pr => {
+    const price = priceFor(m, who, pr.id), on = pr.id === pick;
+    const sub = pr.kind === 'plan' ? `$${price} ${T(W.aMonth)} · ${T(W.asManyAs)}` : `$${price} · ${esc(f().each(each(pr), g.unit))}${price < pr.price ? ` · <s>$${pr.price}</s>` : ''}`;
+    const badge = pr.kind === 'pack' && pr.id === best.id && packs.length > 1 ? `<span class="m-tag m-tagv">${T(W.bestValue)}</span>` : o && o.pid === pr.id && price < pr.price ? `<span class="m-tag m-tagv">${T(W.offer)}</span>` : '';
+    return `<button class="m-row m-opt" data-act="pick" data-arg="${pr.id}" aria-pressed="${on}"><span class="m-radio" aria-hidden="true"></span><span class="m-rt"><b>${T(pr.name)}${mine && mine.pid === pr.id ? ` <span class="m-tag">${T(W.current)}</span>` : ''}</b><span>${sub}</span></span>${badge}</button>`;
+  };
+  const p = person(who), left = mine && mine.kind === 'pack' ? `<p class="m-meta">${esc(f().left(mine.left, g.unit))}${mine.left > 0 ? ` · ${esc(f().useBy(t(mine.until)))}` : ''}</p>` : '';
+  return { title: esc(f().packsTitle(g.unit)), body: `${left}${fam() && !p.me ? `<p class="m-for"><span class="m-lab">${T(W.forWord)}</span> <b>${esc(p.name)}</b></p>` : ''}<div class="card m-rows m-opts" role="radiogroup">${g.products.map(opt).join('')}</div>
+    <button class="btn pri lg m-wide" data-act="sheet" data-kind="pay" data-pay="product" data-id="${pick}" data-who="${who}">${esc(f().continueAmt(priceFor(m, who, pick)))}</button>` };
+}
+/* Change card: pick one of her cards, or add another */
+function cardsSheet() {
+  const m = me(), pick = S.sheet.pick || (curCard() || {}).id, mine = m.plans.find(x => x.who === m.people[0].id && x.kind === 'plan');
+  const rows = m.cards.map(c => `<button class="m-row m-opt" data-act="pick" data-arg="${c.id}" aria-pressed="${c.id === pick}"><span class="m-radio" aria-hidden="true"></span><span class="m-ic">${I.card}</span><span class="m-rt"><b>${esc(cardName(c))}</b><span>${esc(f().cardExp(c.exp))}</span></span></button>`).join('');
+  const add = `<button class="m-row m-irow" data-act="sheet" data-kind="addcard"><span class="m-ic">${I.plus}</span><span class="m-rt"><b>${T(W.addCard)}</b></span>${I.right}</button>`;
+  return { title: T(W.cardsTitle), body: `<div class="card m-rows m-opts" role="radiogroup">${rows}${add}</div>
+    <button class="btn pri lg m-wide" data-act="usecard">${T(W.useCard)}</button><p class="m-fine">${esc(mine ? f().renewsOn(planName(mine)) : f().cardsFine())}</p>` };
+}
+function addcardSheet() {
+  return { title: T(W.addCard), body: `${cardForm(false)}<button class="btn pri lg m-wide" data-act="savecard">${T(W.saveCardBtn)}</button>` };
+}
+/* one receipt, opened */
+function receiptSheet() {
+  const m = me(), g = gym(), r = m.receipts.find(x => String(x.no) === String(S.sheet.id));
+  if (!r) return { title: T(W.receipt), body: '' };
+  const who = r.who ? person(r.who) : null;
+  return { title: esc(f().receiptNo(r.no)), body: `<div class="m-rhead"><span class="m-logo" aria-hidden="true">${g.mark}</span><span class="m-rt"><b>${esc(g.name)}</b><span>${esc(g.addr || g.hood)}</span></span></div>
+    <div class="m-sum"><span class="m-time">$${r.amt}</span><span class="m-sumd">${T(r.d)}</span></div>
+    <div class="card m-rows m-paycard">${kv(T(W.itemW), `<b>${T(r.what)}</b>`)}${who && fam() ? kv(T(W.forWord), esc(who.me ? t(W.me) : who.name)) : ''}${kv(T(W.dateW), T(r.d))}${kv(T(W.paidWith), esc(f().cardName(r.brand, r.last4)))}</div>
+    <button class="btn lg m-wide" data-act="emailcopy">${T(W.emailCopy)}</button><p class="m-fine">${esc(g.name)} · ${esc(g.email)}</p>` };
 }
 function newsSheet() {
   const n = gym().news;
@@ -557,11 +623,11 @@ function sessionSheet() {
     <button class="btn lg m-wide" data-act="nosession">${T(W.cancelSession)}</button><p class="m-fine">${esc(f().sessionLine(s.coach))}</p>` };
 }
 function sheet() {
-  const v = ({ class: classSheet, cancel: cancelSheet, log: logSheet, pay: paySheet, news: newsSheet, session: sessionSheet }[S.sheet.kind])();
+  const v = ({ class: classSheet, cancel: cancelSheet, log: logSheet, pay: paySheet, packs: packsSheet, cards: cardsSheet, addcard: addcardSheet, receipt: receiptSheet, news: newsSheet, session: sessionSheet }[S.sheet.kind])();
   /* a message that belongs to this sheet (she just paid from inside it) is said here: the bar at the bottom is covered */
   const said = S.toast && S.toast.sheet ? `<p class="m-state ok m-said" role="status">${I.check}<span>${esc(S.toast.text)}</span></p>` : '';
   return `<div class="m-scrim" data-act="close"></div><div class="m-sheet" role="dialog" aria-modal="true" aria-labelledby="m-sheet-t" tabindex="-1" data-k="${S.sheet.kind}-${S.sheet.id || ''}">
-    <i class="m-grab" aria-hidden="true"></i><div class="m-sh"><h2 id="m-sheet-t">${v.title}</h2><button class="m-x" data-act="close" aria-label="${T(W.close)}">${I.x}</button></div>${said}${v.body}</div>`;
+    <i class="m-grab" aria-hidden="true"></i><div class="m-sh">${S.sheet.prev ? `<button class="m-x m-shb" data-act="back" aria-label="${T(W.back)}">${I.back}</button>` : ''}<h2 id="m-sheet-t">${v.title}</h2><button class="m-x" data-act="close" aria-label="${T(W.close)}">${I.x}</button></div>${said}${v.body}</div>`;
 }
 
 /* ---------- the bar color: the gym's color paints the bar and its menu, nothing else ---------- */

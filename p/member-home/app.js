@@ -5,9 +5,9 @@
    Motion: sheets slide up and back down, a new screen fades in, a toast rises with a line that runs down while Undo is still possible,
    a status that just changed pops once, and a payment shows a short wait on its button. All of it stops when the device asks for less motion. */
 
-import { b, MEMBERS, GYMS, WORKOUTS, W, F } from './data.js?v=9';
-import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms } from './views.js?v=9';
-import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=9';
+import { b, MEMBERS, GYMS, WORKOUTS, W, F, CARDS, TEST_CARDS, DECLINES } from './data.js?v=10';
+import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms, curCard } from './views.js?v=10';
+import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=10';
 
 const $ = id => document.getElementById(id);
 const clone = x => JSON.parse(JSON.stringify(x));
@@ -22,10 +22,23 @@ const S = {
   lang: Q.get('lang') === 'es' ? 'es' : 'en',
   span: Q.get('span') === 'week' ? 'week' : 'day',          // the Program's Release in Zana: one day at a time (the default) or the whole week
   when: Q.get('when') === 'midnight' ? 'midnight' : 'before',   // the day before at 8:00 PM (the default) or midnight
+  card: Q.get('card') === 'none' ? 'none' : 'saved',             // pretend: every member has a card saved, or nobody has one yet
+  charge: Q.get('charge') === 'decline' ? 'decline' : 'ok',      // pretend: the saved cards go through, or the bank declines them
   db: clone(MEMBERS),              // each sample member's things; taps change this copy only
   ...fresh(),
 };
 bind(S);
+
+/* The two pay switches in the corner menu, laid over the sample members. A card added after the switch goes through,
+   unless it is the test number that declines. */
+function applyPay() {
+  Object.values(S.db).forEach(m => {
+    if (S.card === 'none') { m.cards = []; m.card = null; }
+    else if (!m.cards.length) { m.cards = CARDS[m.id].map(c => ({ ...c })); m.card = 'v'; }
+    m.cards.forEach(c => { c.bad = S.charge === 'decline' || !!c.dn; });
+  });
+}
+applyPay();
 
 const phone = $('mh-phone'), topEl = $('mh-top'), scroll = $('mh-scroll'), bottomEl = $('mh-bottom'), layer = $('mh-layer'), notes = $('mh-notes');
 const me = () => S.db[S.m];
@@ -77,7 +90,7 @@ function notesHtml() {
       <li><b>5.</b> A drop-in coming twice a week is offered Unlimited when it saves her money.</li>
       <li><b>2.</b> Past classes and best lifts up front: not done, later.</li>
     </ul>
-    <p class="n-fine"><b>Pretend:</b> nothing is charged, booked or sent. Members can't book or pay for themselves in Zana yet. Barrio's red and logo, Repecho and the people are made up. Coach photos stand in for staff profiles, which are not built yet (PHO-402, Staff photo and profile). Class descriptions are made up too: Zana has no field for them yet (PHO-479). The card on file, Change, directions and sign out do nothing. Workouts for the other days are made up. When they show follows the Release each Program has in Zana today (one day at a time or the whole week, the day before at 8:00 PM or midnight, Ready days only); here one switch sets it for all of Barrio's programs.</p>`;
+    <p class="n-fine"><b>Pretend:</b> nothing is charged, booked or sent. Members can't book or pay for themselves in Zana yet. Barrio's red and logo, Repecho and the people are made up. Coach photos stand in for staff profiles, which are not built yet (PHO-402, Staff photo and profile). Class descriptions are made up too: Zana has no field for them yet (PHO-479). Paying is pretend too: no card is charged or kept. Change card, Buy more, the card form and receipts work; the card form takes the test numbers in its small print, and the corner menu can make a card decline. Directions and sign out do nothing. Workouts for the other days are made up. When they show follows the Release each Program has in Zana today (one day at a time or the whole week, the day before at 8:00 PM or midnight, Ready days only); here one switch sets it for all of Barrio's programs.</p>`;
 }
 
 /* ---------- draw ---------- */
@@ -128,8 +141,34 @@ function render() {
   else if (!sheetEl && hadSheet && opener) { target = phone.querySelector(opener); opener = null; }
   else if (key) target = phone.querySelector(key);
   if (target) target.focus({ preventScroll: true });
-  try { history.replaceState(null, '', `?m=${S.m}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.lang === 'es' ? '&lang=es' : ''}${S.span === 'week' ? '&span=week' : ''}${S.when === 'midnight' ? '&when=midnight' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
+  try { history.replaceState(null, '', `?m=${S.m}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.lang === 'es' ? '&lang=es' : ''}${S.span === 'week' ? '&span=week' : ''}${S.when === 'midnight' ? '&when=midnight' : ''}${S.card === 'none' ? '&card=none' : ''}${S.charge === 'decline' ? '&charge=decline' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
 }
+
+/* ---------- the card form: read it, check it, or fill a test card ---------- */
+const digits = v => String(v || '').replace(/\D/g, '');
+const luhn = n => { let sum = 0; [...n].reverse().forEach((d, i) => { let x = +d; if (i % 2) { x *= 2; if (x > 9) x -= 9; } sum += x; }); return sum % 10 === 0; };
+const brandOf = n => (n[0] === '4' ? 'Visa' : n[0] === '5' || n[0] === '2' ? 'Mastercard' : n[0] === '3' ? 'Amex' : n[0] === '6' ? 'Discover' : 'Card');
+function readCard() {
+  const v = id => (layer.querySelector(`[data-cf="${id}"]`) || {}).value || '';
+  const no = digits(v('no')), [mm, yy] = v('exp').split('/').map(x => +digits(x)), cvc = digits(v('cvc')), zip = digits(v('zip'));
+  const bad = !(no.length >= 15 && no.length <= 16 && luhn(no)) ? ['no', W.errNo]
+    : !(mm >= 1 && mm <= 12 && yy >= 26 && !(yy === 26 && mm < 11)) ? ['exp', W.errExp]
+    : !(cvc.length >= 3 && cvc.length <= 4) ? ['cvc', W.errCvc]
+    : zip.length !== 5 ? ['zip', W.errZip] : null;
+  layer.querySelectorAll('[data-cf]').forEach(el => el.removeAttribute('aria-invalid'));
+  const err = $('cf-err');
+  if (bad) {
+    const el = layer.querySelector(`[data-cf="${bad[0]}"]`);
+    el.setAttribute('aria-invalid', 'true'); el.focus();
+    if (err) { err.textContent = t(bad[1]); err.hidden = false; }
+    return null;
+  }
+  const save = $('cf-save'), dn = DECLINES.includes(no);
+  return { id: `c${Date.now()}`, brand: brandOf(no), last4: no.slice(-4), exp: `${String(mm).padStart(2, '0')}/${String(yy).padStart(2, '0')}`, dn, bad: dn, keep: !save || save.checked };
+}
+const nextNo = m => Math.max(1000, ...Object.values(S.db).flatMap(x => x.receipts.map(r => r.no || 0))) + 1;
+const rec = (m, card, what, amt, who) => m.receipts.unshift({ d: W.today, what, amt, no: nextNo(m), brand: card.brand, last4: card.last4, who });
+const cardLabel = c => f().cardName(c.brand, c.last4);
 
 /* ---------- what a tap does ---------- */
 const packOf = (m, who) => m.plans.find(p => p.who === who && p.kind === 'pack');
@@ -166,11 +205,37 @@ const ACT = {
   menu() { S.menu = !S.menu; },
   close() { S.sheet = null; S.menu = false; },
   sheet(a, el) {
-    const back = S.sheet && S.sheet.kind === 'class' && a.kind === 'pay' ? { kind: 'class', id: S.sheet.id, who: S.sheet.who } : null;
-    if (!S.sheet) opener = keyOf(el);
+    const cur = S.sheet;
+    const back = cur && cur.kind === 'class' && a.kind === 'pay' ? { kind: 'class', id: cur.id, who: cur.who } : null;
+    if (!cur) opener = keyOf(el);
     S.menu = false;
-    S.sheet = { kind: a.kind, id: a.id, who: a.who, pay: a.pay ? { type: a.pay, id: a.id, who: a.who } : null, back };
+    const prev = cur && cur.kind !== a.kind && ['class', 'pay', 'packs', 'cards'].includes(cur.kind) ? cur : null;      // the arrow on top goes back to it
+    S.sheet = { kind: a.kind, id: a.id, who: a.who || (cur && cur.who), pay: a.pay ? { type: a.pay, id: a.id, who: a.who } : null, back, prev };
   },
+  back() { S.sheet = S.sheet && S.sheet.prev; },
+  pick(a) { S.sheet.pick = a.arg; },
+  usecard() {
+    const m = me(), id = S.sheet.pick || (curCard() || {}).id, prev = S.sheet.prev, c = m.cards.find(x => x.id === id);
+    m.card = id;
+    if (prev && prev.kind === 'pay') S.sheet = { ...prev, card: id, declined: null };       // back to the payment, on this card
+    else { S.sheet = null; toast(f().toastCardSet(cardLabel(c))); }
+  },
+  savecard() {
+    const m = me(), c = readCard();
+    if (!c) return false;
+    delete c.keep;
+    m.cards.push(c); m.card = c.id;
+    const prev = S.sheet.prev, pay = prev && prev.kind === 'pay' ? prev : prev && prev.prev && prev.prev.kind === 'pay' ? prev.prev : null;
+    if (pay) S.sheet = { ...pay, card: c.id, declined: null };
+    else { S.sheet = null; toast(f().toastCardSet(cardLabel(c))); }
+  },
+  testcard(a) {
+    const x = TEST_CARDS[a.arg];
+    Object.entries(x).forEach(([k, v]) => { const el = layer.querySelector(`[data-cf="${k}"]`); if (el) { el.value = v; el.removeAttribute('aria-invalid'); } });
+    const err = $('cf-err'); if (err) err.hidden = true;
+    return false;
+  },
+  emailcopy() { toast(f().toastEmailed(me().email)); S.toast.sheet = true; },
   open(a, el) { S.open = el.getAttribute('aria-expanded') === 'true' ? null : a.arg; },
   day(a) { S.day = +a.arg; },
   wday(a) { S.wday = +a.arg; S.open = undefined; },
@@ -196,9 +261,14 @@ const ACT = {
     else doBook(a.who, a.id);
   },
   bookpay(a) {
-    const m = me(), c = findClass(a.id), amt = GYMS[m.gym].single;
+    const m = me(), c = findClass(a.id), amt = GYMS[m.gym].single, card = curCard();
+    if (!card || card.bad) {
+      S.sheet = { kind: 'pay', id: a.id, who: a.who, pay: { type: 'class', id: a.id, who: a.who }, prev: S.sheet };
+      if (card) S.sheet.declined = { name: cardLabel(card), n: 1, id: card.id };       // she tapped Book and pay: the charge was tried, and the bank said no
+      return true;
+    }
     m.bookings.push({ who: a.who, day: c.day, time: c.time, cls: c.cls, paid: amt });
-    m.receipts.unshift({ d: W.today, what: b('Single class', 'Clase suelta'), amt });
+    rec(m, card, b('Single class', 'Clase suelta'), amt, a.who);
     S.sheet = null;
     S.flash = `${a.who}:${a.id}`;
     toast(f().toastBooked(whenToast(c.day, c.time)) + f().toastCharged(amt));
@@ -226,13 +296,26 @@ const ACT = {
     return true;
   },
   pay() {
-    const m = me(), g = GYMS[m.gym], p = S.sheet.pay, back = S.sheet.back;
+    const m = me(), g = GYMS[m.gym], sh = S.sheet, p = sh.pay, back = sh.back;
+    const fresh = !m.cards.length, card = fresh ? readCard() : curCard();
+    if (!card) return false;
+    if (card.bad) {        // the bank says no: nothing is charged, she stays here
+      sh.declined = { name: cardLabel(card), n: sh.declined && sh.declined.id === card.id ? sh.declined.n + 1 : 1, id: card.id };
+      return true;
+    }
+    if (fresh && card.keep) { delete card.keep; m.cards.push(card); m.card = card.id; }      // saved for next time, so the next payment is one tap
     if (p.type === 'due') {
       const a = m.alerts.find(x => x.id === p.id), pl = m.plans.find(x => x.who === a.who);
       m.alerts = m.alerts.filter(x => x !== a);
       pl.due = false;
-      m.receipts.unshift({ d: W.today, what: pl.name, amt: a.amount });
+      rec(m, card, pl.name || g.products.find(x => x.id === pl.pid).name, a.amount, a.who);
       toast(f().toastPaid(a.amount));
+    } else if (p.type === 'class') {
+      const c = findClass(p.id);
+      m.bookings.push({ who: p.who, day: c.day, time: c.time, cls: c.cls, paid: g.single });
+      rec(m, card, b('Single class', 'Clase suelta'), g.single, p.who);
+      S.flash = `${p.who}:${p.id}`;
+      toast(f().toastBooked(whenToast(c.day, c.time)) + f().toastCharged(g.single));
     } else {
       const pr = g.products.find(x => x.id === p.id), amt = priceFor(m, p.who, p.id);     // read the price before the plan changes
       const i = m.plans.findIndex(x => x.who === p.who), old = i >= 0 ? m.plans[i] : null;
@@ -241,7 +324,7 @@ const ACT = {
         : { who: p.who, kind: 'plan', pid: pr.id, renews: b('Dec 17', '17 dic') };
       if (i >= 0) m.plans[i] = next; else m.plans.unshift(next);
       m.bought = true;
-      m.receipts.unshift({ d: W.today, what: pr.name, amt });
+      rec(m, card, pr.name, amt, p.who);
       toast(pr.kind === 'pack' ? f().toastAdded(amt, pr.n, g.unit) : f().toastPaid(amt));
     }
     S.sheet = back ? { ...back, pay: null, back: null } : null;      // bought from inside a class: back to that class, now covered
@@ -290,17 +373,42 @@ phone.addEventListener('click', e => {
     el.classList.add('m-busy'); el.setAttribute('aria-busy', 'true');
     el.dataset.label = el.textContent;
     el.innerHTML = `<i class="m-spin" aria-hidden="true"></i><span>${el.dataset.act === 'book' ? t(W.booking) : t(W.paying)}</span>`;
-    setTimeout(() => { busy = false; if (fn(el.dataset, el) !== false) render(); }, ms);
+    setTimeout(() => {
+      busy = false;
+      if (fn(el.dataset, el) !== false) render();
+      else { el.classList.remove('m-busy'); el.removeAttribute('aria-busy'); el.textContent = el.dataset.label; }
+    }, ms);
     return;
   }
   if (fn(el.dataset, el) !== false) render();
 });
 
+phone.addEventListener('input', e => {
+  const el = e.target, k = el.dataset && el.dataset.cf;
+  if (k === 'no') el.value = digits(el.value).slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
+  if (k === 'exp') { const d = digits(el.value).slice(0, 4); el.value = d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d; }
+  if (k === 'cvc' || k === 'zip') el.value = digits(el.value).slice(0, k === 'zip' ? 5 : 4);
+});
+
 /* ---------- the sample menu in the corner: not part of the app ---------- */
 const body = document.body, demo = $('mh-demo'), fab = document.querySelector('.dm-fab');
 const DO = {
-  reset() { S.db = clone(MEMBERS); Object.assign(S, fresh()); clearToast(); body.classList.remove('mh-notes-open'); demo.hidden = true; syncViewer(); render(); },
+  reset() { S.db = clone(MEMBERS); applyPay(); Object.assign(S, fresh()); clearToast(); body.classList.remove('mh-notes-open'); demo.hidden = true; syncViewer(); render(); },
   notes() { demo.hidden = true; body.classList.toggle('mh-notes-open'); syncViewer(); if (body.classList.contains('mh-notes-open')) notes.scrollTop = 0; },
+  flow(arg) {      // the pay screens, one tap each: the member, the screen, and the sheet it opens on
+    S.db = clone(MEMBERS); Object.assign(S, fresh()); clearToast();
+    S.card = arg === 'first' ? 'none' : 'saved'; S.charge = arg === 'decline' ? 'decline' : 'ok';
+    applyPay();
+    const F2 = {
+      pack: () => { S.m = 'carmen'; S.screen = 'plan'; S.sheet = { kind: 'packs', who: 'carmen' }; },
+      first: () => { S.m = 'ines'; S.screen = 'schedule'; S.who = 'ines'; S.day = 2; S.sheet = { kind: 'class', id: '2-18:30-yo', who: 'ines' }; },
+      change: () => { S.m = 'maria'; S.screen = 'plan'; S.sheet = { kind: 'cards' }; },
+      decline: () => { S.m = 'luis'; S.screen = 'home'; S.sheet = { kind: 'pay', id: 'due-luis', who: 'luis', pay: { type: 'due', id: 'due-luis', who: 'luis' } }; },
+      receipts: () => { S.m = 'maria'; S.screen = 'receipts'; S.sheet = { kind: 'receipt', id: String(S.db.maria.receipts[0].no) }; },
+    };
+    F2[arg]();
+    demo.hidden = true; syncViewer(); render();
+  },
   demo() { demo.hidden = !demo.hidden; syncViewer(); if (!demo.hidden) demo.querySelector('[aria-pressed="true"]')?.focus({ preventScroll: true }); else fab.focus({ preventScroll: true }); },
 };
 function syncViewer() {
@@ -311,9 +419,10 @@ document.addEventListener('click', e => {
   if (set) {
     const [k, v] = set.dataset.set.split(':');
     S[k] = v;
+    if (k === 'card' || k === 'charge') applyPay();
     if (!['lang', 'span', 'when'].includes(k)) { Object.assign(S, fresh()); clearToast(); }      // a new member or state starts on the home; a new language or release keeps her place
     render();
-  } else if (act && DO[act.dataset.do]) DO[act.dataset.do]();
+  } else if (act && DO[act.dataset.do]) DO[act.dataset.do](act.dataset.arg);
   else if (!demo.hidden && !demo.contains(e.target)) { demo.hidden = true; syncViewer(); }      // a tap outside closes the menu
 });
 document.addEventListener('keydown', e => {

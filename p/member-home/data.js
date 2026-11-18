@@ -477,3 +477,73 @@ export const F = {
     toastBookedFor: (name, when) => `${name} tiene reserva: ${when}${when.endsWith('.') ? '' : '.'}`,
   },
 };
+
+/* ---------- paying: cards on file and receipts (Nov 18). Pretend: no card is charged or stored ----------
+   Each member has the cards she saved; m.card is the one her next payments and her plan's renewals use.
+   A receipt keeps its number and the card it was paid with. */
+const VISA = { id: 'v', brand: 'Visa', last4: '4242', exp: '08/28' };
+const MC = { id: 'mc', brand: 'Mastercard', last4: '4444', exp: '03/27' };
+export const CARDS = { ines: [VISA], maria: [VISA, MC], rafa: [VISA], carmen: [VISA, MC], luis: [VISA] };
+{
+  let no = 1048;
+  Object.values(MEMBERS).forEach(m => {
+    m.cards = CARDS[m.id].map(c => ({ ...c }));
+    m.card = 'v';
+    m.receipts.forEach(r => { r.no = no--; r.last4 = '4242'; r.brand = 'Visa'; });
+  });
+  MEMBERS.carmen.receipts[1].who = 'mateo';
+}
+/* Test numbers, the way payment services ship them: one that goes through, one that the bank declines. */
+export const TEST_CARDS = { ok: { no: '4242 4242 4242 4242', exp: '12/29', cvc: '123', zip: '00907' }, bad: { no: '4000 0000 0000 0002', exp: '12/29', cvc: '123', zip: '00907' } };
+export const DECLINES = ['4000000000000002'];
+
+Object.assign(W, {
+  buyMore: b('Buy more', 'Comprar más'), bestValue: b('Best value', 'Mejor precio'),
+  cardsTitle: b('Your cards', 'Tus tarjetas'), addCard: b('Add a card', 'Añadir una tarjeta'), useCard: b('Use this card', 'Usar esta tarjeta'),
+  saveCardBtn: b('Save card', 'Guardar tarjeta'),
+  cardNo: b('Card number', 'Número de tarjeta'), expires: b('Expires', 'Vence'), cvc: b('CVC', 'CVC'), zip: b('ZIP code', 'Código postal'),
+  saveCard: b('Save this card for next time', 'Guardar esta tarjeta para la próxima'),
+  testLead: b('Prototype only:', 'Solo en el prototipo:'), testOk: b('fill a test card', 'llenar una tarjeta de prueba'), testBad: b('one that declines', 'una que se rechaza'), orW: b('or', 'o'),
+  errNo: b('Check the card number.', 'Revisa el número de la tarjeta.'), errExp: b('Check the date, as MM/YY.', 'Revisa la fecha, como MM/AA.'),
+  errCvc: b('Check the 3 digits on the back.', 'Revisa los 3 dígitos de atrás.'), errZip: b('Check the ZIP code.', 'Revisa el código postal.'),
+  declinedLine: b('Nothing was charged. Your bank said no, which can mean a limit or a block. Try another card, or call the number on the back of this one.', 'No se cobró nada. Tu banco dijo que no, puede ser un límite o un bloqueo. Prueba otra tarjeta o llama al número de atrás de esta.'),
+  declinedAgain: b('Declined again. Nothing was charged.', 'Rechazada otra vez. No se cobró nada.'),
+  tryAgain: b('Try again', 'Intentar de nuevo'), useAnother: b('Use another card', 'Usar otra tarjeta'),
+  noCard: b('No card yet', 'Aún sin tarjeta'), noCardLine: b('You add one the first time you pay.', 'La añades la primera vez que pagas.'),
+  receipt: b('Receipt', 'Recibo'), paidWith: b('Paid with', 'Pagado con'), dateW: b('Date', 'Fecha'), itemW: b('Item', 'Concepto'),
+  emailCopy: b('Email me a copy', 'Enviarme una copia'), allReceipts: b('All receipts', 'Todos los recibos'),
+  noReceipts: b('No payments yet.', 'Aún no hay pagos.'), singleClass: b('Single class', 'Clase suelta'),
+  asManyAs: b('As many classes as you like', 'Todas las clases que quieras'),
+});
+Object.assign(F.en, {
+  cardName: (brand, l4) => `${brand} ending ${l4}`,
+  cardExp: e => `Expires ${e}`,
+  chargedTo: (amt, card) => `$${amt}, charged to your ${card}.`,
+  chargedNext: amt => `$${amt}. You add a card on the next step.`,
+  declined: card => `Your ${card} was declined`,
+  packsTitle: u => `Buy more ${F.en.unit(u, 2)}`,
+  packLine: (n, u, each, until) => `${n} ${F.en.unit(u, n)} · $${each} a ${F.en.unit(u, 1)} · use by ${until}`,
+  each: (each, u) => `$${each} a ${F.en.unit(u, 1)}`,
+  renewsOn: name => `${name} renews on the card you pick here.`,
+  cardsFine: () => 'Your next payments use the card you pick here.',
+  toastCardSet: card => `Your ${card} is the card on file now.`,
+  toastEmailed: email => `A copy is on its way to ${email}.`,
+  receiptNo: n => `Receipt no. ${n}`,
+  continueAmt: amt => `Continue, $${amt}`,
+});
+Object.assign(F.es, {
+  cardName: (brand, l4) => `${brand} que termina en ${l4}`,
+  cardExp: e => `Vence ${e}`,
+  chargedTo: (amt, card) => `$${amt}, a tu ${card}.`,
+  chargedNext: amt => `$${amt}. Añades una tarjeta en el próximo paso.`,
+  declined: card => `Tu ${card} fue rechazada`,
+  packsTitle: u => `Comprar más ${F.es.unit(u, 2)}`,
+  packLine: (n, u, each, until) => `${n} ${F.es.unit(u, n)} · $${each} por ${F.es.unit(u, 1)} · hasta el ${until}`,
+  each: (each, u) => `$${each} por ${F.es.unit(u, 1)}`,
+  renewsOn: name => `${name} se renueva con la tarjeta que elijas aquí.`,
+  cardsFine: () => 'Tus próximos pagos usan la tarjeta que elijas aquí.',
+  toastCardSet: card => `Ahora tu tarjeta guardada es la ${card}.`,
+  toastEmailed: email => `Una copia va camino a ${email}.`,
+  receiptNo: n => `Recibo n.º ${n}`,
+  continueAmt: amt => `Continuar, $${amt}`,
+});
