@@ -24,6 +24,7 @@ export const GYMS = {
     id: 'barrio', name: 'Barrio Fitness', short: 'Barrio', mark: '<svg viewBox=\'0 0 32 32\' aria-hidden=\'true\'><path d=\'M8 5h9.2c4.6 0 7.3 2.2 7.3 5.8 0 2.4-1.3 4-3.4 4.7 2.7.6 4.4 2.5 4.4 5.3 0 4-3 6.2-8 6.2H8zm5 4.2v5h3.6c1.9 0 3-.9 3-2.5s-1.1-2.5-3-2.5zm0 8.8v5.8h4.1c2.2 0 3.4-1 3.4-2.9s-1.2-2.9-3.4-2.9z\' fill=\'currentColor\'/></svg>',
     frame: '#C4161C',                 // Barrio's red: it paints the bar, its notice strip and nothing else
     addr: 'Calle Loíza 1950, San Juan',
+    country: 'PR',                    // read from the address: the business has no country field yet, so Stripe's form starts on Puerto Rico
     classes: true,                    // runs classes a member reserves herself
     hood: 'Santurce, San Juan',
     hours: [b('Monday to Friday, 5:30 AM to 8:30 PM', 'Lunes a viernes, 5:30 a. m. a 8:30 p. m.'), b('Saturday, 7:00 AM to 12:00 PM', 'Sábado, 7:00 a. m. a 12:00 p. m.'), b('Sunday, 9:30 AM to 11:30 AM', 'Domingo, 9:30 a. m. a 11:30 a. m.')],
@@ -50,6 +51,7 @@ export const GYMS = {
     classes: false,                   // one-on-one only: the coach books the sessions
     owner: 'Nico',
     hood: 'Miramar, San Juan',
+    country: 'PR',
     hours: [b('Monday to Friday, 6:00 AM to 8:00 PM', 'Lunes a viernes, 6:00 a. m. a 8:00 p. m.'), b('Saturday, 8:00 AM to 12:00 PM', 'Sábado, 8:00 a. m. a 12:00 p. m.')],
     email: 'hola@repecho.example',
     news: null,
@@ -493,21 +495,50 @@ export const CARDS = { ines: [VISA], maria: [VISA, MC], rafa: [VISA], carmen: [V
   });
   MEMBERS.carmen.receipts[1].who = 'mateo';
 }
-/* Test numbers, the way payment services ship them: one that goes through, one that the bank declines. */
-export const TEST_CARDS = { ok: { no: '4000 0566 5566 5556', exp: '12/29', cvc: '123', zip: '00907' }, bad: { no: '4000 0000 0000 0002', exp: '12/29', cvc: '123', zip: '00907' } };
-export const DECLINES = ['4000000000000002'];
+/* Stripe's own test numbers, so each screen shows what Stripe really answers. Any future date and any CVC go with them.
+   The code is Stripe's decline_code; 3ds means the bank asks her to confirm it's her before it says yes. */
+export const TEST_CARDS = {
+  ok: { no: '4000 0566 5566 5556', code: null },
+  '3ds': { no: '4000 0025 0000 3155', code: '3ds' },
+  funds: { no: '4000 0000 0000 9995', code: 'insufficient_funds' },
+  expired: { no: '4000 0000 0000 0069', code: 'expired_card' },
+  bad: { no: '4000 0000 0000 0002', code: 'generic_decline' },
+};
+export const TEST_FILL = { exp: '12 / 29', cvc: '123', zip: '10001' };
+export const CODES = { '4000000000000002': 'generic_decline', '4000000000009995': 'insufficient_funds', '4000000000000069': 'expired_card', '4000000000000127': 'incorrect_cvc', '4000002500003155': '3ds' };
+/* The country list in Stripe's card form. Zana sets the first pick from the gym's address. Stripe asks a ZIP only where
+   it still uses one (the US); since Sep 2025 it no longer asks it for Puerto Rico, Canada or the UK. */
+export const COUNTRIES = [['PR', b('Puerto Rico', 'Puerto Rico')], ['US', b('United States', 'Estados Unidos')], ['', null], ['CA', b('Canada', 'Canadá')], ['DO', b('Dominican Republic', 'República Dominicana')], ['MX', b('Mexico', 'México')], ['ES', b('Spain', 'España')], ['GB', b('United Kingdom', 'Reino Unido')]];
+export const ZIP_IN = ['US'];
+/* What she reads when the bank says no, worded from Stripe's decline reasons. Lost, stolen and fraud are shown as a
+   plain decline: Stripe says not to tell the customer those. */
+export const DECLINE = {
+  generic_decline: { head: b('Your card was declined.', 'Tu tarjeta fue rechazada.'), line: b("Nothing was charged. Your bank didn't say why. Try another card, or call the number on the back of this one.", 'No se cobró nada. Tu banco no dijo por qué. Prueba otra tarjeta o llama al número de atrás de esta.') },
+  insufficient_funds: { head: b('Your card has insufficient funds.', 'Tu tarjeta no tiene fondos suficientes.'), line: b('Nothing was charged. Try another card.', 'No se cobró nada. Prueba otra tarjeta.') },
+  expired_card: { head: b('Your card has expired.', 'Tu tarjeta está vencida.'), line: b('Nothing was charged. Use another card.', 'No se cobró nada. Usa otra tarjeta.') },
+  incorrect_cvc: { head: b("Your card's security code is incorrect.", 'El código de seguridad de tu tarjeta es incorrecto.'), line: b('Nothing was charged. Check the 3 digits on the back and try again.', 'No se cobró nada. Revisa los 3 dígitos de atrás e inténtalo otra vez.') },
+  '3ds': { head: b("Your bank couldn't confirm it was you.", 'Tu banco no pudo confirmar que eras tú.'), line: b('Nothing was charged. Try again, or use another card.', 'No se cobró nada. Inténtalo otra vez o usa otra tarjeta.') },
+};
 
 Object.assign(W, {
   buyMore: b('Buy more', 'Comprar más'), bestValue: b('Best value', 'Mejor precio'),
   cardsTitle: b('Your cards', 'Tus tarjetas'), addCard: b('Add a card', 'Añadir una tarjeta'), useCard: b('Use this card', 'Usar esta tarjeta'),
   saveCardBtn: b('Save card', 'Guardar tarjeta'),
-  cardNo: b('Card number', 'Número de tarjeta'), expires: b('Expires', 'Vence'), cvc: b('CVC', 'CVC'), zip: b('ZIP code', 'Código postal'),
+  cardNo: b('Card number', 'Número de tarjeta'), expires: b('Expiration date', 'Fecha de vencimiento'), cvc: b('Security code', 'Código de seguridad'), zip: b('ZIP', 'Código postal'), country: b('Country', 'País'),
+  orCard: b('Or pay by card', 'O paga con tarjeta'),
   saveCard: b('Save this card for next time', 'Guardar esta tarjeta para la próxima'),
-  testLead: b('Prototype only:', 'Solo en el prototipo:'), testOk: b('fill a test card', 'llenar una tarjeta de prueba'), testBad: b('one that declines', 'una que se rechaza'), orW: b('or', 'o'),
-  errNo: b('Check the card number.', 'Revisa el número de la tarjeta.'), errExp: b('Check the date, as MM/YY.', 'Revisa la fecha, como MM/AA.'),
-  errCvc: b('Check the 3 digits on the back.', 'Revisa los 3 dígitos de atrás.'), errZip: b('Check the ZIP code.', 'Revisa el código postal.'),
+  testLead: b("Prototype only, Stripe's test cards:", 'Solo en el prototipo, tarjetas de prueba de Stripe:'),
+  test_ok: b('Goes through', 'Pasa'), test_3ds: b('Bank asks to confirm', 'El banco pide confirmar'), test_funds: b('Not enough money', 'Sin fondos'), test_expired: b('Expired', 'Vencida'), test_bad: b('Declined', 'Rechazada'),
+  errNo: b('Your card number is incomplete.', 'El número de tu tarjeta está incompleto.'), errNoBad: b('Your card number is invalid.', 'El número de tu tarjeta no es válido.'),
+  errExp: b("Your card's expiration date is incomplete.", 'La fecha de vencimiento de tu tarjeta está incompleta.'), errExpPast: b("Your card's expiration year is in the past.", 'El año de vencimiento de tu tarjeta ya pasó.'),
+  errCvc: b("Your card's security code is incomplete.", 'El código de seguridad de tu tarjeta está incompleto.'), errZip: b('Your ZIP is incomplete.', 'Tu código postal está incompleto.'),
+  tdsTitle: b("Confirm it's you", 'Confirma que eres tú'), tdsBank: b('Your bank', 'Tu banco'),
+  tdsLine: b("Your bank shows this step, in its app or with a code by text. Zana and the gym don't see it.", 'Este paso lo muestra tu banco, en su app o con un código por texto. Zana y el gimnasio no lo ven.'),
+  tdsOk: b('Confirm', 'Confirmar'), tdsNo: b('Cancel', 'Cancelar'),
+  tdsFake: b('Pretend: a real bank shows its own screen here.', 'De mentira: un banco real muestra su propia pantalla aquí.'),
   declinedLine: b('Nothing was charged. Your bank said no, which can mean a limit or a block. Try another card, or call the number on the back of this one.', 'No se cobró nada. Tu banco dijo que no, puede ser un límite o un bloqueo. Prueba otra tarjeta o llama al número de atrás de esta.'),
   declinedAgain: b('Declined again. Nothing was charged.', 'Rechazada otra vez. No se cobró nada.'),
+  wallet: b('Pretend: Apple Pay and Link are not decided for members yet.', 'De mentira: Apple Pay y Link aún no están decididos para socios.'),
   tryAgain: b('Try again', 'Intentar de nuevo'), useAnother: b('Use another card', 'Usar otra tarjeta'),
   noCard: b('No card yet', 'Aún sin tarjeta'), noCardLine: b('You add one the first time you pay.', 'La añades la primera vez que pagas.'),
   receipt: b('Receipt', 'Recibo'), paidWith: b('Paid with', 'Pagado con'), dateW: b('Date', 'Fecha'), itemW: b('Item', 'Concepto'),
@@ -521,6 +552,9 @@ Object.assign(F.en, {
   chargedTo: (amt, card) => `$${amt}, charged to your ${card}.`,
   chargedNext: amt => `$${amt}. You add a card on the next step.`,
   declined: card => `Your ${card} was declined`,
+  consent: gym => `By providing your card information, you allow ${gym} to charge your card for future payments in accordance with their terms.`,
+  tdsAsk: (gym, amt, card) => `${gym} is charging $${amt} to your ${card}.`,
+  toastKept: card => ` Your ${card} is saved for next time.`,
   packsTitle: u => `Buy more ${F.en.unit(u, 2)}`,
   packLine: (n, u, each, until) => `${n} ${F.en.unit(u, n)} · $${each} a ${F.en.unit(u, 1)} · use by ${until}`,
   each: (each, u) => `$${each} a ${F.en.unit(u, 1)}`,
@@ -537,6 +571,9 @@ Object.assign(F.es, {
   chargedTo: (amt, card) => `$${amt}, a tu ${card}.`,
   chargedNext: amt => `$${amt}. Añades una tarjeta en el próximo paso.`,
   declined: card => `Tu ${card} fue rechazada`,
+  consent: gym => `Al darnos los datos de tu tarjeta, permites que ${gym} cobre a tu tarjeta pagos futuros según sus términos.`,
+  tdsAsk: (gym, amt, card) => `${gym} cobra $${amt} a tu ${card}.`,
+  toastKept: card => ` Tu ${card} quedó guardada para la próxima.`,
   packsTitle: u => `Comprar más ${F.es.unit(u, 2)}`,
   packLine: (n, u, each, until) => `${n} ${F.es.unit(u, n)} · $${each} por ${F.es.unit(u, 1)} · hasta el ${until}`,
   each: (each, u) => `$${each} por ${F.es.unit(u, 1)}`,

@@ -5,8 +5,8 @@
    Motion: sheets slide up and back down, a new screen fades in, a toast rises with a line that runs down while Undo is still possible,
    a status that just changed pops once, and a payment shows a short wait on its button. All of it stops when the device asks for less motion. */
 
-import { b, MEMBERS, GYMS, WORKOUTS, W, F, CARDS, TEST_CARDS, DECLINES } from './data.js?v=11';
-import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms, curCard } from './views.js?v=11';
+import { b, MEMBERS, GYMS, WORKOUTS, W, F, CARDS, TEST_CARDS, TEST_FILL, CODES, ZIP_IN } from './data.js?v=12';
+import { draw, bind, findClass, costOf, priceFor, bid, firstDay, whenToast, cancelTerms, curCard } from './views.js?v=12';
 import { PATTERNS, CORE, NOTES, OWNER } from './notes.js?v=10';
 
 const $ = id => document.getElementById(id);
@@ -23,7 +23,8 @@ const S = {
   span: Q.get('span') === 'week' ? 'week' : 'day',          // the Program's Release in Zana: one day at a time (the default) or the whole week
   when: Q.get('when') === 'midnight' ? 'midnight' : 'before',   // the day before at 8:00 PM (the default) or midnight
   card: Q.get('card') === 'none' ? 'none' : 'saved',             // pretend: every member has a card saved, or nobody has one yet
-  charge: Q.get('charge') === 'decline' ? 'decline' : 'ok',      // pretend: the saved cards go through, or the bank declines them
+  charge: ['decline', 'funds'].includes(Q.get('charge')) ? Q.get('charge') : 'ok',      // pretend: the saved cards go through, or the bank declines them (plainly, or for not enough money)
+  wallet: Q.get('wallet') === 'on' ? 'on' : 'off',               // pretend: Apple Pay and Link above the card form. Off in Zana's code today
   db: clone(MEMBERS),              // each sample member's things; taps change this copy only
   ...fresh(),
 };
@@ -35,7 +36,7 @@ function applyPay() {
   Object.values(S.db).forEach(m => {
     if (S.card === 'none') { m.cards = []; m.card = null; }
     else if (!m.cards.length) { m.cards = CARDS[m.id].map(c => ({ ...c })); m.card = 'v'; }
-    m.cards.forEach(c => { c.bad = S.charge === 'decline' || !!c.dn; });
+    m.cards.forEach(c => { c.bad = S.charge === 'decline' ? 'generic_decline' : S.charge === 'funds' ? 'insufficient_funds' : c.dn || null; });
   });
 }
 applyPay();
@@ -118,6 +119,7 @@ function render() {
   if (tEl && +tEl.dataset.tid !== lastToast) tEl.classList.add('m-enter');
   lastToast = S.toast ? S.toast.at : 0;
   layer.innerHTML = v.layer;
+  const cfNo = layer.querySelector('[data-cf="no"]'); if (cfNo) showBrand(cfNo);      // a form drawn with a number in it shows its brand
   const newSheet = layer.querySelector('.m-sheet');
   if (newSheet && !hadSheet) layer.querySelectorAll('.m-scrim, .m-sheet').forEach(el => el.classList.add('m-enter'));
   else if (newSheet && oldKey && newSheet.dataset.k !== oldKey) newSheet.classList.add('m-swap');      // one sheet into the next: the content changes, the sheet stays
@@ -141,20 +143,27 @@ function render() {
   else if (!sheetEl && hadSheet && opener) { target = phone.querySelector(opener); opener = null; }
   else if (key) target = phone.querySelector(key);
   if (target) target.focus({ preventScroll: true });
-  try { history.replaceState(null, '', `?m=${S.m}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.lang === 'es' ? '&lang=es' : ''}${S.span === 'week' ? '&span=week' : ''}${S.when === 'midnight' ? '&when=midnight' : ''}${S.card === 'none' ? '&card=none' : ''}${S.charge === 'decline' ? '&charge=decline' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
+  try { history.replaceState(null, '', `?m=${S.m}${S.fx === 'off' ? '&fx=off' : ''}${S.grace === 'out' ? '&grace=out' : ''}${S.lang === 'es' ? '&lang=es' : ''}${S.span === 'week' ? '&span=week' : ''}${S.when === 'midnight' ? '&when=midnight' : ''}${S.card === 'none' ? '&card=none' : ''}${S.charge !== 'ok' ? `&charge=${S.charge}` : ''}${S.wallet === 'on' ? '&wallet=on' : ''}`); } catch (e) { /* a preview frame may refuse; the page still works */ }
 }
 
 /* ---------- the card form: read it, check it, or fill a test card ---------- */
 const digits = v => String(v || '').replace(/\D/g, '');
 const luhn = n => { let sum = 0; [...n].reverse().forEach((d, i) => { let x = +d; if (i % 2) { x *= 2; if (x > 9) x -= 9; } sum += x; }); return sum % 10 === 0; };
 const brandOf = n => (n[0] === '4' ? 'Visa' : n[0] === '5' || n[0] === '2' ? 'Mastercard' : n[0] === '3' ? 'Amex' : n[0] === '6' ? 'Discover' : 'Card');
+/* what she typed, kept on the sheet so a decline or the bank's check gives her the form back as she left it, the way Stripe does */
+function typed() {
+  const v = id => (layer.querySelector(`[data-cf="${id}"]`) || {}).value || '', save = $('cf-save');
+  return { no: v('no'), exp: v('exp'), cvc: v('cvc'), zip: v('zip'), cc: v('cc'), keep: !save || save.checked };
+}
+/* checked the way Stripe's form checks it, with Stripe's own words */
 function readCard() {
   const v = id => (layer.querySelector(`[data-cf="${id}"]`) || {}).value || '';
-  const no = digits(v('no')), [mm, yy] = v('exp').split('/').map(x => +digits(x)), cvc = digits(v('cvc')), zip = digits(v('zip'));
-  const bad = !(no.length >= 15 && no.length <= 16 && luhn(no)) ? ['no', W.errNo]
-    : !(mm >= 1 && mm <= 12 && yy >= 26 && !(yy === 26 && mm < 11)) ? ['exp', W.errExp]
-    : !(cvc.length >= 3 && cvc.length <= 4) ? ['cvc', W.errCvc]
-    : zip.length !== 5 ? ['zip', W.errZip] : null;
+  const no = digits(v('no')), ed = digits(v('exp')), mm = +ed.slice(0, 2), yy = +ed.slice(2, 4), cvc = digits(v('cvc')), zip = digits(v('zip')), cc = v('cc');
+  const bad = no.length < 15 ? ['no', W.errNo] : !(no.length <= 16 && luhn(no)) ? ['no', W.errNoBad]
+    : ed.length < 4 || !(mm >= 1 && mm <= 12) ? ['exp', W.errExp]
+    : yy < 26 || (yy === 26 && mm < 11) ? ['exp', W.errExpPast]
+    : cvc.length < 3 ? ['cvc', W.errCvc]
+    : ZIP_IN.includes(cc) && zip.length !== 5 ? ['zip', W.errZip] : null;
   layer.querySelectorAll('[data-cf]').forEach(el => el.removeAttribute('aria-invalid'));
   const err = $('cf-err');
   if (bad) {
@@ -163,9 +172,13 @@ function readCard() {
     if (err) { err.textContent = t(bad[1]); err.hidden = false; }
     return null;
   }
-  const save = $('cf-save'), dn = DECLINES.includes(no);
-  return { id: `c${Date.now()}`, brand: brandOf(no), last4: no.slice(-4), exp: `${String(mm).padStart(2, '0')}/${String(yy).padStart(2, '0')}`, dn, bad: dn, keep: !save || save.checked };
+  const save = $('cf-save'), code = CODES[no] || null, tds = code === '3ds', dn = tds ? null : code;
+  return { id: `c${Date.now()}`, brand: brandOf(no), last4: no.slice(-4), exp: `${String(mm).padStart(2, '0')}/${String(yy).padStart(2, '0')}`, country: cc, dn, bad: dn, tds, keep: !save || save.checked };
 }
+const showBrand = el => {      // the brand marks in the number field: all four until the number says which one
+  const n = digits(el.value), br = n ? brandOf(n) : '';
+  el.parentElement.querySelectorAll('[data-b]').forEach(i => { i.hidden = !!br && br !== 'Card' && i.dataset.b !== br; });
+};
 const nextNo = m => Math.max(1000, ...Object.values(S.db).flatMap(x => x.receipts.map(r => r.no || 0))) + 1;
 const rec = (m, card, what, amt, who) => m.receipts.unshift({ d: W.today, what, amt, no: nextNo(m), brand: card.brand, last4: card.last4, who });
 const cardLabel = c => f().cardName(c.brand, c.last4);
@@ -190,6 +203,40 @@ function doBook(who, id) {
   const last = x.pack && cost.plan.left === 0, p = m.people.find(y => y.id === who);
   const said = p && !p.me ? f().toastBookedFor(p.name, whenToast(c.day, c.time)) : f().toastBooked(whenToast(c.day, c.time));
   toast(said + (last ? f().toastLast(GYMS[m.gym].unit) : ''), () => drop(m, x, x.credit ? 'credit' : 'pack'));
+}
+
+/* one payment that also saves the card when she ticked it: in Stripe, a PaymentIntent with setup_future_usage. Zana's desk
+   saves first and charges after; this is the member's one-step version */
+function finishPay(card, fresh) {
+  const m = me(), g = GYMS[m.gym], p = S.sheet.pay, back = S.sheet.back;
+  const kept = fresh && card.keep;
+  if (kept) { ['keep', 'tds', 'bad', 'dn'].forEach(k => delete card[k]); m.cards.push(card); m.card = card.id; }      // saved for next time, so the next payment is one tap
+  if (p.type === 'due') {
+    const a = m.alerts.find(x => x.id === p.id), pl = m.plans.find(x => x.who === a.who);
+    m.alerts = m.alerts.filter(x => x !== a);
+    pl.due = false;
+    rec(m, card, pl.name || g.products.find(x => x.id === pl.pid).name, a.amount, a.who);
+    toast(f().toastPaid(a.amount));
+  } else if (p.type === 'class') {
+    const c = findClass(p.id);
+    m.bookings.push({ who: p.who, day: c.day, time: c.time, cls: c.cls, paid: g.single });
+    rec(m, card, b('Single class', 'Clase suelta'), g.single, p.who);
+    S.flash = `${p.who}:${p.id}`;
+    toast(f().toastBooked(whenToast(c.day, c.time)) + f().toastCharged(g.single));
+  } else {
+    const pr = g.products.find(x => x.id === p.id), amt = priceFor(m, p.who, p.id);     // read the price before the plan changes
+    const i = m.plans.findIndex(x => x.who === p.who), old = i >= 0 ? m.plans[i] : null;
+    const next = pr.kind === 'pack'
+      ? { who: p.who, kind: 'pack', pid: pr.id, left: (old && old.kind === 'pack' ? old.left : 0) + pr.n, until: b('Feb 15', '15 feb') }
+      : { who: p.who, kind: 'plan', pid: pr.id, renews: b('Dec 17', '17 dic') };
+    if (i >= 0) m.plans[i] = next; else m.plans.unshift(next);
+    m.bought = true;
+    rec(m, card, pr.name, amt, p.who);
+    toast(pr.kind === 'pack' ? f().toastAdded(amt, pr.n, g.unit) : f().toastPaid(amt));
+  }
+  S.sheet = back ? { ...back, pay: null, back: null } : null;      // bought from inside a class: back to that class, now covered
+  if (back) S.toast.sheet = true;                                   // and the receipt line is said inside that sheet
+  if (kept && S.toast) S.toast.text += f().toastKept(cardLabel(card));
 }
 
 const ACT = {
@@ -230,10 +277,17 @@ const ACT = {
     else { S.sheet = null; toast(f().toastCardSet(cardLabel(c))); }
   },
   testcard(a) {
-    const x = TEST_CARDS[a.arg];
-    Object.entries(x).forEach(([k, v]) => { const el = layer.querySelector(`[data-cf="${k}"]`); if (el) { el.value = v; el.removeAttribute('aria-invalid'); } });
+    Object.entries({ ...TEST_FILL, no: TEST_CARDS[a.arg].no }).forEach(([k, v]) => { const el = layer.querySelector(`[data-cf="${k}"]`); if (el) { el.value = v; el.removeAttribute('aria-invalid'); } });
+    showBrand(layer.querySelector('[data-cf="no"]'));
     const err = $('cf-err'); if (err) err.hidden = true;
     return false;
+  },
+  wallet() { toast(t(W.wallet)); S.toast.sheet = true; },
+  tds(a) {       // her answer on the bank's screen: confirmed, it pays; cancelled, nothing is charged
+    const sh = S.sheet, card = sh.tds.card;
+    sh.tds = null;
+    if (a.arg === 'ok') { card.tds = false; return finishPay(card, true); }
+    sh.declined = { code: '3ds', name: cardLabel(card), n: sh.declined && sh.declined.id === card.last4 ? sh.declined.n + 1 : 1, id: card.last4 };
   },
   emailcopy() { toast(f().toastEmailed(me().email)); S.toast.sheet = true; },
   open(a, el) { S.open = el.getAttribute('aria-expanded') === 'true' ? null : a.arg; },
@@ -264,7 +318,7 @@ const ACT = {
     const m = me(), c = findClass(a.id), amt = GYMS[m.gym].single, card = curCard();
     if (!card || card.bad) {
       S.sheet = { kind: 'pay', id: a.id, who: a.who, pay: { type: 'class', id: a.id, who: a.who }, prev: S.sheet };
-      if (card) S.sheet.declined = { name: cardLabel(card), n: 1, id: card.id };       // she tapped Book and pay: the charge was tried, and the bank said no
+      if (card) S.sheet.declined = { code: card.bad, saved: true, name: cardLabel(card), n: 1, id: card.id };       // she tapped Book and pay: the charge was tried, and the bank said no
       return true;
     }
     m.bookings.push({ who: a.who, day: c.day, time: c.time, cls: c.cls, paid: amt });
@@ -296,39 +350,17 @@ const ACT = {
     return true;
   },
   pay() {
-    const m = me(), g = GYMS[m.gym], sh = S.sheet, p = sh.pay, back = sh.back;
-    const fresh = !m.cards.length, card = fresh ? readCard() : curCard();
+    const m = me(), sh = S.sheet, fresh = !m.cards.length;
+    if (fresh) sh.typed = typed();
+    const card = fresh ? readCard() : curCard();
     if (!card) return false;
-    if (card.bad) {        // the bank says no: nothing is charged, she stays here
-      sh.declined = { name: cardLabel(card), n: sh.declined && sh.declined.id === card.id ? sh.declined.n + 1 : 1, id: card.id };
+    if (card.bad) {        // the bank says no: nothing is charged, she stays here, the form as she left it
+      const id = fresh ? card.last4 : card.id;
+      sh.declined = { code: card.bad, saved: !fresh, name: cardLabel(card), n: sh.declined && sh.declined.id === id ? sh.declined.n + 1 : 1, id };
       return true;
     }
-    if (fresh && card.keep) { delete card.keep; m.cards.push(card); m.card = card.id; }      // saved for next time, so the next payment is one tap
-    if (p.type === 'due') {
-      const a = m.alerts.find(x => x.id === p.id), pl = m.plans.find(x => x.who === a.who);
-      m.alerts = m.alerts.filter(x => x !== a);
-      pl.due = false;
-      rec(m, card, pl.name || g.products.find(x => x.id === pl.pid).name, a.amount, a.who);
-      toast(f().toastPaid(a.amount));
-    } else if (p.type === 'class') {
-      const c = findClass(p.id);
-      m.bookings.push({ who: p.who, day: c.day, time: c.time, cls: c.cls, paid: g.single });
-      rec(m, card, b('Single class', 'Clase suelta'), g.single, p.who);
-      S.flash = `${p.who}:${p.id}`;
-      toast(f().toastBooked(whenToast(c.day, c.time)) + f().toastCharged(g.single));
-    } else {
-      const pr = g.products.find(x => x.id === p.id), amt = priceFor(m, p.who, p.id);     // read the price before the plan changes
-      const i = m.plans.findIndex(x => x.who === p.who), old = i >= 0 ? m.plans[i] : null;
-      const next = pr.kind === 'pack'
-        ? { who: p.who, kind: 'pack', pid: pr.id, left: (old && old.kind === 'pack' ? old.left : 0) + pr.n, until: b('Feb 15', '15 feb') }
-        : { who: p.who, kind: 'plan', pid: pr.id, renews: b('Dec 17', '17 dic') };
-      if (i >= 0) m.plans[i] = next; else m.plans.unshift(next);
-      m.bought = true;
-      rec(m, card, pr.name, amt, p.who);
-      toast(pr.kind === 'pack' ? f().toastAdded(amt, pr.n, g.unit) : f().toastPaid(amt));
-    }
-    S.sheet = back ? { ...back, pay: null, back: null } : null;      // bought from inside a class: back to that class, now covered
-    if (back) S.toast.sheet = true;                                   // and the receipt line is said inside that sheet
+    if (fresh && card.tds) { sh.tds = { card }; return true; }      // a new card her bank wants confirmed first: its screen opens over the payment
+    return finishPay(card, fresh);
   },
   savelog() {
     const m = me(), tr = S.sheet.id, w = WORKOUTS[tr], res = {};
@@ -361,15 +393,15 @@ const ACT = {
   undo() { if (undoFn) undoFn(); clearToast(); },
 };
 
-const WAIT = { pay: 900, bookpay: 900, book: 380 };      // pretend: the time a real charge or booking takes
-const NOWAIT = { bookpay: () => !curCard(), pay: () => !me().cards.length && !readCard() };   // no card yet, or the form has a mistake: answer at once, nothing is charged
+const WAIT = { pay: 900, bookpay: 900, book: 380, tds: 900 };      // pretend: the time a real charge or booking takes
+const NOWAIT = { bookpay: () => !curCard(), pay: () => !me().cards.length && !readCard(), tds: a => a.arg !== 'ok' };   // no card yet, or the form has a mistake: answer at once, nothing is charged
 phone.addEventListener('click', e => {
   const el = e.target.closest('[data-act]');
   if (!el || !phone.contains(el) || busy) return;
   const fn = ACT[el.dataset.act];
   if (!fn) return;
   const ms = WAIT[el.dataset.act];
-  if (ms && el.closest('.m-sheet') && !calm() && !(NOWAIT[el.dataset.act] && NOWAIT[el.dataset.act]())) {
+  if (ms && el.closest('.m-sheet') && !calm() && !(NOWAIT[el.dataset.act] && NOWAIT[el.dataset.act](el.dataset))) {
     busy = true;
     el.classList.add('m-busy'); el.setAttribute('aria-busy', 'true');
     el.dataset.label = el.textContent;
@@ -387,8 +419,18 @@ phone.addEventListener('click', e => {
 phone.addEventListener('input', e => {
   const el = e.target, k = el.dataset && el.dataset.cf;
   if (k === 'no') el.value = digits(el.value).slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
-  if (k === 'exp') { const d = digits(el.value).slice(0, 4); el.value = d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d; }
+  if (k === 'exp') { const d = digits(el.value).slice(0, 4); el.value = d.length > 2 ? `${d.slice(0, 2)} / ${d.slice(2)}` : d; }
   if (k === 'cvc' || k === 'zip') el.value = digits(el.value).slice(0, k === 'zip' ? 5 : 4);
+  if (k === 'no') showBrand(el);
+});
+phone.addEventListener('change', e => {      // the country decides whether Stripe asks a ZIP; the box decides whether the consent line shows
+  const el = e.target;
+  if (el.dataset && el.dataset.cf === 'cc') {
+    const zip = ZIP_IN.includes(el.value), cf = el.closest('.m-cf');
+    cf.dataset.zip = zip ? 'yes' : 'no';
+    cf.querySelector('[data-cf="zip"]').closest('.m-cff').hidden = !zip;
+  }
+  if (el.id === 'cf-save') { const c = $('cf-consent'); if (c) c.hidden = !el.checked; }
 });
 
 /* ---------- the sample menu in the corner: not part of the app ---------- */
@@ -398,12 +440,17 @@ const DO = {
   notes() { demo.hidden = true; body.classList.toggle('mh-notes-open'); syncViewer(); if (body.classList.contains('mh-notes-open')) notes.scrollTop = 0; },
   flow(arg) {      // the pay screens, one tap each: the member, the screen, and the sheet it opens on
     S.db = clone(MEMBERS); Object.assign(S, fresh()); clearToast();
-    S.card = arg === 'first' ? 'none' : 'saved'; S.charge = arg === 'decline' ? 'decline' : 'ok';
+    S.card = ['first', 'buy'].includes(arg) ? 'none' : 'saved'; S.charge = ['decline', 'funds'].includes(arg) ? arg : 'ok';
     applyPay();
     const F2 = {
       pack: () => { S.m = 'carmen'; S.screen = 'plan'; S.sheet = { kind: 'packs', who: 'carmen' }; },
-      first: () => { S.m = 'ines'; S.screen = 'schedule'; S.who = 'ines'; S.day = 2; S.sheet = { kind: 'class', id: '2-18:30-yo', who: 'ines' }; },
+      buy: () => { S.m = 'ines'; S.screen = 'plan'; S.sheet = { kind: 'packs', who: 'ines', pick: 'p10' }; },
+      first: () => {      // her first card is one her bank wants confirmed: Stripe's test card that asks for it, typed in
+        S.m = 'ines'; S.screen = 'schedule'; S.who = 'ines'; S.day = 2;
+        S.sheet = { kind: 'pay', id: '2-18:30-yo', who: 'ines', pay: { type: 'class', id: '2-18:30-yo', who: 'ines' }, typed: { ...TEST_FILL, no: TEST_CARDS['3ds'].no, cc: 'PR' } };
+      },
       change: () => { S.m = 'maria'; S.screen = 'plan'; S.sheet = { kind: 'cards' }; },
+      funds: () => F2.decline(),
       decline: () => { S.m = 'luis'; S.screen = 'home'; S.sheet = { kind: 'pay', id: 'due-luis', who: 'luis', pay: { type: 'due', id: 'due-luis', who: 'luis' } }; },
       receipts: () => { S.m = 'maria'; S.screen = 'receipts'; S.sheet = { kind: 'receipt', id: String(S.db.maria.receipts[0].no) }; },
     };
@@ -421,6 +468,7 @@ document.addEventListener('click', e => {
     const [k, v] = set.dataset.set.split(':');
     S[k] = v;
     if (k === 'card' || k === 'charge') applyPay();
+    if (k === 'wallet') { render(); return; }
     if (!['lang', 'span', 'when'].includes(k)) { Object.assign(S, fresh()); clearToast(); }      // a new member or state starts on the home; a new language or release keeps her place
     render();
   } else if (act && DO[act.dataset.do]) DO[act.dataset.do](act.dataset.arg);

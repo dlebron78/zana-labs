@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&display=swap">
 <link rel="stylesheet" href="../../kit/zana.css">
-<link rel="stylesheet" href="home.css?v=15">
+<link rel="stylesheet" href="home.css?v=16">
 </head>
 <body class="mh">
 <section class="phone" id="mh-phone" aria-label="Barrio Fitness member app">
@@ -52,9 +52,11 @@
     <span class="dm-l" id="dm-l-pay">Pay screens: open one</span>
     <span class="vw-seg dm-flow" role="group" aria-labelledby="dm-l-pay">
       <button type="button" data-do="flow" data-arg="pack"><b>Buy a pack</b><i>Carmen</i></button>
-      <button type="button" data-do="flow" data-arg="first"><b>First card</b><i>Inés</i></button>
+      <button type="button" data-do="flow" data-arg="buy"><b>Add card and buy</b><i>Inés</i></button>
+      <button type="button" data-do="flow" data-arg="first"><b>Bank asks to confirm</b><i>Inés</i></button>
       <button type="button" data-do="flow" data-arg="change"><b>Change card</b><i>María</i></button>
       <button type="button" data-do="flow" data-arg="decline"><b>Declined</b><i>Luis</i></button>
+      <button type="button" data-do="flow" data-arg="funds"><b>Not enough money</b><i>Luis</i></button>
       <button type="button" data-do="flow" data-arg="receipts"><b>Receipts</b><i>María</i></button>
     </span>
   </div>
@@ -70,6 +72,14 @@
     <span class="vw-seg" role="group" aria-labelledby="dm-l-charge">
       <button type="button" data-set="charge:ok" aria-pressed="true"><b>Go through</b></button>
       <button type="button" data-set="charge:decline" aria-pressed="false"><b>Declined</b><i>by the bank</i></button>
+      <button type="button" data-set="charge:funds" aria-pressed="false"><b>Not enough money</b></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-wallet">Apple Pay and Link on the card form</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-wallet">
+      <button type="button" data-set="wallet:off" aria-pressed="true"><b>Off</b><i>Zana's code today</i></button>
+      <button type="button" data-set="wallet:on" aria-pressed="false"><b>On</b><i>not decided</i></button>
     </span>
   </div>
   <div class="dm-g">
@@ -108,6 +118,6 @@
 </div>
 <aside class="notes" id="mh-notes" aria-label="Notes on this sample"></aside>
 <noscript><p class="vw-noscript">This prototype is drawn in the browser, so it needs JavaScript switched on. The plan in plain words is on <a href="spec.html">its own page</a>.</p></noscript>
-<script type="module" src="app.js?v=12"></script>
+<script type="module" src="app.js?v=13"></script>
 </body>
 </html>

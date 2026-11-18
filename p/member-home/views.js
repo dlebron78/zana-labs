@@ -1,7 +1,7 @@
 /* Member home: what the phone draws. Pure text in, text out: no page access here, so the same code can be checked without a browser.
    The one rule behind every screen: a thing shows only when this person has one. Nothing is ever shown empty or locked. */
 
-import { DAYS, WEEKS, BOOK_AHEAD, CLOSED, WODS, NOT_READY, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F } from './data.js?v=11';
+import { DAYS, WEEKS, BOOK_AHEAD, CLOSED, WODS, NOT_READY, WD, GYMS, CLASSES, COACHES, FACES, WEEK, FULL, WORKOUTS, NOW, W, F, TEST_CARDS, COUNTRIES, ZIP_IN, DECLINE } from './data.js?v=12';
 
 let S;                                      // the state being drawn: draw() and bind() set it, the helpers below read it
 export const bind = state => { S = state; };
@@ -59,13 +59,33 @@ const irow = (icon, title, sub, right = '', act = '') => `<${act ? 'button' : 'd
 const cardById = id => me().cards.find(c => c.id === id);
 export const curCard = () => (S.sheet && S.sheet.card && cardById(S.sheet.card)) || cardById(me().card) || me().cards[0] || null;
 const cardName = c => f().cardName(c.brand, c.last4);
-/* the card form: the first card, or another one. Nothing typed here leaves the phone; it is all pretend */
-function cardForm(withSave) {
-  const fl = (id, label, ph, mode, ac, cls = '') => `<div class="m-cff${cls}"><label for="cf-${id}">${T(label)}</label><input class="m-in" id="cf-${id}" data-cf="${id}" inputmode="${mode}" autocomplete="${ac}" placeholder="${ph}" spellcheck="false"></div>`;
-  return `<div class="m-cf">${fl('no', W.cardNo, '1234 1234 1234 1234', 'numeric', 'cc-number', ' m-cfw')}${fl('exp', W.expires, 'MM/YY', 'numeric', 'cc-exp')}${fl('cvc', W.cvc, '123', 'numeric', 'cc-csc')}${fl('zip', W.zip, '00907', 'numeric', 'postal-code')}</div>
-    <p class="m-err" id="cf-err" role="alert" hidden></p>${withSave ? `<label class="m-check"><input type="checkbox" id="cf-save" checked><span>${T(W.saveCard)}</span></label>` : ''}
-    <p class="m-test">${T(W.testLead)} <button type="button" data-act="testcard" data-arg="ok">${T(W.testOk)}</button> ${T(W.orW)} <button type="button" data-act="testcard" data-arg="bad">${T(W.testBad)}</button></p>`;
+/* the card form, drawn the way Stripe's Payment Element draws it for Zana: card only (no Apple Pay, Google Pay or Link, as the
+   desk has it today), then the country, set from the gym's address, and a ZIP only for a country where Stripe still asks one.
+   Nothing typed here leaves the phone; it is all pretend */
+function cardForm(saves) {
+  const ty = (S.sheet && S.sheet.typed) || {}, cc = ty.cc || gym().country || 'US', zip = ZIP_IN.includes(cc);
+  const val = k => (ty[k] ? ` value="${esc(ty[k])}"` : '');
+  const fl = (id, label, ph, ac, cls = '', extra = '') => `<div class="m-cff${cls}"${id === 'zip' && !zip ? ' hidden' : ''}><label for="cf-${id}">${T(label)}</label><div class="m-cfi"><input class="m-in" id="cf-${id}" data-cf="${id}" inputmode="numeric" autocomplete="${ac}" placeholder="${ph}" spellcheck="false"${val(id)}>${extra}</div></div>`;
+  const brands = `<span class="m-brands" aria-hidden="true">${['Visa', 'Mastercard', 'Amex', 'Discover'].map(x => `<i data-b="${x}">${{ Visa: 'VISA', Mastercard: 'MC', Amex: 'AMEX', Discover: 'DISC' }[x]}</i>`).join('')}</span>`;
+  const opts = COUNTRIES.map(([k, n]) => (k ? `<option value="${k}"${k === cc ? ' selected' : ''}>${T(n)}</option>` : '<option disabled>──────────</option>')).join('');
+  const country = `<div class="m-cff m-cfc"><label for="cf-cc">${T(W.country)}</label><select class="m-in m-sel" id="cf-cc" data-cf="cc" autocomplete="country">${opts}</select></div>`;
+  const consent = `<p class="m-consent" id="cf-consent"${saves === 'ask' && ty.keep === false ? ' hidden' : ''}>${esc(f().consent(gym().name))}</p>`;
+  return `<div class="m-cf" data-zip="${zip ? 'yes' : 'no'}">${fl('no', W.cardNo, '1234 1234 1234 1234', 'cc-number', ' m-cfw', brands)}${fl('exp', W.expires, 'MM / YY', 'cc-exp')}${fl('cvc', W.cvc, 'CVC', 'cc-csc')}${country}${fl('zip', W.zip, '12345', 'postal-code')}</div>
+    <p class="m-err" id="cf-err" role="alert" hidden></p>${saves === 'ask' ? `<label class="m-check"><input type="checkbox" id="cf-save"${ty.keep === false ? '' : ' checked'}><span>${T(W.saveCard)}</span></label>` : ''}${consent}
+    <div class="m-test"><p>${T(W.testLead)}</p><div>${Object.keys(TEST_CARDS).map(k => `<button type="button" data-act="testcard" data-arg="${k}">${T(W[`test_${k}`])}</button>`).join('')}</div></div>`;
 }
+/* Apple Pay and Link: off in Zana's code today. The corner menu shows them on, to help decide the member's own flow */
+const wallets = () => (S.wallet === 'on' ? `<div class="m-xp"><button class="m-ap" data-act="wallet">Apple Pay</button><button class="m-lk" data-act="wallet">link</button></div><p class="m-orcard"><span>${T(W.orCard)}</span></p>` : '');
+/* the bank said no: worded from Stripe's decline reason; lost, stolen and fraud read as a plain decline */
+const declineBox = d => {
+  const x = DECLINE[d.code] || DECLINE.generic_decline;
+  const head = d.code === 'generic_decline' && d.saved ? f().declined(d.name) : t(x.head).replace(/\.$/, '');
+  return `<div class="m-warn bad m-decl" role="alert"><b>${esc(head)}</b><span>${T(d.n > 1 ? W.declinedAgain : x.line)}</span></div>`;
+};
+/* the bank's own check (3D Secure): Stripe opens it over the payment; a real bank shows its own screen */
+const bankCheck = (amt, card) => `<div class="m-tds" role="group" aria-labelledby="m-tds-t"><p class="m-lab">${T(W.tdsBank)}</p><h3 id="m-tds-t">${T(W.tdsTitle)}</h3>
+  <p class="m-desc">${esc(f().tdsAsk(gym().name, amt, card))}</p><p class="m-meta">${T(W.tdsLine)}</p>
+  <button class="btn pri lg m-wide" data-act="tds" data-arg="ok">${T(W.tdsOk)}</button><button class="btn lg m-wide" data-act="tds" data-arg="no">${T(W.tdsNo)}</button><p class="m-fine">${T(W.tdsFake)}</p></div>`;
 
 /* ---------- time and dates ---------- */
 export function clock(hm) {
@@ -567,8 +587,9 @@ function paySheet() {
     if (pr.kind === 'pack') line = `<p class="m-meta">${esc(f().packLine(pr.n, g.unit, Math.round(amt / pr.n), S.lang === 'es' ? '15 feb' : 'Feb 15'))}</p>`;
   }
   const d = S.sheet.declined, cc = curCard(), form = !m.cards.length;
-  const state = d ? `<div class="m-warn bad m-decl"><b>${esc(f().declined(d.name))}</b><span>${T(d.n > 1 ? W.declinedAgain : W.declinedLine)}</span></div>` : '';
-  const card = form ? cardForm(true) : `<div class="card m-rows m-paycard">${irow('card', esc(cardName(cc)), esc(f().cardExp(cc.exp)), `<button class="btn sm" data-act="sheet" data-kind="cards">${T(W.change)}</button>`)}</div>`;
+  if (S.sheet.tds) return { title: esc(what), body: bankCheck(amt, f().cardName(S.sheet.tds.card.brand, S.sheet.tds.card.last4)) };
+  const state = d ? declineBox(d) : '';
+  const card = form ? `${wallets()}${cardForm('ask')}` : `<div class="card m-rows m-paycard">${irow('card', esc(cardName(cc)), esc(f().cardExp(cc.exp)), `<button class="btn sm" data-act="sheet" data-kind="cards">${T(W.change)}</button>`)}</div>`;
   const action = d && !form
     ? `<button class="btn pri lg m-wide" data-act="sheet" data-kind="cards">${T(W.useAnother)}</button><button class="m-link m-center" data-act="pay">${T(W.tryAgain)}</button>`
     : `<button class="btn pri lg m-wide" data-act="pay">${esc(pay.type === 'class' ? f().bookPay(amt) : f().payAmt(amt))}</button><p class="m-fine">${T(W.receiptLine)}</p>`;
@@ -601,7 +622,7 @@ function cardsSheet() {
     <button class="btn pri lg m-wide" data-act="usecard">${T(W.useCard)}</button><p class="m-fine">${esc(mine ? f().renewsOn(planName(mine)) : f().cardsFine())}</p>` };
 }
 function addcardSheet() {
-  return { title: T(W.addCard), body: `${cardForm(false)}<button class="btn pri lg m-wide" data-act="savecard">${T(W.saveCardBtn)}</button>` };
+  return { title: T(W.addCard), body: `${cardForm('always')}<button class="btn pri lg m-wide" data-act="savecard">${T(W.saveCardBtn)}</button>` };
 }
 /* one receipt, opened */
 function receiptSheet() {
