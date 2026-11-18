@@ -362,13 +362,14 @@ const ACT = {
 };
 
 const WAIT = { pay: 900, bookpay: 900, book: 380 };      // pretend: the time a real charge or booking takes
+const NOWAIT = { bookpay: () => !curCard(), pay: () => !me().cards.length && !readCard() };   // no card yet, or the form has a mistake: answer at once, nothing is charged
 phone.addEventListener('click', e => {
   const el = e.target.closest('[data-act]');
   if (!el || !phone.contains(el) || busy) return;
   const fn = ACT[el.dataset.act];
   if (!fn) return;
   const ms = WAIT[el.dataset.act];
-  if (ms && el.closest('.m-sheet') && !calm()) {
+  if (ms && el.closest('.m-sheet') && !calm() && !(NOWAIT[el.dataset.act] && NOWAIT[el.dataset.act]())) {
     busy = true;
     el.classList.add('m-busy'); el.setAttribute('aria-busy', 'true');
     el.dataset.label = el.textContent;
