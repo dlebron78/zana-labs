@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Get started wizard</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+[hidden]{display:none!important}
+:root{--ink:#111;--frame:#0E0E0E;--on-frame:#A3A3A0;--t2:#4A4A48;--t3:#5C5C59;--line:#E8E8E5;--rowline:#F0F0ED;--page:#F5F5F3;--card:#fff;--fill:#F0F0ED;--fillh:#E4E4E0;--note:#F3F3F0;--red:#A8261B;--redbg:#FDF1EF;--redline:#F6D3CE;--green:#17663A;--greenbg:#EAF5EE;--blue:#1F4FA8;--bluebg:#EDF2FB;--sans:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;--mono:"Geist Mono",ui-monospace,Menlo,monospace;--vh:100dvh;--top:0px;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--ink);overflow-x:hidden}
+body{font:15px/1.45 var(--sans);-webkit-text-size-adjust:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+input,textarea{font-size:16px}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
+
+/* frame: band on laptop, header on phone */
+.band{position:fixed;top:0;bottom:0;left:0;width:96px;background:var(--frame);display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:16px;z-index:5}
+.tile{width:40px;height:40px;border-radius:10px;background:#fff;color:var(--frame);font-weight:700;font-size:14px;display:grid;place-items:center;margin-bottom:14px}
+.bi{width:76px;height:60px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--on-frame);font-size:12px;font-weight:500}
+.bi.on{background:rgba(255,255,255,.13);color:#fff;font-weight:600}
+.bi i{width:20px;height:20px;border-radius:6px;border:2px solid currentColor;opacity:.8}
+.phd{display:none}
+.page{margin-left:96px;padding:32px max(40px,env(safe-area-inset-right)) 80px 40px;max-width:900px}
+.cap{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+h1{margin:4px 0 20px;font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.gs h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em}
+.gs .hd{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.gs .cnt{color:var(--t2);font-size:14px;font-variant-numeric:tabular-nums}
+.gs ul{list-style:none;margin:8px 0 0;padding:0}
+.gs li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--rowline)}
+.gs li:first-child{border-top:0}
+.ck{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center}
+.ck.d{background:var(--ink);border-color:var(--ink)}
+.ck.d::after{content:"";width:9px;height:5px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.ck.s{background:var(--fill);border-color:var(--fill)}
+.gs .nm{flex:1;min-width:0}
+.gs .nm b{display:block;font-weight:600}
+.gs .nm span{font-size:13px;color:var(--t2)}
+.gs li.done .nm b{color:var(--t2);font-weight:500}
+.btn{border:0;background:var(--fill);border-radius:10px;height:40px;padding:0 16px;font-size:15px;font-weight:600;white-space:nowrap}
+.btn:hover{background:var(--fillh)}
+.btn.pri{background:var(--ink);color:#fff}
+.btn.pri:disabled{background:#BDBDB8;color:#fff;cursor:default}
+.btn.sm{height:32px;border-radius:8px;font-size:14px;padding:0 12px}
+.btn:disabled{cursor:default;opacity:.55}
+.lnk{border:0;background:none;padding:0;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.mock{margin-top:24px;background:#1d1d1c;color:#ddd;border-radius:16px;padding:14px 16px;font-size:13px;display:grid;gap:10px}
+.mock b{color:#fff;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.mock .r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mseg{display:inline-flex;gap:2px;background:#2a2a2a;padding:2px;border-radius:8px}
+.mseg button{border:0;background:none;color:#ccc;height:30px;padding:0 10px;border-radius:6px;font-size:13px}
+.mseg button[aria-pressed=true]{background:#fff;color:#111}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:12px;padding:10px 16px;font-size:14px;font-weight:500;z-index:90;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+
+/* the wizard panel: side panel on a laptop, the whole screen on a phone. It never scrolls. */
+.wz{position:fixed;top:0;right:0;width:520px;height:var(--vh);background:var(--card);border-left:1px solid var(--line);box-shadow:-12px 0 40px rgba(17,17,17,.12);display:flex;flex-direction:column;z-index:40;overflow:hidden}
+.wh{flex:none;display:flex;align-items:center;gap:8px;height:56px;padding:0 12px;border-bottom:1px solid var(--rowline)}
+.wh .c{flex:1;min-width:0;text-align:center;font-size:13px;font-weight:600;color:var(--t2);letter-spacing:.02em}
+.ib{width:40px;height:40px;border-radius:10px;border:0;background:var(--fill);display:grid;place-items:center;flex:none}
+.ib:hover{background:var(--fillh)}
+.ib svg{width:20px;height:20px}
+.ib.ghost{visibility:hidden}
+.prog{flex:none;display:flex;gap:4px;padding:10px 20px 0}
+.prog i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.prog i.d{background:var(--ink)}
+.prog i.s{background:#BDBDB8}
+.prog i.l{background:repeating-linear-gradient(90deg,var(--ink) 0 4px,transparent 4px 7px);opacity:.35}
+.prog i.on{background:var(--ink);opacity:1;outline:2px solid var(--ink);outline-offset:1px}
+.wb{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px;padding:18px 20px 12px;overflow:hidden}
+.wb h2{margin:0;font-size:24px;line-height:1.15;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+.wb .sub{margin:-8px 0 0;color:var(--t2);font-size:14px}
+.wf{flex:none;display:flex;align-items:center;gap:8px;padding:12px 20px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--rowline)}
+.wf .sp{flex:1}
+.lbl{font-size:14px;font-weight:600}
+.hint{font-size:13px;color:var(--t2)}
+.fld{display:grid;gap:6px}
+.inp{width:100%;height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:#fff}
+.inp:focus{border-color:var(--ink);outline:none}
+.inpw{position:relative}
+.inpw .pre{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t2)}
+.inpw .suf{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t2);font-size:13px}
+.inpw .inp.pp{padding-left:24px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;background:var(--fill);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:none;border-radius:9px;min-height:40px;padding:4px 10px;font-size:15px;font-weight:600;color:var(--t2);line-height:1.2}
+.seg button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tl{border:1px solid var(--line);background:#fff;border-radius:12px;min-height:48px;padding:8px 12px;text-align:left;font-weight:600;display:flex;align-items:center;gap:10px}
+.tl .bx{flex:none;width:20px;height:20px;border-radius:6px;border:2px solid var(--line)}
+.tl[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.tl[aria-pressed=true] .bx{background:var(--ink);border-color:var(--ink);position:relative}
+.tl[aria-pressed=true] .bx::after{content:"";position:absolute;left:5px;top:2px;width:5px;height:9px;border:2px solid #fff;border-top:0;border-left:0;transform:rotate(45deg)}
+.big{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px 14px;text-align:left;display:grid;gap:2px}
+.big b{font-size:16px}
+.big span{font-size:13px;color:var(--t2)}
+.big em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--t3)}
+.big[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.stripe{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:14px;padding:10px 12px 10px 14px}
+.stripe .t{flex:1;min-width:0}
+.stripe .t b{display:block;font-size:15px}
+.stripe .t span{font-size:13px;color:var(--t2)}
+.stripe.ok{border-color:#CDE7D6;background:var(--greenbg)}
+.stripe.wait{border-color:#D6E0F3;background:var(--bluebg)}
+.stripe.part{border-color:var(--redline);background:var(--redbg)}
+.st{font-size:13px;font-weight:600}
+.st.ok{color:var(--green)}.st.wait{color:var(--blue)}.st.part{color:var(--red)}
+.div{height:1px;background:var(--rowline);margin:2px 0}
+.note{background:var(--note);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--t2)}
+.note b{color:var(--ink)}
+.dep{background:var(--redbg);border:1px solid var(--redline);border-radius:12px;padding:10px 12px;font-size:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dep span{flex:1;min-width:180px}
+.okn{background:var(--greenbg);border-radius:12px;padding:10px 12px;font-size:14px;color:var(--green);font-weight:500}
+.rate{display:grid;grid-template-columns:1fr 104px 28px;gap:8px;align-items:center}
+.chip{display:inline-block;font-size:12px;font-weight:600;color:var(--t2);background:var(--fill);border-radius:6px;padding:2px 7px}
+.days{display:flex;gap:6px}
+.days button{flex:1;height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:600;font-size:14px}
+.days button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ta{flex:1;min-height:80px;width:100%;resize:none;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:16px/1.5 var(--sans);overflow-y:auto}
+.ta:focus{border-color:var(--ink);outline:none}
+.grow{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+.logo{display:flex;align-items:center;gap:14px}
+.drop{width:88px;height:88px;border-radius:16px;border:2px dashed var(--line);display:grid;place-items:center;font-size:12px;color:var(--t2);text-align:center;background:#fff;overflow:hidden;flex:none;position:relative}
+.drop img{width:100%;height:100%;object-fit:contain}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.sw{display:flex;gap:8px}
+.sw button{flex:1;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px;display:grid;gap:6px;justify-items:center;font-size:13px;font-weight:600}
+.sw button i{width:100%;height:28px;border-radius:8px}
+.sw button[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.pv{border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.pv .hb{height:48px;display:flex;align-items:center;gap:10px;padding:0 12px;font-weight:700;font-size:15px}
+.pv .hb .lg{width:28px;height:28px;border-radius:8px;background:#fff;display:grid;place-items:center;overflow:hidden;font-size:11px;color:#111}
+.pv .hb .lg img{width:100%;height:100%;object-fit:contain}
+.pv .bd{background:var(--page);padding:10px 12px;display:grid;gap:6px}
+.pv .bd i{height:10px;border-radius:5px;background:var(--line);display:block}
+.people{display:grid;gap:6px}
+.pr{display:flex;align-items:center;gap:10px;font-size:14px;border:1px solid var(--rowline);border-radius:10px;padding:8px 10px}
+.pr b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.link{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:6px 6px 6px 12px;font-family:var(--mono);font-size:14px}
+.link span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.qr{width:132px;height:132px;flex:none;border:1px solid var(--line);border-radius:12px;padding:8px;background:#fff}
+.sum{display:grid;gap:4px}
+.sum div{display:flex;gap:10px;align-items:center;font-size:14px;padding:6px 0;border-top:1px solid var(--rowline)}
+.sum div:first-child{border-top:0}
+.sum em{font-style:normal;margin-left:auto;color:var(--t2);font-size:13px}
+
+/* Stripe's pages, simulated: a neutral stand-in, never a copy of Stripe's look */
+.away{position:fixed;inset:0;z-index:80;background:#E9E9EC;display:flex;flex-direction:column}
+.away .bar{height:44px;display:flex;align-items:center;gap:8px;padding:0 14px;background:#D9D9DE;font:13px var(--mono);color:#333}
+.away .bar span{background:#fff;border-radius:8px;padding:4px 10px;flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.away .in{flex:1;display:grid;place-items:center;padding:20px}
+.away .bx{background:#fff;border-radius:16px;padding:24px;max-width:420px;width:100%;display:grid;gap:12px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+.away .bx h3{margin:0;font-size:20px}
+.away .bx p{margin:0;color:#555;font-size:14px}
+.away .tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#777}
+.away .bx .btn{width:100%}
+
+@media (min-width:761px){body.wzopen .page{margin-right:520px}}
+@media (max-width:760px){
+  .band{display:none}
+  .phd{display:flex;align-items:center;gap:10px;height:56px;padding:0 16px;background:var(--frame);color:#fff;font-weight:700;position:sticky;top:0;z-index:5}
+  .phd .tile{margin:0;width:32px;height:32px;font-size:12px}
+  .page{margin-left:0;padding:20px 16px 60px}
+  h1{font-size:32px;margin-bottom:16px}
+  .wz{width:100%;border-left:0;box-shadow:none}
+  .wb{padding:14px 16px 10px;gap:12px}
+  .wb h2{font-size:22px}
+  .wf{padding-left:16px;padding-right:16px}
+  .prog{padding:10px 16px 0}
+  .gs .btn.sm{padding:0 10px}
+}
+@media (max-height:600px){
+  .wb .sub{display:none}
+  .tl{min-height:40px;padding:6px 10px}
+  .stripe{padding:8px 10px 8px 12px}
+  .wb h2{font-size:20px}
+}
+@media (max-height:700px){
+  .wb{gap:10px;padding-top:12px}
+  .wb h2{font-size:21px}
+  .tl{min-height:44px}
+  .inp{height:42px}
+  .qr{width:108px;height:108px}
+}
+</style>
+</head>
+<body>
+<nav class="band" aria-label="Sections"><div class="tile">BF</div><div class="bi on"><i></i>Today</div><div class="bi"><i></i>Schedule</div><div class="bi"><i></i>People</div><div class="bi"><i></i>Money</div><div class="bi"><i></i>Settings</div></nav>
+<div class="phd"><div class="tile">BF</div>Barrio Fitness</div>
+<main class="page">
+  <div class="cap" id="dateline"></div>
+  <h1>Today</h1>
+  <section class="card gs" id="gs" aria-label="Get started"></section>
+  <div class="mock">
+    <b>Mock controls · not part of the design</b>
+    <div class="r">Address <span class="mseg" id="m-where"><button data-v="pr">San Juan, PR</button><button data-v="us">Miami, FL</button></span></div>
+    <div class="r">Group classes <span class="mseg" id="m-cls"><button data-v="1">Yes</button><button data-v="0">No</button></span> Staff <span class="mseg" id="m-staff"><button data-v="1">Yes</button><button data-v="0">No</button></span></div>
+    <div class="r"><button class="btn sm" id="m-reset">Start over, as just signed up</button></div>
+  </div>
+</main>
+<div class="wz" id="wz" role="dialog" aria-modal="false" aria-labelledby="wzt" hidden></div>
+<div class="away" id="away" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const IC={back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',del:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
+
+/* each country's suggested ways to pay (money req 10's preset), and who-to-pay asked per method */
+const PRESET={pr:['ATH Móvil','Cash','Venmo','Zelle','PayPal','Cash App'],us:['Cash','Venmo','Zelle','PayPal','Cash App','Check']};
+const PAYTO={'ATH Móvil':['Phone or pATH','787 555 0142'],'Venmo':['Venmo username','@barriofitness'],'Zelle':['Email or phone','pagos@barrio.fit'],'PayPal':['PayPal email','pagos@barrio.fit'],'Cash App':['$Cashtag','$barriofit']};
+
+let S;
+function fresh(keep){
+  S={where:keep?S.where:'pr',classes:keep?S.classes:true,staff:keep?S.staff:true,
+    methods:[],payto:{},card:'none',tax:null,basis:null,rates:[],
+    plan:{kind:null,name:'',price:'',every:'month',visits:'',within:'3'},
+    logo:null,frame:'black',waiver:{name:'',text:'',when:null},
+    cls:{name:'',days:[],time:'',cap:''},people:[],draft:{name:'',email:'',role:null},
+    status:{},open:true,cur:'pay',sub:0,returnTo:null,stripeFrom:null};
+  ratesFor();
+}
+function ratesFor(){S.rates=S.where==='pr'?[{n:'State IVU',r:'10.5',sug:true},{n:'Municipal IVU',r:'1',sug:true}]:[{n:'',r:''}];}
+
+/* the steps, in order; tax only while not answered No, class and staff only where the business has them */
+const NAMES={pay:'How people pay you',tax:'Tax',plan:'Your first plan or pack',look:'Your look',waiver:'Your waiver',class:'Your first class',staff:'Your staff',join:'Your Join link'};
+function ids(){return ['pay',S.tax===false?null:'tax','plan','look','waiver',S.classes?'class':null,S.staff?'staff':null,'join'].filter(Boolean);}
+const SUBS={pay:()=>needPayTo()?2:1,plan:()=>2,waiver:()=>2};
+const subs=id=>SUBS[id]?SUBS[id]():1;
+function needPayTo(){return S.methods.some(m=>PAYTO[m]);}
+const skippable=id=>id==='look'||id==='waiver';
+const planDone=()=>S.status.plan==='done';
+
+/* ---------- Today's checklist ---------- */
+function drawToday(){
+  const list=ids(),done=list.filter(i=>S.status[i]==='done'||S.status[i]==='skipped').length;
+  const firstOpen=list.find(i=>!(S.status[i]==='done'||S.status[i]==='skipped'));
+  if(done===list.length){$('#gs').innerHTML='<div class="hd"><h2>You’re all set up</h2></div><p class="hint" style="margin:0">Every step is done. This card goes away tomorrow.</p>';return;}
+  $('#gs').innerHTML='<div class="hd"><h2>Get started</h2><span class="cnt">'+done+' of '+list.length+'</span></div>'+
+   '<ul>'+list.map(i=>{const st=S.status[i];const d=st==='done',sk=st==='skipped';
+     return '<li class="'+(d||sk?'done':'')+'"><span class="ck '+(d?'d':sk?'s':'')+'"></span><div class="nm"><b>'+NAMES[i]+'</b>'+
+      (sk?'<span>Skipped · <button class="lnk" data-undo="'+i+'">Undo</button></span>':st==='later'?'<span>Later</span>':'')+'</div>'+
+      (d||sk?'':'<button class="btn sm '+(i===firstOpen&&!S.open?'pri':'')+'" data-start="'+i+'">Start</button>')+'</li>';}).join('')+'</ul>';
+}
+document.addEventListener('click',e=>{
+  const s=e.target.closest('[data-start]');if(s){openAt(s.dataset.start);return;}
+  const u=e.target.closest('[data-undo]');if(u){delete S.status[u.dataset.undo];drawAll();}
+});
+
+/* ---------- the panel ---------- */
+function openAt(id,sub){
+  if(id==='plan'&&S.tax===null&&ids().includes('tax')){S.returnTo=null;id='tax';toast('Answer tax first, your price depends on it');}
+  S.cur=id;S.sub=sub||0;S.open=true;drawAll();
+}
+function closeWz(){S.open=false;drawAll();}
+function move(dir){
+  const list=ids();let i=list.indexOf(S.cur);
+  if(dir<0){if(S.sub>0){S.sub--;}else if(i>0){S.cur=list[i-1];S.sub=subs(S.cur)-1;}drawAll();return;}
+  if(S.sub<subs(S.cur)-1){S.sub++;drawAll();return;}
+  if(S.returnTo&&list.includes(S.returnTo)){const r=S.returnTo;S.returnTo=null;S.cur=r;S.sub=0;drawAll();return;}
+  if(i<list.length-1){S.cur=list[i+1];S.sub=0;
+    if(S.cur==='plan'&&S.tax===null){S.cur='tax';}
+  }else{S.cur='end';}
+  drawAll();
+}
+function finishStep(st){S.status[S.cur]=st;move(1);}
+
+function drawWz(){
+  const wz=$('#wz');wz.hidden=!S.open;document.body.classList.toggle('wzopen',S.open);if(!S.open)return;
+  const list=ids();
+  if(S.cur==='end'){wz.innerHTML=head(null)+'<div class="wb">'+viewEnd()+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="go-today">Go to Today</button></div>';
+    $('#go-today').onclick=closeWz;$('#wz-x').onclick=closeWz;return;}
+  const id=S.cur,v=VIEW[id]();
+  const i=list.indexOf(id);
+  const forced=id==='tax'&&S.tax===null;
+  wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div>'+
+    '<div class="wf">'+(skippable(id)&&S.sub===0?'<button class="btn" id="b-skip">Skip</button>':'')+
+    (forced?'':'<button class="btn" id="b-later">Later</button>')+'<span class="sp"></span>'+
+    '<button class="btn pri" id="b-next">'+(S.sub<subs(id)-1?'Next':i===list.length-1?'Finish':'Save and continue')+'</button></div>';
+  $('#wz-x').onclick=closeWz;
+  const bk=$('#wz-back');if(bk)bk.onclick=()=>move(-1);
+  const sk=$('#b-skip');if(sk)sk.onclick=()=>finishStep('skipped');
+  const lt=$('#b-later');if(lt)lt.onclick=()=>{if(S.status[id]!=='done')S.status[id]='later';S.sub=subs(id)-1;move(1);};
+  $('#b-next').onclick=()=>{if(S.sub<subs(id)-1){move(1);}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
+  WIRE[id]&&WIRE[id]();nav();
+}
+function head(i){
+  const list=ids();
+  const canBack=i!==null&&(i>0||S.sub>0);
+  return '<div class="wh"><button class="ib '+(canBack?'':'ghost')+'" id="wz-back" aria-label="Back">'+IC.back+'</button><div class="c">GET STARTED'+(i===null?'':' · '+(i+1)+' OF '+list.length)+'</div><button class="ib" id="wz-x" aria-label="Close">'+IC.x+'</button></div>'+
+   '<div class="prog" aria-hidden="true">'+list.map(x=>{const st=S.status[x];return '<i class="'+(x===S.cur?'on':st==='done'?'d':st==='skipped'?'s':st==='later'?'l':'')+'"></i>';}).join('')+'</div>';
+}
+function nav(){const ok=VALID[S.cur]?VALID[S.cur]():true;const n=$('#b-next');if(n)n.disabled=!ok;}
+function segH(name,opts,val){return '<div class="seg" role="group" aria-label="'+esc(name)+'">'+opts.map(([v,t])=>'<button type="button" data-seg="'+esc(name)+'" data-v="'+v+'" aria-pressed="'+(val===v)+'">'+t+'</button>').join('')+'</div>';}
+function onSeg(name,fn){document.querySelectorAll('[data-seg="'+name+'"]').forEach(b=>b.onclick=()=>{fn(b.dataset.v);});}
+function onInp(sel,fn){const el=$(sel);if(el)el.oninput=()=>{fn(el.value);nav();};}
+
+/* ---------- the views, one screen each ---------- */
+const VIEW={
+ pay(){
+  if(S.sub===1){
+   return '<h2 id="wzt">Where should they send it?</h2><p class="sub">Shown to clients when they pay you by hand.</p>'+
+    S.methods.filter(m=>PAYTO[m]).map(m=>'<div class="fld"><label class="lbl" for="pt-'+esc(m)+'">'+esc(m)+' · '+PAYTO[m][0]+'</label><input class="inp" id="pt-'+esc(m)+'" data-pt="'+esc(m)+'" placeholder="'+esc(PAYTO[m][1])+'" value="'+esc(S.payto[m]||'')+'"></div>').join('')+
+    '<p class="hint" style="margin:0">Cash needs nothing.</p>';
+  }
+  const st={none:['Card, with Stripe','Clients pay by card. You finish on Stripe’s site.','',''],
+   ok:['Card, with Stripe','<span class="st ok">Connected. You can take cards.</span>','ok',''],
+   wait:['Card, with Stripe','<span class="st wait">Stripe is checking your details.</span> Take hand payments meanwhile.','wait',''],
+   part:['Card, with Stripe','<span class="st part">You left Stripe before finishing.</span>','part','']}[S.card==='none'?'none':S.card];
+  return '<h2 id="wzt">How do you want to get paid?</h2><p class="sub">Pick every way your clients pay you.</p>'+
+   '<div class="stripe '+st[2]+'"><div class="t"><b>'+st[0]+'</b><span>'+st[1]+'</span></div>'+
+    (S.card==='ok'?'':'<button class="btn sm" id="b-stripe">'+(S.card==='part'?'Continue':S.card==='wait'?'Check':'Connect')+'</button>')+'</div>'+
+   '<div class="lbl">Paid by hand</div><div class="tiles">'+PRESET[S.where].map(m=>'<button type="button" class="tl" data-m="'+esc(m)+'" aria-pressed="'+S.methods.includes(m)+'"><span class="bx"></span>'+esc(m)+'</button>').join('')+'</div>'+
+   '<div class="div"></div><div class="fld"><div class="lbl">Collect tax?</div>'+segH('tax',[['yes','Yes'],['no','No']],S.tax===null?null:S.tax?'yes':'no')+'</div>';
+ },
+ tax(){
+  if(S.tax===null){
+   return '<h2 id="wzt">Do you collect tax?</h2><p class="sub">Your first price depends on this, so it comes first.</p>'+
+    segH('tax2',[['yes','Yes'],['no','No']],null)+'<div class="note">Answer <b>No</b> and you’re done here. You can turn tax on later in Settings.</div>';
+  }
+  return '<h2 id="wzt">Your tax</h2><p class="sub">Every plan uses these unless you change it on the plan.</p>'+
+   '<div class="fld"><div class="lbl">Your prices</div>'+segH('basis',[['incl','Include tax'],['top','Have tax added on top']],S.basis)+'</div>'+
+   '<div class="fld"><div class="lbl">Rates '+(S.where==='pr'?'<span class="chip">Suggested for Puerto Rico</span>':'')+'</div>'+
+   S.rates.map((r,k)=>'<div class="rate"><input class="inp" data-rn="'+k+'" placeholder="Name, like State tax" value="'+esc(r.n)+'"><div class="inpw"><input class="inp" data-rr="'+k+'" inputmode="decimal" placeholder="0" value="'+esc(r.r)+'" style="padding-right:28px"><span class="suf">%</span></div>'+
+     (S.rates.length>1?'<button class="ib" style="width:28px;height:28px;background:none" data-rdel="'+k+'" aria-label="Remove rate">'+IC.del+'</button>':'<span></span>')+'</div>').join('')+
+   (S.rates.length<3?'<button class="lnk" id="b-addrate" style="justify-self:start">+ Add a rate</button>':'')+'</div>'+
+   '<div class="note">A plan can use these rates, its own, or no tax. <b>Turn tax off and no plan is taxed.</b></div>';
+ },
+ plan(){
+  const p=S.plan;
+  if(S.sub===0){
+   const K=[['plan','Plan','They pay again every month or week.','Unlimited · $120 a month'],['pack','Pack of visits','A number of visits, used before it expires.','8 sessions · $240'],['single','Single visit','A drop-in or a day pass.','Drop-in · $20']];
+   return '<h2 id="wzt">What are you selling first?</h2><p class="sub">You can add more later in Money › Products.</p>'+
+    K.map(k=>'<button type="button" class="big" data-kind="'+k[0]+'" aria-pressed="'+(p.kind===k[0])+'"><b>'+k[1]+'</b><span>'+k[2]+'</span><em>'+k[3]+'</em></button>').join('');
+  }
+  const tx=S.tax?(S.basis==='incl'?'tax included':'+ tax'):'no tax';
+  const total=S.rates.reduce((a,r)=>a+(parseFloat(r.r)||0),0);
+  const kindName={plan:'Plan',pack:'Pack of visits',single:'Single visit'}[p.kind]||'';
+  return '<h2 id="wzt">'+kindName+'</h2><p class="sub">'+(p.kind==='plan'?'Charged again every period until they stop.':p.kind==='pack'?'They use the visits before it expires.':'One visit, one day.')+'</p>'+
+   '<div class="fld"><label class="lbl" for="p-name">Name</label><input class="inp" id="p-name" placeholder="'+(p.kind==='plan'?'Unlimited':p.kind==='pack'?'8 sessions':'Drop-in')+'" value="'+esc(p.name)+'"></div>'+
+   '<div class="fld"><label class="lbl" for="p-price">Price</label><div class="inpw"><span class="pre">$</span><input class="inp pp" id="p-price" inputmode="decimal" placeholder="0" value="'+esc(p.price)+'" style="padding-right:96px"><span class="suf">'+tx+'</span></div></div>'+
+   (p.kind==='plan'?'<div class="row2"><div class="fld"><div class="lbl">Every</div>'+segH('every',[['month','Month'],['week','Week']],p.every)+'</div><div class="fld"><label class="lbl" for="p-vis">Visits each '+p.every+'</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="Unlimited" value="'+esc(p.visits)+'"></div></div>':'')+
+   (p.kind==='pack'?'<div class="row2"><div class="fld"><label class="lbl" for="p-vis">Visits</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="8" value="'+esc(p.visits)+'"></div><div class="fld"><label class="lbl" for="p-in">Use within</label><div class="inpw"><input class="inp" id="p-in" inputmode="numeric" value="'+esc(p.within)+'" style="padding-right:70px"><span class="suf">months</span></div></div></div>':'')+
+   '<div class="note">Tax: '+(S.tax?'your rates, '+total+'%, '+(S.basis==='incl'?'included in the price':'added on top'):'none')+'. Change it on this plan later in Money › Products.</div>';
+ },
+ look(){
+  const fr={black:'#0E0E0E',light:'#FFFFFF',color:'#1F6B5C'}[S.frame];
+  return '<h2 id="wzt">Your look</h2><p class="sub">Your logo and colors, on your page and in your members’ app.</p>'+
+   '<div class="logo"><div class="drop">'+(S.logo?'<img alt="Your logo" src="'+S.logo+'">':'Add your<br>logo')+'<input type="file" accept="image/*" id="lg" aria-label="Upload your logo"></div><div class="hint">A square PNG or JPG works best.'+(S.logo?' <button class="lnk" id="lg-x">Remove</button>':'')+'</div></div>'+
+   '<div class="fld"><div class="lbl">Colors</div><div class="sw">'+[['black','Black','#0E0E0E'],['light','Light','#FFFFFF'],['color','Your color','#1F6B5C']].map(c=>'<button type="button" data-fr="'+c[0]+'" aria-pressed="'+(S.frame===c[0])+'"><i style="background:'+c[2]+';border:1px solid var(--line)"></i>'+c[1]+'</button>').join('')+'</div></div>'+
+   '<div class="pv" aria-label="Preview"><div class="hb" style="background:'+fr+';color:'+(S.frame==='light'?'#111':'#fff')+';border-bottom:1px solid var(--line)"><span class="lg">'+(S.logo?'<img alt="" src="'+S.logo+'">':'BF')+'</span>Barrio Fitness</div><div class="bd"><i style="width:60%"></i><i style="width:85%"></i><i style="width:40%"></i></div></div>';
+ },
+ waiver(){
+  const w=S.waiver;
+  if(S.sub===0){
+   return '<h2 id="wzt">Write your waiver</h2><p class="sub">Paste your own wording. Clients sign it in the app.</p>'+
+    '<div class="fld"><label class="lbl" for="w-name">Name</label><input class="inp" id="w-name" placeholder="Liability waiver" value="'+esc(w.name)+'"></div>'+
+    '<div class="grow"><label class="lbl" for="w-text">Text</label><textarea class="ta" id="w-text" placeholder="Paste your waiver here">'+esc(w.text)+'</textarea></div>';
+  }
+  return '<h2 id="wzt">Who signs it?</h2><p class="sub">Until it’s signed they can’t book. Staff can still check them in.</p>'+
+   '<button type="button" class="big" data-when="join" aria-pressed="'+(w.when==='join')+'"><b>Everyone, when they join</b><span>The usual choice for a liability waiver.</span></button>'+
+   '<button type="button" class="big" data-when="plan" aria-pressed="'+(w.when==='plan')+'"'+(planDone()?'':' disabled style="opacity:.55"')+'><b>Only people who buy '+(planDone()?esc(S.plan.name||'your plan'):'certain plans')+'</b><span>'+(planDone()?'Asked when they buy it.':'Make a plan first to pick this.')+'</span></button>';
+ },
+ class(){
+  const c=S.cls;
+  return '<h2 id="wzt">Your first class</h2><p class="sub">It repeats every week on the days you pick.</p>'+
+   (planDone()?'<div class="okn">Clients with '+esc(S.plan.name||'your plan')+' can book it.</div>':'<div class="dep"><span>Nobody can book this yet. No plan covers it.</span><button class="btn sm" data-goplan>Make a plan first</button></div>')+
+   '<div class="fld"><label class="lbl" for="c-name">Class name</label><input class="inp" id="c-name" placeholder="CrossFit" value="'+esc(c.name)+'"></div>'+
+   '<div class="fld"><div class="lbl">Days</div><div class="days">'+['Mo','Tu','We','Th','Fr','Sa','Su'].map(d=>'<button type="button" data-day="'+d+'" aria-pressed="'+c.days.includes(d)+'">'+d+'</button>').join('')+'</div></div>'+
+   '<div class="row2"><div class="fld"><label class="lbl" for="c-time">Starts at</label><input class="inp" id="c-time" type="time" value="'+esc(c.time)+'"></div><div class="fld"><label class="lbl" for="c-cap">Spots</label><input class="inp" id="c-cap" inputmode="numeric" placeholder="No limit" value="'+esc(c.cap)+'"></div></div>';
+ },
+ staff(){
+  const d=S.draft;const shown=S.people.slice(-2),more=S.people.length-shown.length;
+  const RD={admin:'Everything you can do, except closing the business.',coach:'Their classes, check-ins and workouts.',desk:'Check-ins, sales and today’s payments.'};
+  return '<h2 id="wzt">Add your staff</h2><p class="sub">They get an email to sign in.</p>'+
+   '<div class="row2"><div class="fld"><label class="lbl" for="s-name">Name</label><input class="inp" id="s-name" placeholder="Ana Rivera" value="'+esc(d.name)+'"></div><div class="fld"><label class="lbl" for="s-mail">Email</label><input class="inp" id="s-mail" type="email" placeholder="ana@mail.com" value="'+esc(d.email)+'"></div></div>'+
+   '<div class="fld"><div class="lbl">Role</div>'+segH('role',[['admin','Admin'],['coach','Coach'],['desk','Front desk']],d.role)+'<div class="hint" id="s-rd">'+(d.role?RD[d.role]:'&nbsp;')+'</div></div>'+
+   '<button class="btn" id="s-add" style="justify-self:start">Add '+(d.name?esc(d.name.split(' ')[0]):'them')+'</button>'+
+   (S.people.length?'<div class="people">'+(more>0?'<div class="hint">+ '+more+' more added</div>':'')+shown.map(p=>'<div class="pr"><b>'+esc(p.name)+'</b><span class="chip">'+({admin:'Admin',coach:'Coach',desk:'Front desk'})[p.role]+'</span></div>').join('')+'</div>':'');
+ },
+ join(){
+  return '<h2 id="wzt">Share your Join link</h2><p class="sub">People who tap it join Barrio Fitness'+(planDone()?' and can buy '+esc(S.plan.name||'your plan')+'.':'.')+'</p>'+
+   (planDone()?'':'<div class="dep"><span>People who join have nothing to buy yet.</span><button class="btn sm" data-goplan>Make a plan first</button></div>')+
+   '<div class="link"><span>zana.fit/j/barrio</span><button class="btn sm" id="j-copy">Copy</button></div>'+
+   '<div style="display:flex;gap:14px;align-items:center">'+qr()+'<div style="display:grid;gap:8px"><span class="hint">Put it on your Instagram, your front door or a flyer.</span><button class="btn sm" id="j-qr" style="justify-self:start">Download QR code</button></div></div>';
+ }
+};
+function viewEnd(){
+  const list=ids();
+  const later=list.filter(i=>S.status[i]==='later'||!S.status[i]);
+  return '<h2>'+(planDone()?'Barrio Fitness is ready to sell':'Good start')+'</h2><p class="sub">'+(later.length?'What’s left waits on Today. Tap Start to pick it back up.':'Everything is set up.')+'</p>'+
+   '<div class="sum">'+list.map(i=>{const st=S.status[i];return '<div><span class="ck '+(st==='done'?'d':st==='skipped'?'s':'')+'"></span>'+NAMES[i]+'<em>'+(st==='done'?'Done':st==='skipped'?'Skipped':'Later')+'</em></div>';}).join('')+'</div>';
+}
+function qr(){let h='<svg class="qr" viewBox="0 0 21 21" shape-rendering="crispEdges" aria-label="QR code"><rect width="21" height="21" fill="#fff"/>';let s=7;
+  const fin=(x,y)=>'<rect x="'+x+'" y="'+y+'" width="7" height="7" fill="#111"/><rect x="'+(x+1)+'" y="'+(y+1)+'" width="5" height="5" fill="#fff"/><rect x="'+(x+2)+'" y="'+(y+2)+'" width="3" height="3" fill="#111"/>';
+  for(let y=0;y<21;y++)for(let x=0;x<21;x++){if((x<8&&y<8)||(x>12&&y<8)||(x<8&&y>12))continue;s=(s*73+19)%101;if(s%2)h+='<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="#111"/>';}
+  return h+fin(0,0)+fin(14,0)+fin(0,14)+'</svg>';}
+
+/* ---------- what makes Next work ---------- */
+const VALID={
+ pay(){if(S.sub===1)return S.methods.filter(m=>PAYTO[m]).every(m=>(S.payto[m]||'').trim());return S.tax!==null&&(S.methods.length>0||S.card==='ok'||S.card==='wait');},
+ tax(){if(S.tax===null)return false;return !!S.basis&&S.rates.some(r=>r.n.trim()&&parseFloat(r.r)>0);},
+ plan(){if(S.sub===0)return !!S.plan.kind;return S.plan.name.trim()&&parseFloat(S.plan.price)>0&&(S.plan.kind!=='pack'||parseInt(S.plan.visits)>0);},
+ look(){return !!S.logo;},
+ waiver(){if(S.sub===0)return S.waiver.name.trim()&&S.waiver.text.trim().length>20;return !!S.waiver.when;},
+ class(){const c=S.cls;return c.name.trim()&&c.days.length&&c.time;},
+ staff(){const d=S.draft;return S.people.length>0||(d.name.trim()&&d.email.includes('@')&&!!d.role);},
+ join(){return true;}
+};
+const SAVE={staff(){const d=S.draft;if(d.name.trim()&&d.email.trim()&&d.role){S.people.push({...d});S.draft={name:'',email:'',role:null};}}};
+
+/* ---------- wiring each view ---------- */
+const WIRE={
+ pay(){
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const m=b.dataset.m;S.methods=S.methods.includes(m)?S.methods.filter(x=>x!==m):[...S.methods,m];b.setAttribute('aria-pressed',S.methods.includes(m));nav();});
+  onSeg('tax',v=>{S.tax=v==='yes';drawAll();});
+  document.querySelectorAll('[data-pt]').forEach(el=>el.oninput=()=>{S.payto[el.dataset.pt]=el.value;nav();});
+  const b=$('#b-stripe');if(b)b.onclick=()=>{if(S.card==='wait'){S.card='ok';toast('Stripe approved your details');drawAll();}else stripeIntro();};
+ },
+ tax(){
+  onSeg('tax2',v=>{S.tax=v==='yes';if(!S.tax){S.status.tax='done';S.status.pay=S.status.pay||'later';S.cur='plan';S.sub=0;}drawAll();});
+  onSeg('basis',v=>{S.basis=v;drawAll();});
+  document.querySelectorAll('[data-rn]').forEach(el=>el.oninput=()=>{S.rates[+el.dataset.rn].n=el.value;nav();});
+  document.querySelectorAll('[data-rr]').forEach(el=>el.oninput=()=>{S.rates[+el.dataset.rr].r=el.value.replace(/[^0-9.]/g,'');nav();});
+  document.querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>{S.rates.splice(+b.dataset.rdel,1);drawAll();});
+  const a=$('#b-addrate');if(a)a.onclick=()=>{S.rates.push({n:'',r:''});drawAll();};
+ },
+ plan(){
+  document.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{S.plan.kind=b.dataset.kind;drawAll();});
+  onInp('#p-name',v=>S.plan.name=v);onInp('#p-price',v=>S.plan.price=v.replace(/[^0-9.]/g,''));onInp('#p-vis',v=>S.plan.visits=v.replace(/\D/g,''));onInp('#p-in',v=>S.plan.within=v.replace(/\D/g,''));
+  onSeg('every',v=>{S.plan.every=v;drawAll();});
+ },
+ look(){
+  const f=$('#lg');if(f)f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{S.logo=r.result;drawAll();};r.readAsDataURL(file);};
+  const x=$('#lg-x');if(x)x.onclick=()=>{S.logo=null;drawAll();};
+  document.querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>{S.frame=b.dataset.fr;drawAll();});
+ },
+ waiver(){
+  onInp('#w-name',v=>S.waiver.name=v);onInp('#w-text',v=>S.waiver.text=v);
+  document.querySelectorAll('[data-when]').forEach(b=>b.onclick=()=>{if(b.disabled)return;S.waiver.when=b.dataset.when;drawAll();});
+ },
+ class(){
+  onInp('#c-name',v=>S.cls.name=v);onInp('#c-time',v=>S.cls.time=v);onInp('#c-cap',v=>S.cls.cap=v.replace(/\D/g,''));
+  document.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{const d=b.dataset.day;S.cls.days=S.cls.days.includes(d)?S.cls.days.filter(x=>x!==d):[...S.cls.days,d];b.setAttribute('aria-pressed',S.cls.days.includes(d));nav();});
+  goPlan();
+ },
+ staff(){
+  onInp('#s-name',v=>{S.draft.name=v;const a=$('#s-add');if(a)a.textContent='Add '+(v.trim()?v.trim().split(' ')[0]:'them');});onInp('#s-mail',v=>S.draft.email=v);
+  onSeg('role',v=>{S.draft.role=v;drawAll();});
+  $('#s-add').onclick=()=>{const d=S.draft;if(!(d.name.trim()&&d.email.includes('@')&&d.role)){toast('Add a name, an email and a role');return;}S.people.push({...d});S.draft={name:'',email:'',role:null};drawAll();};
+ },
+ join(){
+  $('#j-copy').onclick=()=>{try{navigator.clipboard.writeText('https://zana.fit/j/barrio');}catch(e){}toast('Link copied');};
+  $('#j-qr').onclick=()=>toast('QR code saved');goPlan();
+ }
+};
+function goPlan(){document.querySelectorAll('[data-goplan]').forEach(b=>b.onclick=()=>{S.returnTo=S.cur;S.cur=S.tax===null?'tax':'plan';S.sub=0;drawAll();});}
+
+/* ---------- leaving for Stripe, and coming back ---------- */
+function stripeIntro(){
+  const wb=$('#wb');
+  wb.innerHTML='<h2 id="wzt">You’ll finish on Stripe</h2><p class="sub">Stripe handles card payments for Zana. It asks for your business details and the bank account your money goes to.</p>'+
+   '<div class="note"><b>About 5 minutes.</b> Have your bank account and ID handy. When you’re done, Stripe sends you right back here, to this step.</div>'+
+   '<div class="note">Your hand payments and your tax answer are saved. Nothing is lost.</div>'+
+   '<div style="display:flex;gap:8px;margin-top:auto"><button class="btn" id="st-no">Not now</button><span style="flex:1"></span><button class="btn pri" id="st-go">Continue to Stripe</button></div>';
+  document.querySelector('.wf').hidden=true;
+  $('#st-no').onclick=()=>drawAll();
+  $('#st-go').onclick=()=>{S.stripeFrom=S.cur;const a=$('#away');a.hidden=false;
+   a.innerHTML='<div class="bar">🔒 <span>connect.stripe.com/setup/…</span></div><div class="in"><div class="bx"><div class="tag">Simulated · Stripe’s own pages appear here</div><h3>Barrio Fitness on Stripe</h3><p>She types her business details, her ID and her bank account on Stripe’s pages. Zana never sees them. Pick how she comes back:</p>'+
+   '<button class="btn pri" data-ret="ok">Finish · approved right away</button><button class="btn" data-ret="wait">Finish · Stripe still checking</button><button class="btn" data-ret="part">Leave before finishing</button></div></div>';
+   a.querySelectorAll('[data-ret]').forEach(b=>b.onclick=()=>comeBack(b.dataset.ret));};
+}
+function comeBack(how){
+  $('#away').hidden=true;S.card=how;S.open=true;S.cur='pay';S.sub=0;
+  toast({ok:'Back from Stripe · cards are on',wait:'Back from Stripe · they’re checking your details',part:'Back from Stripe · not finished yet'}[how]);
+  drawAll();
+}
+
+/* ---------- the rest ---------- */
+let tt;function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,2400);}
+function drawAll(){drawToday();drawWz();drawMock();}
+function drawMock(){
+  const set=(id,v)=>document.querySelectorAll(id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
+  set('#m-where',S.where);set('#m-cls',S.classes?'1':'0');set('#m-staff',S.staff?'1':'0');
+}
+document.querySelectorAll('#m-where button').forEach(b=>b.onclick=()=>{S.where=b.dataset.v;S.methods=[];S.payto={};ratesFor();drawAll();});
+document.querySelectorAll('#m-cls button').forEach(b=>b.onclick=()=>{S.classes=b.dataset.v==='1';if(!S.classes&&S.cur==='class')S.cur='join';drawAll();});
+document.querySelectorAll('#m-staff button').forEach(b=>b.onclick=()=>{S.staff=b.dataset.v==='1';if(!S.staff&&S.cur==='staff')S.cur='join';drawAll();});
+$('#m-reset').onclick=()=>{fresh(true);drawAll();};
+$('#dateline').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+/* the panel fits the visible screen, keyboard included, so it never scrolls */
+function fit(){const v=window.visualViewport;document.documentElement.style.setProperty('--vh',(v?v.height:innerHeight)+'px');const w=$('#wz');if(w&&v)w.style.top=v.offsetTop+'px';}
+if(window.visualViewport){visualViewport.addEventListener('resize',fit);visualViewport.addEventListener('scroll',fit);}addEventListener('resize',fit);fit();
+fresh();drawAll();
+</script>
+</body>
+</html>
