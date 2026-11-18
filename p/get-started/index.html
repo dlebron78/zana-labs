@@ -127,6 +127,11 @@ h1{margin:4px 0 20px;font-size:40px;font-weight:700;letter-spacing:-.03em;line-h
 .drop img{width:100%;height:100%;object-fit:contain}
 .drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .sw{display:flex;gap:8px}
+.sws{display:flex;gap:8px;align-items:center}
+.swc{flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);padding:0;position:relative;display:grid;place-items:center;font-weight:700;color:var(--t2);background:#fff;cursor:pointer}
+.swc[aria-pressed=true]{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
+.swc.cust input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.inp.hex{width:auto;flex:1;min-width:0;font-family:var(--mono);font-size:15px}
 .sw button{flex:1;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px;display:grid;gap:6px;justify-items:center;font-size:13px;font-weight:600}
 .sw button i{width:100%;height:28px;border-radius:8px}
 .sw button[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
@@ -212,15 +217,17 @@ const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const IC={back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',del:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
 
 /* each country's suggested ways to pay (money req 10's preset), and who-to-pay asked per method */
-const PRESET={pr:['ATH Móvil','Cash','Venmo','Zelle','PayPal','Cash App'],us:['Cash','Venmo','Zelle','PayPal','Cash App','Check']};
-const PAYTO={'ATH Móvil':['Phone or pATH','787 555 0142'],'Venmo':['Venmo username','@barriofitness'],'Zelle':['Email or phone','pagos@barrio.fit'],'PayPal':['PayPal email','pagos@barrio.fit'],'Cash App':['$Cashtag','$barriofit']};
+/* one list for every business at launch (money req 10's preset): six as tiles, the rest and Other behind + Another way */
+const TOP=['ATH Móvil','Cash','Venmo','Zelle','PayPal','Cash App'];
+const MORE=['Check','Bank transfer','Own card terminal','Payment link'];
+const PAYTO={'ATH Móvil':['Phone or pATH','787 555 0142'],'Venmo':['Venmo username','@barriofitness'],'Zelle':['Email or phone','pagos@barrio.fit'],'PayPal':['PayPal email','pagos@barrio.fit'],'Cash App':['$Cashtag','$barriofit'],'Bank transfer':['Bank and account','Banco Popular · 1234'],'Payment link':['Link','https://pay.barrio.fit']};
 
 let S;
 function fresh(keep){
   S={where:keep?S.where:'pr',classes:keep?S.classes:true,staff:keep?S.staff:true,
-    methods:[],payto:{},card:'none',tax:null,basis:null,rates:[],
+    methods:[],others:[],more:false,otherName:'',payto:{},card:'none',tax:null,basis:null,rates:[],
     plan:{kind:null,name:'',price:'',every:'month',visits:'',within:'3'},
-    logo:null,frame:'black',waiver:{name:'',text:'',when:null},
+    logo:null,frame:'black',swatches:[],color:'',waiver:{use:null,name:'',text:'',when:null},
     cls:{name:'',days:[],time:'',cap:''},people:[],draft:{name:'',email:'',role:null},
     status:{},open:true,cur:'pay',sub:0,returnTo:null,stripeFrom:null};
   ratesFor();
@@ -230,10 +237,11 @@ function ratesFor(){S.rates=S.where==='pr'?[{n:'State IVU',r:'10.5',sug:true},{n
 /* the steps, in order; tax only while not answered No, class and staff only where the business has them */
 const NAMES={pay:'How people pay you',tax:'Tax',plan:'Your first plan or pack',look:'Your look',waiver:'Your waiver',class:'Your first class',staff:'Your staff',join:'Your Join link'};
 function ids(){return ['pay',S.tax===false?null:'tax','plan','look','waiver',S.classes?'class':null,S.staff?'staff':null,'join'].filter(Boolean);}
-const SUBS={pay:()=>needPayTo()?2:1,plan:()=>2,waiver:()=>2};
+const SUBS={pay:()=>needPayTo()?2:1,plan:()=>2,waiver:()=>S.waiver.use==='yes'?2:1};
 const subs=id=>SUBS[id]?SUBS[id]():1;
 function needPayTo(){return S.methods.some(m=>PAYTO[m]);}
-const skippable=id=>id==='look'||id==='waiver';
+function extras(){return [...S.methods.filter(m=>MORE.includes(m)),...S.others];}
+const skippable=id=>id==='look';
 const planDone=()=>S.status.plan==='done';
 
 /* ---------- Today's checklist ---------- */
@@ -277,6 +285,8 @@ function drawWz(){
     $('#go-today').onclick=closeWz;$('#wz-x').onclick=closeWz;return;}
   const id=S.cur,v=VIEW[id]();
   const i=list.indexOf(id);
+  if(id==='pay'&&S.more){wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
+    $('#wz-x').onclick=closeWz;const bk0=$('#wz-back');if(bk0)bk0.onclick=()=>{S.more=false;drawAll();};$('#b-done').onclick=()=>{S.more=false;drawAll();};WIRE.pay();return;}
   const forced=id==='tax'&&S.tax===null;
   wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div>'+
     '<div class="wf">'+(skippable(id)&&S.sub===0?'<button class="btn" id="b-skip">Skip</button>':'')+
@@ -286,12 +296,12 @@ function drawWz(){
   const bk=$('#wz-back');if(bk)bk.onclick=()=>move(-1);
   const sk=$('#b-skip');if(sk)sk.onclick=()=>finishStep('skipped');
   const lt=$('#b-later');if(lt)lt.onclick=()=>{if(S.status[id]!=='done')S.status[id]='later';S.sub=subs(id)-1;move(1);};
-  $('#b-next').onclick=()=>{if(S.sub<subs(id)-1){move(1);}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
+  $('#b-next').onclick=()=>{if(S.sub<subs(id)-1){move(1);}else if(id==='waiver'&&S.waiver.use==='no'){finishStep('skipped');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
   WIRE[id]&&WIRE[id]();nav();
 }
 function head(i){
   const list=ids();
-  const canBack=i!==null&&(i>0||S.sub>0);
+  const canBack=i!==null&&(i>0||S.sub>0||S.more);
   return '<div class="wh"><button class="ib '+(canBack?'':'ghost')+'" id="wz-back" aria-label="Back">'+IC.back+'</button><div class="c">GET STARTED'+(i===null?'':' · '+(i+1)+' OF '+list.length)+'</div><button class="ib" id="wz-x" aria-label="Close">'+IC.x+'</button></div>'+
    '<div class="prog" aria-hidden="true">'+list.map(x=>{const st=S.status[x];return '<i class="'+(x===S.cur?'on':st==='done'?'d':st==='skipped'?'s':st==='later'?'l':'')+'"></i>';}).join('')+'</div>';
 }
@@ -303,6 +313,12 @@ function onInp(sel,fn){const el=$(sel);if(el)el.oninput=()=>{fn(el.value);nav();
 /* ---------- the views, one screen each ---------- */
 const VIEW={
  pay(){
+  if(S.more){
+   return '<h2 id="wzt">Another way to get paid</h2><p class="sub">Tap any that apply, or name your own.</p>'+
+    '<div class="tiles">'+MORE.map(m=>'<button type="button" class="tl" data-m="'+esc(m)+'" aria-pressed="'+S.methods.includes(m)+'"><span class="bx"></span>'+esc(m)+'</button>').join('')+'</div>'+
+    '<div class="fld"><label class="lbl" for="o-name">Something else</label><div style="display:flex;gap:8px"><input class="inp" id="o-name" placeholder="Caja del frente" value="'+esc(S.otherName)+'"><button class="btn" id="o-add">Add</button></div></div>'+
+    (S.others.length?'<div class="people">'+S.others.map((o,k)=>'<div class="pr"><b>'+esc(o)+'</b><span class="chip">Your own</span><button class="ib" style="width:28px;height:28px;background:none" data-odel="'+k+'" aria-label="Remove">'+IC.del+'</button></div>').join('')+'</div>':'');
+  }
   if(S.sub===1){
    return '<h2 id="wzt">Where should they send it?</h2><p class="sub">Shown to clients when they pay you by hand.</p>'+
     S.methods.filter(m=>PAYTO[m]).map(m=>'<div class="fld"><label class="lbl" for="pt-'+esc(m)+'">'+esc(m)+' · '+PAYTO[m][0]+'</label><input class="inp" id="pt-'+esc(m)+'" data-pt="'+esc(m)+'" placeholder="'+esc(PAYTO[m][1])+'" value="'+esc(S.payto[m]||'')+'"></div>').join('')+
@@ -315,7 +331,8 @@ const VIEW={
   return '<h2 id="wzt">How do you want to get paid?</h2><p class="sub">Pick every way your clients pay you.</p>'+
    '<div class="stripe '+st[2]+'"><div class="t"><b>'+st[0]+'</b><span>'+st[1]+'</span></div>'+
     (S.card==='ok'?'':'<button class="btn sm" id="b-stripe">'+(S.card==='part'?'Continue':S.card==='wait'?'Check':'Connect')+'</button>')+'</div>'+
-   '<div class="lbl">Paid by hand</div><div class="tiles">'+PRESET[S.where].map(m=>'<button type="button" class="tl" data-m="'+esc(m)+'" aria-pressed="'+S.methods.includes(m)+'"><span class="bx"></span>'+esc(m)+'</button>').join('')+'</div>'+
+   '<div style="display:flex;align-items:baseline;gap:12px"><span class="lbl" style="flex:none">Paid by hand</span><span style="flex:1"></span><button class="lnk" id="b-more" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(extras().length?'Also '+extras().map(esc).join(', '):'+ Another way')+'</button></div><div class="tiles">'+TOP.map(m=>'<button type="button" class="tl" data-m="'+esc(m)+'" aria-pressed="'+S.methods.includes(m)+'"><span class="bx"></span>'+esc(m)+'</button>').join('')+'</div>'+
+
    '<div class="div"></div><div class="fld"><div class="lbl">Collect tax?</div>'+segH('tax',[['yes','Yes'],['no','No']],S.tax===null?null:S.tax?'yes':'no')+'</div>';
  },
  tax(){
@@ -349,18 +366,26 @@ const VIEW={
    '<div class="note">Tax: '+(S.tax?'your rates, '+total+'%, '+(S.basis==='incl'?'included in the price':'added on top'):'none')+'. Change it on this plan later in Money › Products.</div>';
  },
  look(){
-  const fr={black:'#0E0E0E',light:'#FFFFFF',color:'#1F6B5C'}[S.frame];
+  const reads=S.color&&contrast(S.color)>=4.5;
+  const fr=S.frame==='light'?'#FFFFFF':S.frame==='color'&&reads?S.color:'#0E0E0E';
   return '<h2 id="wzt">Your look</h2><p class="sub">Your logo and colors, on your page and in your members’ app.</p>'+
    '<div class="logo"><div class="drop">'+(S.logo?'<img alt="Your logo" src="'+S.logo+'">':'Add your<br>logo')+'<input type="file" accept="image/*" id="lg" aria-label="Upload your logo"></div><div class="hint">A square PNG or JPG works best.'+(S.logo?' <button class="lnk" id="lg-x">Remove</button>':'')+'</div></div>'+
-   '<div class="fld"><div class="lbl">Colors</div><div class="sw">'+[['black','Black','#0E0E0E'],['light','Light','#FFFFFF'],['color','Your color','#1F6B5C']].map(c=>'<button type="button" data-fr="'+c[0]+'" aria-pressed="'+(S.frame===c[0])+'"><i style="background:'+c[2]+';border:1px solid var(--line)"></i>'+c[1]+'</button>').join('')+'</div></div>'+
-   '<div class="pv" aria-label="Preview"><div class="hb" style="background:'+fr+';color:'+(S.frame==='light'?'#111':'#fff')+';border-bottom:1px solid var(--line)"><span class="lg">'+(S.logo?'<img alt="" src="'+S.logo+'">':'BF')+'</span>Barrio Fitness</div><div class="bd"><i style="width:60%"></i><i style="width:85%"></i><i style="width:40%"></i></div></div>';
+   '<div class="fld"><div class="lbl">Frame</div>'+segH('frame',[['black','Black'],['light','Light'],['color','Your color']],S.frame)+'</div>'+
+   (S.frame==='color'?'<div class="fld"><div class="sws">'+
+     (S.swatches.length?S.swatches.map(c=>'<button type="button" class="swc" data-c="'+c+'" aria-pressed="'+(S.color===c)+'" style="background:'+c+'" aria-label="'+c+'"></button>').join(''):'<span class="hint" style="flex:1">Add your logo to pick from its colors.</span>')+
+     '<label class="swc cust" aria-label="Custom color"><input type="color" id="c-pick" value="'+(S.color||'#1F6B5C')+'">＋</label>'+
+     '<input class="inp hex" id="c-hex" placeholder="#1F6B5C" value="'+esc(S.color)+'" maxlength="7"></div>'+
+     (S.color&&!reads?'<div class="hint" style="color:var(--red)">White text is hard to read on this color, so your frame stays Black.</div>':'')+'</div>':'')+
+   '<div class="pv" aria-label="Preview"><div class="hb" style="background:'+fr+';color:'+(fr==='#FFFFFF'?'#111':'#fff')+';border-bottom:1px solid var(--line)"><span class="lg">'+(S.logo?'<img alt="" src="'+S.logo+'">':'BF')+'</span>Barrio Fitness</div></div>';
  },
  waiver(){
   const w=S.waiver;
   if(S.sub===0){
-   return '<h2 id="wzt">Write your waiver</h2><p class="sub">Paste your own wording. Clients sign it in the app.</p>'+
-    '<div class="fld"><label class="lbl" for="w-name">Name</label><input class="inp" id="w-name" placeholder="Liability waiver" value="'+esc(w.name)+'"></div>'+
-    '<div class="grow"><label class="lbl" for="w-text">Text</label><textarea class="ta" id="w-text" placeholder="Paste your waiver here">'+esc(w.text)+'</textarea></div>';
+   return '<h2 id="wzt">Do you use a waiver?</h2><p class="sub">Clients sign it in the app before they book.</p>'+
+    segH('wuse',[['yes','Yes'],['no','No']],w.use)+
+    (w.use==='yes'?'<div class="fld"><label class="lbl" for="w-name">Name</label><input class="inp" id="w-name" placeholder="Liability waiver" value="'+esc(w.name)+'"></div>'+
+    '<div class="grow"><label class="lbl" for="w-text">Your wording</label><textarea class="ta" id="w-text" placeholder="Paste your waiver here">'+esc(w.text)+'</textarea></div>':
+    w.use==='no'?'<div class="note">No waiver for now. You can write one any time in Settings › Documents.</div>':'');
   }
   return '<h2 id="wzt">Who signs it?</h2><p class="sub">Until it’s signed they can’t book. Staff can still check them in.</p>'+
    '<button type="button" class="big" data-when="join" aria-pressed="'+(w.when==='join')+'"><b>Everyone, when they join</b><span>The usual choice for a liability waiver.</span></button>'+
@@ -396,6 +421,15 @@ function viewEnd(){
   return '<h2>'+(planDone()?'Barrio Fitness is ready to sell':'Good start')+'</h2><p class="sub">'+(later.length?'What’s left waits on Today. Tap Start to pick it back up.':'Everything is set up.')+'</p>'+
    '<div class="sum">'+list.map(i=>{const st=S.status[i];return '<div><span class="ck '+(st==='done'?'d':st==='skipped'?'s':'')+'"></span>'+NAMES[i]+'<em>'+(st==='done'?'Done':st==='skipped'?'Skipped':'Later')+'</em></div>';}).join('')+'</div>';
 }
+/* up to six colors from the logo: shrink it, bucket the pixels, drop near-white, near-transparent and near-duplicate colors */
+function colorsOf(src){return new Promise(res=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=48;const x=c.getContext('2d');x.drawImage(im,0,0,48,48);let d;try{d=x.getImageData(0,0,48,48).data;}catch(e){res([]);return;}
+  const n={};for(let i=0;i<d.length;i+=4){if(d[i+3]<160)continue;const r=d[i]>>4,g=d[i+1]>>4,b=d[i+2]>>4;if(r>13&&g>13&&b>13)continue;const k=r+','+g+','+b;n[k]=(n[k]||0)+1;}
+  const hex=k=>'#'+k.split(',').map(v=>((+v<<4)+8).toString(16).padStart(2,'0')).join('').toUpperCase();
+  const tot=Object.values(n).reduce((a,b)=>a+b,0);
+  const out=[];Object.entries(n).filter(([,c])=>c>=tot*0.04).sort((a,b)=>b[1]-a[1]).forEach(([k])=>{const h=hex(k);if(out.length<6&&out.every(o=>dist(o,h)>60))out.push(h);});res(out);};im.onerror=()=>res([]);im.src=src;});}
+function rgb(h){return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));}
+function dist(a,b){const x=rgb(a),y=rgb(b);return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2]);}
+function contrast(h){const L=rgb(h).map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});const l=0.2126*L[0]+0.7152*L[1]+0.0722*L[2];return 1.05/(l+0.05);}
 function qr(){let h='<svg class="qr" viewBox="0 0 21 21" shape-rendering="crispEdges" aria-label="QR code"><rect width="21" height="21" fill="#fff"/>';let s=7;
   const fin=(x,y)=>'<rect x="'+x+'" y="'+y+'" width="7" height="7" fill="#111"/><rect x="'+(x+1)+'" y="'+(y+1)+'" width="5" height="5" fill="#fff"/><rect x="'+(x+2)+'" y="'+(y+2)+'" width="3" height="3" fill="#111"/>';
   for(let y=0;y<21;y++)for(let x=0;x<21;x++){if((x<8&&y<8)||(x>12&&y<8)||(x<8&&y>12))continue;s=(s*73+19)%101;if(s%2)h+='<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="#111"/>';}
@@ -403,11 +437,11 @@ function qr(){let h='<svg class="qr" viewBox="0 0 21 21" shape-rendering="crispE
 
 /* ---------- what makes Next work ---------- */
 const VALID={
- pay(){if(S.sub===1)return S.methods.filter(m=>PAYTO[m]).every(m=>(S.payto[m]||'').trim());return S.tax!==null&&(S.methods.length>0||S.card==='ok'||S.card==='wait');},
+ pay(){if(S.more)return true;if(S.sub===1)return S.methods.filter(m=>PAYTO[m]).every(m=>(S.payto[m]||'').trim());return S.tax!==null&&(S.methods.length>0||S.others.length>0||S.card==='ok'||S.card==='wait');},
  tax(){if(S.tax===null)return false;return !!S.basis&&S.rates.some(r=>r.n.trim()&&parseFloat(r.r)>0);},
  plan(){if(S.sub===0)return !!S.plan.kind;return S.plan.name.trim()&&parseFloat(S.plan.price)>0&&(S.plan.kind!=='pack'||parseInt(S.plan.visits)>0);},
  look(){return !!S.logo;},
- waiver(){if(S.sub===0)return S.waiver.name.trim()&&S.waiver.text.trim().length>20;return !!S.waiver.when;},
+ waiver(){const w=S.waiver;if(S.sub===0)return w.use==='no'||(w.use==='yes'&&w.name.trim()&&w.text.trim().length>20);return !!w.when;},
  class(){const c=S.cls;return c.name.trim()&&c.days.length&&c.time;},
  staff(){const d=S.draft;return S.people.length>0||(d.name.trim()&&d.email.includes('@')&&!!d.role);},
  join(){return true;}
@@ -421,6 +455,10 @@ const WIRE={
   onSeg('tax',v=>{S.tax=v==='yes';drawAll();});
   document.querySelectorAll('[data-pt]').forEach(el=>el.oninput=()=>{S.payto[el.dataset.pt]=el.value;nav();});
   const b=$('#b-stripe');if(b)b.onclick=()=>{if(S.card==='wait'){S.card='ok';toast('Stripe approved your details');drawAll();}else stripeIntro();};
+  const mo=$('#b-more');if(mo)mo.onclick=()=>{S.more=true;drawAll();};
+  onInp('#o-name',v=>S.otherName=v);
+  const oa=$('#o-add');if(oa)oa.onclick=()=>{const n=S.otherName.trim();if(!n)return;if(!S.others.includes(n))S.others.push(n);S.otherName='';drawAll();};
+  document.querySelectorAll('[data-odel]').forEach(x=>x.onclick=()=>{S.others.splice(+x.dataset.odel,1);drawAll();});
  },
  tax(){
   onSeg('tax2',v=>{S.tax=v==='yes';if(!S.tax){S.status.tax='done';S.status.pay=S.status.pay||'later';S.cur='plan';S.sub=0;}drawAll();});
@@ -436,12 +474,16 @@ const WIRE={
   onSeg('every',v=>{S.plan.every=v;drawAll();});
  },
  look(){
-  const f=$('#lg');if(f)f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{S.logo=r.result;drawAll();};r.readAsDataURL(file);};
-  const x=$('#lg-x');if(x)x.onclick=()=>{S.logo=null;drawAll();};
-  document.querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>{S.frame=b.dataset.fr;drawAll();});
+  const f=$('#lg');if(f)f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{S.logo=r.result;colorsOf(S.logo).then(c=>{S.swatches=c;if(c.length&&!S.color){S.color=c[0];}drawAll();});};r.readAsDataURL(file);};
+  const x=$('#lg-x');if(x)x.onclick=()=>{S.logo=null;S.swatches=[];drawAll();};
+  onSeg('frame',v=>{S.frame=v;drawAll();});
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{S.color=b.dataset.c;drawAll();});
+  const pk=$('#c-pick');if(pk)pk.onchange=()=>{S.color=pk.value.toUpperCase();drawAll();};
+  const hx=$('#c-hex');if(hx)hx.onchange=()=>{const v=hx.value.trim();if(/^#[0-9A-Fa-f]{6}$/.test(v)){S.color=v.toUpperCase();}drawAll();};
  },
  waiver(){
   onInp('#w-name',v=>S.waiver.name=v);onInp('#w-text',v=>S.waiver.text=v);
+  onSeg('wuse',v=>{S.waiver.use=v;drawAll();});
   document.querySelectorAll('[data-when]').forEach(b=>b.onclick=()=>{if(b.disabled)return;S.waiver.when=b.dataset.when;drawAll();});
  },
  class(){
@@ -488,7 +530,7 @@ function drawMock(){
   const set=(id,v)=>document.querySelectorAll(id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
   set('#m-where',S.where);set('#m-cls',S.classes?'1':'0');set('#m-staff',S.staff?'1':'0');
 }
-document.querySelectorAll('#m-where button').forEach(b=>b.onclick=()=>{S.where=b.dataset.v;S.methods=[];S.payto={};ratesFor();drawAll();});
+document.querySelectorAll('#m-where button').forEach(b=>b.onclick=()=>{S.where=b.dataset.v;ratesFor();drawAll();});
 document.querySelectorAll('#m-cls button').forEach(b=>b.onclick=()=>{S.classes=b.dataset.v==='1';if(!S.classes&&S.cur==='class')S.cur='join';drawAll();});
 document.querySelectorAll('#m-staff button').forEach(b=>b.onclick=()=>{S.staff=b.dataset.v==='1';if(!S.staff&&S.cur==='staff')S.cur='join';drawAll();});
 $('#m-reset').onclick=()=>{fresh(true);drawAll();};
