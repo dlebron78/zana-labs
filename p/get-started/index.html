@@ -235,7 +235,7 @@ function fresh(keep){
     methods:[],others:[],more:false,otherName:'',payto:{},card:'none',tax:null,basis:null,rates:[],
     plan:{kind:null,name:'',price:'',every:'month',visits:'',within:'3'},
     logo:null,frame:'black',swatches:[],color:'',waiver:{use:null,name:'',text:'',when:null},
-    cls:{name:'',days:[],time:'',cap:''},people:[],draft:{name:'',email:'',role:null},inv:{use:null,how:'paste',text:'',file:'',rows:[],en:true,es:true,fix:false,page:0,sent:0},
+    cls:{name:'',days:[],time:'',cap:''},people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:true,es:true,fix:false,page:0,sent:0},
     status:{},open:true,cur:'pay',sub:0,returnTo:null,stripeFrom:null};
   ratesFor();
 }
@@ -308,7 +308,7 @@ function drawWz(){
   const bk=$('#wz-back');if(bk)bk.onclick=()=>move(-1);
   const sk=$('#b-skip');if(sk)sk.onclick=()=>finishStep('skipped');
   const lt=$('#b-later');if(lt)lt.onclick=()=>{if(S.status[id]!=='done')S.status[id]='later';S.sub=subs(id)-1;move(1);};
-  $('#b-next').onclick=()=>{if(S.sub<subs(id)-1){move(1);}else if((id==='waiver'&&S.waiver.use==='no')||(id==='invite'&&S.inv.use==='no')){finishStep('skipped');}else if(id==='invite'){S.inv.sent=readyRows().length;finishStep('done');toast(S.inv.sent+' invites sent');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
+  $('#b-next').onclick=()=>{if(id==='invite'&&S.sub===0&&invMode()==='one')invAdd();if(S.sub<subs(id)-1){move(1);}else if((id==='waiver'&&S.waiver.use==='no')||(id==='invite'&&S.inv.use==='no')){finishStep('skipped');}else if(id==='invite'){S.inv.sent=readyRows().length;finishStep('done');toast(S.inv.sent+' invites sent');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
   WIRE[id]&&WIRE[id]();nav();
 }
 function head(i){
@@ -429,7 +429,7 @@ const VIEW={
     (pages>1?'<div style="display:flex;align-items:center;gap:8px;margin-top:auto"><button class="ib" id="pg-prev" aria-label="Previous"'+(pg===0?' disabled':'')+'>'+IC.back+'</button><span class="hint" style="flex:1;text-align:center">'+(pg*per+1)+'–'+(pg*per+show.length)+' of '+miss.length+'</span><button class="ib" id="pg-next" aria-label="Next" style="transform:scaleX(-1)"'+(pg>=pages-1?' disabled':'')+'>'+IC.back+'</button></div>':'');
   }
   if(S.sub===1){
-   const ok=readyRows(),noname=v.rows.filter(r=>!r.dup&&!r.name&&!r.fixed).length,dup=v.rows.filter(r=>r.dup).length;
+   const ok=readyRows(),list=invMode()==='list',noname=list?v.rows.filter(r=>!r.dup&&!r.name&&!r.fixed).length:0,dup=list?v.rows.filter(r=>r.dup).length:0;
    return '<h2 id="wzt">Ready to invite '+ok.length+'</h2><p class="sub">Each gets an email from Barrio Fitness with a link to join.</p>'+
     '<div class="sum">'+
      '<div><span class="ck d"></span>'+(ok.length-noname)+' with a name and an email</div>'+
@@ -443,10 +443,14 @@ const VIEW={
    segH('inuse',[['yes','Yes'],['no','No']],v.use)+
    (v.use==='no'?'<div class="note">Nobody to bring yet. New people join through your Join link, in Settings.</div>':'')+
    (v.use==='yes'?(planDone()?'':'<div class="dep"><span>People who join have nothing to buy yet.</span><button class="btn sm" data-goplan>Make a plan first</button></div>')+
-     segH('inhow',[['paste','Paste a list'],['csv','Upload a CSV']],v.how)+
-     (v.how==='paste'?'<div class="grow"><label class="lbl" for="in-text">One person a line: name, email</label><textarea class="ta" id="in-text" placeholder="Ana Rivera, ana@mail.com&#10;Luis Ortiz, luis@mail.com">'+esc(v.text)+'</textarea></div>':
-      '<div class="drop" style="width:100%;height:96px;border-radius:14px">'+(v.file?esc(v.file):'Tap to pick a CSV<br>with name and email')+'<input type="file" accept=".csv,text/csv" id="in-csv" aria-label="Upload a CSV"></div>')+
-     '<div class="hint" id="in-count">'+(found?found+' found':'&nbsp;')+'</div>':'');
+     segH('inmode',[['one','One at a time'],['list','A list']],invMode())+
+     (invMode()==='one'?
+      '<div class="row2"><div class="fld"><label class="lbl" for="io-name">Name</label><input class="inp" id="io-name" placeholder="Ana Rivera" value="'+esc(v.d.name)+'"></div><div class="fld"><label class="lbl" for="io-mail">Email</label><input class="inp" id="io-mail" type="email" placeholder="ana@mail.com" value="'+esc(v.d.email)+'"></div></div>'+
+      '<button class="btn" id="io-add" style="justify-self:start">Add '+(v.d.name.trim()?esc(v.d.name.trim().split(' ')[0]):'them')+'</button>'+
+      (v.ones.length?'<div class="pr"><span class="ck d" style="width:20px;height:20px"></span><b>'+v.ones.length+' added: '+v.ones.map(o=>esc(o.name.split(' ')[0])).join(', ')+'</b></div>':'')
+     :
+      '<div class="grow"><label class="lbl" for="in-text">One person a line: name, email</label><textarea class="ta" id="in-text" placeholder="Ana Rivera, ana@mail.com&#10;Luis Ortiz, luis@mail.com">'+esc(v.text)+'</textarea></div>'+
+      '<div style="display:flex;align-items:center;gap:12px"><span class="hint" id="in-count" style="flex:1">'+(v.file?esc(v.file)+' · ':'')+(found?found+' found':'&nbsp;')+'</span><label class="lnk" style="position:relative;cursor:pointer">or upload a CSV<input type="file" accept=".csv,text/csv" id="in-csv" aria-label="Upload a CSV" style="position:absolute;inset:0;opacity:0;width:100%"></label></div>'):'');
  }
 };
 function viewEnd(){
@@ -478,7 +482,7 @@ const VALID={
  waiver(){const w=S.waiver;if(S.sub===0)return w.use==='no'||(w.use==='yes'&&w.name.trim()&&w.text.trim().length>20);return !!w.when;},
  class(){const c=S.cls;return c.name.trim()&&c.days.length&&c.time;},
  staff(){const d=S.draft;return S.people.length>0||(d.name.trim()&&d.email.includes('@')&&!!d.role);},
- invite(){const v=S.inv;if(v.fix)return true;if(S.sub===0)return v.use==='no'||(v.use==='yes'&&v.rows.some(r=>!r.dup));return readyRows().length>0&&(v.en||v.es);}
+ invite(){const v=S.inv;if(v.fix)return true;if(S.sub===0)return v.use==='no'||(v.use==='yes'&&(invMode()==='one'?(v.ones.length>0||!!invDraftOk()):v.rows.some(r=>!r.dup)));return readyRows().length>0&&(v.en||v.es);}
 };
 const SAVE={staff(){const d=S.draft;if(d.name.trim()&&d.email.trim()&&d.role){S.people.push({...d});S.draft={name:'',email:'',role:null};}}};
 
@@ -532,7 +536,9 @@ const WIRE={
  },
  invite(){
   const v=S.inv;
-  onSeg('inuse',x=>{v.use=x;drawAll();});onSeg('inhow',x=>{v.how=x;drawAll();});
+  onSeg('inuse',x=>{v.use=x;drawAll();});onSeg('inmode',x=>{v.mode=x;drawAll();});
+  onInp('#io-name',x=>{v.d.name=x;const a=$('#io-add');if(a)a.textContent='Add '+(x.trim()?x.trim().split(' ')[0]:'them');});onInp('#io-mail',x=>v.d.email=x);
+  const ia=$('#io-add');if(ia)ia.onclick=()=>{if(!invAdd()){toast('Add a name and an email');return;}drawAll();const n=$('#io-name');if(n)n.focus();};
   const t=$('#in-text');if(t)t.oninput=()=>{v.text=t.value;v.rows=parseList(t.value);const c=$('#in-count');const n=v.rows.filter(r=>!r.dup).length;if(c)c.innerHTML=n?n+' found':'&nbsp;';nav();};
   const f=$('#in-csv');if(f)f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{v.file=file.name;v.rows=parseList(String(r.result));drawAll();};r.readAsText(file);};
   document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{v[b.dataset.lang]=!v[b.dataset.lang];drawAll();});
@@ -546,7 +552,11 @@ const WIRE={
 /* a pasted list or a CSV: one person a line, an email and whatever else is the name; a repeated email is sent once */
 function parseList(txt){const seen={},out=[];txt.split(/\r?\n/).forEach(line=>{const parts=line.split(/[,;\t]/).map(x=>x.trim()).filter(Boolean);const em=parts.find(x=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x));if(!em)return;
   const name=parts.filter(x=>x!==em&&!/^(name|nombre|email|correo)$/i.test(x)).join(' ');const k=em.toLowerCase();out.push({name,email:em,dup:!!seen[k]});seen[k]=1;});return out;}
-function readyRows(){return S.inv.rows.filter(r=>!r.dup);}
+function readyRows(){return invMode()==='one'?S.inv.ones:S.inv.rows.filter(r=>!r.dup);}
+/* which way opens first: one at a time for a business with no group classes (personal training), a list otherwise; she can switch */
+function invMode(){return S.inv.mode||(S.classes?'list':'one');}
+function invDraftOk(){const d=S.inv.d;return d.name.trim()&&/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email.trim());}
+function invAdd(){if(!invDraftOk())return false;const d=S.inv.d;if(!S.inv.ones.some(o=>o.email.toLowerCase()===d.email.trim().toLowerCase()))S.inv.ones.push({name:d.name.trim(),email:d.email.trim()});S.inv.d={name:'',email:''};return true;}
 function goPlan(){document.querySelectorAll('[data-goplan]').forEach(b=>b.onclick=()=>{S.returnTo=S.cur;S.cur=S.tax===null?'tax':'plan';S.sub=0;drawAll();});}
 
 /* ---------- leaving for Stripe, and coming back ---------- */
