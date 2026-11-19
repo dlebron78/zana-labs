@@ -239,7 +239,7 @@ select.inp:invalid,select.inp option[value=""]{color:#9A9A96}
   <div class="mock">
     <b>Mock controls · not part of the design</b>
     <div class="r">Address <span class="mseg" id="m-where"><button data-v="pr">San Juan, PR</button><button data-v="us">Miami, FL</button></span></div>
-    <div class="r">Group classes <span class="mseg" id="m-cls"><button data-v="1">Yes</button><button data-v="0">No</button></span> Staff <span class="mseg" id="m-staff"><button data-v="1">Yes</button><button data-v="0">No</button></span></div>
+    <div class="r">Sign-up said <span class="mseg" id="m-cls"><button data-v="classes">Classes</button><button data-v="ones">1:1</button><button data-v="both">Both</button></span> Staff <span class="mseg" id="m-staff"><button data-v="1">Yes</button><button data-v="0">No</button></span></div>
     <div class="r">On a laptop <span class="mseg" id="m-box"><button data-v="panel">Side panel</button><button data-v="modal">Centered modal</button></span></div>
     <div class="r"><button class="btn sm" id="m-reset">Start over, as just signed up</button></div>
   </div>
@@ -263,24 +263,24 @@ const PAYTO={'ATH Móvil':['Phone or pATH','787 555 0142'],'Venmo':['Venmo usern
 
 let S;let BOX='panel';
 function fresh(keep){
-  S={where:keep?S.where:'pr',classes:keep?S.classes:true,staff:keep?S.staff:true,
+  S={where:keep?S.where:'pr',staff:keep?S.staff:true,
     methods:[],others:[],more:false,otherName:'',payto:{},card:'none',tax:null,basis:null,rates:[],
     plan:{kind:null,name:'',price:'',every:'month',visits:'',within:'3'},
     logo:null,frame:'black',swatches:[],color:'',waiver:{use:null,name:'',text:'',when:null},
-    cls:{name:'',len:'60',cap:10,start:'',time:'',days:[],end:'never',until:'',sheet:false},prog:{use:null,name:'',start:''},people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:false,es:false,fix:false,page:0,sent:0},
+    cls:{name:'',len:'60',cap:10,start:'',time:'',days:[],end:'never',until:'',sheet:false},one:{use:null,name:'',len:'60',start:'',time:'',days:[],end:'never',until:'',sheet:false},prog:{use:null,name:'',start:''},how:keep?S.signup:'classes',signup:keep?S.signup:'classes',people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:false,es:false,fix:false,page:0,sent:0},
     status:{},open:true,cur:'pay',sub:0,returnTo:null,stripeFrom:null};
   ratesFor();
 }
 function ratesFor(){S.rates=S.where==='pr'?[{n:'State IVU',r:'10.5',sug:true},{n:'Municipal IVU',r:'1',sug:true}]:[{n:'',r:''}];}
 
 /* the steps, in order; tax only while not answered No, class and staff only where the business has them */
-const NAMES={pay:'How people pay you',tax:'Tax',plan:'Your first plan or pack',look:'Your look',waiver:'Your waiver',class:'Your first class',staff:'Your staff',invite:'Invite your members',program:'Your workout program'};
-function ids(){return ['pay',S.tax===false?null:'tax','plan','look',S.classes?'class':null,S.classes?'program':null,'waiver',S.staff?'staff':null,'invite'].filter(Boolean);}
+const NAMES={pay:'How people pay you',tax:'Tax',plan:'Your first plan or pack',look:'Your look',waiver:'Your waiver',class:'Your first class',staff:'Your staff',invite:'Invite your members',program:'Your workout program',one:'Your 1:1 times'};
+function ids(){return ['pay',S.tax===false?null:'tax','plan','look',hasClasses()?'class':null,hasOnes()?'one':null,'program','waiver',S.staff?'staff':null,'invite'].filter(Boolean);}
 /* five sections, named for where each thing lives in the app afterwards */
-const SECTION={pay:'Money',tax:'Money',plan:'Money',look:'Look',class:'Schedule',program:'Workouts',waiver:'People',staff:'People',invite:'People'};
+const SECTION={pay:'Money',tax:'Money',plan:'Money',look:'Look',class:'Schedule',one:'Schedule',program:'Workouts',waiver:'People',staff:'People',invite:'People'};
 const FIND={Money:'Money',Look:'Settings › Look',Schedule:'Schedule',Workouts:'Workouts',People:'People'};
 function sections(){const out=[];ids().forEach(i=>{const n=SECTION[i];let g=out.find(x=>x.name===n);if(!g){g={name:n,ids:[]};out.push(g);}g.ids.push(i);});return out;}
-const SUBS={pay:()=>needPayTo()?2:1,plan:()=>2,waiver:()=>S.waiver.use==='yes'?2:1,invite:()=>S.inv.use==='yes'?2:1};
+const SUBS={class:()=>screens('class').length,one:()=>screens('one').length,program:()=>screens('program').length,pay:()=>needPayTo()?2:1,plan:()=>2,waiver:()=>S.waiver.use==='yes'?2:1,invite:()=>S.inv.use==='yes'?2:1};
 const subs=id=>SUBS[id]?SUBS[id]():1;
 function needPayTo(){return S.methods.some(m=>PAYTO[m]);}
 function extras(){return [...S.methods.filter(m=>MORE.includes(m)),...S.others];}
@@ -330,8 +330,8 @@ function drawWz(){
     $('#go-today').onclick=closeWz;$('#wz-x').onclick=closeWz;return;}
   const id=S.cur,v=VIEW[id]();
   const i=list.indexOf(id);
-  if(id==='class'&&S.cls.sheet){wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
-    $('#wz-x').onclick=closeWz;const bk2=$('#wz-back');if(bk2)bk2.onclick=()=>{S.cls.sheet=false;drawAll();};$('#b-done').onclick=()=>{S.cls.sheet=false;drawAll();};WIRE.class();nav();return;}
+  if((id==='class'&&S.cls.sheet)||(id==='one'&&S.one.sheet)){const F=id==='class'?S.cls:S.one;wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
+    $('#wz-x').onclick=closeWz;const bk2=$('#wz-back');if(bk2)bk2.onclick=()=>{F.sheet=false;drawAll();};$('#b-done').onclick=()=>{F.sheet=false;drawAll();};WIRE[id]();nav();return;}
   if(id==='invite'&&S.inv.fix){wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
     $('#wz-x').onclick=closeWz;const bk1=$('#wz-back');if(bk1)bk1.onclick=()=>{S.inv.fix=false;drawAll();};$('#b-done').onclick=()=>{S.inv.fix=false;drawAll();};WIRE.invite();return;}
   if(id==='pay'&&S.more){wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
@@ -346,12 +346,12 @@ function drawWz(){
   const bk=$('#wz-back');if(bk)bk.onclick=()=>move(-1);
   const sk=$('#b-skip');if(sk)sk.onclick=()=>finishStep('skipped');
   const lt=$('#b-later');if(lt)lt.onclick=()=>{if(S.status[id]!=='done')S.status[id]='later';S.sub=subs(id)-1;move(1);};
-  $('#b-next').onclick=()=>{if(id==='invite'&&S.sub===0&&invMode()==='one')invAdd();if(S.sub<subs(id)-1){move(1);}else if((id==='waiver'&&S.waiver.use==='no')||(id==='invite'&&S.inv.use==='no')||(id==='program'&&S.prog.use==='no')){finishStep('skipped');}else if(id==='invite'){S.inv.sent=readyRows().length;finishStep('done');toast(S.inv.sent+' invites sent');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
+  $('#b-next').onclick=()=>{if(id==='invite'&&S.sub===0&&invMode()==='one')invAdd();if(S.sub<subs(id)-1){move(1);}else if((id==='waiver'&&S.waiver.use==='no')||(id==='invite'&&S.inv.use==='no')||(id==='program'&&S.prog.use==='no')||(id==='one'&&S.one.use==='no'&&scr('one')==='q')){finishStep('skipped');}else if(id==='invite'){S.inv.sent=readyRows().length;finishStep('done');toast(S.inv.sent+' invites sent');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
   WIRE[id]&&WIRE[id]();nav();
 }
 function head(i){
   const list=ids();
-  const canBack=i!==null&&(i>0||S.sub>0||S.more||S.inv.fix||S.cls.sheet);
+  const canBack=i!==null&&(i>0||S.sub>0||S.more||S.inv.fix||S.cls.sheet||S.one.sheet);
   let label='GET STARTED';
   if(i!==null){const g=sections().find(x=>x.ids.includes(S.cur));label=g.name.toUpperCase()+(g.ids.length>1?' · '+(g.ids.indexOf(S.cur)+1)+' OF '+g.ids.length:'');}
   return '<div class="wh"><button class="ib '+(canBack?'':'ghost')+'" id="wz-back" aria-label="Back">'+IC.back+'</button><div class="c">'+label+'</div><button class="ib" id="wz-x" aria-label="Close">'+IC.x+'</button></div>'+
@@ -444,22 +444,27 @@ const VIEW={
    '<button type="button" class="big" data-when="plan" aria-pressed="'+(w.when==='plan')+'"'+(planDone()?'':' disabled style="opacity:.55"')+'><b>Only people who buy '+(planDone()?esc(S.plan.name||'your plan'):'certain plans')+'</b><span>'+(planDone()?'Asked when they buy it.':'Make a plan first to pick this.')+'</span></button>';
  },
  class(){
+  if(S.cls.sheet)return repeatsView(S.cls,'c');
+  if(scr('class')==='how')return howView();
   const c=S.cls;
-  if(c.sheet){
-   return '<h2 id="wzt">Repeats</h2><p class="sub">Leave every day off for a one-time class.</p>'+
-    '<div class="seg days7" role="group" aria-label="Days">'+DAYS.map((d,k)=>'<button type="button" data-day="'+k+'" aria-pressed="'+c.days.includes(k)+'">'+d+'</button>').join('')+'</div>'+
-    '<div class="fld"><div class="lbl">Ends</div>'+segH('cend',[['never','Never'],['date','On a date']],c.end)+'</div>'+
-    (c.end==='date'?'<div class="fld"><label class="lbl" for="c-until">Last class on</label>'+selDate('c-until',c.until,10)+'</div>':'');
-  }
-  const covered=planDone();
   return '<h2 id="wzt">Your first class</h2><p class="sub">The same form as Schedule › New class.</p>'+
    '<div class="fld"><label class="lbl" for="c-name">Class name</label><input class="inp" id="c-name" placeholder="e.g. Bootcamp" value="'+esc(c.name)+'"></div>'+
    '<div class="row2"><div class="fld"><label class="lbl" for="c-len">Length</label>'+selOpts('c-len',LENGTHS.map(m=>[String(m),m+' min']),c.len)+'</div>'+
    '<div class="fld"><div class="lbl">Spots</div><div class="stepper"><button type="button" class="ib" id="c-less" aria-label="Fewer">−</button><span>'+(c.cap?c.cap:'No limit')+'</span><button type="button" class="ib" id="c-more" aria-label="More">+</button></div></div></div>'+
-   '<div class="row2"><div class="fld"><label class="lbl" for="c-start">Starts</label>'+selDate('c-start',c.start,14,true)+'</div>'+
-   '<div class="fld"><label class="lbl" for="c-time">Time</label>'+selOpts('c-time',TIMES.map(t=>[t,timeText(t)]),c.time,'Pick a time')+'</div></div>'+
-   '<button type="button" class="setrow" id="c-rep"><span>Repeats</span><b>'+repeatsText()+'</b><i aria-hidden="true">›</i></button>'+
-   (covered?'<div class="hint">Clients with '+esc(S.plan.name||'your plan')+' can book it.</div>':'<div class="dep"><span>Nobody can book this yet. No plan covers it.</span><button class="btn sm" data-goplan>Make a plan first</button></div>');
+   whenRows(c,'c')+coverLine();
+ },
+ one(){
+  if(S.one.sheet)return repeatsView(S.one,'o');
+  const sc=scr('one');
+  if(sc==='how')return howView();
+  const o=S.one;
+  if(sc==='q')return '<h2 id="wzt">Do clients book time with you?</h2><p class="sub">Open times on your schedule, one client each.</p>'+
+   segH('ouse',[['yes','Yes'],['no','No']],o.use)+
+   (o.use==='no'?'<div class="note">No open times for now. You can still book a client yourself from Schedule.</div>':'');
+  return '<h2 id="wzt">Your 1:1 times</h2><p class="sub">The same form as Schedule › New 1:1.</p>'+
+   '<div class="row2"><div class="fld"><label class="lbl" for="o-name">Name</label><input class="inp" id="o-name" placeholder="e.g. Personal training" value="'+esc(o.name)+'"></div>'+
+   '<div class="fld"><label class="lbl" for="o-len">Length</label>'+selOpts('o-len',LENGTHS.map(m=>[String(m),m+' min']),o.len)+'</div></div>'+
+   whenRows(o,'o')+'<div class="hint">One client per time. '+(planDone()?'Clients with '+esc(S.plan.name||'your plan')+' can book it.':'')+'</div>'+(planDone()?'':coverLine());
  },
  staff(){
   const d=S.draft;const shown=S.people.slice(-2),more=S.people.length-shown.length;
@@ -471,13 +476,17 @@ const VIEW={
    (S.people.length?'<div class="people">'+(more>0?'<div class="hint">+ '+more+' more added</div>':'')+shown.map(p=>'<div class="pr"><b>'+esc(p.name)+'</b><span class="chip">'+({admin:'Admin',coach:'Coach',desk:'Front desk'})[p.role]+'</span></div>').join('')+'</div>':'');
  },
  program(){
-  const g=S.prog,cn=S.cls.name.trim();
-  return '<h2 id="wzt">Do you post workouts for your classes?</h2><p class="sub">Everyone in your classes sees the same workout each day.</p>'+
-   segH('puse',[['yes','Yes'],['no','No']],g.use)+
-   (g.use==='yes'?'<div class="fld"><label class="lbl" for="g-name">Program name</label><input class="inp" id="g-name" placeholder="e.g. Daily WOD" value="'+esc(g.name)+'"></div>'+
-     '<div class="fld"><label class="lbl" for="g-start">Day 1 is</label>'+selDate('g-start',g.start,6,true,true)+'</div>'+
-     '<div class="note">'+(cn?'Your '+esc(cn)+' class shows':'Your classes show')+' each day’s workout from it. Write the first one in Workouts.</div>':
-    g.use==='no'?'<div class="note">No program for now. You can start one any time in Workouts.</div>':'');
+  const g=S.prog;
+  if(scr('program')==='choice'){
+   return '<h2 id="wzt">Do you write workouts?</h2><p class="sub">Clients see them in the app, and in class.</p>'+
+    progChoices().map(([v,t,d])=>'<button type="button" class="big" data-pc="'+v+'" aria-pressed="'+(g.use===v)+'"><b>'+t+'</b><span>'+d+'</span></button>').join('');
+  }
+  const shared=g.use==='classes'||g.use==='both',cn=S.cls.name.trim();
+  return '<h2 id="wzt">'+(shared?'Your class program':'Your 1:1 program')+'</h2><p class="sub">'+(shared?'Everyone in your classes is on the same day.':'Each client starts on their own day 1.')+'</p>'+
+   '<div class="fld"><label class="lbl" for="g-name">Program name</label><input class="inp" id="g-name" placeholder="'+(shared?'e.g. Daily WOD':'e.g. 12-week strength')+'" value="'+esc(g.name)+'"></div>'+
+   (shared?'<div class="fld"><label class="lbl" for="g-start">Day 1 is</label>'+selDate('g-start',g.start,6,true,true)+'</div>'+
+     '<div class="note">'+(cn?'Your '+esc(cn)+' class shows':'Your classes show')+' each day’s workout from it. Write the first one in Workouts.'+(g.use==='both'?' Give a 1:1 program from any client’s page later.':'')+'</div>':
+    '<div class="note">Give it to a client from their page, and they start on day 1. Write it in Workouts.</div>');
  },
  invite(){
   const v=S.inv;
@@ -541,8 +550,9 @@ const VALID={
  plan(){if(S.sub===0)return !!S.plan.kind;return S.plan.name.trim()&&parseFloat(S.plan.price)>0&&(S.plan.kind!=='pack'||parseInt(S.plan.visits)>0);},
  look(){return S.frame!=='color'||!!S.color;},
  waiver(){const w=S.waiver;if(S.sub===0)return w.use==='no'||(w.use==='yes'&&w.name.trim()&&w.text.trim().length>20);return !!w.when;},
- class(){const c=S.cls;if(c.sheet)return c.end!=='date'||!!c.until;return c.name.trim()&&c.time&&c.start;},
- program(){const g=S.prog;return g.use==='no'||(g.use==='yes'&&g.name.trim()&&!!g.start);},
+ class(){const c=S.cls;if(c.sheet)return c.end!=='date'||!!c.until;if(scr('class')==='how')return !!S.how;return c.name.trim()&&c.time&&c.start;},
+ one(){const o=S.one;if(o.sheet)return o.end!=='date'||!!o.until;const sc=scr('one');if(sc==='how')return !!S.how;if(sc==='q')return !!o.use;return o.name.trim()&&o.time&&o.start;},
+ program(){const g=S.prog;if(scr('program')==='choice')return !!g.use;return g.name.trim()&&(g.use==='ones'||!!g.start);},
  staff(){const d=S.draft;return S.people.length>0||(d.name.trim()&&d.email.includes('@')&&!!d.role);},
  invite(){const v=S.inv;if(v.fix)return true;if(S.sub===0)return v.use==='no'||(v.use==='yes'&&(invMode()==='one'?(v.ones.length>0||!!invDraftOk()):v.rows.some(r=>!r.dup)));return readyRows().length>0&&(v.en||v.es);}
 };
@@ -589,20 +599,10 @@ const WIRE={
   onSeg('wuse',v=>{S.waiver.use=v;drawAll();});
   document.querySelectorAll('[data-when]').forEach(b=>b.onclick=()=>{if(b.disabled)return;S.waiver.when=b.dataset.when;drawAll();});
  },
- class(){
-  const c=S.cls;
-  onInp('#c-name',v=>c.name=v);
-  [['c-len','len'],['c-start','start'],['c-time','time'],['c-until','until']].forEach(([id,k])=>{const el=$('#'+id);if(el)el.onchange=()=>{c[k]=el.value;nav();};});
-  const ls=$('#c-less'),mr=$('#c-more');
-  if(ls)ls.onclick=()=>{c.cap=c.cap?(c.cap<=2?'':c.cap-1):'';drawAll();};
-  if(mr)mr.onclick=()=>{c.cap=c.cap?c.cap+1:10;drawAll();};
-  const rp=$('#c-rep');if(rp)rp.onclick=()=>{c.sheet=true;drawAll();};
-  document.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{const k=+b.dataset.day;c.days=c.days.includes(k)?c.days.filter(x=>x!==k):[...c.days,k].sort();b.setAttribute('aria-pressed',c.days.includes(k));});
-  onSeg('cend',v=>{c.end=v;drawAll();});
-  goPlan();
- },
+ class(){wireHow();wireForm(S.cls,'c');goPlan();},
+ one(){wireHow();onSeg('ouse',v=>{S.one.use=v;drawAll();});onInp('#o-name',v=>S.one.name=v);wireForm(S.one,'o');goPlan();},
  program(){
-  const g=S.prog;onSeg('puse',v=>{g.use=v;drawAll();});onInp('#g-name',v=>g.name=v);
+  const g=S.prog;document.querySelectorAll('[data-pc]').forEach(b=>b.onclick=()=>{g.use=b.dataset.pc;drawAll();});onInp('#g-name',v=>g.name=v);
   const st=$('#g-start');if(st)st.onchange=()=>{g.start=st.value;nav();};
  },
  staff(){
@@ -633,7 +633,7 @@ function pb(){return S.plan.basis||S.basis;}
 function taxRate(){return S.rates.reduce((a,r)=>a+(parseFloat(r.r)||0),0);}
 function readyRows(){return invMode()==='one'?S.inv.ones:S.inv.rows.filter(r=>!r.dup);}
 /* which way opens first: one at a time for a business with no group classes (personal training), a list otherwise; she can switch */
-function invMode(){return S.inv.mode||(S.classes?'list':'one');}
+function invMode(){return S.inv.mode||(hasClasses()?'list':'one');}
 function invDraftOk(){const d=S.inv.d;return d.name.trim()&&/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email.trim());}
 function invAdd(){if(!invDraftOk())return false;const d=S.inv.d;if(!S.inv.ones.some(o=>o.email.toLowerCase()===d.email.trim().toLowerCase()))S.inv.ones.push({name:d.name.trim(),email:d.email.trim()});S.inv.d={name:'',email:''};return true;}
 /* the little receipt: what one sale looks like with her rates, inside the price or on top of it */
@@ -666,7 +666,46 @@ function selDate(id,val,n,today,mondays){const out=[];const d=new Date();d.setHo
   for(let k=0;out.length<n;k++){const x=new Date(d);x.setDate(d.getDate()+k);if(mondays&&k>0&&x.getDay()!==1)continue;if(!today&&k===0)continue;
     const iso=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');out.push([iso,(k===0?'Today, ':'')+x.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})]);}
   return selOpts(id,out,val,'Pick a day');}
-function repeatsText(){const c=S.cls;if(!c.days.length)return 'One time';const w=c.days.length===7?'Every day':c.days.length===5&&[0,1,2,3,4].every(x=>c.days.includes(x))?'Weekdays':c.days.map(k=>DAYS[k]).join(', ');return w+(c.end==='date'&&c.until?' · until '+c.until.slice(5):'');}
+/* how she trains clients: her sign-up answer, shown picked on the first Schedule screen, where she can change it */
+function hasClasses(){return S.how==='classes'||S.how==='both';}
+function hasOnes(){return S.how==='ones'||S.how==='both';}
+function schedFirst(){return hasClasses()?'class':'one';}
+/* each step's screens, in order; S.sub indexes into them */
+function screens(id){
+  if(id==='class')return [schedFirst()==='class'?'how':null,'form'].filter(Boolean);
+  if(id==='one')return [schedFirst()==='one'?'how':null,'q',S.one.use==='yes'?'form':null].filter(Boolean);
+  if(id==='program')return ['choice',S.prog.use&&S.prog.use!=='no'?'details':null].filter(Boolean);
+  return null;}
+function scr(id){const l=screens(id);return l[Math.min(S.sub,l.length-1)];}
+function howView(){
+  return '<h2 id="wzt">How do clients train with you?</h2><p class="sub">From your sign-up. Change it if it’s not quite right.</p>'+
+   [['classes','Group classes','Several people book the same time.'],['ones','1:1 sessions','One client at a time.'],['both','Both','Classes, and some clients 1:1.']]
+    .map(([v,t,d])=>'<button type="button" class="big" data-how="'+v+'" aria-pressed="'+(S.how===v)+'"><b>'+t+'</b><span>'+d+'</span></button>').join('');
+}
+function wireHow(){document.querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>{S.how=b.dataset.how;S.cur=schedFirst();S.sub=0;
+  if(S.prog.use&&!progChoices().some(x=>x[0]===S.prog.use))S.prog.use=null;drawAll();});}
+function progChoices(){const c=[['classes','For my classes','Everyone sees the same workout each day.'],['ones','For my 1:1 clients','Each client starts on their own day 1.'],['both','Both','A class program now. Give 1:1 ones from a client’s page later.'],['no','No','Not for now. Start one any time in Workouts.']];
+  return c.filter(x=>x[0]==='no'||(x[0]==='classes'&&hasClasses())||(x[0]==='ones'&&hasOnes())||(x[0]==='both'&&S.how==='both'));}
+function whenRows(c,px){
+  return '<div class="row2"><div class="fld"><label class="lbl" for="'+px+'-start">Starts</label>'+selDate(px+'-start',c.start,14,true)+'</div>'+
+   '<div class="fld"><label class="lbl" for="'+px+'-time">Time</label>'+selOpts(px+'-time',TIMES.map(t=>[t,timeText(t)]),c.time,'Pick a time')+'</div></div>'+
+   '<button type="button" class="setrow" id="'+px+'-rep"><span>Repeats</span><b>'+repeatsText(c)+'</b><i aria-hidden="true">›</i></button>';}
+function coverLine(){return planDone()?'<div class="hint">Clients with '+esc(S.plan.name||'your plan')+' can book it.</div>':'<div class="dep"><span>Nobody can book this yet. No plan covers it.</span><button class="btn sm" data-goplan>Make a plan first</button></div>';}
+function repeatsView(c,px){
+  return '<h2 id="wzt">Repeats</h2><p class="sub">Leave every day off for a one-time '+(px==='o'?'1:1 time':'class')+'.</p>'+
+   '<div class="seg days7" role="group" aria-label="Days">'+DAYS.map((d,k)=>'<button type="button" data-day="'+k+'" aria-pressed="'+c.days.includes(k)+'">'+d+'</button>').join('')+'</div>'+
+   '<div class="fld"><div class="lbl">Ends</div>'+segH(px+'end',[['never','Never'],['date','On a date']],c.end)+'</div>'+
+   (c.end==='date'?'<div class="fld"><label class="lbl" for="'+px+'-until">Last one on</label>'+selDate(px+'-until',c.until,10)+'</div>':'');}
+function wireForm(c,px){
+  onInp('#'+px+'-name',v=>c.name=v);
+  [['-len','len'],['-start','start'],['-time','time'],['-until','until']].forEach(([id,k])=>{const el=$('#'+px+id);if(el)el.onchange=()=>{c[k]=el.value;nav();};});
+  const ls=$('#'+px+'-less'),mr=$('#'+px+'-more');
+  if(ls)ls.onclick=()=>{c.cap=c.cap?(c.cap<=2?'':c.cap-1):'';drawAll();};
+  if(mr)mr.onclick=()=>{c.cap=c.cap?c.cap+1:10;drawAll();};
+  const rp=$('#'+px+'-rep');if(rp)rp.onclick=()=>{c.sheet=true;drawAll();};
+  document.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{const k=+b.dataset.day;c.days=c.days.includes(k)?c.days.filter(x=>x!==k):[...c.days,k].sort();b.setAttribute('aria-pressed',c.days.includes(k));});
+  onSeg(px+'end',v=>{c.end=v;drawAll();});}
+function repeatsText(c){c=c||S.cls;if(!c.days.length)return 'One time';const w=c.days.length===7?'Every day':c.days.length===5&&[0,1,2,3,4].every(x=>c.days.includes(x))?'Weekdays':c.days.map(k=>DAYS[k]).join(', ');return w+(c.end==='date'&&c.until?' · until '+c.until.slice(5):'');}
 function sel(id,opts,val,ph){return '<select class="inp" id="'+id+'" aria-label="'+ph+'"><option value=""'+(val?'':' selected')+' disabled>'+ph+'</option>'+opts.map(o=>'<option'+(o===val?' selected':'')+'>'+o+'</option>').join('')+'</select>';}
 function goPlan(){document.querySelectorAll('[data-goplan]').forEach(b=>b.onclick=()=>{S.returnTo=S.cur;S.cur=S.tax===null?'tax':'plan';S.sub=0;drawAll();});}
 
@@ -695,10 +734,10 @@ let tt;function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;c
 function drawAll(){drawToday();drawWz();drawMock();}
 function drawMock(){
   const set=(id,v)=>document.querySelectorAll(id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
-  set('#m-where',S.where);set('#m-box',BOX);set('#m-cls',S.classes?'1':'0');set('#m-staff',S.staff?'1':'0');
+  set('#m-where',S.where);set('#m-box',BOX);set('#m-cls',S.signup);set('#m-staff',S.staff?'1':'0');
 }
 document.querySelectorAll('#m-where button').forEach(b=>b.onclick=()=>{S.where=b.dataset.v;ratesFor();drawAll();});
-document.querySelectorAll('#m-cls button').forEach(b=>b.onclick=()=>{S.classes=b.dataset.v==='1';if(!S.classes&&S.cur==='class')S.cur='invite';drawAll();});
+document.querySelectorAll('#m-cls button').forEach(b=>b.onclick=()=>{S.signup=b.dataset.v;S.how=b.dataset.v;if(!ids().includes(S.cur))S.cur=schedFirst();S.sub=0;drawAll();});
 document.querySelectorAll('#m-staff button').forEach(b=>b.onclick=()=>{S.staff=b.dataset.v==='1';if(!S.staff&&S.cur==='staff')S.cur='invite';drawAll();});
 document.querySelectorAll('#m-box button').forEach(b=>b.onclick=()=>{BOX=b.dataset.v;S.open=true;drawAll();});
 $('#scrim').onclick=()=>closeWz();
