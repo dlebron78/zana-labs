@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>App status, no footer</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+[hidden]{display:none!important}
+:root{--ink:#111;--frame:#0E0E0E;--on-frame:#A3A3A0;--t2:#4A4A48;--t3:#5C5C59;--line:#E8E8E5;--rowline:#F0F0ED;--page:#F5F5F3;--card:#fff;--fill:#F0F0ED;--fillh:#E4E4E0;--red:#A8261B;--redbg:#FDF1EF;--redline:#F6D3CE;--green:#17663A;--greenbg:#EAF5EE;--blue:#1F4FA8;--bluebg:#EDF2FB;--blueline:#D6E0F3;--sans:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;--mono:"Geist Mono",ui-monospace,Menlo,monospace;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--ink);overflow-x:hidden}
+body{font:15px/1.45 var(--sans);-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+.band{position:fixed;top:0;bottom:0;left:0;width:96px;background:var(--frame);display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:16px;z-index:5}
+.tile{width:40px;height:40px;border-radius:10px;background:#fff;color:var(--frame);font-weight:700;font-size:14px;display:grid;place-items:center;margin-bottom:14px}
+.bi{width:76px;height:60px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--on-frame);font-size:12px;font-weight:500}
+.bi.on{background:rgba(255,255,255,.13);color:#fff;font-weight:600}
+.bi i{width:20px;height:20px;border-radius:6px;border:2px solid currentColor;opacity:.8}
+.top{margin-left:96px;height:56px;display:flex;align-items:center;gap:12px;padding:0 24px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:6}
+.top .biz{font-weight:600}.top .biz span{font-weight:400;color:var(--t3);margin-left:6px}
+.top .search{flex:1;max-width:420px;height:36px;border-radius:10px;background:var(--fill);display:flex;align-items:center;padding:0 12px;color:var(--t3);font-size:14px;margin-left:auto}
+.face{width:32px;height:32px;border-radius:50%;background:#C9B7A6;border:0;font-weight:700;font-size:12px;color:#111;display:grid;place-items:center}
+.face[aria-expanded=true]{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
+.phd{display:none}
+.page{margin-left:96px;padding:28px 40px 60px;max-width:960px}
+.cap{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+h1{margin:4px 0 20px;font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:16px}
+.card h2{margin:0 0 8px;font-size:20px;font-weight:700}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--rowline)}
+.row:first-of-type{border-top:0}
+.row b{font-weight:600}.row .t{width:72px;font-variant-numeric:tabular-nums;color:var(--t2)}
+.row .bar{flex:1;height:6px;border-radius:3px;background:var(--fill);overflow:hidden}.row .bar i{display:block;height:100%;background:var(--ink)}
+.end{color:var(--t3);font-size:13px;text-align:center;margin-top:24px}
+/* the status bar: only when something is wrong, never a footer */
+.status{margin-left:96px;position:sticky;top:56px;z-index:5;display:flex;align-items:center;gap:12px;padding:10px 24px;font-size:14px;font-weight:500;border-bottom:1px solid}
+.status .msg{flex:1;min-width:0}
+.status.update{background:var(--bluebg);color:var(--blue);border-color:var(--blueline)}
+.status.offline{background:var(--redbg);color:var(--red);border-color:var(--redline)}
+.status.back{background:var(--greenbg);color:var(--green);border-color:#CDE7D6}
+.btn{border:0;background:var(--fill);border-radius:10px;height:36px;padding:0 14px;font-size:15px;font-weight:600;white-space:nowrap;color:var(--ink)}
+.btn.pri{background:var(--ink);color:#fff}
+.btn.sm{height:32px;border-radius:8px;font-size:14px;padding:0 12px}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:sp 1s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* face menu, as designed 2026-10-23, with About Zana */
+.scrim{position:fixed;inset:0;background:rgba(14,14,14,.18);z-index:30}
+.fm{position:fixed;top:52px;right:20px;width:280px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.14);z-index:31}
+.fm .who{padding:10px 10px 8px}.fm .who b{display:block;font-size:15px}.fm .who span{font-size:13px;color:var(--t3)}
+.fm .lbl{font-size:12px;font-weight:600;color:var(--t3);padding:8px 10px 4px}
+.fm .item{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;height:44px;border-radius:10px;padding:0 10px;text-align:left;font-size:14px;font-weight:500}
+.fm .item:hover{background:var(--fill)}
+.fm .gym .lg{width:24px;height:24px;border-radius:7px;background:var(--frame);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center}
+.fm .gym small{display:block;font-size:12px;color:var(--t3);font-weight:400}
+.fm hr{border:0;border-top:1px solid var(--rowline);margin:6px 0}
+.about{margin:2px 4px 4px;background:var(--fill);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--t2);display:grid;gap:6px}
+.about .kv{display:flex;gap:8px}.about .kv span{flex:1}.about .kv b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+.about .btn{background:#fff;border:1px solid var(--line)}
+.about .ok{color:var(--green);font-weight:600}.about .stale{color:var(--blue);font-weight:600}
+.mock{margin-top:28px;background:#1d1d1c;color:#ddd;border-radius:16px;padding:14px 16px;font-size:13px;display:grid;gap:10px}
+.mock b{color:#fff;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.mseg{display:inline-flex;gap:2px;background:#2a2a2a;padding:2px;border-radius:8px;flex-wrap:wrap}
+.mseg button{border:0;background:none;color:#ccc;height:30px;padding:0 10px;border-radius:6px;font-size:13px}
+.mseg button[aria-pressed=true]{background:#fff;color:#111}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:12px;padding:10px 16px;font-size:14px;z-index:90}
+@media (max-width:760px){
+  .band,.top{display:none}
+  .phd{display:flex;align-items:center;gap:10px;height:56px;padding:0 16px;background:var(--frame);color:#fff;font-weight:700;position:sticky;top:0;z-index:6}
+  .phd .tile{margin:0;width:32px;height:32px;font-size:12px}
+  .phd .sec{flex:1;font-size:18px}
+  .phd .face{width:32px;height:32px}
+  .status{margin-left:0;top:56px;padding:10px 16px}
+  .page{margin-left:0;padding:20px 16px 40px}
+  h1{font-size:32px}
+  /* on a phone the face menu is a sheet from the bottom */
+  .fm{top:auto;bottom:0;left:0;right:0;width:auto;border-radius:20px 20px 0 0;padding:10px 10px calc(14px + env(safe-area-inset-bottom))}
+  .fm .item{height:48px;font-size:15px}
+}
+</style>
+</head>
+<body>
+<nav class="band" aria-label="Sections"><div class="tile">BF</div><div class="bi on"><i></i>Today</div><div class="bi"><i></i>Schedule</div><div class="bi"><i></i>People</div><div class="bi"><i></i>Money</div><div class="bi"><i></i>Settings</div></nav>
+<header class="top"><div class="biz">Barrio Fitness<span>Owner</span></div><div class="search">Search people, classes…</div><button class="face" id="face" aria-expanded="false" aria-label="Your menu">MR</button></header>
+<header class="phd"><div class="tile">BF</div><div class="sec">Today ▾</div><button class="face" id="face2" aria-expanded="false" aria-label="Your menu">MR</button></header>
+<div class="status" id="status" role="status" hidden></div>
+<main class="page">
+  <div class="cap" id="dateline"></div>
+  <h1>Today</h1>
+  <section class="card"><h2>Classes</h2>
+    <div class="row"><span class="t">6:00 am</span><b style="flex:1">Bootcamp</b><span class="bar"><i style="width:70%"></i></span><span>10/15</span></div>
+    <div class="row"><span class="t">12:00 pm</span><b style="flex:1">Open gym</b><span class="bar"><i style="width:30%"></i></span><span>6</span></div>
+    <div class="row"><span class="t">5:30 pm</span><b style="flex:1">Bootcamp</b><span class="bar"><i style="width:90%"></i></span><span>14/15</span></div>
+  </section>
+  <section class="card"><h2>Needs you</h2>
+    <div class="row"><b style="flex:1">Luis Ortiz · Owes</b><button class="btn sm">Collect</button></div>
+    <div class="row"><b style="flex:1">Add your waiver</b><button class="btn sm">Start</button></div>
+  </section>
+  <p class="end">The page just ends. No footer.</p>
+  <div class="mock">
+    <b>Mock controls · not part of the design</b>
+    <div>What the check finds <span class="mseg" id="m-state"><button data-v="ok">All good</button><button data-v="update">New version out</button><button data-v="offline">Connection lost</button><button data-v="back">Back online</button></span></div>
+    <div><button class="btn sm" id="m-menu">Open the face menu</button></div>
+  </div>
+</main>
+<div class="scrim" id="scrim" hidden></div>
+<div class="fm" id="fm" role="menu" hidden>
+  <div class="who"><b>Marta Rivera</b><span>Owner · Barrio Fitness</span></div>
+  <hr>
+  <div class="lbl">Your gyms</div>
+  <button class="item gym" role="menuitem"><span class="lg">BF</span><span style="flex:1">Barrio Fitness<small>Owner</small></span>✓</button>
+  <hr>
+  <button class="item" role="menuitem">Account</button>
+  <button class="item" role="menuitem" id="about-btn" aria-expanded="false">About Zana<span style="margin-left:auto;color:var(--t3)" id="about-car">›</span></button>
+  <div class="about" id="about" hidden></div>
+  <button class="item" role="menuitem">Sign out</button>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+/* what the check knows: the build this tab runs, and the build the server runs */
+const TAB={commit:'aed9d25',api:'0.1.0',when:'Nov 18, 4:12 pm'};
+const LIVE={commit:'c41f0b7',api:'0.1.0',when:'Nov 19, 7:02 pm'};
+let state='ok';
+function drawStatus(){
+  const s=$('#status');s.className='status';
+  if(state==='ok'){s.hidden=true;return;}
+  s.hidden=false;s.classList.add(state);
+  if(state==='update')s.innerHTML='<span class="msg">Zana has been updated.</span><button class="btn sm pri" id="reload">Reload</button>';
+  if(state==='offline')s.innerHTML='<span class="spin" aria-hidden="true"></span><span class="msg">Can’t reach Zana. Retrying… Changes won’t save until you’re back.</span>';
+  if(state==='back'){s.innerHTML='<span class="msg">You’re back online.</span>';setTimeout(()=>{if(state==='back'){state='ok';drawAll();}},3000);}
+  const r=$('#reload');if(r)r.onclick=()=>{state='ok';TAB.commit=LIVE.commit;TAB.when=LIVE.when;drawAll();toast('Reloaded. You’re on the newest version.');};
+}
+function drawAbout(){
+  const fresh=TAB.commit===LIVE.commit;
+  $('#about').innerHTML='<div class="kv"><span>Version</span><b>'+TAB.commit+'</b></div><div class="kv"><span>Updated</span><b>'+TAB.when+'</b></div><div class="kv"><span>API</span><b>'+TAB.api+'</b></div>'+
+   (state==='offline'?'<div class="stale">Can’t check right now.</div>':fresh?'<div class="ok">✓ You’re on the newest version</div>':'<div class="stale">A newer version is ready · <button class="btn sm" id="ab-reload" style="height:28px">Reload</button></div>')+
+   '<button class="btn sm" id="copy" style="justify-self:start">Copy details</button>';
+  $('#copy').onclick=()=>{try{navigator.clipboard.writeText('Zana '+TAB.commit+' · API '+TAB.api+' · '+navigator.userAgent);}catch(e){}toast('Copied. Paste it to Zana support.');};
+  const ar=$('#ab-reload');if(ar)ar.onclick=()=>{state='ok';TAB.commit=LIVE.commit;TAB.when=LIVE.when;drawAll();};
+}
+function openMenu(o){$('#fm').hidden=!o;$('#scrim').hidden=!o;['#face','#face2'].forEach(f=>$(f).setAttribute('aria-expanded',o));}
+$('#face').onclick=()=>openMenu($('#fm').hidden);$('#face2').onclick=()=>openMenu($('#fm').hidden);$('#m-menu').onclick=()=>openMenu(true);
+$('#scrim').onclick=()=>openMenu(false);
+$('#about-btn').onclick=()=>{const a=$('#about');a.hidden=!a.hidden;$('#about-btn').setAttribute('aria-expanded',!a.hidden);$('#about-car').textContent=a.hidden?'›':'⌄';drawAbout();};
+document.querySelectorAll('#m-state button').forEach(b=>b.onclick=()=>{state=b.dataset.v;if(state==='update'){TAB.commit='aed9d25';TAB.when='Nov 18, 4:12 pm';}drawAll();});
+let tt;function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,2400);}
+function drawAll(){drawStatus();drawAbout();document.querySelectorAll('#m-state button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===state));}
+$('#dateline').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+drawAll();
+</script>
+</body>
+</html>
