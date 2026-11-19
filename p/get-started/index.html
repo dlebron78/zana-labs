@@ -235,7 +235,7 @@ select.inp:invalid,select.inp option[value=""]{color:#9A9A96}
 <main class="page">
   <div class="cap" id="dateline"></div>
   <h1>Today</h1>
-  <section class="card gs" id="gs" aria-label="Get started"></section>
+  <section class="card gs" id="gs" aria-label="Needs you"></section>
   <div class="mock">
     <b>Mock controls · not part of the design</b>
     <div class="r">Address <span class="mseg" id="m-where"><button data-v="pr">San Juan, PR</button><button data-v="us">Miami, FL</button></span></div>
@@ -268,7 +268,7 @@ function fresh(keep){
     plan:{kind:null,name:'',price:'',every:'month',visits:'',within:'3'},
     logo:null,frame:'black',swatches:[],color:'',waiver:{use:null,name:'',text:'',when:null},
     cls:{name:'',len:'60',cap:10,start:'',time:'',days:[],end:'never',until:'',sheet:false},one:{use:null,name:'',len:'60',start:'',time:'',days:[],end:'never',until:'',sheet:false},prog:{use:null,name:'',start:''},how:keep?S.signup:'classes',signup:keep?S.signup:'classes',people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:false,es:false,fix:false,page:0,sent:0},
-    status:{},open:true,cur:'pay',sub:0,returnTo:null,stripeFrom:null};
+    status:{},open:true,cur:'pay',sub:0,returnTo:null,stripeFrom:null,products:[],moreAns:{},ended:false};
   ratesFor();
 }
 function ratesFor(){S.rates=S.where==='pr'?[{n:'State IVU',r:'10.5',sug:true},{n:'Municipal IVU',r:'1',sug:true}]:[{n:'',r:''}];}
@@ -280,15 +280,46 @@ function ids(){return ['pay',S.tax===false?null:'tax','plan','look',hasClasses()
 const SECTION={pay:'Money',tax:'Money',plan:'Money',look:'Look',class:'Schedule',one:'Schedule',program:'Workouts',waiver:'People',staff:'People',invite:'People'};
 const FIND={Money:'Money',Look:'Settings › Look',Schedule:'Schedule',Workouts:'Workouts',People:'People'};
 function sections(){const out=[];ids().forEach(i=>{const n=SECTION[i];let g=out.find(x=>x.name===n);if(!g){g={name:n,ids:[]};out.push(g);}g.ids.push(i);});return out;}
-const SUBS={class:()=>screens('class').length,one:()=>screens('one').length,program:()=>screens('program').length,pay:()=>needPayTo()?2:1,plan:()=>2,waiver:()=>S.waiver.use==='yes'?2:1,invite:()=>S.inv.use==='yes'?2:1};
+const SUBS={class:()=>screens('class').length,one:()=>screens('one').length,program:()=>screens('program').length,pay:()=>needPayTo()?2:1,plan:()=>3,staff:()=>2,waiver:()=>S.waiver.use==='yes'?2:1,invite:()=>S.inv.use==='yes'?3:1};
 const subs=id=>SUBS[id]?SUBS[id]():1;
 function needPayTo(){return S.methods.some(m=>PAYTO[m]);}
 function extras(){return [...S.methods.filter(m=>MORE.includes(m)),...S.others];}
 const skippable=()=>false;
-const planDone=()=>S.status.plan==='done';
+const planDone=()=>S.products.length>0||S.status.plan==='done';
+function prodName(){return (S.products[0]&&S.products[0].name)||S.plan.name||'your plan';}
+function newDraft(){S.plan={kind:null,name:'',price:'',every:'month',visits:'',within:'3',basis:null};}
+function keepDraft(){const d=S.plan;if(!d.key)d.key=Date.now()+Math.random();const k=S.products.findIndex(x=>x.key===d.key);if(k>=0)S.products[k]={...d};else S.products.push({...d});}
 
 /* ---------- Today's checklist ---------- */
+/* the last screen of plan, staff and invite: that's all, or more later (which leaves a Task on Today) */
+function isMore(id){return (id==='plan'&&S.sub===2)||(id==='staff'&&S.sub===1)||(id==='invite'&&S.sub===2);}
+const ENDQ={plan:['You’re selling','+ Add another plan, pack or visit','I’ll add more later'],staff:['Your staff','+ Add someone else','I’ll add more later'],invite:['Invited','+ Invite more people','I’ll invite more later']};
+function moreView(id){
+  const m=ENDQ[id];let items=[];
+  if(id==='plan')items=S.products.map(x=>esc(x.name)+' · $'+esc(x.price)+(x.kind==='plan'?' a '+x.every:''));
+  if(id==='staff')items=S.people.map(x=>esc(x.name)+' · '+({admin:'Admin',coach:'Coach',desk:'Front desk'})[x.role]);
+  if(id==='invite')items=[S.inv.sent+' people, by email'];
+  const shown=items.slice(-3),extra=items.length-shown.length;
+  return '<h2 id="wzt">'+m[0]+'</h2><p class="sub">'+(id==='plan'&&!S.products.some(x=>x.kind==='single')?'Most gyms also sell a drop-in.':'You can always add more from '+(id==='plan'?'Money › Products':'People')+'.')+'</p>'+
+   '<div class="sum">'+(extra>0?'<div class="hint">+ '+extra+' more</div>':'')+shown.map(t=>'<div><span class="ck d"></span>'+t+'</div>').join('')+'</div>'+
+   '<button class="btn" id="b-again" style="align-self:start">'+m[1]+'</button>'+
+   '<div class="fld" style="margin-top:auto"><div class="lbl">Anything else?</div>'+segH('more',[['all','That’s all for now'],['later',m[2]]],S.moreAns[id]||null)+'</div>';
+}
+function againFrom(id){if(id==='plan'){newDraft();S.sub=0;}if(id==='staff'){S.sub=0;}if(id==='invite'){Object.assign(S.inv,{text:'',file:'',rows:[],ones:[],d:{name:'',email:''},fix:false,page:0});S.sub=0;}S.moreAns[id]=null;drawAll();}
+/* the Tasks a finished or closed wizard leaves on Today: steps left for later, and "more later" answers. Skipped or No leaves none. */
+const TASK={pay:'Add how people pay you',tax:'Set your tax',plan:'Make your first plan',look:'Pick your look',class:'Add your first class',program:'Start your workout program',waiver:'Add your waiver',staff:'Add your staff',invite:'Invite your members'};
+const TASK_MORE={plan:'Add more products',staff:'Add more staff',invite:'Invite more members'};
+function tasks(){const t=ids().filter(i=>!(S.status[i]==='done'||S.status[i]==='skipped')).map(i=>({id:i,t:TASK[i],more:false}));
+  Object.keys(TASK_MORE).forEach(i=>{if(S.status[i]==='done'&&S.moreAns[i]==='later'&&ids().includes(i))t.push({id:i,t:TASK_MORE[i],more:true});});return t;}
 function drawToday(){
+  if(!S.ended){$('#gs').innerHTML='<div class="hd"><h2>Needs you</h2></div><p class="hint" style="margin:0">Setting up Barrio Fitness. Anything you leave for later shows up here.</p>';return;}
+  const t=tasks();
+  if(!t.length){$('#gs').innerHTML='<div class="hd"><h2>Needs you</h2><span class="cnt">0</span></div><p class="hint" style="margin:0">Nothing needs you right now.</p>';return;}
+  $('#gs').innerHTML='<div class="hd"><h2>Needs you</h2><span class="cnt">'+t.length+'</span></div><ul>'+t.map((x,k)=>
+    '<li><span class="ck"></span><div class="nm"><b>'+x.t+'</b><span>Setup · '+SECTION[x.id]+' · since today</span></div><button class="btn sm '+(k===0&&!S.open?'pri':'')+'" data-task="'+x.id+'" data-more="'+(x.more?1:0)+'">Start</button></li>').join('')+'</ul>';
+  return;
+}
+function _oldDrawToday(){
   const list=ids(),done=list.filter(i=>S.status[i]==='done'||S.status[i]==='skipped').length;
   const firstOpen=list.find(i=>!(S.status[i]==='done'||S.status[i]==='skipped'));
   if(done===list.length){$('#gs').innerHTML='<div class="hd"><h2>You’re all set up</h2></div><p class="hint" style="margin:0">Every step is done. This card goes away tomorrow.</p>';return;}
@@ -300,6 +331,7 @@ function drawToday(){
 }
 document.addEventListener('click',e=>{
   const s=e.target.closest('[data-start]');if(s){openAt(s.dataset.start);return;}
+  const tk=e.target.closest('[data-task]');if(tk){const id=tk.dataset.task;if(tk.dataset.more==='1'){S.cur=id;S.open=true;againFrom(id);}else openAt(id);return;}
   const u=e.target.closest('[data-undo]');if(u){delete S.status[u.dataset.undo];drawAll();}
 });
 
@@ -308,7 +340,7 @@ function openAt(id,sub){
   if(id==='plan'&&S.tax===null&&ids().includes('tax')){S.returnTo=null;id='tax';toast('Answer tax first, your price depends on it');}
   S.cur=id;S.sub=sub||0;S.open=true;drawAll();
 }
-function closeWz(){S.open=false;drawAll();}
+function closeWz(){S.open=false;S.ended=true;drawAll();}
 function move(dir){
   const list=ids();let i=list.indexOf(S.cur);
   if(dir<0){if(S.sub>0){S.sub--;}else if(i>0){S.cur=list[i-1];S.sub=subs(S.cur)-1;}drawAll();return;}
@@ -328,7 +360,7 @@ function drawWz(){
   const list=ids();
   if(S.cur==='end'){wz.innerHTML=head(null)+'<div class="wb" id="wb">'+viewEnd()+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="go-today">Go to Today</button></div>';
     $('#go-today').onclick=closeWz;$('#wz-x').onclick=closeWz;return;}
-  const id=S.cur,v=VIEW[id]();
+  const id=S.cur,v=isMore(id)?moreView(id):VIEW[id]();
   const i=list.indexOf(id);
   if((id==='class'&&S.cls.sheet)||(id==='one'&&S.one.sheet)){const F=id==='class'?S.cls:S.one;wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
     $('#wz-x').onclick=closeWz;const bk2=$('#wz-back');if(bk2)bk2.onclick=()=>{F.sheet=false;drawAll();};$('#b-done').onclick=()=>{F.sheet=false;drawAll();};WIRE[id]();nav();return;}
@@ -339,15 +371,20 @@ function drawWz(){
   const forced=id==='tax'&&S.tax===null;
   wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div>'+
     '<div class="wf">'+(skippable(id)&&S.sub===0?'<button class="btn" id="b-skip">Skip</button>':'')+
-    (forced?'':'<button class="btn" id="b-later">Later</button>')+'<span class="sp"></span>'+
+    (forced||isMore(id)?'':'<button class="btn" id="b-later">Do this later</button>')+'<span class="sp"></span>'+
     '<button class="btn pri" id="b-next">'+(S.sub<subs(id)-1?'Next':i===list.length-1?'Finish':'Save and continue')+'</button></div>';
-  if(id==='invite'&&S.sub===1){const n=readyRows().length;$('#b-next').textContent='Send '+n+' invite'+(n===1?'':'s');}
+  if(id==='invite'&&S.sub===1&&S.inv.use==='yes'){const n=readyRows().length;$('#b-next').textContent='Send '+n+' invite'+(n===1?'':'s');}
   $('#wz-x').onclick=closeWz;
   const bk=$('#wz-back');if(bk)bk.onclick=()=>move(-1);
   const sk=$('#b-skip');if(sk)sk.onclick=()=>finishStep('skipped');
   const lt=$('#b-later');if(lt)lt.onclick=()=>{if(S.status[id]!=='done')S.status[id]='later';S.sub=subs(id)-1;move(1);};
-  $('#b-next').onclick=()=>{if(id==='invite'&&S.sub===0&&invMode()==='one')invAdd();if(S.sub<subs(id)-1){move(1);}else if((id==='waiver'&&S.waiver.use==='no')||(id==='invite'&&S.inv.use==='no')||(id==='program'&&S.prog.use==='no')||(id==='one'&&S.one.use==='no'&&scr('one')==='q')){finishStep('skipped');}else if(id==='invite'){S.inv.sent=readyRows().length;finishStep('done');toast(S.inv.sent+' invites sent');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
-  WIRE[id]&&WIRE[id]();nav();
+  if(isMore(id)){onSeg('more',v=>{S.moreAns[id]=v;drawAll();});const ag=$('#b-again');if(ag)ag.onclick=()=>againFrom(id);}
+  $('#b-next').onclick=()=>{if(id==='invite'&&S.sub===0&&invMode()==='one')invAdd();
+    if(id==='plan'&&S.sub===1)keepDraft();
+    if(id==='staff'&&S.sub===0)SAVE.staff();
+    if(id==='invite'&&S.sub===1&&S.inv.use==='yes'){const n=readyRows().length;S.inv.sent+=n;toast(n+' invites sent');}
+    if(isMore(id)){finishStep('done');return;}if(S.sub<subs(id)-1){move(1);}else if((id==='waiver'&&S.waiver.use==='no')||(id==='invite'&&S.inv.use==='no')||(id==='program'&&S.prog.use==='no')||(id==='one'&&S.one.use==='no'&&scr('one')==='q')){finishStep('skipped');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
+  if(!isMore(id))WIRE[id]&&WIRE[id]();nav();
 }
 function head(i){
   const list=ids();
@@ -357,7 +394,7 @@ function head(i){
   return '<div class="wh"><button class="ib '+(canBack?'':'ghost')+'" id="wz-back" aria-label="Back">'+IC.back+'</button><div class="c">'+label+'</div><button class="ib" id="wz-x" aria-label="Close">'+IC.x+'</button></div>'+
    '<div class="prog" aria-hidden="true">'+sections().map(g=>'<span class="pg" style="flex:'+g.ids.length+'">'+g.ids.map(x=>{const st=S.status[x];return '<i class="'+(x===S.cur?'on':st==='done'?'d':st==='skipped'?'s':st==='later'?'l':'')+'"></i>';}).join('')+'</span>').join('')+'</div>';
 }
-function nav(){const ok=VALID[S.cur]?VALID[S.cur]():true;const n=$('#b-next');if(n)n.disabled=!ok;}
+function nav(){const ok=isMore(S.cur)?!!S.moreAns[S.cur]:VALID[S.cur]?VALID[S.cur]():true;const n=$('#b-next');if(n)n.disabled=!ok;}
 function segH(name,opts,val){return '<div class="seg" role="group" aria-label="'+esc(name)+'">'+opts.map(([v,t])=>'<button type="button" data-seg="'+esc(name)+'" data-v="'+v+'" aria-pressed="'+(val===v)+'">'+t+'</button>').join('')+'</div>';}
 function onSeg(name,fn){document.querySelectorAll('[data-seg="'+name+'"]').forEach(b=>b.onclick=()=>{fn(b.dataset.v);});}
 function onInp(sel,fn){const el=$(sel);if(el)el.oninput=()=>{fn(el.value);nav();};}
@@ -404,7 +441,7 @@ const VIEW={
   const p=S.plan;
   if(S.sub===0){
    const K=[['plan','Plan','They pay again every month or week.','Unlimited · $120 a month'],['pack','Pack of visits','A number of visits, used before it expires.','8 sessions · $240'],['single','Single visit','A drop-in or a day pass.','Drop-in · $20']];
-   return '<h2 id="wzt">What are you selling first?</h2><p class="sub">You can add more later in Money › Products.</p>'+
+   return '<h2 id="wzt">'+(S.products.length?'What else are you selling?':'What are you selling first?')+'</h2><p class="sub">You can add more later in Money › Products.</p>'+
     K.map(k=>'<button type="button" class="big" data-kind="'+k[0]+'" aria-pressed="'+(p.kind===k[0])+'"><b>'+k[1]+'</b><span>'+k[2]+'</span><em>'+k[3]+'</em></button>').join('');
   }
   const tx=S.tax?(pb()==='incl'?'tax included':'+ tax'):'no tax';
@@ -441,7 +478,7 @@ const VIEW={
   }
   return '<h2 id="wzt">Who signs it?</h2><p class="sub">Until it’s signed they can’t book. Staff can still check them in.</p>'+
    '<button type="button" class="big" data-when="join" aria-pressed="'+(w.when==='join')+'"><b>Everyone, when they join</b><span>The usual choice for a liability waiver.</span></button>'+
-   '<button type="button" class="big" data-when="plan" aria-pressed="'+(w.when==='plan')+'"'+(planDone()?'':' disabled style="opacity:.55"')+'><b>Only people who buy '+(planDone()?esc(S.plan.name||'your plan'):'certain plans')+'</b><span>'+(planDone()?'Asked when they buy it.':'Make a plan first to pick this.')+'</span></button>';
+   '<button type="button" class="big" data-when="plan" aria-pressed="'+(w.when==='plan')+'"'+(planDone()?'':' disabled style="opacity:.55"')+'><b>Only people who buy '+(planDone()?esc(prodName()):'certain plans')+'</b><span>'+(planDone()?'Asked when they buy it.':'Make a plan first to pick this.')+'</span></button>';
  },
  class(){
   if(S.cls.sheet)return repeatsView(S.cls,'c');
@@ -464,7 +501,7 @@ const VIEW={
   return '<h2 id="wzt">Your 1:1 times</h2><p class="sub">The same form as Schedule › New 1:1.</p>'+
    '<div class="row2"><div class="fld"><label class="lbl" for="o-name">Name</label><input class="inp" id="o-name" placeholder="e.g. Personal training" value="'+esc(o.name)+'"></div>'+
    '<div class="fld"><label class="lbl" for="o-len">Length</label>'+selOpts('o-len',LENGTHS.map(m=>[String(m),m+' min']),o.len)+'</div></div>'+
-   whenRows(o,'o')+'<div class="hint">One client per time. '+(planDone()?'Clients with '+esc(S.plan.name||'your plan')+' can book it.':'')+'</div>'+(planDone()?'':coverLine());
+   whenRows(o,'o')+'<div class="hint">One client per time. '+(planDone()?'Clients with '+esc(prodName())+' can book it.':'')+'</div>'+(planDone()?'':coverLine());
  },
  staff(){
   const d=S.draft;const shown=S.people.slice(-2),more=S.people.length-shown.length;
@@ -524,11 +561,13 @@ const VIEW={
 };
 function viewEnd(){
   const list=ids();
-  const later=list.filter(i=>S.status[i]==='later'||!S.status[i]);
-  return '<h2>'+(planDone()?'Barrio Fitness is ready to sell':'Good start')+'</h2><p class="sub">'+(later.length?'What’s left waits on Today. Tap Start to pick it back up.':'Everything is set up.')+'</p>'+
+  const later=list.filter(i=>S.status[i]==='later'||!S.status[i]).concat(Object.keys(S.moreAns).filter(i=>S.moreAns[i]==='later'));
+  return '<h2>'+(planDone()?'Barrio Fitness is ready to sell':'Good start')+'</h2><p class="sub">'+(later.length?'What you left for later shows on Today, under Needs you.':'Everything is set up.')+'</p>'+
    /* one line a section, so the summary fits any screen: what's done, and by name what waits */
    '<div class="sum">'+sections().map(g=>{const open=g.ids.filter(i=>!(S.status[i]==='done'||S.status[i]==='skipped'));
-     return '<div><span class="ck '+(open.length?'':'d')+'"></span><b style="font-weight:600">'+g.name+'</b><em>'+(open.length?'Later: '+open.map(i=>NAMES[i].replace(/^Your /,'').replace(/^./,c=>c.toUpperCase())).join(', '):g.ids.every(i=>S.status[i]==='skipped')?'Skipped':'Done')+'</em></div>';}).join('')+'</div>';
+     const more=g.ids.filter(i=>S.status[i]==='done'&&S.moreAns[i]==='later').map(i=>TASK_MORE[i].replace(/^Add /,'').replace(/^Invite /,'').replace(/^./,c=>c.toUpperCase()));
+     const lat=open.map(i=>NAMES[i].replace(/^Your /,'').replace(/^./,c=>c.toUpperCase())).concat(more);
+     return '<div><span class="ck '+(open.length?'':'d')+'"></span><b style="font-weight:600">'+g.name+'</b><em>'+(lat.length?'Later: '+lat.join(', '):g.ids.every(i=>S.status[i]==='skipped')?'Skipped':'Done')+'</em></div>';}).join('')+'</div>';
 }
 /* up to six colors from the logo: shrink it, bucket the pixels, drop near-white, near-transparent and near-duplicate colors */
 function colorsOf(src){return new Promise(res=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=48;const x=c.getContext('2d');x.drawImage(im,0,0,48,48);let d;try{d=x.getImageData(0,0,48,48).data;}catch(e){res([]);return;}
@@ -691,7 +730,7 @@ function whenRows(c,px){
   return '<div class="row2"><div class="fld"><label class="lbl" for="'+px+'-start">Starts</label>'+selDate(px+'-start',c.start,14,true)+'</div>'+
    '<div class="fld"><label class="lbl" for="'+px+'-time">Time</label>'+selOpts(px+'-time',TIMES.map(t=>[t,timeText(t)]),c.time,'Pick a time')+'</div></div>'+
    '<button type="button" class="setrow" id="'+px+'-rep"><span>Repeats</span><b>'+repeatsText(c)+'</b><i aria-hidden="true">›</i></button>';}
-function coverLine(){return planDone()?'<div class="hint">Clients with '+esc(S.plan.name||'your plan')+' can book it.</div>':'<div class="dep"><span>Nobody can book this yet. No plan covers it.</span><button class="btn sm" data-goplan>Make a plan first</button></div>';}
+function coverLine(){return planDone()?'<div class="hint">Clients with '+esc(prodName())+' can book it.</div>':'<div class="dep"><span>Nobody can book this yet. No plan covers it.</span><button class="btn sm" data-goplan>Make a plan first</button></div>';}
 function repeatsView(c,px){
   return '<h2 id="wzt">Repeats</h2><p class="sub">Leave every day off for a one-time '+(px==='o'?'1:1 time':'class')+'.</p>'+
    '<div class="seg days7" role="group" aria-label="Days">'+DAYS.map((d,k)=>'<button type="button" data-day="'+k+'" aria-pressed="'+c.days.includes(k)+'">'+d+'</button>').join('')+'</div>'+
