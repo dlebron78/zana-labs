@@ -240,7 +240,6 @@ select.inp:invalid,select.inp option[value=""]{color:#9A9A96}
     <b>Mock controls · not part of the design</b>
     <div class="r">Address <span class="mseg" id="m-where"><button data-v="pr">San Juan, PR</button><button data-v="us">Miami, FL</button></span></div>
     <div class="r">Sign-up said <span class="mseg" id="m-cls"><button data-v="classes">Classes</button><button data-v="ones">1:1</button><button data-v="both">Both</button></span> Staff <span class="mseg" id="m-staff"><button data-v="1">Yes</button><button data-v="0">No</button></span></div>
-    <div class="r">On a laptop <span class="mseg" id="m-box"><button data-v="panel">Side panel</button><button data-v="modal">Centered modal</button></span></div>
     <div class="r"><button class="btn sm" id="m-reset">Start over, as just signed up</button></div>
   </div>
 </main>
@@ -261,13 +260,13 @@ const TOP=['ATH Móvil','Cash','Venmo','Zelle','PayPal','Cash App'];
 const MORE=['Check','Bank transfer','Own card terminal','Payment link'];
 const PAYTO={'ATH Móvil':['Phone or pATH','787 555 0142'],'Venmo':['Venmo username','@barriofitness'],'Zelle':['Email or phone','pagos@barrio.fit'],'PayPal':['PayPal email','pagos@barrio.fit'],'Cash App':['$Cashtag','$barriofit'],'Bank transfer':['Bank and account','Banco Popular · 1234'],'Payment link':['Link','https://pay.barrio.fit']};
 
-let S;let BOX='panel';
+let S;let BOX='modal';
 function fresh(keep){
   S={where:keep?S.where:'pr',staff:keep?S.staff:true,
     methods:[],others:[],more:false,otherName:'',payto:{},card:'none',tax:null,basis:null,rates:[],
     plan:{kind:null,name:'',price:'',every:'month',visits:'',within:'3'},
     logo:null,frame:'black',swatches:[],color:'',waiver:{use:null,name:'',text:'',when:null},
-    cls:{name:'',len:'60',cap:10,start:'',time:'',days:[],end:'never',until:'',sheet:false},one:{use:null,name:'',len:'60',start:'',time:'',days:[],end:'never',until:'',sheet:false},prog:{use:null,name:'',start:''},how:keep?S.signup:'classes',signup:keep?S.signup:'classes',people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:false,es:false,fix:false,page:0,sent:0},
+    cls:{want:null,name:'',len:'60',cap:10,start:'',time:'',days:[],end:'never',until:'',sheet:false},one:{use:null,name:'',len:'60',start:'',time:'',days:[],end:'never',until:'',sheet:false},prog:{use:null,name:'',start:''},services:keep?[...S.signupSv]:['classes'],signupSv:keep?S.signupSv:['classes'],signup:keep?S.signup:'classes',people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:false,es:false,fix:false,page:0,sent:0},
     status:{},open:true,cur:'pay',sub:0,returnTo:null,stripeFrom:null,products:[],moreAns:{},ended:false};
   ratesFor();
 }
@@ -303,7 +302,7 @@ function moreView(id){
   return '<h2 id="wzt">'+m[0]+'</h2><p class="sub">'+(id==='plan'&&!S.products.some(x=>x.kind==='single')?'Most gyms also sell a drop-in.':'You can always add more from '+(id==='plan'?'Money › Products':'People')+'.')+'</p>'+
    '<div class="sum">'+(extra>0?'<div class="hint">+ '+extra+' more</div>':'')+shown.map(t=>'<div><span class="ck d"></span>'+t+'</div>').join('')+'</div>'+
    '<button class="btn" id="b-again" style="align-self:start">'+m[1]+'</button>'+
-   '<div class="fld" style="margin-top:auto"><div class="lbl">Anything else?</div>'+segH('more',[['all','That’s all for now'],['later',m[2]]],S.moreAns[id]||null)+'</div>';
+   '<div class="fld" style="margin-top:auto"><div class="lbl">Anything else?</div>'+segH('more',[['all','That’s all for now'],['later',m[2]]],S.moreAns[id]||null)+'<div class="hint">'+(S.moreAns[id]==='later'?'We’ll add a task on Today to remind you.':'Pick “'+m[2]+'” and we’ll add a task on Today to remind you.')+'</div></div>';
 }
 function againFrom(id){if(id==='plan'){newDraft();S.sub=0;}if(id==='staff'){S.sub=0;}if(id==='invite'){Object.assign(S.inv,{text:'',file:'',rows:[],ones:[],d:{name:'',email:''},fix:false,page:0});S.sub=0;}S.moreAns[id]=null;drawAll();}
 /* the Tasks a finished or closed wizard leaves on Today: steps left for later, and "more later" answers. Skipped or No leaves none. */
@@ -383,7 +382,7 @@ function drawWz(){
     if(id==='plan'&&S.sub===1)keepDraft();
     if(id==='staff'&&S.sub===0)SAVE.staff();
     if(id==='invite'&&S.sub===1&&S.inv.use==='yes'){const n=readyRows().length;S.inv.sent+=n;toast(n+' invites sent');}
-    if(isMore(id)){finishStep('done');return;}if(S.sub<subs(id)-1){move(1);}else if((id==='waiver'&&S.waiver.use==='no')||(id==='invite'&&S.inv.use==='no')||(id==='program'&&S.prog.use==='no')||(id==='one'&&S.one.use==='no'&&scr('one')==='q')){finishStep('skipped');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
+    if(isMore(id)){finishStep('done');return;}if(S.sub<subs(id)-1){move(1);}else if((id==='waiver'&&S.waiver.use==='no')||(id==='invite'&&S.inv.use==='no')||(id==='program'&&S.prog.use==='no')||(id==='class'&&S.cls.want==='no')||(id==='one'&&S.one.use==='no'&&scr('one')==='q')){finishStep('skipped');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
   if(!isMore(id))WIRE[id]&&WIRE[id]();nav();
 }
 function head(i){
@@ -516,14 +515,14 @@ const VIEW={
   const g=S.prog;
   if(scr('program')==='how')return howView();
   if(scr('program')==='choice'){
-   return '<h2 id="wzt">Do you write workouts?</h2><p class="sub">Clients see them in the app, and in class.</p>'+
+   return '<h2 id="wzt">Do you write workouts?</h2><p class="sub">Pick one to start with. Add others any time in Workouts.</p>'+
     progChoices().map(([v,t,d])=>'<button type="button" class="big" data-pc="'+v+'" aria-pressed="'+(g.use===v)+'"><b>'+t+'</b><span>'+d+'</span></button>').join('');
   }
-  const shared=g.use==='classes'||g.use==='both',cn=S.cls.name.trim();
+  const shared=g.use==='classes'||g.use==='online',cn=S.cls.name.trim();
   return '<h2 id="wzt">'+(shared?'Your class program':'Your 1:1 program')+'</h2><p class="sub">'+(shared?'Everyone in your classes is on the same day.':'Each client starts on their own day 1.')+'</p>'+
    '<div class="fld"><label class="lbl" for="g-name">Program name</label><input class="inp" id="g-name" placeholder="'+(shared?'e.g. Daily WOD':'e.g. 12-week strength')+'" value="'+esc(g.name)+'"></div>'+
    (shared?'<div class="fld"><label class="lbl" for="g-start">Day 1 is</label>'+selDate('g-start',g.start,6,true,true)+'</div>'+
-     '<div class="note">'+(cn?'Your '+esc(cn)+' class shows':'Your classes show')+' each day’s workout from it. Write the first one in Workouts.'+(g.use==='both'?' Give a 1:1 program from any client’s page later.':'')+'</div>':
+     '<div class="note">'+(cn?'Your '+esc(cn)+' class shows':'Your classes show')+' each day’s workout from it. Write the first one in Workouts.'+(progChoices().length>2?' Start others any time in Workouts.':'')+'</div>':
     '<div class="note">Give it to a client from their page, and they start on day 1. Write it in Workouts.</div>');
  },
  invite(){
@@ -590,9 +589,9 @@ const VALID={
  plan(){if(S.sub===0)return !!S.plan.kind;return S.plan.name.trim()&&parseFloat(S.plan.price)>0&&(S.plan.kind!=='pack'||parseInt(S.plan.visits)>0);},
  look(){return S.frame!=='color'||!!S.color;},
  waiver(){const w=S.waiver;if(S.sub===0)return w.use==='no'||(w.use==='yes'&&w.name.trim()&&w.text.trim().length>20);return !!w.when;},
- class(){const c=S.cls;if(c.sheet)return c.end!=='date'||!!c.until;if(scr('class')==='how')return !!S.how;return c.name.trim()&&c.time&&c.start;},
+ class(){const c=S.cls;if(c.sheet)return c.end!=='date'||!!c.until;if(scr('class')==='how')return S.services.length>0&&!!S.cls.want;return c.name.trim()&&c.time&&c.start;},
  one(){const o=S.one;if(o.sheet)return o.end!=='date'||!!o.until;const sc=scr('one');if(sc==='how')return !!S.how;if(sc==='q')return !!o.use;return o.name.trim()&&o.time&&o.start;},
- program(){const g=S.prog;if(scr('program')==='how')return !!S.how;if(scr('program')==='choice')return !!g.use;return g.name.trim()&&(g.use==='ones'||!!g.start);},
+ program(){const g=S.prog;if(scr('program')==='how')return S.services.length>0;if(scr('program')==='choice')return !!g.use;return g.name.trim()&&(g.use==='ones'||!!g.start);},
  staff(){const d=S.draft;return S.people.length>0||(d.name.trim()&&d.email.includes('@')&&!!d.role);},
  invite(){const v=S.inv;if(v.fix)return true;if(S.sub===0)return v.use==='no'||(v.use==='yes'&&(invMode()==='one'?(v.ones.length>0||!!invDraftOk()):v.rows.some(r=>!r.dup)));return readyRows().length>0&&(v.en||v.es);}
 };
@@ -707,25 +706,30 @@ function selDate(id,val,n,today,mondays){const out=[];const d=new Date();d.setHo
     const iso=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');out.push([iso,(k===0?'Today, ':'')+x.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})]);}
   return selOpts(id,out,val,'Pick a day');}
 /* how she trains clients: her sign-up answer, shown picked on the first Schedule screen, where she can change it */
-function hasClasses(){return S.how==='classes'||S.how==='both';}
-function hasOnes(){return S.how==='ones'||S.how==='both';}
+/* How do you work? — the business's Services, the same answer as sign-up and Settings › Business (one fact, not a copy) */
+const SERVICES=[['classes','Group classes'],['ones','1:1 sessions'],['online','Programs (online)'],['open','Open gym']];
+function has(x){return S.services.includes(x);}
+function hasClasses(){return has('classes');}
+function hasOnes(){return has('ones');}
 function schedFirst(){return hasClasses()?'class':'program';}
 /* each step's screens, in order; S.sub indexes into them */
 function screens(id){
-  if(id==='class')return [schedFirst()==='class'?'how':null,'form'].filter(Boolean);
+  if(id==='class')return ['how',S.cls.want==='yes'?'form':null].filter(Boolean);
   if(id==='one')return [schedFirst()==='one'?'how':null,'q',S.one.use==='yes'?'form':null].filter(Boolean);
   if(id==='program')return [schedFirst()==='program'?'how':null,'choice',S.prog.use&&S.prog.use!=='no'?'details':null].filter(Boolean);
   return null;}
 function scr(id){const l=screens(id);return l[Math.min(S.sub,l.length-1)];}
 function howView(){
-  return '<h2 id="wzt">How do clients train with you?</h2><p class="sub">From your sign-up. Change it if it’s not quite right.'+(hasClasses()?'':' 1:1 times get their own setup later.')+'</p>'+
-   [['classes','Group classes','Several people book the same time.'],['ones','1:1 sessions','One client at a time.'],['both','Both','Classes, and some clients 1:1.']]
-    .map(([v,t,d])=>'<button type="button" class="big" data-how="'+v+'" aria-pressed="'+(S.how===v)+'"><b>'+t+'</b><span>'+d+'</span></button>').join('');
+  return '<h2 id="wzt">How do you work?</h2><p class="sub">What you picked at sign-up. Change it if it’s not quite right.</p>'+
+   '<div class="tiles">'+SERVICES.map(([v,t])=>'<button type="button" class="tl" data-svc="'+v+'" aria-pressed="'+has(v)+'"><span class="bx"></span>'+t+'</button>').join('')+'</div>'+
+   (hasClasses()?'<div class="fld" style="margin-top:auto"><div class="lbl">Do you want to add your first class now?</div>'+segH('cwant',[['yes','Yes'],['no','No']],S.cls.want||null)+'</div>':'')+
+   (!hasClasses()&&has('ones')?'<div class="hint">1:1 times get their own setup later.</div>':'');
 }
-function wireHow(){document.querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>{S.how=b.dataset.how;S.cur=schedFirst();S.sub=0;
-  if(S.prog.use&&!progChoices().some(x=>x[0]===S.prog.use))S.prog.use=null;drawAll();});}
-function progChoices(){const c=[['classes','For my classes','Everyone sees the same workout each day.'],['ones','For my 1:1 clients','Each client starts on their own day 1.'],['both','Both','A class program now. Give 1:1 ones from a client’s page later.'],['no','No','Not for now. Start one any time in Workouts.']];
-  return c.filter(x=>x[0]==='no'||(x[0]==='classes'&&hasClasses())||(x[0]==='ones'&&hasOnes())||(x[0]==='both'&&S.how==='both'));}
+function wireHow(){document.querySelectorAll('[data-svc]').forEach(b=>b.onclick=()=>{const v=b.dataset.svc;S.services=has(v)?S.services.filter(x=>x!==v):[...S.services,v];
+  S.cur=schedFirst();S.sub=0;if(S.prog.use&&!progChoices().some(x=>x[0]===S.prog.use))S.prog.use=null;drawAll();});
+  onSeg('cwant',v=>{S.cls.want=v;drawAll();});}
+function progChoices(){const c=[['classes','For my classes','Everyone sees the same workout each day.'],['online','For my online clients','Everyone follows the same day, wherever they train.'],['ones','For my 1:1 clients','Each client starts on their own day 1.'],['no','No','Not for now. Start one any time in Workouts.']];
+  return c.filter(x=>x[0]==='no'||has(x[0]));}
 function whenRows(c,px){
   return '<div class="row2"><div class="fld"><label class="lbl" for="'+px+'-start">Starts</label>'+selDate(px+'-start',c.start,14,true)+'</div>'+
    '<div class="fld"><label class="lbl" for="'+px+'-time">Time</label>'+selOpts(px+'-time',TIMES.map(t=>[t,timeText(t)]),c.time,'Pick a time')+'</div></div>'+
@@ -774,10 +778,10 @@ let tt;function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;c
 function drawAll(){drawToday();drawWz();drawMock();}
 function drawMock(){
   const set=(id,v)=>document.querySelectorAll(id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
-  set('#m-where',S.where);set('#m-box',BOX);set('#m-cls',S.signup);set('#m-staff',S.staff?'1':'0');
+  set('#m-where',S.where);set('#m-cls',S.signup);set('#m-staff',S.staff?'1':'0');
 }
 document.querySelectorAll('#m-where button').forEach(b=>b.onclick=()=>{S.where=b.dataset.v;ratesFor();drawAll();});
-document.querySelectorAll('#m-cls button').forEach(b=>b.onclick=()=>{S.signup=b.dataset.v;S.how=b.dataset.v;if(!ids().includes(S.cur))S.cur=schedFirst();S.sub=0;drawAll();});
+document.querySelectorAll('#m-cls button').forEach(b=>b.onclick=()=>{S.signup=b.dataset.v;S.signupSv={classes:['classes'],ones:['ones'],both:['classes','ones']}[b.dataset.v];S.services=[...S.signupSv];if(!ids().includes(S.cur))S.cur=schedFirst();S.sub=0;drawAll();});
 document.querySelectorAll('#m-staff button').forEach(b=>b.onclick=()=>{S.staff=b.dataset.v==='1';if(!S.staff&&S.cur==='staff')S.cur='invite';drawAll();});
 document.querySelectorAll('#m-box button').forEach(b=>b.onclick=()=>{BOX=b.dataset.v;S.open=true;drawAll();});
 $('#scrim').onclick=()=>closeWz();
