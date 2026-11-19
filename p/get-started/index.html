@@ -14,6 +14,7 @@ body{font:15px/1.45 var(--sans);-webkit-text-size-adjust:100%}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 input,textarea{font-size:16px}
+::placeholder{color:#9A9A96;opacity:1}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:none;box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
 
 /* frame: band on laptop, header on phone */
@@ -80,6 +81,9 @@ h1{margin:4px 0 20px;font-size:40px;font-weight:700;letter-spacing:-.03em;line-h
 .fld{display:grid;gap:6px}
 .inp{width:100%;height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:#fff}
 .inp:focus{border-color:var(--ink);outline:none}
+.tf{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:4px}
+.tf select{padding:0 2px;font-size:15px;appearance:none;-webkit-appearance:none;text-align:center;text-align-last:center;background:#fff}
+select.inp:invalid,select.inp option[value=""]{color:#9A9A96}
 .inpw{position:relative}
 .inpw .pre{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t2)}
 .inpw .suf{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t2);font-size:13px}
@@ -108,7 +112,15 @@ h1{margin:4px 0 20px;font-size:40px;font-weight:700;letter-spacing:-.03em;line-h
 .stripe.part{border-color:var(--redline);background:var(--redbg)}
 .st{font-size:13px;font-weight:600}
 .st.ok{color:var(--green)}.st.wait{color:var(--blue)}.st.part{color:var(--red)}
+.away-in{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:0 8px}
+.away-in p{margin:0;color:var(--t2);font-size:15px;max-width:380px}
+.away-in .hint{font-size:13px}
+.btn.lg{height:44px;border-radius:12px;font-size:16px;padding:0 22px}
 .div{height:1px;background:var(--rowline);margin:2px 0}
+.rcpt{background:var(--note);border-radius:12px;padding:10px 12px;font-size:13px;display:grid;gap:3px;font-variant-numeric:tabular-nums}
+.rcpt .rt{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin-bottom:2px}
+.rcpt div:not(.rt):not(.hint){display:flex;justify-content:space-between;color:var(--t2)}
+.rcpt .tot{border-top:1px dashed #CFCFCB;padding-top:4px;margin-top:2px;color:var(--ink)!important;font-weight:700;font-size:14px}
 .note{background:var(--note);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--t2)}
 .note b{color:var(--ink)}
 .dep{background:var(--redbg);border:1px solid var(--redline);border-radius:12px;padding:10px 12px;font-size:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -183,6 +195,8 @@ h1{margin:4px 0 20px;font-size:40px;font-weight:700;letter-spacing:-.03em;line-h
   .gs .btn.sm{padding:0 10px}
 }
 @media (max-height:600px){
+  .rcpt{padding:6px 10px;gap:1px}
+  .rcpt .rt{display:none}
   .wb .sub{display:none}
   .tl{min-height:40px;padding:6px 10px}
   .stripe{padding:8px 10px 8px 12px}
@@ -235,7 +249,7 @@ function fresh(keep){
     methods:[],others:[],more:false,otherName:'',payto:{},card:'none',tax:null,basis:null,rates:[],
     plan:{kind:null,name:'',price:'',every:'month',visits:'',within:'3'},
     logo:null,frame:'black',swatches:[],color:'',waiver:{use:null,name:'',text:'',when:null},
-    cls:{name:'',days:[],time:'',cap:''},people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:true,es:true,fix:false,page:0,sent:0},
+    cls:{name:'',days:[],h:'',m:'',ap:'',cap:''},people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:false,es:false,fix:false,page:0,sent:0},
     status:{},open:true,cur:'pay',sub:0,returnTo:null,stripeFrom:null};
   ratesFor();
 }
@@ -328,12 +342,12 @@ const VIEW={
   if(S.more){
    return '<h2 id="wzt">Another way to get paid</h2><p class="sub">Tap any that apply, or name your own.</p>'+
     '<div class="tiles">'+MORE.map(m=>'<button type="button" class="tl" data-m="'+esc(m)+'" aria-pressed="'+S.methods.includes(m)+'"><span class="bx"></span>'+esc(m)+'</button>').join('')+'</div>'+
-    '<div class="fld"><label class="lbl" for="o-name">Something else</label><div style="display:flex;gap:8px"><input class="inp" id="o-name" placeholder="Caja del frente" value="'+esc(S.otherName)+'"><button class="btn" id="o-add">Add</button></div></div>'+
+    '<div class="fld"><label class="lbl" for="o-name">Something else</label><div style="display:flex;gap:8px"><input class="inp" id="o-name" placeholder="e.g. Caja del frente" value="'+esc(S.otherName)+'"><button class="btn" id="o-add">Add</button></div></div>'+
     (S.others.length?'<div class="people">'+S.others.map((o,k)=>'<div class="pr"><b>'+esc(o)+'</b><span class="chip">Your own</span><button class="ib" style="width:28px;height:28px;background:none" data-odel="'+k+'" aria-label="Remove">'+IC.del+'</button></div>').join('')+'</div>':'');
   }
   if(S.sub===1){
    return '<h2 id="wzt">Where should they send it?</h2><p class="sub">Shown to clients when they pay you by hand.</p>'+
-    S.methods.filter(m=>PAYTO[m]).map(m=>'<div class="fld"><label class="lbl" for="pt-'+esc(m)+'">'+esc(m)+' · '+PAYTO[m][0]+'</label><input class="inp" id="pt-'+esc(m)+'" data-pt="'+esc(m)+'" placeholder="'+esc(PAYTO[m][1])+'" value="'+esc(S.payto[m]||'')+'"></div>').join('')+
+    S.methods.filter(m=>PAYTO[m]).map(m=>'<div class="fld"><label class="lbl" for="pt-'+esc(m)+'">'+esc(m)+' · '+PAYTO[m][0]+'</label><input class="inp" id="pt-'+esc(m)+'" data-pt="'+esc(m)+'" placeholder="e.g. '+esc(PAYTO[m][1])+'" value="'+esc(S.payto[m]||'')+'"></div>').join('')+
     '<p class="hint" style="margin:0">Cash needs nothing.</p>';
   }
   const st={none:['Card, with Stripe','Clients pay by card. You finish on Stripe’s site.','',''],
@@ -352,13 +366,13 @@ const VIEW={
    return '<h2 id="wzt">Do you collect tax?</h2><p class="sub">Your first price depends on this, so it comes first.</p>'+
     segH('tax2',[['yes','Yes'],['no','No']],null)+'<div class="note">Answer <b>No</b> and you’re done here. You can turn tax on later in Settings.</div>';
   }
-  return '<h2 id="wzt">Your tax</h2><p class="sub">Every plan uses these unless you change it on the plan.</p>'+
-   '<div class="fld"><div class="lbl">Your prices</div>'+segH('basis',[['incl','Include tax'],['top','Have tax added on top']],S.basis)+'</div>'+
+  return '<h2 id="wzt">Your tax</h2><p class="sub">Every plan uses these unless you change it on the plan. Turn tax off and no plan is taxed.</p>'+
+   '<div class="fld"><div class="lbl">Is tax already inside your prices?</div>'+segH('basis',[['incl','Yes, it’s inside'],['top','No, it’s added on top']],S.basis)+'</div>'+
    '<div class="fld"><div class="lbl">Rates '+(S.where==='pr'?'<span class="chip">Suggested for Puerto Rico</span>':'')+'</div>'+
-   S.rates.map((r,k)=>'<div class="rate"><input class="inp" data-rn="'+k+'" placeholder="Name, like State tax" value="'+esc(r.n)+'"><div class="inpw"><input class="inp" data-rr="'+k+'" inputmode="decimal" placeholder="0" value="'+esc(r.r)+'" style="padding-right:28px"><span class="suf">%</span></div>'+
+   S.rates.map((r,k)=>'<div class="rate"><input class="inp" data-rn="'+k+'" placeholder="e.g. State tax" value="'+esc(r.n)+'"><div class="inpw"><input class="inp" data-rr="'+k+'" inputmode="decimal" placeholder="e.g. 7" value="'+esc(r.r)+'" style="padding-right:28px"><span class="suf">%</span></div>'+
      (S.rates.length>1?'<button class="ib" style="width:28px;height:28px;background:none" data-rdel="'+k+'" aria-label="Remove rate">'+IC.del+'</button>':'<span></span>')+'</div>').join('')+
    (S.rates.length<3?'<button class="lnk" id="b-addrate" style="justify-self:start">+ Add a rate</button>':'')+'</div>'+
-   '<div class="note">A plan can use these rates, its own, or no tax. <b>Turn tax off and no plan is taxed.</b></div>';
+   '<div id="rc">'+receipt(100,'A $100 sale')+'</div>';
  },
  plan(){
   const p=S.plan;
@@ -367,15 +381,15 @@ const VIEW={
    return '<h2 id="wzt">What are you selling first?</h2><p class="sub">You can add more later in Money › Products.</p>'+
     K.map(k=>'<button type="button" class="big" data-kind="'+k[0]+'" aria-pressed="'+(p.kind===k[0])+'"><b>'+k[1]+'</b><span>'+k[2]+'</span><em>'+k[3]+'</em></button>').join('');
   }
-  const tx=S.tax?(S.basis==='incl'?'tax included':'+ tax'):'no tax';
+  const tx=S.tax?(S.basis==='incl'?'tax inside':'+ tax'):'no tax';
   const total=S.rates.reduce((a,r)=>a+(parseFloat(r.r)||0),0);
   const kindName={plan:'Plan',pack:'Pack of visits',single:'Single visit'}[p.kind]||'';
   return '<h2 id="wzt">'+kindName+'</h2><p class="sub">'+(p.kind==='plan'?'Charged again every period until they stop.':p.kind==='pack'?'They use the visits before it expires.':'One visit, one day.')+'</p>'+
-   '<div class="fld"><label class="lbl" for="p-name">Name</label><input class="inp" id="p-name" placeholder="'+(p.kind==='plan'?'Unlimited':p.kind==='pack'?'8 sessions':'Drop-in')+'" value="'+esc(p.name)+'"></div>'+
-   '<div class="fld"><label class="lbl" for="p-price">Price</label><div class="inpw"><span class="pre">$</span><input class="inp pp" id="p-price" inputmode="decimal" placeholder="0" value="'+esc(p.price)+'" style="padding-right:96px"><span class="suf">'+tx+'</span></div></div>'+
+   '<div class="fld"><label class="lbl" for="p-name">Name</label><input class="inp" id="p-name" placeholder="e.g. '+(p.kind==='plan'?'Unlimited':p.kind==='pack'?'8 sessions':'Drop-in')+'" value="'+esc(p.name)+'"></div>'+
+   '<div class="fld"><label class="lbl" for="p-price">Price</label><div class="inpw"><span class="pre">$</span><input class="inp pp" id="p-price" inputmode="decimal" placeholder="e.g. 240" value="'+esc(p.price)+'" style="padding-right:96px"><span class="suf">'+tx+'</span></div></div>'+
    (p.kind==='plan'?'<div class="row2"><div class="fld"><div class="lbl">Every</div>'+segH('every',[['month','Month'],['week','Week']],p.every)+'</div><div class="fld"><label class="lbl" for="p-vis">Visits each '+p.every+'</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="Unlimited" value="'+esc(p.visits)+'"></div></div>':'')+
-   (p.kind==='pack'?'<div class="row2"><div class="fld"><label class="lbl" for="p-vis">Visits</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="8" value="'+esc(p.visits)+'"></div><div class="fld"><label class="lbl" for="p-in">Use within</label><div class="inpw"><input class="inp" id="p-in" inputmode="numeric" value="'+esc(p.within)+'" style="padding-right:70px"><span class="suf">months</span></div></div></div>':'')+
-   '<div class="note">Tax: '+(S.tax?'your rates, '+total+'%, '+(S.basis==='incl'?'included in the price':'added on top'):'none')+'. Change it on this plan later in Money › Products.</div>';
+   (p.kind==='pack'?'<div class="row2"><div class="fld"><label class="lbl" for="p-vis">Visits</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="e.g. 8" value="'+esc(p.visits)+'"></div><div class="fld"><label class="lbl" for="p-in">Use within</label><div class="inpw"><input class="inp" id="p-in" inputmode="numeric" value="'+esc(p.within)+'" style="padding-right:70px"><span class="suf">months</span></div></div></div>':'')+
+   (S.tax?'<div id="rc">'+receipt(parseFloat(p.price)||0,'What a client pays')+'</div>':'<div class="note">No tax on this plan.</div>');
  },
  look(){
   const reads=S.color&&contrast(S.color)>=4.5;
@@ -386,7 +400,7 @@ const VIEW={
    (S.frame==='color'?'<div class="fld"><div class="sws">'+
      (S.swatches.length?S.swatches.map(c=>'<button type="button" class="swc" data-c="'+c+'" aria-pressed="'+(S.color===c)+'" style="background:'+c+'" aria-label="'+c+'"></button>').join(''):'<span class="hint" style="flex:1">Add your logo to pick from its colors.</span>')+
      '<label class="swc cust" aria-label="Custom color"><input type="color" id="c-pick" value="'+(S.color||'#1F6B5C')+'">＋</label>'+
-     '<input class="inp hex" id="c-hex" placeholder="#1F6B5C" value="'+esc(S.color)+'" maxlength="7"></div>'+
+     '<input class="inp hex" id="c-hex" placeholder="e.g. #1F6B5C" value="'+esc(S.color)+'" maxlength="7"></div>'+
      (S.color&&!reads?'<div class="hint" style="color:var(--red)">White text is hard to read on this color, so your frame stays Black.</div>':'')+'</div>':'')+
    '<div class="pv" aria-label="Preview"><div class="hb" style="background:'+fr+';color:'+(fr==='#FFFFFF'?'#111':'#fff')+';border-bottom:1px solid var(--line)"><span class="lg">'+(S.logo?'<img alt="" src="'+S.logo+'">':'BF')+'</span>Barrio Fitness</div></div>';
  },
@@ -395,7 +409,7 @@ const VIEW={
   if(S.sub===0){
    return '<h2 id="wzt">Do you use a waiver?</h2><p class="sub">Clients sign it in the app before they book.</p>'+
     segH('wuse',[['yes','Yes'],['no','No']],w.use)+
-    (w.use==='yes'?'<div class="fld"><label class="lbl" for="w-name">Name</label><input class="inp" id="w-name" placeholder="Liability waiver" value="'+esc(w.name)+'"></div>'+
+    (w.use==='yes'?'<div class="fld"><label class="lbl" for="w-name">Name</label><input class="inp" id="w-name" placeholder="e.g. Liability waiver" value="'+esc(w.name)+'"></div>'+
     '<div class="grow"><label class="lbl" for="w-text">Your wording</label><textarea class="ta" id="w-text" placeholder="Paste your waiver here">'+esc(w.text)+'</textarea></div>':
     w.use==='no'?'<div class="note">No waiver for now. You can write one any time in Settings › Documents.</div>':'');
   }
@@ -407,15 +421,15 @@ const VIEW={
   const c=S.cls;
   return '<h2 id="wzt">Your first class</h2><p class="sub">It repeats every week on the days you pick.</p>'+
    (planDone()?'<div class="okn">Clients with '+esc(S.plan.name||'your plan')+' can book it.</div>':'<div class="dep"><span>Nobody can book this yet. No plan covers it.</span><button class="btn sm" data-goplan>Make a plan first</button></div>')+
-   '<div class="fld"><label class="lbl" for="c-name">Class name</label><input class="inp" id="c-name" placeholder="CrossFit" value="'+esc(c.name)+'"></div>'+
+   '<div class="fld"><label class="lbl" for="c-name">Class name</label><input class="inp" id="c-name" placeholder="e.g. CrossFit" value="'+esc(c.name)+'"></div>'+
    '<div class="fld"><div class="lbl">Days</div><div class="days">'+['Mo','Tu','We','Th','Fr','Sa','Su'].map(d=>'<button type="button" data-day="'+d+'" aria-pressed="'+c.days.includes(d)+'">'+d+'</button>').join('')+'</div></div>'+
-   '<div class="row2"><div class="fld"><label class="lbl" for="c-time">Starts at</label><input class="inp" id="c-time" type="time" value="'+esc(c.time)+'"></div><div class="fld"><label class="lbl" for="c-cap">Spots</label><input class="inp" id="c-cap" inputmode="numeric" placeholder="No limit" value="'+esc(c.cap)+'"></div></div>';
+   '<div class="row2" style="grid-template-columns:1.5fr 1fr"><div class="fld"><label class="lbl" for="c-time">Starts at</label><div class="tf" id="c-time">'+sel('c-h',['1','2','3','4','5','6','7','8','9','10','11','12'],c.h,'Hour')+sel('c-m',['00','05','10','15','20','25','30','35','40','45','50','55'],c.m,'Min')+sel('c-ap',['am','pm'],c.ap,'am/pm')+'</div></div><div class="fld"><label class="lbl" for="c-cap">Spots</label><input class="inp" id="c-cap" inputmode="numeric" placeholder="No limit" value="'+esc(c.cap)+'"></div></div>';
  },
  staff(){
   const d=S.draft;const shown=S.people.slice(-2),more=S.people.length-shown.length;
   const RD={admin:'Everything you can do, except closing the business.',coach:'Their classes, check-ins and workouts.',desk:'Check-ins, sales and today’s payments.'};
   return '<h2 id="wzt">Add your staff</h2><p class="sub">They get an email to sign in.</p>'+
-   '<div class="row2"><div class="fld"><label class="lbl" for="s-name">Name</label><input class="inp" id="s-name" placeholder="Ana Rivera" value="'+esc(d.name)+'"></div><div class="fld"><label class="lbl" for="s-mail">Email</label><input class="inp" id="s-mail" type="email" placeholder="ana@mail.com" value="'+esc(d.email)+'"></div></div>'+
+   '<div class="row2"><div class="fld"><label class="lbl" for="s-name">Name</label><input class="inp" id="s-name" placeholder="e.g. Ana Rivera" value="'+esc(d.name)+'"></div><div class="fld"><label class="lbl" for="s-mail">Email</label><input class="inp" id="s-mail" type="email" placeholder="e.g. ana@mail.com" value="'+esc(d.email)+'"></div></div>'+
    '<div class="fld"><div class="lbl">Role</div>'+segH('role',[['admin','Admin'],['coach','Coach'],['desk','Front desk']],d.role)+'<div class="hint" id="s-rd">'+(d.role?RD[d.role]:'&nbsp;')+'</div></div>'+
    '<button class="btn" id="s-add" style="justify-self:start">Add '+(d.name?esc(d.name.split(' ')[0]):'them')+'</button>'+
    (S.people.length?'<div class="people">'+(more>0?'<div class="hint">+ '+more+' more added</div>':'')+shown.map(p=>'<div class="pr"><b>'+esc(p.name)+'</b><span class="chip">'+({admin:'Admin',coach:'Coach',desk:'Front desk'})[p.role]+'</span></div>').join('')+'</div>':'');
@@ -445,11 +459,11 @@ const VIEW={
    (v.use==='yes'?(planDone()?'':'<div class="dep"><span>People who join have nothing to buy yet.</span><button class="btn sm" data-goplan>Make a plan first</button></div>')+
      segH('inmode',[['one','One at a time'],['list','A list']],invMode())+
      (invMode()==='one'?
-      '<div class="row2"><div class="fld"><label class="lbl" for="io-name">Name</label><input class="inp" id="io-name" placeholder="Ana Rivera" value="'+esc(v.d.name)+'"></div><div class="fld"><label class="lbl" for="io-mail">Email</label><input class="inp" id="io-mail" type="email" placeholder="ana@mail.com" value="'+esc(v.d.email)+'"></div></div>'+
+      '<div class="row2"><div class="fld"><label class="lbl" for="io-name">Name</label><input class="inp" id="io-name" placeholder="e.g. Ana Rivera" value="'+esc(v.d.name)+'"></div><div class="fld"><label class="lbl" for="io-mail">Email</label><input class="inp" id="io-mail" type="email" placeholder="e.g. ana@mail.com" value="'+esc(v.d.email)+'"></div></div>'+
       '<button class="btn" id="io-add" style="justify-self:start">Add '+(v.d.name.trim()?esc(v.d.name.trim().split(' ')[0]):'them')+'</button>'+
       (v.ones.length?'<div class="pr"><span class="ck d" style="width:20px;height:20px"></span><b>'+v.ones.length+' added: '+v.ones.map(o=>esc(o.name.split(' ')[0])).join(', ')+'</b></div>':'')
      :
-      '<div class="grow"><label class="lbl" for="in-text">One person a line: name, email</label><textarea class="ta" id="in-text" placeholder="Ana Rivera, ana@mail.com&#10;Luis Ortiz, luis@mail.com">'+esc(v.text)+'</textarea></div>'+
+      '<div class="grow"><label class="lbl" for="in-text">One person a line: name, email</label><textarea class="ta" id="in-text" placeholder="e.g.&#10;Ana Rivera, ana@mail.com&#10;Luis Ortiz, luis@mail.com">'+esc(v.text)+'</textarea></div>'+
       '<div style="display:flex;align-items:center;gap:12px"><span class="hint" id="in-count" style="flex:1">'+(v.file?esc(v.file)+' · ':'')+(found?found+' found':'&nbsp;')+'</span><label class="lnk" style="position:relative;cursor:pointer">or upload a CSV<input type="file" accept=".csv,text/csv" id="in-csv" aria-label="Upload a CSV" style="position:absolute;inset:0;opacity:0;width:100%"></label></div>'):'');
  }
 };
@@ -480,7 +494,7 @@ const VALID={
  plan(){if(S.sub===0)return !!S.plan.kind;return S.plan.name.trim()&&parseFloat(S.plan.price)>0&&(S.plan.kind!=='pack'||parseInt(S.plan.visits)>0);},
  look(){return S.frame!=='color'||!!S.color;},
  waiver(){const w=S.waiver;if(S.sub===0)return w.use==='no'||(w.use==='yes'&&w.name.trim()&&w.text.trim().length>20);return !!w.when;},
- class(){const c=S.cls;return c.name.trim()&&c.days.length&&c.time;},
+ class(){const c=S.cls;return c.name.trim()&&c.days.length&&c.h&&c.m&&c.ap;},
  staff(){const d=S.draft;return S.people.length>0||(d.name.trim()&&d.email.includes('@')&&!!d.role);},
  invite(){const v=S.inv;if(v.fix)return true;if(S.sub===0)return v.use==='no'||(v.use==='yes'&&(invMode()==='one'?(v.ones.length>0||!!invDraftOk()):v.rows.some(r=>!r.dup)));return readyRows().length>0&&(v.en||v.es);}
 };
@@ -501,14 +515,15 @@ const WIRE={
  tax(){
   onSeg('tax2',v=>{S.tax=v==='yes';if(!S.tax){S.status.tax='done';S.status.pay=S.status.pay||'later';S.cur='plan';S.sub=0;}drawAll();});
   onSeg('basis',v=>{S.basis=v;drawAll();});
-  document.querySelectorAll('[data-rn]').forEach(el=>el.oninput=()=>{S.rates[+el.dataset.rn].n=el.value;nav();});
-  document.querySelectorAll('[data-rr]').forEach(el=>el.oninput=()=>{S.rates[+el.dataset.rr].r=el.value.replace(/[^0-9.]/g,'');nav();});
+  const rc=()=>{const r=$('#rc');if(r)r.innerHTML=receipt(100,'A $100 sale');};
+  document.querySelectorAll('[data-rn]').forEach(el=>el.oninput=()=>{S.rates[+el.dataset.rn].n=el.value;rc();nav();});
+  document.querySelectorAll('[data-rr]').forEach(el=>el.oninput=()=>{S.rates[+el.dataset.rr].r=el.value.replace(/[^0-9.]/g,'');rc();nav();});
   document.querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>{S.rates.splice(+b.dataset.rdel,1);drawAll();});
   const a=$('#b-addrate');if(a)a.onclick=()=>{S.rates.push({n:'',r:''});drawAll();};
  },
  plan(){
   document.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{S.plan.kind=b.dataset.kind;drawAll();});
-  onInp('#p-name',v=>S.plan.name=v);onInp('#p-price',v=>S.plan.price=v.replace(/[^0-9.]/g,''));onInp('#p-vis',v=>S.plan.visits=v.replace(/\D/g,''));onInp('#p-in',v=>S.plan.within=v.replace(/\D/g,''));
+  onInp('#p-name',v=>S.plan.name=v);onInp('#p-price',v=>{S.plan.price=v.replace(/[^0-9.]/g,'');const r=$('#rc');if(r)r.innerHTML=receipt(parseFloat(S.plan.price)||0,'What a client pays');});onInp('#p-vis',v=>S.plan.visits=v.replace(/\D/g,''));onInp('#p-in',v=>S.plan.within=v.replace(/\D/g,''));
   onSeg('every',v=>{S.plan.every=v;drawAll();});
  },
  look(){
@@ -525,7 +540,7 @@ const WIRE={
   document.querySelectorAll('[data-when]').forEach(b=>b.onclick=()=>{if(b.disabled)return;S.waiver.when=b.dataset.when;drawAll();});
  },
  class(){
-  onInp('#c-name',v=>S.cls.name=v);onInp('#c-time',v=>S.cls.time=v);onInp('#c-cap',v=>S.cls.cap=v.replace(/\D/g,''));
+  onInp('#c-name',v=>S.cls.name=v);['h','m','ap'].forEach(k=>{const el=$('#c-'+k);if(el)el.onchange=()=>{S.cls[k]=el.value;nav();};});onInp('#c-cap',v=>S.cls.cap=v.replace(/\D/g,''));
   document.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{const d=b.dataset.day;S.cls.days=S.cls.days.includes(d)?S.cls.days.filter(x=>x!==d):[...S.cls.days,d];b.setAttribute('aria-pressed',S.cls.days.includes(d));nav();});
   goPlan();
  },
@@ -557,16 +572,31 @@ function readyRows(){return invMode()==='one'?S.inv.ones:S.inv.rows.filter(r=>!r
 function invMode(){return S.inv.mode||(S.classes?'list':'one');}
 function invDraftOk(){const d=S.inv.d;return d.name.trim()&&/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email.trim());}
 function invAdd(){if(!invDraftOk())return false;const d=S.inv.d;if(!S.inv.ones.some(o=>o.email.toLowerCase()===d.email.trim().toLowerCase()))S.inv.ones.push({name:d.name.trim(),email:d.email.trim()});S.inv.d={name:'',email:''};return true;}
+/* the little receipt: what one sale looks like with her rates, inside the price or on top of it */
+function receipt(amount,title){
+  if(!S.tax)return '';
+  if(!S.basis)return '<div class="rcpt"><div class="rt">'+title+'</div><div class="hint">Pick one above to see what a client pays.</div></div>';
+  if(!(amount>0))return '';
+  const rs=S.rates.filter(r=>parseFloat(r.r)>0).map(r=>({n:r.n.trim()||'Tax',r:parseFloat(r.r)/100}));
+  const R=rs.reduce((a,r)=>a+r.r,0),c=v=>'$'+v.toFixed(2);
+  let price,taxes,total;
+  if(S.basis==='incl'){total=amount;const base=amount/(1+R);taxes=rs.map(r=>Math.round(base*r.r*100)/100);price=Math.round((total-taxes.reduce((a,b)=>a+b,0))*100)/100;}
+  else{price=amount;taxes=rs.map(r=>Math.round(amount*r.r*100)/100);total=Math.round((price+taxes.reduce((a,b)=>a+b,0))*100)/100;}
+  return '<div class="rcpt"><div class="rt">'+title+'</div><div><span>Price</span><span>'+c(price)+'</span></div>'+
+    rs.map((r,k)=>'<div><span>'+esc(r.n)+' '+(r.r*100).toFixed(r.r*100%1?1:0)+'%</span><span>'+c(taxes[k])+'</span></div>').join('')+
+    '<div class="tot"><span>Total</span><span>'+c(total)+'</span></div></div>';
+}
+function sel(id,opts,val,ph){return '<select class="inp" id="'+id+'" aria-label="'+ph+'"><option value=""'+(val?'':' selected')+' disabled>'+ph+'</option>'+opts.map(o=>'<option'+(o===val?' selected':'')+'>'+o+'</option>').join('')+'</select>';}
 function goPlan(){document.querySelectorAll('[data-goplan]').forEach(b=>b.onclick=()=>{S.returnTo=S.cur;S.cur=S.tax===null?'tax':'plan';S.sub=0;drawAll();});}
 
 /* ---------- leaving for Stripe, and coming back ---------- */
 function stripeIntro(){
   const wb=$('#wb');
-  wb.innerHTML='<h2 id="wzt">You’ll finish on Stripe</h2><p class="sub">Stripe handles card payments for Zana. It asks for your business details and the bank account your money goes to.</p>'+
-   '<div class="note"><b>About 5 minutes.</b> Have your bank account and ID handy. When you’re done, Stripe sends you right back here, to this step.</div>'+
-   '<div class="note">Your hand payments and your tax answer are saved. Nothing is lost.</div>'+
-   '<div style="display:flex;gap:8px;margin-top:auto"><button class="btn" id="st-no">Not now</button><span style="flex:1"></span><button class="btn pri" id="st-go">Continue to Stripe</button></div>';
-  document.querySelector('.wf').hidden=true;
+  wb.innerHTML='<div class="away-in"><h2 id="wzt">You’ll go to Stripe</h2>'+
+   '<p>Stripe takes card payments for Zana. If you already use Stripe, sign in there to reuse your details. If not, you’ll set up a new account.</p>'+
+   '<button class="btn pri lg" id="st-go">Continue to Stripe ↗</button>'+
+   '<p class="hint">About 5 minutes. Have your bank account and ID handy. When you’re done, you come right back to this step. Nothing here is lost.</p></div>';
+  document.querySelector('.wf').innerHTML='<button class="btn" id="st-no">Not now</button><span class="sp"></span>';
   $('#st-no').onclick=()=>drawAll();
   $('#st-go').onclick=()=>{S.stripeFrom=S.cur;const a=$('#away');a.hidden=false;
    a.innerHTML='<div class="bar">🔒 <span>connect.stripe.com/setup/…</span></div><div class="in"><div class="bx"><div class="tag">Simulated · Stripe’s own pages appear here</div><h3>Barrio Fitness on Stripe</h3><p>She types her business details, her ID and her bank account on Stripe’s pages. Zana never sees them. Pick how she comes back:</p>'+
