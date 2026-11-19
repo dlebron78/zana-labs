@@ -309,13 +309,14 @@ function againFrom(id){if(id==='plan'){newDraft();S.sub=0;}if(id==='staff'){S.su
 const TASK={pay:'Add how people pay you',tax:'Set your tax',plan:'Make your first plan',look:'Pick your look',class:'Add your first class',program:'Start your workout program',waiver:'Add your waiver',staff:'Add your staff',invite:'Invite your members'};
 const TASK_MORE={plan:'Add more products',staff:'Add more staff',invite:'Invite more members'};
 function tasks(){const t=ids().filter(i=>!(S.status[i]==='done'||S.status[i]==='skipped')).map(i=>({id:i,t:TASK[i],more:false}));
+  if(S.tax===false&&S.taxLater)t.push({id:'tax',t:'Set up tax',more:'tax'});
   Object.keys(TASK_MORE).forEach(i=>{if(S.status[i]==='done'&&S.moreAns[i]==='later'&&ids().includes(i))t.push({id:i,t:TASK_MORE[i],more:true});});return t;}
 function drawToday(){
   if(!S.ended){$('#gs').innerHTML='<div class="hd"><h2>Needs you</h2></div><p class="hint" style="margin:0">Setting up Barrio Fitness. Anything you leave for later shows up here.</p>';return;}
   const t=tasks();
   if(!t.length){$('#gs').innerHTML='<div class="hd"><h2>Needs you</h2><span class="cnt">0</span></div><p class="hint" style="margin:0">Nothing needs you right now.</p>';return;}
   $('#gs').innerHTML='<div class="hd"><h2>Needs you</h2><span class="cnt">'+t.length+'</span></div><ul>'+t.map((x,k)=>
-    '<li><span class="ck"></span><div class="nm"><b>'+x.t+'</b><span>Setup · '+SECTION[x.id]+' · since today</span></div><button class="btn sm '+(k===0&&!S.open?'pri':'')+'" data-task="'+x.id+'" data-more="'+(x.more?1:0)+'">Start</button></li>').join('')+'</ul>';
+    '<li><span class="ck"></span><div class="nm"><b>'+x.t+'</b><span>Setup · '+SECTION[x.id]+' · since today</span></div><button class="btn sm '+(k===0&&!S.open?'pri':'')+'" data-task="'+x.id+'" data-more="'+(x.more==='tax'?'tax':x.more?1:0)+'">Start</button></li>').join('')+'</ul>';
   return;
 }
 function _oldDrawToday(){
@@ -330,7 +331,7 @@ function _oldDrawToday(){
 }
 document.addEventListener('click',e=>{
   const s=e.target.closest('[data-start]');if(s){openAt(s.dataset.start);return;}
-  const tk=e.target.closest('[data-task]');if(tk){const id=tk.dataset.task;if(tk.dataset.more==='1'){S.cur=id;S.open=true;againFrom(id);}else openAt(id);return;}
+  const tk=e.target.closest('[data-task]');if(tk){const id=tk.dataset.task;if(tk.dataset.more==='tax'){S.tax=null;S.taxLater=false;openAt('tax');return;}if(tk.dataset.more==='1'){S.cur=id;S.open=true;againFrom(id);}else openAt(id);return;}
   const u=e.target.closest('[data-undo]');if(u){delete S.status[u.dataset.undo];drawAll();}
 });
 
@@ -451,7 +452,7 @@ const VIEW={
    '<div class="fld"><label class="lbl" for="p-price">Price</label><div class="inpw"><span class="pre">$</span><input class="inp pp" id="p-price" inputmode="decimal" placeholder="e.g. 240" value="'+esc(p.price)+'" style="padding-right:96px"><span class="suf">'+tx+'</span></div></div>'+
    (p.kind==='plan'?'<div class="row2"><div class="fld"><div class="lbl">Every</div>'+segH('every',[['month','Month'],['week','Week']],p.every)+'</div><div class="fld"><label class="lbl" for="p-vis">Visits each '+p.every+'</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="Unlimited" value="'+esc(p.visits)+'"></div></div>':'')+
    (p.kind==='pack'?'<div class="row2"><div class="fld"><label class="lbl" for="p-vis">Visits</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="e.g. 8" value="'+esc(p.visits)+'"></div><div class="fld"><label class="lbl" for="p-in">Use within</label><div class="inpw"><input class="inp" id="p-in" inputmode="numeric" value="'+esc(p.within)+'" style="padding-right:70px"><span class="suf">months</span></div></div></div>':'')+
-   (S.tax?'<div id="rc">'+receipt(parseFloat(p.price)||0,'What a client pays',pb(),true)+'</div>':'<div class="note">No tax on this plan.</div>');
+   '<div id="rc">'+(S.tax?receipt(parseFloat(p.price)||0,'What a client pays',pb(),true):noTaxReceipt(parseFloat(p.price)||0))+'</div>';
  },
  look(){
   const reads=S.color&&contrast(S.color)>=4.5;
@@ -621,7 +622,7 @@ const WIRE={
  },
  plan(){
   document.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{S.plan.kind=b.dataset.kind;drawAll();});
-  onInp('#p-name',v=>S.plan.name=v);onInp('#p-price',v=>{S.plan.price=v.replace(/[^0-9.]/g,'');const r=$('#rc');if(r){r.innerHTML=receipt(parseFloat(S.plan.price)||0,'What a client pays',pb(),true);r.querySelectorAll('[data-pb]').forEach(b=>b.onclick=()=>{S.plan.basis=b.dataset.pb;drawAll();});}});
+  onInp('#p-name',v=>S.plan.name=v);onInp('#p-price',v=>{S.plan.price=v.replace(/[^0-9.]/g,'');const r=$('#rc');if(r){const a=parseFloat(S.plan.price)||0;r.innerHTML=S.tax?receipt(a,'What a client pays',pb(),true):noTaxReceipt(a);wireRc();}});wireRc();
   document.querySelectorAll('[data-pb]').forEach(b=>b.onclick=()=>{S.plan.basis=b.dataset.pb;drawAll();});onInp('#p-vis',v=>S.plan.visits=v.replace(/\D/g,''));onInp('#p-in',v=>S.plan.within=v.replace(/\D/g,''));
   onSeg('every',v=>{S.plan.every=v;drawAll();});
  },
@@ -676,6 +677,14 @@ function invMode(){return S.inv.mode||(hasClasses()?'list':'one');}
 function invDraftOk(){const d=S.inv.d;return d.name.trim()&&/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email.trim());}
 function invAdd(){if(!invDraftOk())return false;const d=S.inv.d;if(!S.inv.ones.some(o=>o.email.toLowerCase()===d.email.trim().toLowerCase()))S.inv.ones.push({name:d.name.trim(),email:d.email.trim()});S.inv.d={name:'',email:''};return true;}
 /* the little receipt: what one sale looks like with her rates, inside the price or on top of it */
+/* with tax answered No: the same receipt, saying so, and a reminder to add tax that becomes a Task on Today */
+function noTaxReceipt(a){const c=v=>'$'+v.toFixed(2);
+  return '<div class="rcpt"><div class="rth"><span class="rt" style="margin:0">What a client pays</span>'+
+   (S.taxLater?'<button type="button" class="lnk" id="b-taxlater" style="font-size:12px">Undo reminder</button>':'<span class="minis"><button type="button" id="b-taxlater">Remind me to add tax</button></span>')+'</div>'+
+   '<div><span>Price</span><span>'+c(a)+'</span></div><div><span>No tax</span><span>$0.00</span></div><div class="tot"><span>Total</span><span>'+c(a)+'</span></div>'+
+   (S.taxLater?'<div class="hint" style="display:block">We’ll add a task on Today to set up tax.</div>':'')+'</div>';}
+function wireRc(){const r=$('#rc');if(!r)return;r.querySelectorAll('[data-pb]').forEach(b=>b.onclick=()=>{S.plan.basis=b.dataset.pb;drawAll();});
+  const t=$('#b-taxlater');if(t)t.onclick=()=>{S.taxLater=!S.taxLater;drawAll();};}
 function receipt(amount,title,basis,onPlan){
   basis=basis||S.basis;
   if(!S.tax)return '';
