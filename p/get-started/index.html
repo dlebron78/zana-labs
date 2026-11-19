@@ -158,6 +158,7 @@ select.inp:invalid,select.inp option[value=""]{color:#9A9A96}
 .drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .sw{display:flex;gap:8px}
 .sws{display:flex;gap:8px;align-items:center}
+
 .swc{flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);padding:0;position:relative;display:grid;place-items:center;font-weight:700;color:var(--t2);background:#fff;cursor:pointer}
 .swc[aria-pressed=true]{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
 .swc.cust input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
@@ -265,7 +266,7 @@ function fresh(keep){
   S={where:keep?S.where:'pr',staff:keep?S.staff:true,
     methods:[],others:[],more:false,otherName:'',payto:{},card:'none',tax:null,basis:null,rates:[],
     plan:{kind:null,name:'',price:'',every:'month',visits:'',within:'3'},
-    logo:null,frame:'black',swatches:[],color:'',waiver:{use:null,name:'',text:'',when:null},
+    biz:{desc:'',legal:'',aff:[],affText:'',sheet:false},logo:null,frame:'black',swatches:[],color:'',waiver:{use:null,name:'',text:'',when:null},
     cls:{want:null,name:'',len:'60',cap:10,start:'',time:'',days:[],end:'never',until:'',sheet:false},one:{use:null,name:'',len:'60',start:'',time:'',days:[],end:'never',until:'',sheet:false},prog:{kinds:[],none:false,later:[],done:[],d:{classes:{name:'',start:''},online:{name:'',start:''},ones:{name:''}}},services:keep?[...S.signupSv]:['classes'],signupSv:keep?S.signupSv:['classes'],signup:keep?S.signup:'classes',people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:false,es:false,fix:false,page:0,sent:0},
     status:{},open:true,cur:'pay',sub:0,returnTo:null,stripeFrom:null,products:[],moreAns:{},ended:false};
   ratesFor();
@@ -273,11 +274,11 @@ function fresh(keep){
 function ratesFor(){S.rates=S.where==='pr'?[{n:'State IVU',r:'10.5',sug:true},{n:'Municipal IVU',r:'1',sug:true}]:[{n:'',r:''}];}
 
 /* the steps, in order; tax only while not answered No, class and staff only where the business has them */
-const NAMES={pay:'How people pay you',tax:'Tax',plan:'Your first plan or pack',look:'Your look',waiver:'Your waiver',class:'Your first class',staff:'Your staff',invite:'Invite your members',program:'Your workout program',one:'Your 1:1 times'};
-function ids(){return ['pay',S.tax===false?null:'tax','plan','look',hasClasses()?'class':null,'program','waiver',S.staff?'staff':null,'invite'].filter(Boolean);}
+const NAMES={biz:'Your business',pay:'How people pay you',tax:'Tax',plan:'Your first plan or pack',look:'Your look',waiver:'Your waiver',class:'Your first class',staff:'Your staff',invite:'Invite your members',program:'Your workout program',one:'Your 1:1 times'};
+function ids(){return ['pay',S.tax===false?null:'tax','plan','biz','look',hasClasses()?'class':null,'program','waiver',S.staff?'staff':null,'invite'].filter(Boolean);}
 /* five sections, named for where each thing lives in the app afterwards */
-const SECTION={pay:'Money',tax:'Money',plan:'Money',look:'Look',class:'Schedule',one:'Schedule',program:'Workouts',waiver:'People',staff:'People',invite:'People'};
-const FIND={Money:'Money',Look:'Settings › Look',Schedule:'Schedule',Workouts:'Workouts',People:'People'};
+const SECTION={pay:'Money',tax:'Money',plan:'Money',biz:'Business',look:'Business',class:'Schedule',one:'Schedule',program:'Workouts',waiver:'People',staff:'People',invite:'People'};
+const FIND={Money:'Money',Business:'Settings › Business and Look',Schedule:'Schedule',Workouts:'Workouts',People:'People'};
 function sections(){const out=[];ids().forEach(i=>{const n=SECTION[i];let g=out.find(x=>x.name===n);if(!g){g={name:n,ids:[]};out.push(g);}g.ids.push(i);});return out;}
 const SUBS={class:()=>screens('class').length,one:()=>screens('one').length,program:()=>screens('program').length,pay:()=>needPayTo()?2:1,plan:()=>3,staff:()=>2,waiver:()=>S.waiver.use==='yes'?2:1,invite:()=>S.inv.use==='yes'?3:1};
 const subs=id=>SUBS[id]?SUBS[id]():1;
@@ -306,7 +307,7 @@ function moreView(id){
 }
 function againFrom(id){if(id==='plan'){newDraft();S.sub=0;}if(id==='staff'){S.sub=0;}if(id==='invite'){Object.assign(S.inv,{text:'',file:'',rows:[],ones:[],d:{name:'',email:''},fix:false,page:0});S.sub=0;}S.moreAns[id]=null;drawAll();}
 /* the Tasks a finished or closed wizard leaves on Today: steps left for later, and "more later" answers. Skipped or No leaves none. */
-const TASK={pay:'Add how people pay you',tax:'Set your tax',plan:'Make your first plan',look:'Pick your look',class:'Add your first class',program:'Start your workout program',waiver:'Add your waiver',staff:'Add your staff',invite:'Invite your members'};
+const TASK={biz:'Add your business details',pay:'Add how people pay you',tax:'Set your tax',plan:'Make your first plan',look:'Pick your look',class:'Add your first class',program:'Start your workout program',waiver:'Add your waiver',staff:'Add your staff',invite:'Invite your members'};
 const TASK_MORE={plan:'Add more plans or packs',staff:'Add more staff',invite:'Invite more members'};
 function tasks(){const t=ids().filter(i=>!(S.status[i]==='done'||S.status[i]==='skipped')&&!(i==='program'&&S.prog.later.length)).map(i=>({id:i,t:TASK[i],more:false}));
   if(S.tax===false&&S.taxLater)t.push({id:'tax',t:'Set up tax',more:'tax'});
@@ -363,7 +364,7 @@ function drawWz(){
     $('#go-today').onclick=closeWz;$('#wz-x').onclick=closeWz;return;}
   const id=S.cur,v=isMore(id)?moreView(id):VIEW[id]();
   const i=list.indexOf(id);
-  if((id==='class'&&S.cls.sheet)||(id==='one'&&S.one.sheet)){const F=id==='class'?S.cls:S.one;wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
+  if((id==='class'&&S.cls.sheet)||(id==='one'&&S.one.sheet)||(id==='biz'&&S.biz.sheet)){const F=id==='class'?S.cls:id==='biz'?S.biz:S.one;wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
     $('#wz-x').onclick=closeWz;const bk2=$('#wz-back');if(bk2)bk2.onclick=()=>{F.sheet=false;drawAll();};$('#b-done').onclick=()=>{F.sheet=false;drawAll();};WIRE[id]();nav();return;}
   if(id==='invite'&&S.inv.fix){wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
     $('#wz-x').onclick=closeWz;const bk1=$('#wz-back');if(bk1)bk1.onclick=()=>{S.inv.fix=false;drawAll();};$('#b-done').onclick=()=>{S.inv.fix=false;drawAll();};WIRE.invite();return;}
@@ -397,7 +398,7 @@ function drawWz(){
 }
 function head(i){
   const list=ids();
-  const canBack=i!==null&&(i>0||S.sub>0||S.more||S.inv.fix||S.cls.sheet||S.one.sheet);
+  const canBack=i!==null&&(i>0||S.sub>0||S.more||S.inv.fix||S.cls.sheet||S.one.sheet||S.biz.sheet);
   let label='GET STARTED';
   if(i!==null){const g=sections().find(x=>x.ids.includes(S.cur));label=g.name.toUpperCase()+(g.ids.length>1?' · '+(g.ids.indexOf(S.cur)+1)+' OF '+g.ids.length:'');}
   return '<div class="wh"><button class="ib '+(canBack?'':'ghost')+'" id="wz-back" aria-label="Back">'+IC.back+'</button><div class="c">'+label+'</div><button class="ib" id="wz-x" aria-label="Close">'+IC.x+'</button></div>'+
@@ -462,6 +463,17 @@ const VIEW={
    (p.kind==='plan'?'<div class="row2"><div class="fld"><div class="lbl">Every</div>'+segH('every',[['month','Month'],['week','Week']],p.every)+'</div><div class="fld"><label class="lbl" for="p-vis">Visits each '+p.every+'</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="Unlimited" value="'+esc(p.visits)+'"></div></div>':'')+
    (p.kind==='pack'?'<div class="row2"><div class="fld"><label class="lbl" for="p-vis">Visits</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="e.g. 8" value="'+esc(p.visits)+'"></div><div class="fld"><label class="lbl" for="p-in">Use within</label><div class="inpw"><input class="inp" id="p-in" inputmode="numeric" value="'+esc(p.within)+'" style="padding-right:70px"><span class="suf">months</span></div></div></div>':'')+
    '<div id="rc">'+(S.tax?receipt(parseFloat(p.price)||0,'What a client pays',pb(),true):noTaxReceipt(parseFloat(p.price)||0))+'</div>';
+ },
+ biz(){
+  const b=S.biz,SUG=['CrossFit','Hyrox','F45','Les Mills','Zumba','Spinning'];
+  /* affiliations is an optional setting: a row that opens its own screen, so the form never grows */
+  if(b.sheet)return '<h2 id="wzt">Affiliations</h2><p class="sub">Programs or brands you’re part of. Names only, never their logos.</p>'+
+   '<div class="tiles">'+SUG.concat(b.aff.filter(a=>!SUG.includes(a))).map(a=>'<button type="button" class="tl" data-aff="'+esc(a)+'" aria-pressed="'+b.aff.includes(a)+'"><span class="bx"></span>'+esc(a)+'</button>').join('')+'</div>'+
+   '<div class="fld"><label class="lbl" for="b-aff">Another one</label><div style="display:flex;gap:8px"><input class="inp" id="b-aff" placeholder="e.g. USA Weightlifting" value="'+esc(b.affText)+'"><button class="btn" id="b-affadd">Add</button></div></div>';
+  return '<h2 id="wzt">Your business</h2><p class="sub">All optional. Shown on your page and your receipts.</p>'+
+   '<div class="grow" style="flex:0 1 auto;min-height:96px"><label class="lbl" for="b-desc">Description</label><textarea class="ta" id="b-desc" style="min-height:72px" placeholder="e.g. A neighborhood box in Santurce. Classes from 5:30 am.">'+esc(b.desc)+'</textarea></div>'+
+   '<div class="fld"><label class="lbl" for="b-legal">Legal name</label><input class="inp" id="b-legal" placeholder="e.g. Barrio Fitness LLC" value="'+esc(b.legal)+'"></div>'+
+   '<button type="button" class="setrow" id="b-affrow"><span>Affiliations</span><b>'+(b.aff.length?esc(b.aff.join(', ')):'None')+'</b><i aria-hidden="true">›</i></button>';
  },
  look(){
   const reads=S.color&&contrast(S.color)>=4.5;
@@ -598,6 +610,7 @@ const VALID={
  pay(){if(S.more)return true;if(S.sub===1)return S.methods.filter(m=>PAYTO[m]).every(m=>(S.payto[m]||'').trim());return S.tax!==null&&(S.methods.length>0||S.others.length>0||S.card==='ok'||S.card==='wait');},
  tax(){if(S.tax===null)return false;return !!S.basis&&S.rates.some(r=>r.n.trim()&&parseFloat(r.r)>0);},
  plan(){if(S.sub===0)return !!S.plan.kind;return S.plan.name.trim()&&parseFloat(S.plan.price)>0&&(S.plan.kind!=='pack'||parseInt(S.plan.visits)>0);},
+ biz(){return true;},
  look(){return S.frame!=='color'||!!S.color;},
  waiver(){const w=S.waiver;if(S.sub===0)return w.use==='no'||(w.use==='yes'&&w.name.trim()&&w.text.trim().length>20);return !!w.when;},
  class(){const c=S.cls;if(c.sheet)return c.end!=='date'||!!c.until;if(scr('class')==='how')return S.services.length>0&&!!S.cls.want;return c.name.trim()&&c.time&&c.start;},
@@ -635,6 +648,12 @@ const WIRE={
   onInp('#p-name',v=>S.plan.name=v);onInp('#p-price',v=>{S.plan.price=v.replace(/[^0-9.]/g,'');const r=$('#rc');if(r){const a=parseFloat(S.plan.price)||0;r.innerHTML=S.tax?receipt(a,'What a client pays',pb(),true):noTaxReceipt(a);wireRc();}});wireRc();
   document.querySelectorAll('[data-pb]').forEach(b=>b.onclick=()=>{S.plan.basis=b.dataset.pb;drawAll();});onInp('#p-vis',v=>S.plan.visits=v.replace(/\D/g,''));onInp('#p-in',v=>S.plan.within=v.replace(/\D/g,''));
   onSeg('every',v=>{S.plan.every=v;drawAll();});
+ },
+ biz(){
+  const b=S.biz;onInp('#b-desc',v=>b.desc=v);onInp('#b-legal',v=>b.legal=v);onInp('#b-aff',v=>b.affText=v);
+  document.querySelectorAll('[data-aff]').forEach(x=>x.onclick=()=>{const a=x.dataset.aff;b.aff=b.aff.includes(a)?b.aff.filter(y=>y!==a):[...b.aff,a];x.setAttribute('aria-pressed',b.aff.includes(a));});
+  const ad=$('#b-affadd');if(ad)ad.onclick=()=>{const a=b.affText.trim();if(a&&!b.aff.includes(a))b.aff.push(a);b.affText='';drawAll();};
+  const rw=$('#b-affrow');if(rw)rw.onclick=()=>{b.sheet=true;drawAll();};
  },
  look(){
   const f=$('#lg');if(f)f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{S.logo=r.result;colorsOf(S.logo).then(c=>{S.swatches=c;if(c.length&&!S.color){S.color=c[0];}drawAll();});};r.readAsDataURL(file);};
