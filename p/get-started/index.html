@@ -588,7 +588,8 @@ function viewEnd(){
    /* one line a section, so the summary fits any screen: what's done, and by name what waits */
    '<div class="sum">'+sections().map(g=>{const open=g.ids.filter(i=>!(S.status[i]==='done'||S.status[i]==='skipped'));
      const more=g.ids.filter(i=>S.status[i]==='done'&&S.moreAns[i]==='later').map(i=>TASK_MORE[i].replace(/^Add /,'').replace(/^Invite /,'').replace(/^./,c=>c.toUpperCase()));
-     const lat=open.map(i=>NAMES[i].replace(/^Your /,'').replace(/^./,c=>c.toUpperCase())).concat(more);
+     const progLater=g.ids.includes('program')?S.prog.later.filter(k=>S.prog.kinds.includes(k)).map(k=>(PLABEL[k]+' program').replace(/^./,c=>c.toUpperCase())):[];
+     const lat=open.map(i=>NAMES[i].replace(/^Your /,'').replace(/^./,c=>c.toUpperCase())).concat(more,progLater);
      return '<div><span class="ck '+(open.length?'':'d')+'"></span><b style="font-weight:600">'+g.name+'</b><em>'+(lat.length?'Later: '+lat.join(', '):g.ids.every(i=>S.status[i]==='skipped')?'Skipped':'Done')+'</em></div>';}).join('')+'</div>';
 }
 /* up to six colors from the logo: shrink it, bucket the pixels, drop near-white, near-transparent and near-duplicate colors */
