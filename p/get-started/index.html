@@ -91,6 +91,11 @@ select.inp:invalid,select.inp option[value=""]{color:#9A9A96}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .seg{display:flex;background:var(--fill);border-radius:12px;padding:4px;gap:4px}
 .seg button{flex:1;border:0;background:none;border-radius:9px;min-height:40px;padding:4px 10px;font-size:15px;font-weight:600;color:var(--t2);line-height:1.2}
+.rth{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.rth .rt{flex:1}
+.minis{display:inline-flex;background:var(--fillh);border-radius:8px;padding:2px;gap:2px}
+.minis button{border:0;background:none;border-radius:6px;height:26px;padding:0 8px;font-size:12px;font-weight:600;color:var(--t2);white-space:nowrap}
+.minis button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .seg button small{display:block;font-size:12px;font-weight:500;color:var(--t2);margin-top:1px}
 .seg button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -382,7 +387,7 @@ const VIEW={
    return '<h2 id="wzt">What are you selling first?</h2><p class="sub">You can add more later in Money › Products.</p>'+
     K.map(k=>'<button type="button" class="big" data-kind="'+k[0]+'" aria-pressed="'+(p.kind===k[0])+'"><b>'+k[1]+'</b><span>'+k[2]+'</span><em>'+k[3]+'</em></button>').join('');
   }
-  const tx=S.tax?(S.basis==='incl'?'tax included':'+ tax'):'no tax';
+  const tx=S.tax?(pb()==='incl'?'tax included':'+ tax'):'no tax';
   const total=S.rates.reduce((a,r)=>a+(parseFloat(r.r)||0),0);
   const kindName={plan:'Plan',pack:'Pack of visits',single:'Single visit'}[p.kind]||'';
   return '<h2 id="wzt">'+kindName+'</h2><p class="sub">'+(p.kind==='plan'?'Charged again every period until they stop.':p.kind==='pack'?'They use the visits before it expires.':'One visit, one day.')+'</p>'+
@@ -390,7 +395,7 @@ const VIEW={
    '<div class="fld"><label class="lbl" for="p-price">Price</label><div class="inpw"><span class="pre">$</span><input class="inp pp" id="p-price" inputmode="decimal" placeholder="e.g. 240" value="'+esc(p.price)+'" style="padding-right:96px"><span class="suf">'+tx+'</span></div></div>'+
    (p.kind==='plan'?'<div class="row2"><div class="fld"><div class="lbl">Every</div>'+segH('every',[['month','Month'],['week','Week']],p.every)+'</div><div class="fld"><label class="lbl" for="p-vis">Visits each '+p.every+'</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="Unlimited" value="'+esc(p.visits)+'"></div></div>':'')+
    (p.kind==='pack'?'<div class="row2"><div class="fld"><label class="lbl" for="p-vis">Visits</label><input class="inp" id="p-vis" inputmode="numeric" placeholder="e.g. 8" value="'+esc(p.visits)+'"></div><div class="fld"><label class="lbl" for="p-in">Use within</label><div class="inpw"><input class="inp" id="p-in" inputmode="numeric" value="'+esc(p.within)+'" style="padding-right:70px"><span class="suf">months</span></div></div></div>':'')+
-   (S.tax?'<div id="rc">'+receipt(parseFloat(p.price)||0,'What a client pays')+'</div>':'<div class="note">No tax on this plan.</div>');
+   (S.tax?'<div id="rc">'+receipt(parseFloat(p.price)||0,'What a client pays',pb(),true)+'</div>':'<div class="note">No tax on this plan.</div>');
  },
  look(){
   const reads=S.color&&contrast(S.color)>=4.5;
@@ -408,7 +413,7 @@ const VIEW={
  waiver(){
   const w=S.waiver;
   if(S.sub===0){
-   return '<h2 id="wzt">Do you use a waiver?</h2><p class="sub">Clients sign it in the app before they book.</p>'+
+   return '<h2 id="wzt">Do you want to add a waiver?</h2><p class="sub">Clients sign it in the app before they book.</p>'+
     segH('wuse',[['yes','Yes'],['no','No']],w.use)+
     (w.use==='yes'?'<div class="fld"><label class="lbl" for="w-name">Name</label><input class="inp" id="w-name" placeholder="e.g. Liability waiver" value="'+esc(w.name)+'"></div>'+
     '<div class="grow"><label class="lbl" for="w-text">Your wording</label><textarea class="ta" id="w-text" placeholder="Paste your waiver here">'+esc(w.text)+'</textarea></div>':
@@ -422,7 +427,7 @@ const VIEW={
   const c=S.cls;
   return '<h2 id="wzt">Your first class</h2><p class="sub">It repeats every week on the days you pick.</p>'+
    (planDone()?'<div class="okn">Clients with '+esc(S.plan.name||'your plan')+' can book it.</div>':'<div class="dep"><span>Nobody can book this yet. No plan covers it.</span><button class="btn sm" data-goplan>Make a plan first</button></div>')+
-   '<div class="fld"><label class="lbl" for="c-name">Class name</label><input class="inp" id="c-name" placeholder="e.g. CrossFit" value="'+esc(c.name)+'"></div>'+
+   '<div class="fld"><label class="lbl" for="c-name">Class name</label><input class="inp" id="c-name" placeholder="e.g. Bootcamp" value="'+esc(c.name)+'"></div>'+
    '<div class="fld"><div class="lbl">Days</div><div class="days">'+['Mo','Tu','We','Th','Fr','Sa','Su'].map(d=>'<button type="button" data-day="'+d+'" aria-pressed="'+c.days.includes(d)+'">'+d+'</button>').join('')+'</div></div>'+
    '<div class="row2" style="grid-template-columns:1.5fr 1fr"><div class="fld"><label class="lbl" for="c-time">Starts at</label><div class="tf" id="c-time">'+sel('c-h',['1','2','3','4','5','6','7','8','9','10','11','12'],c.h,'Hour')+sel('c-m',['00','05','10','15','20','25','30','35','40','45','50','55'],c.m,'Min')+sel('c-ap',['am','pm'],c.ap,'am/pm')+'</div></div><div class="fld"><label class="lbl" for="c-cap">Spots</label><input class="inp" id="c-cap" inputmode="numeric" placeholder="No limit" value="'+esc(c.cap)+'"></div></div>';
  },
@@ -525,7 +530,8 @@ const WIRE={
  },
  plan(){
   document.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{S.plan.kind=b.dataset.kind;drawAll();});
-  onInp('#p-name',v=>S.plan.name=v);onInp('#p-price',v=>{S.plan.price=v.replace(/[^0-9.]/g,'');const r=$('#rc');if(r)r.innerHTML=receipt(parseFloat(S.plan.price)||0,'What a client pays');});onInp('#p-vis',v=>S.plan.visits=v.replace(/\D/g,''));onInp('#p-in',v=>S.plan.within=v.replace(/\D/g,''));
+  onInp('#p-name',v=>S.plan.name=v);onInp('#p-price',v=>{S.plan.price=v.replace(/[^0-9.]/g,'');const r=$('#rc');if(r){r.innerHTML=receipt(parseFloat(S.plan.price)||0,'What a client pays',pb(),true);r.querySelectorAll('[data-pb]').forEach(b=>b.onclick=()=>{S.plan.basis=b.dataset.pb;drawAll();});}});
+  document.querySelectorAll('[data-pb]').forEach(b=>b.onclick=()=>{S.plan.basis=b.dataset.pb;drawAll();});onInp('#p-vis',v=>S.plan.visits=v.replace(/\D/g,''));onInp('#p-in',v=>S.plan.within=v.replace(/\D/g,''));
   onSeg('every',v=>{S.plan.every=v;drawAll();});
  },
  look(){
@@ -569,6 +575,8 @@ const WIRE={
 /* a pasted list or a CSV: one person a line, an email and whatever else is the name; a repeated email is sent once */
 function parseList(txt){const seen={},out=[];txt.split(/\r?\n/).forEach(line=>{const parts=line.split(/[,;\t]/).map(x=>x.trim()).filter(Boolean);const em=parts.find(x=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x));if(!em)return;
   const name=parts.filter(x=>x!==em&&!/^(name|nombre|email|correo)$/i.test(x)).join(' ');const k=em.toLowerCase();out.push({name,email:em,dup:!!seen[k]});seen[k]=1;});return out;}
+/* a plan's own tax: the business's answer until she changes it on the plan */
+function pb(){return S.plan.basis||S.basis;}
 function taxRate(){return S.rates.reduce((a,r)=>a+(parseFloat(r.r)||0),0);}
 function readyRows(){return invMode()==='one'?S.inv.ones:S.inv.rows.filter(r=>!r.dup);}
 /* which way opens first: one at a time for a business with no group classes (personal training), a list otherwise; she can switch */
@@ -576,17 +584,23 @@ function invMode(){return S.inv.mode||(S.classes?'list':'one');}
 function invDraftOk(){const d=S.inv.d;return d.name.trim()&&/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email.trim());}
 function invAdd(){if(!invDraftOk())return false;const d=S.inv.d;if(!S.inv.ones.some(o=>o.email.toLowerCase()===d.email.trim().toLowerCase()))S.inv.ones.push({name:d.name.trim(),email:d.email.trim()});S.inv.d={name:'',email:''};return true;}
 /* the little receipt: what one sale looks like with her rates, inside the price or on top of it */
-function receipt(amount,title){
+function receipt(amount,title,basis,onPlan){
+  basis=basis||S.basis;
   if(!S.tax)return '';
-  if(!S.basis)return '<div class="rcpt"><div class="rt">'+title+'</div><div class="hint">Pick one above to see what a client pays.</div></div>';
-  if(!(amount>0))return '';
+  if(!basis)return '<div class="rcpt"><div class="rt">'+title+'</div><div class="hint">Pick one above to see what a client pays.</div></div>';
+  if(!(amount>0)&&!onPlan)return '';
+  if(!(amount>0))amount=0;
   const rs=S.rates.filter(r=>parseFloat(r.r)>0).map(r=>({n:r.n.trim()||'Tax',r:parseFloat(r.r)/100}));
   const R=rs.reduce((a,r)=>a+r.r,0),c=v=>'$'+v.toFixed(2);
   let price,taxes,total;
-  if(S.basis==='incl'){total=amount;const base=amount/(1+R);taxes=rs.map(r=>Math.round(base*r.r*100)/100);price=Math.round((total-taxes.reduce((a,b)=>a+b,0))*100)/100;}
+  if(basis==='incl'){total=amount;const base=amount/(1+R);taxes=rs.map(r=>Math.round(base*r.r*100)/100);price=Math.round((total-taxes.reduce((a,b)=>a+b,0))*100)/100;}
   else{price=amount;taxes=rs.map(r=>Math.round(amount*r.r*100)/100);total=Math.round((price+taxes.reduce((a,b)=>a+b,0))*100)/100;}
-  return '<div class="rcpt"><div class="rt">'+title+'</div><div><span>Price</span><span>'+c(price)+'</span></div>'+
-    rs.map((r,k)=>'<div><span>'+esc(r.n)+' '+(r.r*100).toFixed(r.r*100%1?1:0)+'%</span><span>'+c(taxes[k])+'</span></div>').join('')+
+  const pct=v=>(v*100).toFixed(Math.round(v*1000)%10?1:0)+'%';
+  /* on the plan: one tax line, and the plan's own switch in the receipt's header (included or added), starting from the business's answer */
+  const head=onPlan?'<div class="rth"><span class="rt" style="margin:0">'+title+'</span><span class="minis">'+[['incl','Included'],['top','Added']].map(([v,t])=>'<button type="button" data-pb="'+v+'" aria-pressed="'+(basis===v)+'">Tax '+t.toLowerCase()+'</button>').join('')+'</span></div>':'<div class="rt">'+title+'</div>';
+  const lines=onPlan?'<div><span>'+(S.where==='pr'?'IVU':'Tax')+' '+pct(R)+'</span><span>'+c(taxes.reduce((a,b)=>a+b,0))+'</span></div>':
+    rs.map((r,k)=>'<div><span>'+esc(r.n)+' '+pct(r.r)+'</span><span>'+c(taxes[k])+'</span></div>').join('');
+  return '<div class="rcpt">'+head+'<div><span>Price</span><span>'+c(price)+'</span></div>'+lines+
     '<div class="tot"><span>Total</span><span>'+c(total)+'</span></div></div>';
 }
 function sel(id,opts,val,ph){return '<select class="inp" id="'+id+'" aria-label="'+ph+'"><option value=""'+(val?'':' selected')+' disabled>'+ph+'</option>'+opts.map(o=>'<option'+(o===val?' selected':'')+'>'+o+'</option>').join('')+'</select>';}
