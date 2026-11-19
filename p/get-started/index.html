@@ -65,7 +65,8 @@ h1{margin:4px 0 20px;font-size:40px;font-weight:700;letter-spacing:-.03em;line-h
 .ib:hover{background:var(--fillh)}
 .ib svg{width:20px;height:20px}
 .ib.ghost{visibility:hidden}
-.prog{flex:none;display:flex;gap:4px;padding:10px 20px 0}
+.prog{flex:none;display:flex;gap:10px;padding:10px 20px 0}
+.prog .pg{display:flex;gap:3px}
 .prog i{flex:1;height:4px;border-radius:2px;background:var(--line)}
 .prog i.d{background:var(--ink)}
 .prog i.s{background:#BDBDB8}
@@ -91,6 +92,17 @@ select.inp:invalid,select.inp option[value=""]{color:#9A9A96}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .seg{display:flex;background:var(--fill);border-radius:12px;padding:4px;gap:4px}
 .seg button{flex:1;border:0;background:none;border-radius:9px;min-height:40px;padding:4px 10px;font-size:15px;font-weight:600;color:var(--t2);line-height:1.2}
+.sec{display:flex;align-items:baseline;gap:8px;margin:14px 0 2px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.sec span{font-size:12px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--t3)}
+.sum .sech{border-top:0!important;padding:8px 0 0!important;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.stepper{display:flex;align-items:center;gap:6px;height:44px}
+.stepper span{flex:1;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+.stepper .ib{font-size:20px;font-weight:600}
+.setrow{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px 12px;text-align:left;font-size:15px}
+.setrow span{font-weight:600}
+.setrow b{flex:1;text-align:right;font-weight:500;color:var(--t2)}
+.setrow i{font-style:normal;font-size:20px;color:var(--t3)}
+.days7 button{padding:4px 2px;font-size:14px}
 .rth{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .rth .rt{flex:1}
 .minis{display:inline-flex;background:var(--fillh);border-radius:8px;padding:2px;gap:2px}
@@ -255,15 +267,19 @@ function fresh(keep){
     methods:[],others:[],more:false,otherName:'',payto:{},card:'none',tax:null,basis:null,rates:[],
     plan:{kind:null,name:'',price:'',every:'month',visits:'',within:'3'},
     logo:null,frame:'black',swatches:[],color:'',waiver:{use:null,name:'',text:'',when:null},
-    cls:{name:'',days:[],h:'',m:'',ap:'',cap:''},people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:false,es:false,fix:false,page:0,sent:0},
+    cls:{name:'',len:'60',cap:10,start:'',time:'',days:[],end:'never',until:'',sheet:false},prog:{use:null,name:'',start:''},people:[],draft:{name:'',email:'',role:null},inv:{use:null,mode:null,ones:[],d:{name:'',email:''},text:'',file:'',rows:[],en:false,es:false,fix:false,page:0,sent:0},
     status:{},open:true,cur:'pay',sub:0,returnTo:null,stripeFrom:null};
   ratesFor();
 }
 function ratesFor(){S.rates=S.where==='pr'?[{n:'State IVU',r:'10.5',sug:true},{n:'Municipal IVU',r:'1',sug:true}]:[{n:'',r:''}];}
 
 /* the steps, in order; tax only while not answered No, class and staff only where the business has them */
-const NAMES={pay:'How people pay you',tax:'Tax',plan:'Your first plan or pack',look:'Your look',waiver:'Your waiver',class:'Your first class',staff:'Your staff',invite:'Invite your members'};
-function ids(){return ['pay',S.tax===false?null:'tax','plan','look','waiver',S.classes?'class':null,S.staff?'staff':null,'invite'].filter(Boolean);}
+const NAMES={pay:'How people pay you',tax:'Tax',plan:'Your first plan or pack',look:'Your look',waiver:'Your waiver',class:'Your first class',staff:'Your staff',invite:'Invite your members',program:'Your workout program'};
+function ids(){return ['pay',S.tax===false?null:'tax','plan','look',S.classes?'class':null,S.classes?'program':null,'waiver',S.staff?'staff':null,'invite'].filter(Boolean);}
+/* five sections, named for where each thing lives in the app afterwards */
+const SECTION={pay:'Money',tax:'Money',plan:'Money',look:'Look',class:'Schedule',program:'Workouts',waiver:'People',staff:'People',invite:'People'};
+const FIND={Money:'Money',Look:'Settings › Look',Schedule:'Schedule',Workouts:'Workouts',People:'People'};
+function sections(){const out=[];ids().forEach(i=>{const n=SECTION[i];let g=out.find(x=>x.name===n);if(!g){g={name:n,ids:[]};out.push(g);}g.ids.push(i);});return out;}
 const SUBS={pay:()=>needPayTo()?2:1,plan:()=>2,waiver:()=>S.waiver.use==='yes'?2:1,invite:()=>S.inv.use==='yes'?2:1};
 const subs=id=>SUBS[id]?SUBS[id]():1;
 function needPayTo(){return S.methods.some(m=>PAYTO[m]);}
@@ -277,10 +293,10 @@ function drawToday(){
   const firstOpen=list.find(i=>!(S.status[i]==='done'||S.status[i]==='skipped'));
   if(done===list.length){$('#gs').innerHTML='<div class="hd"><h2>You’re all set up</h2></div><p class="hint" style="margin:0">Every step is done. This card goes away tomorrow.</p>';return;}
   $('#gs').innerHTML='<div class="hd"><h2>Get started</h2><span class="cnt">'+done+' of '+list.length+'</span></div>'+
-   '<ul>'+list.map(i=>{const st=S.status[i];const d=st==='done',sk=st==='skipped';
+   sections().map(g=>'<div class="sec">'+g.name+'<span>Find it later in '+FIND[g.name]+'</span></div><ul>'+g.ids.map(i=>{const st=S.status[i];const d=st==='done',sk=st==='skipped';
      return '<li class="'+(d||sk?'done':'')+'"><span class="ck '+(d?'d':sk?'s':'')+'"></span><div class="nm"><b>'+NAMES[i]+'</b>'+
       (sk?'<span>Skipped · <button class="lnk" data-undo="'+i+'">Undo</button></span>':st==='later'?'<span>Later</span>':d&&i==='invite'?'<span>'+S.inv.sent+' invited · 0 joined so far</span>':'')+'</div>'+
-      (d||sk?'':'<button class="btn sm '+(i===firstOpen&&!S.open?'pri':'')+'" data-start="'+i+'">Start</button>')+'</li>';}).join('')+'</ul>';
+      (d||sk?'':'<button class="btn sm '+(i===firstOpen&&!S.open?'pri':'')+'" data-start="'+i+'">Start</button>')+'</li>';}).join('')+'</ul>').join('');
 }
 document.addEventListener('click',e=>{
   const s=e.target.closest('[data-start]');if(s){openAt(s.dataset.start);return;}
@@ -310,10 +326,12 @@ function drawWz(){
   document.body.classList.toggle('panel',BOX==='panel');wz.classList.toggle('modal',BOX==='modal');wz.setAttribute('aria-modal',BOX==='modal');
   $('#scrim').hidden=!(S.open&&BOX==='modal');fit();if(!S.open)return;
   const list=ids();
-  if(S.cur==='end'){wz.innerHTML=head(null)+'<div class="wb">'+viewEnd()+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="go-today">Go to Today</button></div>';
+  if(S.cur==='end'){wz.innerHTML=head(null)+'<div class="wb" id="wb">'+viewEnd()+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="go-today">Go to Today</button></div>';
     $('#go-today').onclick=closeWz;$('#wz-x').onclick=closeWz;return;}
   const id=S.cur,v=VIEW[id]();
   const i=list.indexOf(id);
+  if(id==='class'&&S.cls.sheet){wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
+    $('#wz-x').onclick=closeWz;const bk2=$('#wz-back');if(bk2)bk2.onclick=()=>{S.cls.sheet=false;drawAll();};$('#b-done').onclick=()=>{S.cls.sheet=false;drawAll();};WIRE.class();nav();return;}
   if(id==='invite'&&S.inv.fix){wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
     $('#wz-x').onclick=closeWz;const bk1=$('#wz-back');if(bk1)bk1.onclick=()=>{S.inv.fix=false;drawAll();};$('#b-done').onclick=()=>{S.inv.fix=false;drawAll();};WIRE.invite();return;}
   if(id==='pay'&&S.more){wz.innerHTML=head(i)+'<div class="wb" id="wb">'+v+'</div><div class="wf"><span class="sp"></span><button class="btn pri" id="b-done">Done</button></div>';
@@ -328,14 +346,16 @@ function drawWz(){
   const bk=$('#wz-back');if(bk)bk.onclick=()=>move(-1);
   const sk=$('#b-skip');if(sk)sk.onclick=()=>finishStep('skipped');
   const lt=$('#b-later');if(lt)lt.onclick=()=>{if(S.status[id]!=='done')S.status[id]='later';S.sub=subs(id)-1;move(1);};
-  $('#b-next').onclick=()=>{if(id==='invite'&&S.sub===0&&invMode()==='one')invAdd();if(S.sub<subs(id)-1){move(1);}else if((id==='waiver'&&S.waiver.use==='no')||(id==='invite'&&S.inv.use==='no')){finishStep('skipped');}else if(id==='invite'){S.inv.sent=readyRows().length;finishStep('done');toast(S.inv.sent+' invites sent');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
+  $('#b-next').onclick=()=>{if(id==='invite'&&S.sub===0&&invMode()==='one')invAdd();if(S.sub<subs(id)-1){move(1);}else if((id==='waiver'&&S.waiver.use==='no')||(id==='invite'&&S.inv.use==='no')||(id==='program'&&S.prog.use==='no')){finishStep('skipped');}else if(id==='invite'){S.inv.sent=readyRows().length;finishStep('done');toast(S.inv.sent+' invites sent');}else{SAVE[id]&&SAVE[id]();finishStep('done');}};
   WIRE[id]&&WIRE[id]();nav();
 }
 function head(i){
   const list=ids();
-  const canBack=i!==null&&(i>0||S.sub>0||S.more||S.inv.fix);
-  return '<div class="wh"><button class="ib '+(canBack?'':'ghost')+'" id="wz-back" aria-label="Back">'+IC.back+'</button><div class="c">GET STARTED'+(i===null?'':' · '+(i+1)+' OF '+list.length)+'</div><button class="ib" id="wz-x" aria-label="Close">'+IC.x+'</button></div>'+
-   '<div class="prog" aria-hidden="true">'+list.map(x=>{const st=S.status[x];return '<i class="'+(x===S.cur?'on':st==='done'?'d':st==='skipped'?'s':st==='later'?'l':'')+'"></i>';}).join('')+'</div>';
+  const canBack=i!==null&&(i>0||S.sub>0||S.more||S.inv.fix||S.cls.sheet);
+  let label='GET STARTED';
+  if(i!==null){const g=sections().find(x=>x.ids.includes(S.cur));label=g.name.toUpperCase()+(g.ids.length>1?' · '+(g.ids.indexOf(S.cur)+1)+' OF '+g.ids.length:'');}
+  return '<div class="wh"><button class="ib '+(canBack?'':'ghost')+'" id="wz-back" aria-label="Back">'+IC.back+'</button><div class="c">'+label+'</div><button class="ib" id="wz-x" aria-label="Close">'+IC.x+'</button></div>'+
+   '<div class="prog" aria-hidden="true">'+sections().map(g=>'<span class="pg" style="flex:'+g.ids.length+'">'+g.ids.map(x=>{const st=S.status[x];return '<i class="'+(x===S.cur?'on':st==='done'?'d':st==='skipped'?'s':st==='later'?'l':'')+'"></i>';}).join('')+'</span>').join('')+'</div>';
 }
 function nav(){const ok=VALID[S.cur]?VALID[S.cur]():true;const n=$('#b-next');if(n)n.disabled=!ok;}
 function segH(name,opts,val){return '<div class="seg" role="group" aria-label="'+esc(name)+'">'+opts.map(([v,t])=>'<button type="button" data-seg="'+esc(name)+'" data-v="'+v+'" aria-pressed="'+(val===v)+'">'+t+'</button>').join('')+'</div>';}
@@ -425,11 +445,21 @@ const VIEW={
  },
  class(){
   const c=S.cls;
-  return '<h2 id="wzt">Your first class</h2><p class="sub">It repeats every week on the days you pick.</p>'+
-   (planDone()?'<div class="okn">Clients with '+esc(S.plan.name||'your plan')+' can book it.</div>':'<div class="dep"><span>Nobody can book this yet. No plan covers it.</span><button class="btn sm" data-goplan>Make a plan first</button></div>')+
+  if(c.sheet){
+   return '<h2 id="wzt">Repeats</h2><p class="sub">Leave every day off for a one-time class.</p>'+
+    '<div class="seg days7" role="group" aria-label="Days">'+DAYS.map((d,k)=>'<button type="button" data-day="'+k+'" aria-pressed="'+c.days.includes(k)+'">'+d+'</button>').join('')+'</div>'+
+    '<div class="fld"><div class="lbl">Ends</div>'+segH('cend',[['never','Never'],['date','On a date']],c.end)+'</div>'+
+    (c.end==='date'?'<div class="fld"><label class="lbl" for="c-until">Last class on</label>'+selDate('c-until',c.until,10)+'</div>':'');
+  }
+  const covered=planDone();
+  return '<h2 id="wzt">Your first class</h2><p class="sub">The same form as Schedule › New class.</p>'+
    '<div class="fld"><label class="lbl" for="c-name">Class name</label><input class="inp" id="c-name" placeholder="e.g. Bootcamp" value="'+esc(c.name)+'"></div>'+
-   '<div class="fld"><div class="lbl">Days</div><div class="days">'+['Mo','Tu','We','Th','Fr','Sa','Su'].map(d=>'<button type="button" data-day="'+d+'" aria-pressed="'+c.days.includes(d)+'">'+d+'</button>').join('')+'</div></div>'+
-   '<div class="row2" style="grid-template-columns:1.5fr 1fr"><div class="fld"><label class="lbl" for="c-time">Starts at</label><div class="tf" id="c-time">'+sel('c-h',['1','2','3','4','5','6','7','8','9','10','11','12'],c.h,'Hour')+sel('c-m',['00','05','10','15','20','25','30','35','40','45','50','55'],c.m,'Min')+sel('c-ap',['am','pm'],c.ap,'am/pm')+'</div></div><div class="fld"><label class="lbl" for="c-cap">Spots</label><input class="inp" id="c-cap" inputmode="numeric" placeholder="No limit" value="'+esc(c.cap)+'"></div></div>';
+   '<div class="row2"><div class="fld"><label class="lbl" for="c-len">Length</label>'+selOpts('c-len',LENGTHS.map(m=>[String(m),m+' min']),c.len)+'</div>'+
+   '<div class="fld"><div class="lbl">Spots</div><div class="stepper"><button type="button" class="ib" id="c-less" aria-label="Fewer">−</button><span>'+(c.cap?c.cap:'No limit')+'</span><button type="button" class="ib" id="c-more" aria-label="More">+</button></div></div></div>'+
+   '<div class="row2"><div class="fld"><label class="lbl" for="c-start">Starts</label>'+selDate('c-start',c.start,14,true)+'</div>'+
+   '<div class="fld"><label class="lbl" for="c-time">Time</label>'+selOpts('c-time',TIMES.map(t=>[t,timeText(t)]),c.time,'Pick a time')+'</div></div>'+
+   '<button type="button" class="setrow" id="c-rep"><span>Repeats</span><b>'+repeatsText()+'</b><i aria-hidden="true">›</i></button>'+
+   (covered?'<div class="hint">Clients with '+esc(S.plan.name||'your plan')+' can book it.</div>':'<div class="dep"><span>Nobody can book this yet. No plan covers it.</span><button class="btn sm" data-goplan>Make a plan first</button></div>');
  },
  staff(){
   const d=S.draft;const shown=S.people.slice(-2),more=S.people.length-shown.length;
@@ -439,6 +469,15 @@ const VIEW={
    '<div class="fld"><div class="lbl">Role</div>'+segH('role',[['admin','Admin'],['coach','Coach'],['desk','Front desk']],d.role)+'<div class="hint" id="s-rd">'+(d.role?RD[d.role]:'&nbsp;')+'</div></div>'+
    '<button class="btn" id="s-add" style="justify-self:start">Add '+(d.name?esc(d.name.split(' ')[0]):'them')+'</button>'+
    (S.people.length?'<div class="people">'+(more>0?'<div class="hint">+ '+more+' more added</div>':'')+shown.map(p=>'<div class="pr"><b>'+esc(p.name)+'</b><span class="chip">'+({admin:'Admin',coach:'Coach',desk:'Front desk'})[p.role]+'</span></div>').join('')+'</div>':'');
+ },
+ program(){
+  const g=S.prog,cn=S.cls.name.trim();
+  return '<h2 id="wzt">Do you post workouts for your classes?</h2><p class="sub">Everyone in your classes sees the same workout each day.</p>'+
+   segH('puse',[['yes','Yes'],['no','No']],g.use)+
+   (g.use==='yes'?'<div class="fld"><label class="lbl" for="g-name">Program name</label><input class="inp" id="g-name" placeholder="e.g. Daily WOD" value="'+esc(g.name)+'"></div>'+
+     '<div class="fld"><label class="lbl" for="g-start">Day 1 is</label>'+selDate('g-start',g.start,6,true,true)+'</div>'+
+     '<div class="note">'+(cn?'Your '+esc(cn)+' class shows':'Your classes show')+' each day’s workout from it. Write the first one in Workouts.</div>':
+    g.use==='no'?'<div class="note">No program for now. You can start one any time in Workouts.</div>':'');
  },
  invite(){
   const v=S.inv;
@@ -477,7 +516,9 @@ function viewEnd(){
   const list=ids();
   const later=list.filter(i=>S.status[i]==='later'||!S.status[i]);
   return '<h2>'+(planDone()?'Barrio Fitness is ready to sell':'Good start')+'</h2><p class="sub">'+(later.length?'What’s left waits on Today. Tap Start to pick it back up.':'Everything is set up.')+'</p>'+
-   '<div class="sum">'+list.map(i=>{const st=S.status[i];return '<div><span class="ck '+(st==='done'?'d':st==='skipped'?'s':'')+'"></span>'+NAMES[i]+'<em>'+(st==='done'?'Done':st==='skipped'?'Skipped':'Later')+'</em></div>';}).join('')+'</div>';
+   /* one line a section, so the summary fits any screen: what's done, and by name what waits */
+   '<div class="sum">'+sections().map(g=>{const open=g.ids.filter(i=>!(S.status[i]==='done'||S.status[i]==='skipped'));
+     return '<div><span class="ck '+(open.length?'':'d')+'"></span><b style="font-weight:600">'+g.name+'</b><em>'+(open.length?'Later: '+open.map(i=>NAMES[i].replace(/^Your /,'').replace(/^./,c=>c.toUpperCase())).join(', '):g.ids.every(i=>S.status[i]==='skipped')?'Skipped':'Done')+'</em></div>';}).join('')+'</div>';
 }
 /* up to six colors from the logo: shrink it, bucket the pixels, drop near-white, near-transparent and near-duplicate colors */
 function colorsOf(src){return new Promise(res=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=48;const x=c.getContext('2d');x.drawImage(im,0,0,48,48);let d;try{d=x.getImageData(0,0,48,48).data;}catch(e){res([]);return;}
@@ -500,7 +541,8 @@ const VALID={
  plan(){if(S.sub===0)return !!S.plan.kind;return S.plan.name.trim()&&parseFloat(S.plan.price)>0&&(S.plan.kind!=='pack'||parseInt(S.plan.visits)>0);},
  look(){return S.frame!=='color'||!!S.color;},
  waiver(){const w=S.waiver;if(S.sub===0)return w.use==='no'||(w.use==='yes'&&w.name.trim()&&w.text.trim().length>20);return !!w.when;},
- class(){const c=S.cls;return c.name.trim()&&c.days.length&&c.h&&c.m&&c.ap;},
+ class(){const c=S.cls;if(c.sheet)return c.end!=='date'||!!c.until;return c.name.trim()&&c.time&&c.start;},
+ program(){const g=S.prog;return g.use==='no'||(g.use==='yes'&&g.name.trim()&&!!g.start);},
  staff(){const d=S.draft;return S.people.length>0||(d.name.trim()&&d.email.includes('@')&&!!d.role);},
  invite(){const v=S.inv;if(v.fix)return true;if(S.sub===0)return v.use==='no'||(v.use==='yes'&&(invMode()==='one'?(v.ones.length>0||!!invDraftOk()):v.rows.some(r=>!r.dup)));return readyRows().length>0&&(v.en||v.es);}
 };
@@ -548,9 +590,20 @@ const WIRE={
   document.querySelectorAll('[data-when]').forEach(b=>b.onclick=()=>{if(b.disabled)return;S.waiver.when=b.dataset.when;drawAll();});
  },
  class(){
-  onInp('#c-name',v=>S.cls.name=v);['h','m','ap'].forEach(k=>{const el=$('#c-'+k);if(el)el.onchange=()=>{S.cls[k]=el.value;nav();};});onInp('#c-cap',v=>S.cls.cap=v.replace(/\D/g,''));
-  document.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{const d=b.dataset.day;S.cls.days=S.cls.days.includes(d)?S.cls.days.filter(x=>x!==d):[...S.cls.days,d];b.setAttribute('aria-pressed',S.cls.days.includes(d));nav();});
+  const c=S.cls;
+  onInp('#c-name',v=>c.name=v);
+  [['c-len','len'],['c-start','start'],['c-time','time'],['c-until','until']].forEach(([id,k])=>{const el=$('#'+id);if(el)el.onchange=()=>{c[k]=el.value;nav();};});
+  const ls=$('#c-less'),mr=$('#c-more');
+  if(ls)ls.onclick=()=>{c.cap=c.cap?(c.cap<=2?'':c.cap-1):'';drawAll();};
+  if(mr)mr.onclick=()=>{c.cap=c.cap?c.cap+1:10;drawAll();};
+  const rp=$('#c-rep');if(rp)rp.onclick=()=>{c.sheet=true;drawAll();};
+  document.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{const k=+b.dataset.day;c.days=c.days.includes(k)?c.days.filter(x=>x!==k):[...c.days,k].sort();b.setAttribute('aria-pressed',c.days.includes(k));});
+  onSeg('cend',v=>{c.end=v;drawAll();});
   goPlan();
+ },
+ program(){
+  const g=S.prog;onSeg('puse',v=>{g.use=v;drawAll();});onInp('#g-name',v=>g.name=v);
+  const st=$('#g-start');if(st)st.onchange=()=>{g.start=st.value;nav();};
  },
  staff(){
   onInp('#s-name',v=>{S.draft.name=v;const a=$('#s-add');if(a)a.textContent='Add '+(v.trim()?v.trim().split(' ')[0]:'them');});onInp('#s-mail',v=>S.draft.email=v);
@@ -603,6 +656,17 @@ function receipt(amount,title,basis,onPlan){
   return '<div class="rcpt">'+head+'<div><span>Price</span><span>'+c(price)+'</span></div>'+lines+
     '<div class="tot"><span>Total</span><span>'+c(total)+'</span></div></div>';
 }
+const DAYS=['Mo','Tu','We','Th','Fr','Sa','Su'];
+const LENGTHS=[30,45,60,75,90,120];
+/* times in five-minute steps, 5:00 am to 10:55 pm (the real class form's list is in 15s today) */
+const TIMES=[];for(let m=5*60;m<23*60;m+=5)TIMES.push(String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'));
+function timeText(t){const [h,m]=t.split(':').map(Number);return ((h+11)%12+1)+':'+String(m).padStart(2,'0')+(h<12?' am':' pm');}
+function selOpts(id,opts,val,ph){return '<select class="inp" id="'+id+'">'+(ph?'<option value=""'+(val?'':' selected')+' disabled>'+ph+'</option>':'')+opts.map(([v,t])=>'<option value="'+v+'"'+(v===val?' selected':'')+'>'+t+'</option>').join('')+'</select>';}
+function selDate(id,val,n,today,mondays){const out=[];const d=new Date();d.setHours(12,0,0,0);
+  for(let k=0;out.length<n;k++){const x=new Date(d);x.setDate(d.getDate()+k);if(mondays&&k>0&&x.getDay()!==1)continue;if(!today&&k===0)continue;
+    const iso=x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');out.push([iso,(k===0?'Today, ':'')+x.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})]);}
+  return selOpts(id,out,val,'Pick a day');}
+function repeatsText(){const c=S.cls;if(!c.days.length)return 'One time';const w=c.days.length===7?'Every day':c.days.length===5&&[0,1,2,3,4].every(x=>c.days.includes(x))?'Weekdays':c.days.map(k=>DAYS[k]).join(', ');return w+(c.end==='date'&&c.until?' · until '+c.until.slice(5):'');}
 function sel(id,opts,val,ph){return '<select class="inp" id="'+id+'" aria-label="'+ph+'"><option value=""'+(val?'':' selected')+' disabled>'+ph+'</option>'+opts.map(o=>'<option'+(o===val?' selected':'')+'>'+o+'</option>').join('')+'</select>';}
 function goPlan(){document.querySelectorAll('[data-goplan]').forEach(b=>b.onclick=()=>{S.returnTo=S.cur;S.cur=S.tax===null?'tax':'plan';S.sub=0;drawAll();});}
 
