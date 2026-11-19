@@ -275,7 +275,7 @@ function ratesFor(){S.rates=S.where==='pr'?[{n:'State IVU',r:'10.5',sug:true},{n
 
 /* the steps, in order; tax only while not answered No, class and staff only where the business has them */
 const NAMES={pay:'How people pay you',tax:'Tax',plan:'Your first plan or pack',look:'Your look',waiver:'Your waiver',class:'Your first class',staff:'Your staff',invite:'Invite your members',program:'Your workout program',one:'Your 1:1 times'};
-function ids(){return ['pay',S.tax===false?null:'tax','plan','look',hasClasses()?'class':null,hasOnes()?'one':null,'program','waiver',S.staff?'staff':null,'invite'].filter(Boolean);}
+function ids(){return ['pay',S.tax===false?null:'tax','plan','look',hasClasses()?'class':null,'program','waiver',S.staff?'staff':null,'invite'].filter(Boolean);}
 /* five sections, named for where each thing lives in the app afterwards */
 const SECTION={pay:'Money',tax:'Money',plan:'Money',look:'Look',class:'Schedule',one:'Schedule',program:'Workouts',waiver:'People',staff:'People',invite:'People'};
 const FIND={Money:'Money',Look:'Settings › Look',Schedule:'Schedule',Workouts:'Workouts',People:'People'};
@@ -477,6 +477,7 @@ const VIEW={
  },
  program(){
   const g=S.prog;
+  if(scr('program')==='how')return howView();
   if(scr('program')==='choice'){
    return '<h2 id="wzt">Do you write workouts?</h2><p class="sub">Clients see them in the app, and in class.</p>'+
     progChoices().map(([v,t,d])=>'<button type="button" class="big" data-pc="'+v+'" aria-pressed="'+(g.use===v)+'"><b>'+t+'</b><span>'+d+'</span></button>').join('');
@@ -552,7 +553,7 @@ const VALID={
  waiver(){const w=S.waiver;if(S.sub===0)return w.use==='no'||(w.use==='yes'&&w.name.trim()&&w.text.trim().length>20);return !!w.when;},
  class(){const c=S.cls;if(c.sheet)return c.end!=='date'||!!c.until;if(scr('class')==='how')return !!S.how;return c.name.trim()&&c.time&&c.start;},
  one(){const o=S.one;if(o.sheet)return o.end!=='date'||!!o.until;const sc=scr('one');if(sc==='how')return !!S.how;if(sc==='q')return !!o.use;return o.name.trim()&&o.time&&o.start;},
- program(){const g=S.prog;if(scr('program')==='choice')return !!g.use;return g.name.trim()&&(g.use==='ones'||!!g.start);},
+ program(){const g=S.prog;if(scr('program')==='how')return !!S.how;if(scr('program')==='choice')return !!g.use;return g.name.trim()&&(g.use==='ones'||!!g.start);},
  staff(){const d=S.draft;return S.people.length>0||(d.name.trim()&&d.email.includes('@')&&!!d.role);},
  invite(){const v=S.inv;if(v.fix)return true;if(S.sub===0)return v.use==='no'||(v.use==='yes'&&(invMode()==='one'?(v.ones.length>0||!!invDraftOk()):v.rows.some(r=>!r.dup)));return readyRows().length>0&&(v.en||v.es);}
 };
@@ -602,7 +603,7 @@ const WIRE={
  class(){wireHow();wireForm(S.cls,'c');goPlan();},
  one(){wireHow();onSeg('ouse',v=>{S.one.use=v;drawAll();});onInp('#o-name',v=>S.one.name=v);wireForm(S.one,'o');goPlan();},
  program(){
-  const g=S.prog;document.querySelectorAll('[data-pc]').forEach(b=>b.onclick=()=>{g.use=b.dataset.pc;drawAll();});onInp('#g-name',v=>g.name=v);
+  wireHow();const g=S.prog;document.querySelectorAll('[data-pc]').forEach(b=>b.onclick=()=>{g.use=b.dataset.pc;drawAll();});onInp('#g-name',v=>g.name=v);
   const st=$('#g-start');if(st)st.onchange=()=>{g.start=st.value;nav();};
  },
  staff(){
@@ -669,16 +670,16 @@ function selDate(id,val,n,today,mondays){const out=[];const d=new Date();d.setHo
 /* how she trains clients: her sign-up answer, shown picked on the first Schedule screen, where she can change it */
 function hasClasses(){return S.how==='classes'||S.how==='both';}
 function hasOnes(){return S.how==='ones'||S.how==='both';}
-function schedFirst(){return hasClasses()?'class':'one';}
+function schedFirst(){return hasClasses()?'class':'program';}
 /* each step's screens, in order; S.sub indexes into them */
 function screens(id){
   if(id==='class')return [schedFirst()==='class'?'how':null,'form'].filter(Boolean);
   if(id==='one')return [schedFirst()==='one'?'how':null,'q',S.one.use==='yes'?'form':null].filter(Boolean);
-  if(id==='program')return ['choice',S.prog.use&&S.prog.use!=='no'?'details':null].filter(Boolean);
+  if(id==='program')return [schedFirst()==='program'?'how':null,'choice',S.prog.use&&S.prog.use!=='no'?'details':null].filter(Boolean);
   return null;}
 function scr(id){const l=screens(id);return l[Math.min(S.sub,l.length-1)];}
 function howView(){
-  return '<h2 id="wzt">How do clients train with you?</h2><p class="sub">From your sign-up. Change it if it’s not quite right.</p>'+
+  return '<h2 id="wzt">How do clients train with you?</h2><p class="sub">From your sign-up. Change it if it’s not quite right.'+(hasClasses()?'':' 1:1 times get their own setup later.')+'</p>'+
    [['classes','Group classes','Several people book the same time.'],['ones','1:1 sessions','One client at a time.'],['both','Both','Classes, and some clients 1:1.']]
     .map(([v,t,d])=>'<button type="button" class="big" data-how="'+v+'" aria-pressed="'+(S.how===v)+'"><b>'+t+'</b><span>'+d+'</span></button>').join('');
 }
