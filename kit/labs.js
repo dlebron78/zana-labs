@@ -13,6 +13,10 @@
   var vMeta = document.querySelector('meta[name="labs-version"]');
   L.version = vMeta ? vMeta.content : 'v1';
   L.tester = params.get('t') || null;
+  /* ?lang=es shows the page in Spanish; every event carries the language */
+  L.lang = (params.get('lang') || '').toLowerCase() === 'es' ? 'es' : 'en';
+  if (L.lang === 'es') document.documentElement.lang = 'es';
+  L.w = function (en, es) { return L.lang === 'es' ? es : en; };
   L.testName = null;
   L.kpis = [];
   var queue = [], started = Date.now();
@@ -37,7 +41,7 @@
 
   L.track = function (name, props) {
     if (!L.testName) return; /* a page without labs.test() records nothing */
-    var p = Object.assign({ test: L.testName, version: L.version, tester: L.tester, device: innerWidth < 760 ? 'phone' : 'laptop' }, props || {});
+    var p = Object.assign({ test: L.testName, version: L.version, tester: L.tester, lang: L.lang, device: innerWidth < 760 ? 'phone' : 'laptop' }, props || {});
     p.at = new Date().toISOString();
     if (window.posthog && window.posthog.capture) window.posthog.capture(name, p);
     else { queue.push([name, p]); try { var k = 'labs:outbox'; var ob = JSON.parse(localStorage.getItem(k) || '[]'); ob.push([name, p]); localStorage.setItem(k, JSON.stringify(ob.slice(-500))); } catch (e) {} }
@@ -98,7 +102,7 @@
   function strip() {
     var s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
     var off = !cfg.posthogKey;
-    var bar = el('<div class="labs-strip" role="note"'+(off?' style="background:#A8261B"':'')+'><span><b>Zana test</b> · '+(off?'TRACKING IS OFF: answers are not being saved':'your taps are recorded to improve it')+'</span><button type="button" data-labs="fb">Feedback</button><button type="button" data-labs="reset">Start over</button></div>');
+    var bar = el('<div class="labs-strip" role="note"'+(off?' style="background:#A8261B"':'')+'><span><b>'+L.w('Zana test','Prueba de Zana')+'</b> · '+(off?L.w('TRACKING IS OFF: answers are not being saved','EL REGISTRO ESTÁ APAGADO: no se guardan las respuestas'):L.w('your taps are recorded to improve it','lo que tocas se registra para mejorarla'))+'</span><button type="button" data-labs="fb">'+L.w('Feedback','Comentarios')+'</button><button type="button" data-labs="reset">'+L.w('Start over','Empezar de nuevo')+'</button></div>');
     document.body.insertBefore(bar, document.body.firstChild);
     document.documentElement.style.setProperty('--labs-h', '32px');
     addEventListener('scroll', function () { document.documentElement.style.setProperty('--labs-h', Math.max(0, 32 - scrollY) + 'px'); }, { passive: true });
@@ -107,23 +111,24 @@
       if (b.dataset.labs === 'fb') L.feedback();
       if (b.dataset.labs === 'reset') {
         if (b.dataset.sure) { L.track('reset'); L.store.reset(); location.reload(); }
-        else { b.dataset.sure = '1'; b.textContent = 'Tap again to erase'; setTimeout(function () { delete b.dataset.sure; b.textContent = 'Start over'; }, 3000); }
+        else { b.dataset.sure = '1'; b.textContent = L.w('Tap again to erase', 'Toca otra vez para borrar'); setTimeout(function () { delete b.dataset.sure; b.textContent = L.w('Start over', 'Empezar de nuevo'); }, 3000); }
       }
     });
   }
   L.feedback = function () {
-    var w = el('<div class="labs-fb"><form><h2>How did it go?</h2>' +
-      '<label>Did you get done what you wanted?<select name="done"><option value="">Pick one</option><option>Yes, easily</option><option>Yes, but it took effort</option><option>No</option></select></label>' +
-      '<label>What confused you, or slowed you down?<textarea name="confused"></textarea></label>' +
-      '<label>What’s missing?<textarea name="missing"></textarea></label>' +
-      '<label>Would you use this instead of how you do it today?<select name="use"><option value="">Pick one</option><option>Yes</option><option>Maybe</option><option>No</option></select></label>' +
-      '<div class="r"><button type="button" data-x>Cancel</button><button class="p" type="submit">Send</button></div></form></div>');
-    document.body.appendChild(w);
-    w.addEventListener('click', function (e) { if (e.target === w || e.target.hasAttribute('data-x')) w.remove(); });
-    w.querySelector('form').addEventListener('submit', function (e) {
+    var w = L.w;
+    var form = el('<div class="labs-fb"><form><h2>' + w('How did it go?', '¿Cómo te fue?') + '</h2>' +
+      '<label>' + w('Did you get done what you wanted?', '¿Lograste hacer lo que querías?') + '<select name="done"><option value="">' + w('Pick one', 'Escoge una') + '</option><option value="Yes, easily">' + w('Yes, easily', 'Sí, fácil') + '</option><option value="Yes, but it took effort">' + w('Yes, but it took effort', 'Sí, pero me costó') + '</option><option value="No">No</option></select></label>' +
+      '<label>' + w('What confused you, or slowed you down?', '¿Qué te confundió o te atrasó?') + '<textarea name="confused"></textarea></label>' +
+      '<label>' + w('What’s missing?', '¿Qué falta?') + '<textarea name="missing"></textarea></label>' +
+      '<label>' + w('Would you use this instead of how you do it today?', '¿Usarías esto en vez de cómo lo haces hoy?') + '<select name="use"><option value="">' + w('Pick one', 'Escoge una') + '</option><option value="Yes">' + w('Yes', 'Sí') + '</option><option value="Maybe">' + w('Maybe', 'Quizás') + '</option><option value="No">No</option></select></label>' +
+      '<div class="r"><button type="button" data-x>' + w('Cancel', 'Cancelar') + '</button><button class="p" type="submit">' + w('Send', 'Enviar') + '</button></div></form></div>');
+    document.body.appendChild(form);
+    form.addEventListener('click', function (e) { if (e.target === form || e.target.hasAttribute('data-x')) form.remove(); });
+    form.querySelector('form').addEventListener('submit', function (e) {
       e.preventDefault(); var f = new FormData(e.target), o = {}; f.forEach(function (v, k) { o[k] = v; });
       L.track('feedback_sent', o);
-      e.target.innerHTML = '<h2>Thank you</h2><p style="margin:0;color:#4A4A48">That helps a lot.</p><div class="r"><button class="p" type="button" data-x>Close</button></div>';
+      e.target.innerHTML = '<h2>' + w('Thank you', 'Gracias') + '</h2><p style="margin:0;color:#4A4A48">' + w('That helps a lot.', 'Eso nos ayuda mucho.') + '</p><div class="r"><button class="p" type="button" data-x>' + w('Close', 'Cerrar') + '</button></div>';
     });
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', strip); else strip();
