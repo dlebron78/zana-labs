@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#C4161C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Barrio">
+<link rel="icon" href="data:,">
+<title>Barrio Fitness</title>
+<meta name="description" content="Prototype of PHO-520: a member of Barrio Fitness buys a plan, pack or drop-in herself, with a card form inside Zana. Built on the member home mock. Sample members, tax and the screens of the flow are in the small button in the corner.">
+<!-- Geist is Zana's face. Loaded from Google Fonts here because this is a labs page. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&display=swap">
+<link rel="stylesheet" href="../../kit/zana.css">
+<link rel="stylesheet" href="home.css?v=16">
+</head>
+<body class="mh">
+<section class="phone" id="mh-phone" aria-label="Barrio Fitness member app">
+  <div class="m-top" id="mh-top"></div>
+  <div class="m-scroll" id="mh-scroll"></div>
+  <div class="m-bottom" id="mh-bottom"></div>
+  <div class="m-layer" id="mh-layer"></div>
+</section>
+
+<!-- The sample menu. Not part of the app: it switches between the versions of this prototype. -->
+<button type="button" class="dm-fab" data-do="demo" aria-expanded="false" aria-controls="mh-demo" aria-label="Versions of this prototype"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+<div class="dm" id="mh-demo" role="dialog" aria-label="Versions of this prototype" hidden>
+  <div class="dm-h"><b>Member buys: versions</b><span>not part of the app</span><button type="button" class="dm-x" data-do="demo" aria-label="Close"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 2l10 10M12 2 2 12"/></svg></button></div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-m">Member</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-m">
+      <button type="button" data-set="m:ines" aria-pressed="false"><b>Inés</b><i>drop-in</i></button>
+      <button type="button" data-set="m:maria" aria-pressed="true"><b>María</b><i>unlimited</i></button>
+      <button type="button" data-set="m:rafa" aria-pressed="false"><b>Rafa</b><i>1:1 client</i></button>
+      <button type="button" data-set="m:carmen" aria-pressed="false"><b>Carmen</b><i>parent</i></button>
+      <button type="button" data-set="m:luis" aria-pressed="false"><b>Luis</b><i>overdue</i></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-g">Overdue payment (Luis, Carmen)</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-g">
+      <button type="button" data-set="grace:in" aria-pressed="true"><b>In grace</b><i>can still book</i></button>
+      <button type="button" data-set="grace:out" aria-pressed="false"><b>Grace over</b><i>pay first</i></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-pay">Buying: open a screen</span>
+    <span class="vw-seg dm-flow" role="group" aria-labelledby="dm-l-pay">
+      <button type="button" data-do="flow" data-arg="offer"><b>Upsell</b><i>Inés, saved $21</i></button>
+      <button type="button" data-do="flow" data-arg="shop"><b>Buy</b><i>Inés</i></button>
+      <button type="button" data-do="flow" data-arg="plan"><b>Checkout, card saved</b><i>Inés, Unlimited</i></button>
+      <button type="button" data-do="flow" data-arg="first"><b>Checkout, first card</b><i>Inés, Unlimited</i></button>
+      <button type="button" data-do="flow" data-arg="decline"><b>Declined</b><i>Inés, 10-class pack</i></button>
+      <button type="button" data-do="flow" data-arg="done"><b>Confirmation</b><i>Inés, Unlimited</i></button>
+      <button type="button" data-do="flow" data-arg="runout"><b>Pack ran out</b><i>Carmen, with Not now</i></button>
+      <button type="button" data-do="flow" data-arg="me"><b>Card on Me</b><i>María</i></button>
+      <button type="button" data-do="flow" data-arg="receipts"><b>Receipt</b><i>María</i></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-tax">Tax (Settings &gt; Tax)</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-tax">
+      <button type="button" data-set="tax:on" aria-pressed="true"><b>Collects IVU</b><i>11.5%</i></button>
+      <button type="button" data-set="tax:off" aria-pressed="false"><b>No tax</b><i>?tax=0</i></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-staff">Barrio's $60 staff rate</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-staff">
+      <button type="button" data-set="staff:hidden" aria-pressed="true"><b>Hidden from new sales</b><i>not on Buy</i></button>
+      <button type="button" data-set="staff:shown" aria-pressed="false"><b>Not hidden</b><i>on Buy</i></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-card">Card on file (everyone)</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-card">
+      <button type="button" data-set="card:saved" aria-pressed="true"><b>Saved</b><i>Visa 4242</i></button>
+      <button type="button" data-set="card:none" aria-pressed="false"><b>None yet</b><i>new member</i></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-charge">Saved cards when charged</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-charge">
+      <button type="button" data-set="charge:ok" aria-pressed="true"><b>Go through</b></button>
+      <button type="button" data-set="charge:decline" aria-pressed="false"><b>Declined</b><i>by the bank</i></button>
+      <button type="button" data-set="charge:funds" aria-pressed="false"><b>Not enough money</b></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-wallet">Apple Pay and Link on the card form</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-wallet">
+      <button type="button" data-set="wallet:off" aria-pressed="true"><b>Off</b><i>Zana's code today</i></button>
+      <button type="button" data-set="wallet:on" aria-pressed="false"><b>On</b><i>not decided</i></button>
+    </span>
+  </div>
+  <div class="dm-g">
+    <span class="dm-l" id="dm-l-lang">Language</span>
+    <span class="vw-seg" role="group" aria-labelledby="dm-l-lang">
+      <button type="button" data-set="lang:en" aria-pressed="true"><b>English</b></button>
+      <button type="button" data-set="lang:es" aria-pressed="false"><b>Español</b></button>
+    </span>
+  </div>
+  <div class="dm-row">
+    <button type="button" class="vw-btn" data-do="reset">Start over</button>
+    <button type="button" class="vw-btn" data-do="notes">Notes on this member</button>
+    <a class="vw-link" href="../member-home/">Member home</a>
+  </div>
+</div>
+<aside class="notes" id="mh-notes" aria-label="Notes on this sample"></aside>
+<noscript><p class="vw-noscript">This prototype is drawn in the browser, so it needs JavaScript switched on. The member home it is built on is <a href="../member-home/">here</a>.</p></noscript>
+<script type="module" src="app.js?v=13"></script>
+</body>
+</html>
