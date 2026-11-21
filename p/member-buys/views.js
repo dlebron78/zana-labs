@@ -585,7 +585,7 @@ function classSheet() {
   const pct = Math.min(100, Math.round(tk / k.cap * 100));
   const meter = `<div class="m-cap"><div class="m-meter${tk >= k.cap ? ' full' : ''}" aria-hidden="true"><span style="width:${pct}%"></span></div><span>${esc(f().spotsOf(tk, k.cap))}</span></div>`;
   return { title: T(k.name), body: `<div class="m-sum"><span class="m-time">${clock(c.time)}</span><span class="m-sumd">${c.day === 0 ? `${T(W.today)} · ` : ''}${esc(dateLine(c.day))} · ${k.mins} min</span></div>
-    <div class="m-coachrow">${face(c.coach, 'md')}<span class="m-rt"><b>${esc(COACHES[c.coach])}</b><span>${T(W.coachWord)} · ${T(k.room)}</span></span></div>${meter}<p class="m-desc">${T(k.blurb)}</p>${
+    <div class="m-coachrow">${face(c.coach, 'md')}<span class="m-rt"><b>${esc(COACHES[c.coach])}</b><span>${T(W.coachWord)} · ${T(k.room)}</span></span></div>${meter}${
     fam() ? `<p class="m-for"><span class="m-lab">${T(W.forWhom)}</span> <b>${p.me ? T(W.me) : esc(p.name)}</b></p>` : ''}${state}${action}${fine ? `<p class="m-fine">${esc(fine)}</p>` : ''}${extra}` };
 }
 function cancelSheet() {
@@ -594,7 +594,7 @@ function cancelSheet() {
   const line = tm.back === 'pack' ? f().cancelBack(u, hrs) : tm.back === 'credit' ? f().cancelCredit(tm.amt, hrs)
     : tm.back === 'none' ? (x.pack ? f().cancelLost(u, hrs) : f().cancelPaidLost(tm.amt, hrs)) : f().cancelPlan();
   return { title: T(W.cancelQ), body: `<p class="m-meta"><b>${T(k.name)}</b> · ${esc(dateLine(c.day))} · ${clock(c.time)}</p>${p.me ? '' : `<p class="m-for">${esc(f().cancelFor(p.name))}</p>`}
-    <p class="m-warn${tm.back === 'none' ? ' bad' : ''}">${esc(line)}</p>
+    ${tm.back === 'none' ? `<p class="m-warn bad">${esc(line)}</p>` : ''}
     <button class="btn lg m-wide${tm.back === 'none' ? ' m-danger' : ''}" data-act="cancel" data-id="${c.id}" data-who="${p.id}">${T(W.yesCancel)}</button>
     <button class="m-link m-center" data-act="close">${T(W.keep)}</button>` };
 }
