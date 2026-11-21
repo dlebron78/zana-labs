@@ -128,3 +128,7 @@ html.vw-bare .vw-top, html.vw-bare .vw-note, html.vw-bare .vw-fab, html.vw-bare 
 /* on a full HD screen or wider the panel starts open, so it is a touch slimmer there and clears the page's widest content */
 @media (min-width: 1920px) { .vw-panel { right: 8px; width: 336px; } }
 @media (prefers-reduced-motion: reduce) { html.vw-hint-on .vw-adjust[aria-expanded="false"] { animation: none; box-shadow: 0 0 0 4px rgba(255,255,255,.4); } .vw-panel, .vw-sw i, .vw-sw i::after, .vw-blk i, .vw-blk i::after, .vw-launch i, .vw-launch i::after { transition: none; } }
+
+/* the links list and the content page: two more views. On a phone the links take their own row; on a laptop they show where there is room */
+@media (max-width: 1099.98px) { .vw-end { grid-area: 3 / 1 / 4 / -1; flex-wrap: wrap; gap: 2px 16px; } .vw-link { line-height: 36px; } }
+@media (min-width: 1100px) and (max-width: 1559.98px) { .vw-link--x { display: none; } }

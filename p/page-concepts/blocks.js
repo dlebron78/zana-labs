@@ -30,6 +30,9 @@ export const WORDS = {
     switchTo: 'Ver en español', menu: 'Menu', pause: 'Pause video', play: 'Play video', prev: 'Back', nextCard: 'Forward',
     bbClass: 'Class', bbDay: 'Day', bbAny: 'Any class', bbGo: 'See times', showing: 'Showing', clear: 'Show all',
     coachOf: 'Coach',
+    taxIn: 'Taxes included', seeAll: n => `See all prices (${n})`, fewer: 'Show fewer prices',
+    privacy: 'Privacy Policy', terms: 'Terms', close: 'Close', more: 'More', ownAddr: 'Its own address:',
+    phone: 'Phone', out: name => `In the real page, this opens ${name}.`, leaves: 'Leaves this page',
     /* a personal trainer sells sessions, not classes: these replace the words above */
     session: {
       nav: { classes: 'Training', schedule: 'Open times' },
@@ -60,6 +63,9 @@ export const WORDS = {
     switchTo: 'View in English', menu: 'Menú', pause: 'Pausar video', play: 'Reproducir video', prev: 'Atrás', nextCard: 'Adelante',
     bbClass: 'Clase', bbDay: 'Día', bbAny: 'Cualquier clase', bbGo: 'Ver horarios', showing: 'Mostrando', clear: 'Ver todas',
     coachOf: 'Coach',
+    taxIn: 'Impuestos incluidos', seeAll: n => `Ver todos los precios (${n})`, fewer: 'Ver menos precios',
+    privacy: 'Política de privacidad', terms: 'Términos', close: 'Cerrar', more: 'Más', ownAddr: 'Su propia dirección:',
+    phone: 'Teléfono', out: name => `En la página real, aquí abre ${name}.`, leaves: 'Sale de esta página',
     session: {
       nav: { classes: 'Entrenamiento', schedule: 'Horas libres' },
       book: 'Reserva una sesión', see: 'Ver horas libres', seeTimes: 'Ver horas libres', tClasses: 'Entrenamiento', hClasses: () => 'Cómo podemos entrenar',
@@ -159,12 +165,12 @@ export const VOICES = Object.keys(COPY);
 /* ---------- small pieces the blocks share ---------- */
 /* The logo. With no image, the mark and the name are set in the heading typeface.
    An uploaded image shows as it is, or (one color) painted in the text color: the image is used as a stencil, so it shows on any background. */
-const logo = gym => {
+export const logo = (gym, href = '#top') => {
   const l = gym.logo;
   const pic = !l.src ? `${l.mark ? `<svg viewBox="0 0 32 32" aria-hidden="true">${l.mark}</svg>` : ''}<span class="zp-logo__w">${esc(l.word || gym.name)}</span>`
     : l.mono ? `<span class="zp-logo__pic zp-logo__pic--mono" style="--logo:url('${esc(l.src)}');aspect-ratio:${+l.ratio || 3}"></span>`
     : `<img class="zp-logo__pic" src="${esc(l.src)}" alt="">`;
-  return `<a class="zp-logo" href="#top" aria-label="${esc(gym.name)}">${pic}</a>`;
+  return `<a class="zp-logo" href="${href}" aria-label="${esc(gym.name)}">${pic}</a>`;
 };
 const oneLang = gym => !!gym.langs && gym.langs.length < 2;   // the business is set up in one language, so there is nothing to switch to
 const initials = name => name.split(/\s+/).map(w => w.charAt(0)).join('').slice(0, 2).toUpperCase();
@@ -454,23 +460,29 @@ export function scheduleList(gym, x, o = {}) {
   </article>`; }, `zp-rows${o.big ? ' zp-rows--big' : ''}${x.solo ? ' zp-rows--solo' : ''}`);
 }
 
-/* Price cards: three equal cards, name, price in the brand color, one line, three ticks, a full-width Buy button
-   pinned to the bottom so the buttons line up, and a small corner tab on the featured one. */
+/* Price cards: name, price in the brand color, one line, the "what you get" ticks, a full-width Buy button
+   pinned to the bottom so the buttons line up, and the owner's own label in a small corner tab ("Most popular", "New").
+   The owner picks which products are featured (onPage). The rest wait behind "See all", in the same grid. */
 export function priceCards(gym, x, o = {}) {
   const { S, L } = x;
   if (!gym.prices || !gym.prices.length) return '';
-  const n = gym.prices.length;
-  return `<section class="zp-sec${o.band ? ' zp-sec--band' : ''}" data-block="priceCards" id="prices"><div class="zp-in">
-    ${head(S.tPrices, esc(S.hPrices))}
-    <div class="zp-plans${n === 1 ? ' is-one' : ''}" style="--cols:${n === 4 ? 2 : Math.min(3, n)}">${gym.prices.map((p, i) => `<article class="zp-plan${p.featured ? ' is-feat' : ''}" data-rise style="--i:${i}">
-      ${p.featured ? `<span class="zp-plan__tab">${esc(S.popular)}</span>` : ''}
+  const feat = gym.prices.filter(p => p.onPage !== false), rest = gym.prices.filter(p => p.onPage === false);
+  const shown = feat.length ? feat : gym.prices, more = feat.length ? rest : [];
+  const n = shown.length, tax = gym.tax && gym.tax.included;
+  const tabOf = p => (L(p.label) || (p.featured ? S.popular : ''));
+  const card = (p, i, hide) => `<article class="zp-plan${tabOf(p) ? ' is-feat' : ''}"${hide ? ' data-more hidden' : ' data-rise'} style="--i:${i}">
+      ${tabOf(p) ? `<span class="zp-plan__tab">${esc(tabOf(p))}</span>` : ''}
       <h3 class="zp-h3 zp-plan__name">${esc(L(p.name))}</h3>
       <p class="zp-plan__price">${esc(x.money(p.price))}${p.monthly ? ` <small>${esc(S.perMonth)}</small>` : ''}</p>
+      ${tax ? `<p class="zp-plan__tax">(${esc(S.taxIn)})</p>` : ''}
       ${L(p.line) ? `<p class="zp-plan__line">${esc(L(p.line))}</p>` : ''}
       ${(p.ticks || []).length ? `<ul class="zp-ticks">${p.ticks.map(t => `<li>${TICK}<span>${esc(L(t))}</span></li>`).join('')}</ul>` : ''}
       <a class="zp-btn zp-btn--block" href="#" data-act="reserve">${esc(S.buy)}</a>
-    </article>`).join('')}</div>
-    ${gym.tax && gym.tax.included ? `<p class="zp-note">${esc(S.tax(gym.tax.name))}</p>` : ''}
+    </article>`;
+  return `<section class="zp-sec${o.band ? ' zp-sec--band' : ''}" data-block="priceCards" id="prices"><div class="zp-in">
+    ${head(S.tPrices, esc(S.hPrices))}
+    <div class="zp-plans${n === 1 ? ' is-one' : ''}" style="--cols:${n === 4 ? 2 : Math.min(3, n)}">${shown.map((p, i) => card(p, i)).join('')}${more.map((p, i) => card(p, n + i, true)).join('')}</div>
+    ${more.length ? `<p class="zp-plans__more"><button type="button" class="zp-btn zp-btn--ghost" data-act="allprices" aria-expanded="false" data-all="${esc(S.seeAll(gym.prices.length))}" data-few="${esc(S.fewer)}">${esc(S.seeAll(gym.prices.length))}</button></p>` : ''}
   </div></section>`;
 }
 
@@ -533,18 +545,63 @@ export function bookingBar(gym, x) {
   </form></div>`;
 }
 
-/* Footer: where, when and how to reach the gym. */
+/* Contact details. WhatsApp, Instagram, TikTok and phone are business details the owner fills in from the customizer.
+   Each one shows only when it is filled in, in the footer and on the links list. */
+export const CONTACTS = ['whatsapp', 'instagram', 'tiktok', 'phone'];
+export function contactOf(gym, k, S) {
+  const v = String((gym.place || {})[k] || '').trim(); if (!v) return null;
+  const handle = v.replace(/^@/, ''), digits = v.replace(/\D/g, '');
+  return {
+    whatsapp: { name: 'WhatsApp', shown: v, href: `https://wa.me/1${digits}` },
+    instagram: { name: 'Instagram', shown: '@' + handle, href: `https://www.instagram.com/${handle}/` },
+    tiktok: { name: 'TikTok', shown: '@' + handle, href: `https://www.tiktok.com/@${handle}` },
+    phone: { name: S.phone, shown: v, href: `tel:+1${digits}` },
+  }[k];
+}
+/* every outside link in the demo says where it would go instead of leaving */
+const outLink = (c, label, cls = 'zp-link') => `<a class="${cls}" href="${esc(c.href)}" data-act="out" data-name="${esc(c.name)}">${label}</a>`;
+
+/* Privacy Policy and Terms: footer links that open a panel. The text comes from the business's legal documents in Zana.
+   They are never printed on the page itself. */
+export function legalSheet(gym, x) {
+  const docs = gym.legal ? ['privacy', 'terms'].filter(k => gym.legal[k]) : [];
+  if (!docs.length) return '';
+  return `<div class="zp-sheet" data-sheet hidden><div class="zp-sheet__scrim" data-act="sheetclose"></div>
+    ${docs.map(k => { const d = gym.legal[k]; return `<article class="zp-sheet__box" role="dialog" aria-modal="true" aria-labelledby="zp-doc-${k}" data-doc="${k}" hidden>
+      <div class="zp-sheet__head"><div><h2 class="zp-h3" id="zp-doc-${k}">${esc(x.L(d.title))}</h2>${d.updated ? `<p class="zp-tag">${esc(x.L(d.updated))}</p>` : ''}</div><button type="button" class="zp-sheet__x" data-act="sheetclose" aria-label="${esc(x.S.close)}">×</button></div>
+      <div class="zp-sheet__body">${(d.body || []).map(p => `<p>${esc(x.L(p))}</p>`).join('')}
+      ${gym.slug ? `<p class="zp-sheet__addr">${esc(x.S.ownAddr)} ${esc(gym.slug)}.zana.fit/${k}</p>` : ''}</div>
+    </article>`; }).join('')}
+  </div>`;
+}
+/* the small links at the very bottom: content pages, then Privacy Policy and Terms */
+export function footLinks(gym, x) {
+  const { S } = x;
+  const pages = (gym.pages || []).filter(p => p.footer !== false && p.title);
+  const docs = gym.legal ? ['privacy', 'terms'].filter(k => gym.legal[k]) : [];
+  const bits = [
+    ...pages.map(p => `<a href="content.html?p=${esc(p.slug)}" data-act="go" data-v="page:${esc(p.slug)}">${esc(p.title)}</a>`),
+    ...docs.map(k => `<button type="button" data-act="legal" data-v="${k}">${esc(k === 'privacy' ? S.privacy : S.terms)}</button>`),
+  ];
+  return bits.length ? `<nav class="zp-foot__links" aria-label="${esc(S.more)}">${bits.join('')}</nav>` : '';
+}
+
+/* Footer: where, when and how to reach the business. */
 export function footer(gym, x) {
   const { S, L } = x, p = gym.place;
+  const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.addr.join(', '))}`;
+  const reach = CONTACTS.map(k => contactOf(gym, k, S)).filter(Boolean);
+  const contact = reach.length || p.email || !oneLang(gym);
   return `<footer class="zp-foot" data-block="footer" id="find"><div class="zp-in">
     <div class="zp-foot__grid">
-      <div class="zp-foot__brand">${logo(gym)}${x.L(gym.kind) || gym.area ? `<p>${[x.L(gym.kind), gym.area].filter(Boolean).map(t => esc(t) + '.').join(' ')}</p>` : ''}${x.cta && x.cta.href !== '#find' ? `<a class="zp-btn" href="${x.cta.href}">${esc(x.cta.label)}</a>` : ''}</div>
-      ${p.addr.length ? `<div><p class="zp-tag">${esc(S.tFind)}</p><p>${p.addr.map(esc).join('<br>')}</p><p><a class="zp-link" href="#" data-act="noop">${esc(S.maps)}</a></p></div>` : ''}
+      <div class="zp-foot__brand">${logo(gym)}${L(gym.line) ? `<p>${esc(L(gym.line))}</p>` : x.L(gym.kind) || gym.area ? `<p>${[x.L(gym.kind), gym.area].filter(Boolean).map(t => esc(t) + '.').join(' ')}</p>` : ''}${x.cta && x.cta.href !== '#find' ? `<a class="zp-btn" href="${x.cta.href}">${esc(x.cta.label)}</a>` : ''}</div>
+      ${p.addr.length ? `<div><p class="zp-tag">${esc(S.tFind)}</p><p>${p.addr.map(esc).join('<br>')}</p>${L(p.note) ? `<p class="zp-foot__note">${esc(L(p.note))}</p>` : ''}<p>${outLink({ href: mapsHref, name: 'Maps' }, esc(S.maps))}</p></div>` : ''}
       ${p.hours.length ? `<div><p class="zp-tag">${esc(S.tHours)}</p><p>${p.hours.map(h => esc(glue(L(h)))).join('<br>')}</p></div>` : ''}
-      ${p.phone || p.email || !oneLang(gym) ? `<div><p class="zp-tag">${esc(S.tContact)}</p>${p.phone || p.email ? `<p>${[p.phone, p.email].filter(Boolean).map(esc).join('<br>')}</p>` : ''}${oneLang(gym) ? '' : `<p><button class="zp-link" type="button" data-act="lang">${esc(S.switchTo)}</button></p>`}</div>` : ''}
+      ${contact ? `<div><p class="zp-tag">${esc(S.tContact)}</p>${reach.length || p.email ? `<ul class="zp-foot__reach">${reach.map(c => `<li><span>${esc(c.name)}</span>${outLink(c, esc(c.shown))}</li>`).join('')}${p.email ? `<li><span>Email</span>${esc(p.email)}</li>` : ''}</ul>` : ''}${oneLang(gym) ? '' : `<p><button class="zp-link" type="button" data-act="lang">${esc(S.switchTo)}</button></p>`}</div>` : ''}
     </div>
-    <p class="zp-foot__made">${esc(S.made)}</p>
-  </div></footer>`;
+    ${footLinks(gym, x)}
+    <p class="zp-foot__made">${esc(L(gym.made) || S.made)}</p>
+  </div>${legalSheet(gym, x)}</footer>`;
 }
 
 /* The Book button that follows you. Three shapes: a pill with the price, a pill with two actions, a full bar.
@@ -559,7 +616,7 @@ export function followBook(gym, x, variant = 'pill') {
   return `<div class="zp-follow zp-follow--${variant}${price ? '' : ' is-bare'}" data-fx-book role="complementary" aria-label="${esc(c.label)}">${inner}</div>`;
 }
 
-/* Cover band. The one cover photo Zana staff set, shown wide under a hero that has no photo of its own
+/* Cover band. The one cover photo the owner sets, shown wide under a hero that has no photo of its own
    (Timetable's hero is the day's board). The launch version adds it so a launch page is never photo-free. */
 export function coverBand(gym, x) {
   const pic = gym.photos[0]; if (!pic) return '';

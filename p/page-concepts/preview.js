@@ -2,9 +2,10 @@
    It keeps no settings of its own. The settings screen sends the settings in force and this draws them with the framework,
    exactly the way a visitor's browser would. Because it is a frame, the page reacts to the frame's width: a phone-wide frame gets the phone layout. */
 
-import { buildPage, applyTokens, wirePage } from './page.js?v=17';
-import { mountEffects } from './effects.js?v=17';
-import { compose, tokensOf, resolve, blocksOf } from './owner.js?v=17';
+import { buildPage, applyTokens, wirePage } from './page.js?v=18';
+import { mountEffects } from './effects.js?v=18';
+import { compose, tokensOf, resolve, blocksOf } from './owner.js?v=18';
+import { drawExtra } from './extras.js?v=18';
 
 const stage = document.getElementById('stage');
 const mqStill = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -32,28 +33,43 @@ function restore(a) {
 }
 
 /* everything that needs the blocks built again. Color, spacing and headline size are not in here: they are only paint. */
-const buildKey = m => JSON.stringify([m.s.style, m.s.hero, m.s.fx, m.s.order, m.s.show, m.logo, m.cover, lang, still()]);
+const buildKey = m => JSON.stringify([m.target, m.page, m.extra, m.s.style, m.s.hero, m.s.fx, m.s.order, m.s.show, m.logo, m.cover, lang, still()]);
+
+/* inside the preview every inside link stays inside: the settings screen switches what the frame shows */
+const go = v => tell(v === 'links' ? { zana: 'target', v: 'links' } : v.startsWith('page:') ? { zana: 'target', v: 'content', page: v.slice(5) } : { zana: 'target', v: 'page', focus: v === 'top' ? 'top' : v === 'schedule' ? 'schedule' : 'prices' });
+const setLang = l => { lang = l; draw(last, true); built = buildKey(last); tell({ zana: 'lang', lang }); };
 
 function draw(m, keep) {
   const at = keep && root ? anchor() : null;
   if (unmount) unmount();
   if (unwire) unwire();
-  const c = compose(m.s, { lang, brand: m.brand, logo: m.logo, cover: m.cover, still: still() });
+  unmount = unwire = null;
+  const c = compose(m.s, { lang, brand: m.brand, logo: m.logo, cover: m.cover, still: still(), extra: m.extra });
+  if (m.target === 'links' || m.target === 'content') {                  // the links list or a content page, painted like the page
+    page = null;
+    const d = drawExtra(stage, m.target, c.gym, { lang, slug: m.page, tokens: tokensOf(m.s, m.brand), hooks: { go, setLang } });
+    root = d.root; unwire = d.unwire; unmount = null;
+    root.classList.toggle('zp--still', still());
+    if (at && keep) restore(at); else window.scrollTo({ top: 0, behavior: 'instant' });
+    document.documentElement.lang = lang;
+    return;
+  }
   page = buildPage(c.recipe, c.gym, c.opts);
   stage.innerHTML = page.html;
   root = stage.firstElementChild;
   applyTokens(root, page.tokens);
   root.classList.toggle('zp--still', still());
   if (at) restore(at); else window.scrollTo({ top: 0, behavior: 'instant' });
-  unwire = wirePage(root, page, { setLang: l => { lang = l; draw(last, true); built = buildKey(last); tell({ zana: 'lang', lang }); }, still });
+  unwire = wirePage(root, page, { setLang, still, go });
   unmount = mountEffects(root, c.fx, { stick: () => 0, S: page.x.S });
   if (at) restore(at);
   document.documentElement.lang = lang;
 }
 
 function paint(m) {
-  page.tokens = tokensOf(m.s, m.brand);
-  applyTokens(root, page.tokens);
+  const t = tokensOf(m.s, m.brand);
+  if (page) page.tokens = t;
+  applyTokens(root, t);
   requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));   // lets the effects measure again
 }
 

@@ -287,6 +287,77 @@ export const GYMS = {
       hours: [b('Mon to Fri, 6 AM to 8 PM', 'Lun a vie, 6 a. m. a 8 p. m.'), b('Saturday, 8 AM to 12 PM', 'Sábado, 8 a. m. a 12 p. m.')],
     },
   },
+
+  /* ------------------------------------------------------------------ 6
+     Barrio 13 CrossFit, Santurce. A real business, switching over from Afya first. The launch version draws its page.
+     Real: the name, the one line, the three passes (names, prices, labels, what you get), the address, the note under it, the Instagram handle.
+     Stand-ins: the logo, the color, the schedule, the photos (stock), the phone and WhatsApp number (787-555, never Barrio's own),
+     the custom link, the content page's words and the legal text.
+     The business's own words are plain strings, written once: a business has no second language. Zana's own words switch, English first. */
+  barrio: {
+    id: 'barrio', name: 'Barrio 13 CrossFit', slug: 'barrio13',
+    kind: 'CrossFit', hood: 'Santurce', area: 'Santurce, San Juan',
+    line: 'Daily CrossFit classes & flexible Open Gym access.',
+    brand: '#D7261E', brand2: '#F2B705', brandNames: [b('Red', 'Rojo'), b('Yellow', 'Amarillo')],
+    logo: { word: 'Barrio 13', mark: '<rect x="2.5" y="2.5" width="27" height="27" rx="3" fill="none" stroke="currentColor" stroke-width="3"/><path d="M8.5 11.5 12 9v14.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M16.5 9.5h6.5l-3.6 5c2.6 0 4.1 1.7 4.1 4.4 0 2.9-2 4.9-4.9 4.9-1.3 0-2.4-.4-3.3-1.1" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' },
+    photos: [
+      { src: P + 'box-floor.jpg', shape: 'wide' }, { src: P + 'box-ropes.jpg', shape: 'wide', pos: '60% 45%' },
+      { src: P + 'box-rig.jpg', shape: 'tall', pos: '50% 55%' }, { src: P + 'coach-man.jpg', shape: 'wide' }, { src: P + 'gym-floor.jpg', shape: 'wide' },
+    ],
+    tax: { name: 'IVU', included: true },
+    made: b('Page made with Zana. Demo: the prices, the address and the Instagram handle are Barrio 13\'s own. The schedule, photos, phone number and legal text are stand-ins.',
+      'Página hecha con Zana. Demo: los precios, la dirección y el Instagram son de Barrio 13. El horario, las fotos, el teléfono y el texto legal son de muestra.'),
+    classes: [
+      { id: 'crossfit', name: 'CrossFit', mins: 60 },
+      { id: 'open', open: true, name: 'Open Gym', mins: 90 },
+    ],
+    coaches: [],
+    schedule: week([
+      ['12345', '05:30', 'crossfit', null, 16], ['12345', '06:30', 'crossfit', null, 16], ['12345', '09:00', 'open', null, 20],
+      ['12345', '12:00', 'crossfit', null, 16], ['12345', '17:30', 'crossfit', null, 16], ['12345', '18:30', 'crossfit', null, 16],
+      ['6', '08:00', 'crossfit', null, 16], ['6', '09:30', 'open', null, 20], ['7', '09:00', 'crossfit', null, 16],
+    ]),
+    /* Barrio's real passes. label and ticks ("what you get") are typed by the owner per product.
+       onPage: the products featured on the page. The rest wait behind "See all". */
+    prices: [
+      { id: 'day', name: 'Day Pass', price: 27.88, onPage: true, ticks: ['CrossFit classes & open gym', 'Use on any single day', 'Expires 7 days after purchase'] },
+      { id: 'two', name: '2 Day Pass', price: 50.18, onPage: true, label: 'Most popular', ticks: ['Choose any 2 days within the week'] },
+      { id: 'week', name: '1 Week Pass', price: 100.35, onPage: false, ticks: ['Unlimited CrossFit & open gym', 'Valid for all days within the week', '20% off t-shirt purchases'] },
+    ],
+    place: {
+      addr: ['805 Calle Condado', 'San Juan, PR 00907'],
+      note: 'We are just 7 minutes from the cruise port and 10 minutes from the airport.',
+      /* new business details: filled in by the owner from the customizer. Empty ones are not shown anywhere. */
+      whatsapp: '787-555-0113', instagram: 'barrio13crossfit', tiktok: '', phone: '787-555-0113',
+    },
+    /* the links list (link-in-bio). Zana's buttons, the content pages and up to 3 of the owner's own links, in the owner's order.
+       off: switched off by the owner. A contact button with nothing filled in is left out by itself. */
+    links: {
+      order: ['book', 'prices', 'join', 'page:barrio-games-2026', 'location', 'whatsapp', 'instagram', 'tiktok', 'phone', 'c1'],
+      off: ['phone'],
+      custom: [{ id: 'c1', name: 'CrossFit Open 2027', url: 'games.crossfit.com' }],
+    },
+    /* content pages: up to 3. Each has its own address, and is linked from the footer or the links list, never from the menu bar. */
+    pages: [{
+      slug: 'barrio-games-2026', title: 'Barrio Games 2026', footer: true,
+      hero: { src: P + 'box-ropes.jpg', pos: '60% 45%', text: 'Saturday, December 12 · Teams of two · All levels' },
+      body: '<h2>Three workouts, one Saturday</h2><p>Our in-house throwdown is back. Teams of two, <b>scaled and Rx divisions</b>, and a final heat at sundown. Members and drop-ins are welcome.</p><h2>How to enter</h2><p>Sign up at the front desk or send us a message on WhatsApp. Entry is <b>$40 per team</b>, t-shirts included. Workouts go up on <a href="https://www.instagram.com/barrio13crossfit/">our Instagram</a> one week before.</p>',
+      side: { src: P + 'coach-man.jpg', text: 'Not competing? Come cheer. There is music, food and the whole barrio on the sidelines, from 8 AM until the last rep.' },
+    }],
+    /* Privacy Policy and Terms: in Zana these come from the business's own legal documents. Never printed on the page. */
+    legal: {
+      privacy: { title: 'Privacy Policy', updated: 'Updated November 2026', body: [
+        'Sample text. In Zana this is the Privacy Policy Barrio 13 CrossFit keeps under its legal documents.',
+        'We collect your name, email, phone number and the classes you book so we can run your membership and reach you about it.',
+        'Payments are handled by our payment processor. We never see or store your full card number.',
+        'We do not sell your information. Write to us to see, correct or delete what we hold about you.'] },
+      terms: { title: 'Terms of Service', updated: 'Updated November 2026', body: [
+        'Sample text. In Zana these are the Terms Barrio 13 CrossFit keeps under its legal documents.',
+        'Passes are personal and cannot be shared. A pass expires on the date shown when you buy it.',
+        'Cancel a booked class at least 2 hours before it starts to keep your visit.',
+        'Training carries risk. Tell your coach about any injury before class.'] },
+    },
+  },
 };
 
 /* ---------------------------------------------------------------------

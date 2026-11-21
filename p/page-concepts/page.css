@@ -514,3 +514,70 @@
 .zp.is-outlined [data-block]:not(.zp-bar) { position: relative; }
 .zp.is-outlined [data-block]::before { content: attr(data-label); position: absolute; z-index: 30; left: 8px; top: 8px; padding: 5px 9px; background: var(--ink); color: var(--bg); border-radius: 6px; font-family: var(--bf); font-size: 13px; font-weight: 700; line-height: 1.2; letter-spacing: 0; text-transform: none; white-space: nowrap; pointer-events: none; }
 .zp.is-outlined .zp-bar[data-block]::before { top: auto; bottom: -30px; }
+
+/* ---------- prices: the tax line, and "See all" for the products the owner did not feature ---------- */
+.zp-plan__tax { margin-top: -2px; font-size: var(--small); color: var(--ink2); }
+.zp-plans__more { display: flex; justify-content: center; margin-top: var(--gap); }
+
+/* ---------- footer additions: the note under the address, the ways to reach the business, the small links ---------- */
+.zp-foot__note { max-width: 26em; font-size: var(--small); color: var(--ink2); }
+.zp-foot__reach { display: grid; gap: 8px; }
+.zp-foot__reach li { display: grid; gap: 0; line-height: 1.35; }
+.zp-foot__reach li > span { font-size: var(--small); color: var(--ink2); }
+.zp-foot__links { display: flex; flex-wrap: wrap; gap: 4px 22px; margin-top: calc(var(--gap) * 1.6); }
+.zp-foot__links a, .zp-foot__links button { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: inherit; font-size: var(--small); font-weight: 600; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; cursor: pointer; }
+.zp-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- the legal panel: Privacy Policy or Terms. A sheet from the bottom on a phone, a centered panel on a laptop ---------- */
+html.zp-locked { overflow: hidden; }
+.zp-sheet { position: fixed; inset: 0; z-index: 80; display: grid; align-items: end; justify-items: center; }
+.zp-sheet__scrim { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+.zp-sheet__box { position: relative; display: flex; flex-direction: column; width: 100%; max-height: 88vh; background: var(--bg); color: var(--ink); border-radius: var(--r-card) var(--r-card) 0 0; box-shadow: var(--shadow); }
+.zp-sheet__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px var(--gut) 14px; border-bottom: 1px solid var(--line); }
+.zp-sheet__head > div { display: grid; gap: 6px; }
+.zp-sheet__x { flex: none; width: 44px; height: 44px; margin: -6px -8px 0 0; padding: 0; border: 0; border-radius: 50%; background: transparent; font-size: 30px; line-height: 1; }
+.zp-sheet__body { display: grid; gap: 14px; overflow: auto; padding: 18px var(--gut) calc(24px + var(--safe)); max-width: 42em; }
+.zp-sheet__addr { font-size: var(--small); color: var(--ink2); }
+@media (min-width: 700px) {
+  .zp-sheet { align-items: center; padding: 32px; }
+  .zp-sheet__box { width: min(100%, 680px); max-height: 82vh; border-radius: var(--r-card); }
+  .zp-sheet__head, .zp-sheet__body { padding-inline: 28px; }
+}
+
+/* ---------- the links list (link in bio): one narrow column, the business on top, then its buttons ---------- */
+.zp-lk { display: grid; justify-items: center; background: var(--band); }
+.zp-lk__in { display: grid; gap: 28px; width: min(100% - 32px, 520px); padding: 40px 0 32px; }
+.zp-lk__head { display: grid; justify-items: center; gap: 10px; text-align: center; }
+.zp-lk__logo .zp-logo { display: grid; place-items: center; width: 96px; height: 96px; margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 50%; }
+.zp-lk__logo .zp-logo svg { width: 46px; height: 46px; }
+.zp-lk__logo .zp-logo__w { display: none; }
+.zp-lk__logo .zp-logo__pic { max-width: 72px; height: 40px; }
+.zp-lk__name { font-size: var(--h3); }
+.zp-lk__line { max-width: 26em; color: var(--ink2); text-wrap: balance; }
+.zp-lk__list { display: grid; gap: 12px; }
+.zp-lk__btn { display: grid; grid-template-columns: 24px minmax(0, 1fr) 18px; gap: 14px; align-items: center; min-height: 64px; padding: 10px 18px; background: var(--surface); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: var(--r-btn); text-decoration: none; }
+.zp[data-corners="round"] .zp-lk__btn { border-radius: 999px; padding-inline: 22px; }
+.zp-lk__btn:hover { border-color: var(--ink); }
+.zp-lk__btn.is-main { background: var(--acc); color: var(--accInk); border-color: var(--accEdge); }
+.zp-lk__ico { width: 24px; height: 24px; }
+.zp-lk__go { width: 18px; height: 18px; opacity: .8; }
+.zp-lk__t { display: grid; min-width: 0; line-height: 1.25; }
+.zp-lk__t b { font-weight: 700; overflow-wrap: anywhere; }
+.zp-lk__t small { font-size: var(--small); opacity: .78; overflow-wrap: anywhere; }
+.zp-lk__foot { display: grid; justify-items: center; gap: 4px; text-align: center; font-size: var(--small); color: var(--ink2); }
+.zp-lk__foot .zp-foot__links { justify-content: center; margin-top: 0; }
+
+/* ---------- a content page: a shorter hero, formatted text in a reading column, one photo with text beside it ---------- */
+.zp-cp .zp-hero--full.zp-cp__hero { min-height: clamp(380px, 62vh, 640px); }
+.zp-cp__hero:not(.zp-hero--full) .zp-hero__in { width: min(100%, 1328px); margin-inline: auto; padding: calc(var(--bar-h) * .4 + 24px) var(--gut) 12px; }
+.zp-cp__text { display: grid; gap: 16px; max-width: 42em; }
+.zp-cp__text h2 { margin-top: 18px; font-family: var(--hf); font-stretch: var(--hstretch); font-weight: var(--hw); font-size: var(--h3); letter-spacing: var(--htrack); text-transform: var(--hcase); line-height: 1.14; }
+.zp-cp__text h3 { margin-top: 10px; font-size: 1.1em; font-weight: 700; }
+.zp-cp__text h2:first-child { margin-top: 0; }
+.zp-cp__text b { font-weight: 700; }
+.zp-cp__text a { font-weight: 600; text-decoration-thickness: 1.5px; text-underline-offset: 3px; color: var(--accText); }
+.zp-cp__text ul, .zp-cp__text ol { display: grid; gap: 6px; padding-left: 1.3em; list-style: disc; }
+.zp-cp__side { display: grid; gap: var(--gap); align-items: center; }
+.zp-cp__ph { aspect-ratio: 4 / 3; }
+.zp-cp__beside { font-size: 1.15em; line-height: 1.5; text-wrap: pretty; }
+@media (min-width: 860px) { .zp-cp__side:not(.is-solo) { grid-template-columns: 1.1fr 1fr; gap: calc(var(--gap) * 2); } }

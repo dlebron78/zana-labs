@@ -3,9 +3,11 @@
    owner.js turns those into the settings in force, and the preview frame draws them.
    What an owner may change, and how far, is decided in owner.js. This file only draws the controls. */
 
-import { FX } from './recipes.js?v=17';
-import { SHIP } from './launch.js?v=17';
-import { OWNER_GYM, STYLES, SPACES, SIZES, OWNER_FX, TOP, LOCKED, STYLE, resolve, tokensOf, coverUse, photoCards, scaleOf } from './owner.js?v=17';
+import { FX } from './recipes.js?v=18';
+import { SHIP } from './launch.js?v=18';
+import { OWNER_GYM, STYLES, SPACES, SIZES, OWNER_FX, TOP, LOCKED, STYLE, resolve, tokensOf, coverUse, photoCards, scaleOf, withOwner } from './owner.js?v=18';
+import { CONTACTS, contactOf, WORDS } from './blocks.js?v=18';
+import { ZANA_LINKS, CUSTOM_MAX, PAGES_MAX, linkItem, cleanRich } from './extras.js?v=18';
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -18,9 +20,9 @@ const gym = OWNER_GYM;
 /* ---------- the words, in English and Spanish ---------- */
 const T = {
   en: {
-    labs: 'Labs mock: the settings screen a gym owner would use. Nothing is saved.',
-    samples: 'Sample pages', spec: 'How it works', plan: 'Build phases',
-    planKey: 'This screen is phase 2. In phase 1 there is no owner screen: Zana staff set the color, logo and cover photo. Phase 3 adds video from a bought service and the extra effects.', launch: 'Phase 2', later: 'Phase 3',
+    labs: 'Labs mock: the customizer an owner or admin uses for the business page. It ships at launch. Nothing is saved.',
+    samples: 'Sample pages', spec: 'How it works', plan: 'What ships at launch',
+    planKey: 'Everything tagged Launch ships in the first release, this customizer included. Later: three more styles, the extra sections and effects, the slideshow and video heroes.', launch: 'Launch', later: 'Later',
     title: 'Business page settings', crumb: 'Business page', publish: 'Publish', publishToast: 'This is a mock. Nothing was saved or published.',
     vSettings: 'Settings', vPreview: 'Preview', language: 'Language',
     h1: 'Your business page',
@@ -65,6 +67,7 @@ const T = {
     coverUse: {
       fill: 'It fills the first screen.', first: 'It is the first photo of the slideshow.', beside: 'It sits beside the headline.',
       tile: 'It is the first of the three photos.', poster: 'It shows while the video loads, and for visitors who turn motion off.',
+      band: 'It shows as a wide band right under the classes of the day.',
     },
     coverNone: { today: 'Not used right now: this hero shows the classes of the day instead of a photo.', slideshow: 'Not used right now: this slideshow shows one photo per class.' },
 
@@ -117,11 +120,40 @@ const T = {
     moved: (n, i, all) => `${n} is now ${i} of ${all}.`, locked: 'Always shown',
     pvTitle: 'Preview', pvNote: 'Live. Changes show at once.', phone: 'Phone', laptop: 'Laptop',
     notImage: 'That file is not a picture. Try a PNG, JPG or SVG.',
+    tPage: 'Page', tLinks: 'Links list', tContent: 'Content page', showing: 'Showing',
+
+    gContact: ['Contact details', 'New details for your business. Each one shows in the footer and on the links list, and only when it is filled in.'],
+    cName: { whatsapp: 'WhatsApp', instagram: 'Instagram', tiktok: 'TikTok', phone: 'Phone' },
+    cPh: { whatsapp: '787-555-0100', instagram: '@yourbusiness', tiktok: '@yourbusiness', phone: '787-555-0100' },
+    cNote: 'The address, the note under it, the email and the hours come from your business settings.',
+
+    gPrices: ['Prices', 'Your products come from Zana with their names and prices. Here you give each one a label and what it gets you, and pick the ones featured on your page.'],
+    pFeat: n => `Feature ${n} on the page`, pLabel: 'Label', pLabelPh: 'Most popular, New', pGet: 'What you get', pGetHelp: 'One line each. Each line gets a tick.',
+    pShown: (n, all) => (n === 0 ? 'None featured, so the page shows them all.' : n >= all ? `All ${all} are featured, so there is no See all button.` : `${n} featured on the page, then a See all button for the other ${all - n}.`),
+    pTax: 'Your prices include tax, so each card says "Taxes included".', pFrom: 'Name and price: change them in Products.',
+
+    gLinks: ['Links list', 'A page of buttons for your Instagram or TikTok bio. Turn buttons on or off and put them in order.'],
+    addr: 'Its address:', lKind: { zana: 'From Zana', page: 'Content page', mine: 'Your link' },
+    lSub: { book: 'Opens your schedule.', prices: 'Opens your prices.', join: 'Opens the screen to join your business on Zana.', location: 'Opens your address on a map.' },
+    lNeeds: n => `Fill in ${n} under Contact details to show it.`, lNoPage: 'This page has no title yet.',
+    lMineHelp: 'Up to 3 links of your own: a name and a web address. They open another site, and the button is marked that way.',
+    lAdd: 'Add a link', lName: 'Name', lUrl: 'Web address', lDel: n => `Remove ${n}`, lMax: 'You have 3 links of your own, the most a list can hold.', lNew: 'New link',
+    lEmpty: 'Hidden until it has a name and a web address.',
+
+    gPages: ['Content pages', 'Up to 3 pages of your own, such as an event. Each has its own address, and is linked from the footer or the links list, never the menu bar.'],
+    pgAdd: 'Add a page', pgMax: 'You have 3 pages, the most a business can have.', pgTitle: 'Title', pgAddr: 'Address', pgHero: 'Hero photo', pgHeroText: 'Text over the photo',
+    pgBody: 'Text', pgBodyHelp: 'Headings, bold and links.', pgSide: 'One photo with text beside it', pgSideText: 'Text beside the photo',
+    pgFoot: 'Link it from the footer', pgLinks: 'Link it from the links list', pgDel: 'Delete this page', pgNew: 'New page', pgOpen: 'Open the sample on its own',
+    pgNone: 'No photo', tb: { h2: 'Heading', b: 'Bold', a: 'Link', p: 'Plain text' }, linkAsk: 'Web address for the link', pgEdit: n => `Edit ${n}`,
+    pgRule: 'A content page has no gallery and no layout to pick: a title, a photo with text over it, your text, and one photo with text beside it.',
+
+    gLegal: ['Privacy Policy and Terms', 'They come from your legal documents in Zana. Your page links to them in the footer, and each one opens in a panel. They are never printed on the page itself.'],
+    lgWhere: 'Change them in Settings, under Legal documents.', lgSee: 'See the footer',
   },
   es: {
-    labs: 'Maqueta de labs: la pantalla de ajustes que usaría el dueño de un gimnasio. No se guarda nada.',
-    samples: 'Páginas de muestra', spec: 'Cómo funciona', plan: 'Fases',
-    planKey: 'Esta pantalla es la fase 2. En la fase 1 no hay pantalla para el dueño: el equipo de Zana pone el color, el logo y la foto de portada. La fase 3 suma video de un servicio comprado y los efectos extra.', launch: 'Fase 2', later: 'Fase 3',
+    labs: 'Maqueta de labs: el personalizador que usa el dueño o un admin para la página del negocio. Sale en el lanzamiento. No se guarda nada.',
+    samples: 'Páginas de muestra', spec: 'Cómo funciona', plan: 'Qué sale en el lanzamiento',
+    planKey: 'Todo lo marcado Lanzamiento sale en la primera versión, este personalizador incluido. Después: tres estilos más, las secciones y efectos extra, y las portadas con fotos que cambian y con video.', launch: 'Lanzamiento', later: 'Después',
     title: 'Ajustes de la página del negocio', crumb: 'Página del negocio', publish: 'Publicar', publishToast: 'Esto es una maqueta. No se guardó ni se publicó nada.',
     vSettings: 'Ajustes', vPreview: 'Vista previa', language: 'Idioma',
     h1: 'La página de tu negocio',
@@ -166,6 +198,7 @@ const T = {
     coverUse: {
       fill: 'Llena la primera pantalla.', first: 'Es la primera de las fotos que cambian.', beside: 'Va al lado del titular.',
       tile: 'Es la primera de las tres fotos.', poster: 'Se ve mientras carga el video, y para quien desactiva el movimiento.',
+      band: 'Se ve como una franja ancha justo debajo de las clases del día.',
     },
     coverNone: { today: 'Ahora no se usa: esta portada muestra las clases del día en lugar de una foto.', slideshow: 'Ahora no se usa: aquí se muestra una foto por clase.' },
 
@@ -218,12 +251,41 @@ const T = {
     moved: (n, i, all) => `${n} ahora está en el lugar ${i} de ${all}.`, locked: 'Siempre visible',
     pvTitle: 'Vista previa', pvNote: 'En vivo. Los cambios se ven al momento.', phone: 'Teléfono', laptop: 'Computadora',
     notImage: 'Ese archivo no es una imagen. Prueba con un PNG, JPG o SVG.',
+    tPage: 'Página', tLinks: 'Lista de enlaces', tContent: 'Página de contenido', showing: 'Mostrando',
+
+    gContact: ['Datos de contacto', 'Datos nuevos de tu negocio. Cada uno se ve en el pie de página y en la lista de enlaces, solo si está lleno.'],
+    cName: { whatsapp: 'WhatsApp', instagram: 'Instagram', tiktok: 'TikTok', phone: 'Teléfono' },
+    cPh: { whatsapp: '787-555-0100', instagram: '@tunegocio', tiktok: '@tunegocio', phone: '787-555-0100' },
+    cNote: 'La dirección, la nota debajo, el email y el horario salen de los ajustes de tu negocio.',
+
+    gPrices: ['Precios', 'Tus productos vienen de Zana con su nombre y su precio. Aquí le pones a cada uno una etiqueta y lo que incluye, y eliges cuáles se destacan en tu página.'],
+    pFeat: n => `Destacar ${n} en la página`, pLabel: 'Etiqueta', pLabelPh: 'Más popular, Nuevo', pGet: 'Qué incluye', pGetHelp: 'Una línea por cosa. Cada línea lleva una marca.',
+    pShown: (n, all) => (n === 0 ? 'Ninguno destacado, así que la página los muestra todos.' : n >= all ? `Los ${all} están destacados, así que no hay botón de Ver todos.` : `${n} destacados en la página y luego un botón de Ver todos para los otros ${all - n}.`),
+    pTax: 'Tus precios incluyen impuestos, así que cada tarjeta dice "Impuestos incluidos".', pFrom: 'Nombre y precio: se cambian en Productos.',
+
+    gLinks: ['Lista de enlaces', 'Una página de botones para la bio de tu Instagram o TikTok. Activa o desactiva botones y ponlos en orden.'],
+    addr: 'Su dirección:', lKind: { zana: 'De Zana', page: 'Página de contenido', mine: 'Tu enlace' },
+    lSub: { book: 'Abre tu horario.', prices: 'Abre tus precios.', join: 'Abre la pantalla para unirse a tu negocio en Zana.', location: 'Abre tu dirección en un mapa.' },
+    lNeeds: n => `Llena ${n} en Datos de contacto para mostrarlo.`, lNoPage: 'Esta página aún no tiene título.',
+    lMineHelp: 'Hasta 3 enlaces tuyos: un nombre y una dirección web. Abren otro sitio, y el botón lo indica.',
+    lAdd: 'Añadir un enlace', lName: 'Nombre', lUrl: 'Dirección web', lDel: n => `Quitar ${n}`, lMax: 'Ya tienes 3 enlaces tuyos, el máximo de una lista.', lNew: 'Enlace nuevo',
+    lEmpty: 'Oculto hasta que tenga nombre y dirección web.',
+
+    gPages: ['Páginas de contenido', 'Hasta 3 páginas tuyas, como un evento. Cada una tiene su propia dirección y se enlaza desde el pie de página o la lista de enlaces, nunca desde la barra de menú.'],
+    pgAdd: 'Añadir una página', pgMax: 'Ya tienes 3 páginas, el máximo de un negocio.', pgTitle: 'Título', pgAddr: 'Dirección', pgHero: 'Foto de portada', pgHeroText: 'Texto sobre la foto',
+    pgBody: 'Texto', pgBodyHelp: 'Títulos, negritas y enlaces.', pgSide: 'Una foto con texto al lado', pgSideText: 'Texto al lado de la foto',
+    pgFoot: 'Enlazarla desde el pie de página', pgLinks: 'Enlazarla desde la lista de enlaces', pgDel: 'Borrar esta página', pgNew: 'Página nueva', pgOpen: 'Abrir la muestra sola',
+    pgNone: 'Sin foto', tb: { h2: 'Título', b: 'Negrita', a: 'Enlace', p: 'Texto normal' }, linkAsk: 'Dirección web del enlace', pgEdit: n => `Editar ${n}`,
+    pgRule: 'Una página de contenido no tiene galería ni diseño que elegir: un título, una foto con texto encima, tu texto y una foto con texto al lado.',
+
+    gLegal: ['Política de privacidad y Términos', 'Salen de tus documentos legales en Zana. Tu página los enlaza en el pie, y cada uno abre en un panel. Nunca se imprimen en la página.'],
+    lgWhere: 'Se cambian en Ajustes, en Documentos legales.', lgSee: 'Ver el pie de página',
   },
 };
 let W = T.en;
 
 /* What ships when comes from launch.js, the same map the samples viewer reads for its "Launch version" switch.
-   This whole screen is phase 2, so a tag here only tells phase 2 from phase 3. */
+   This screen ships at launch. A tag here tells what ships at launch from what comes later. */
 
 /* ---------- small drawings ---------- */
 const I = {
@@ -251,13 +313,24 @@ const THUMB = {
 };
 /* an invented logo, so the logo setting can be tried without a file at hand */
 const SAMPLE_LOGO = {
-  src: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232 60"><circle cx="30" cy="30" r="21" fill="none" stroke="#E3A72F" stroke-width="6"/><path d="M11 33c6-6 13-6 19 0s13 6 19 0" fill="none" stroke="#0B1F3A" stroke-width="6" stroke-linecap="round"/><text x="66" y="30" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700" letter-spacing="3" fill="#0B1F3A">LITORAL</text><text x="67" y="48" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" letter-spacing="2.6" fill="#0B1F3A">TRAINING CLUB</text></svg>'),
+  src: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232 60"><rect x="6" y="6" width="48" height="48" rx="6" fill="#D7261E"/><text x="30" y="40" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700" fill="#fff">13</text><text x="66" y="31" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700" letter-spacing="3" fill="#111">BARRIO</text><text x="67" y="48" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" letter-spacing="2.4" fill="#111">CROSSFIT SANTURCE</text></svg>'),
   ratio: 3.87, mono: true,
 };
 
 /* ---------- what the owner has chosen ----------
    own holds only the settings changed on top of the style. Color, logo and cover photo are the owner's own, so they are kept apart. */
-const state = { lang: 'en', stamp: 0, style: 'film', own: {}, brand: null, logo: null, cover: null, upload: null, view: 'settings', device: 'phone', plan: false };
+const clone = o => JSON.parse(JSON.stringify(o ?? null));
+const state = {
+  lang: 'en', stamp: 0, style: STYLES[0], own: {}, brand: null, logo: null, cover: null, upload: null, view: 'settings', device: 'phone', plan: false,
+  target: 'page', pg: (gym.pages[0] || {}).slug || null,                          // what the preview shows: the page, the links list or a content page
+  /* the owner's own details. A mock: they start from Barrio's and are never saved */
+  contact: Object.fromEntries(CONTACTS.map(k => [k, gym.place[k] || ''])),
+  prices: Object.fromEntries(gym.prices.map(p => [p.id, { label: p.label || '', ticks: [...(p.ticks || [])], onPage: p.onPage !== false }])),
+  links: clone(gym.links), pages: clone(gym.pages),
+};
+const extra = () => ({ place: state.contact, prices: state.prices, links: state.links, pages: state.pages });
+const ownGym = () => withOwner(gym, extra());
+const curPage = () => state.pages.find(p => p.slug === state.pg) || state.pages[0] || null;
 const cur = () => resolve(state.style, state.own);
 const brandNow = () => (state.brand || gym.brand).toUpperCase();
 const coverChoices = () => [...(state.upload ? [state.upload] : []), ...gym.photos];
@@ -279,6 +352,7 @@ function readUrl() {
   if (Q.get('view') === 'preview') state.view = 'preview';
   if (Q.get('device') === 'laptop') state.device = 'laptop';
   state.plan = Q.get('plan') === '1';
+  if (['links', 'content'].includes(Q.get('pv'))) state.target = Q.get('pv');
 }
 function writeUrl() {
   const s = cur(), p = new URLSearchParams(), own = state.own;
@@ -296,13 +370,14 @@ function writeUrl() {
   if (state.view === 'preview') p.set('view', 'preview');
   if (state.device === 'laptop') p.set('device', 'laptop');
   if (state.plan) p.set('plan', '1');
+  if (state.target !== 'page') p.set('pv', state.target);
   for (const k of ['keys', 'frame']) if (Q.has(k)) p.set(k, Q.get(k));
   const q = p.toString().replace(/%2C/g, ',');
   history.replaceState(null, '', location.pathname + (q ? '?' + q : ''));
 }
 
 /* ---------- the pieces every group uses ---------- */
-const tag = ship => { const k = ship === 3 || ship === 'later' ? 'later' : 'launch'; return state.plan ? `<span class="st-ship st-ship--${k}">${W[k]}</span>` : ''; };
+const tag = ship => { const k = ship === 1 || ship === 'launch' ? 'launch' : 'later'; return state.plan ? `<span class="st-ship st-ship--${k}">${W[k]}</span>` : ''; };
 const card = (id, n, [title, help], body, ship) => `<section class="st-card" id="g-${id}" aria-labelledby="h-${id}"><header class="st-card__head"><span class="st-n" aria-hidden="true">${n}</span><div><h2 id="h-${id}">${esc(title)}${ship ? tag(ship) : ''}</h2><p>${esc(help)}</p></div></header>${body}</section>`;
 const field = (label, body, ship = 'launch') => `<div class="st-field"><div class="st-field__top"><h3>${esc(label)}</h3>${tag(ship)}</div>${body}</div>`;
 const seg = (key, opts, now, label) => `<div class="st-seg" role="group" aria-label="${esc(label)}">${opts.map(([v, main, sub]) => `<button type="button" data-do="${key}" data-v="${v}" data-id="${key}:${v}" aria-pressed="${v === now}"><b>${esc(main)}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</button>`).join('')}</div>`;
@@ -322,8 +397,8 @@ function summary(s) {
 function gStyle(s) {
   return card('style', 1, W.gStyle, `
     <div class="st-styles" style="--brand:${brandNow()}">${STYLES.map(id => `<button type="button" class="st-style" data-do="style" data-v="${id}" data-id="style:${id}" aria-pressed="${id === s.style}">
-      ${THUMB[id]}<span class="st-style__t"><b>${esc(W.styleName[id])}${I.tick}</b><span>${esc(W.styleLine[id])}</span><small>${esc(W.styleSuits[id])}</small></span></button>`).join('')}</div>
-    <p class="st-note">${esc(W.styleKeeps)}</p>`, 'launch');
+      ${THUMB[id]}<span class="st-style__t"><b>${esc(W.styleName[id])}${I.tick}${tag(SHIP.style[id])}</b><span>${esc(W.styleLine[id])}</span><small>${esc(W.styleSuits[id])}</small></span></button>`).join('')}</div>
+    <p class="st-note">${esc(W.styleKeeps)}</p>`);
 }
 
 /* the part of the color setting that follows the picker while it is dragged */
@@ -363,7 +438,7 @@ function gBrand(s) {
 
 function gSpace(s) {
   const d = s.defaults, f = tokensOf(s).facts;
-  return card('space', 3, W.gSpace, `
+  return card('space', 10, W.gSpace, `
     ${field(W.space, seg('space', SPACES.map(k => [k, W.spaceName[k]]), s.space, W.space) + status('space', s.changed.space, W.spaceName[d.space]))}
     ${field(W.size, seg('size', SIZES.map(k => [k, W.sizeName[k], Math.round(18 * scaleOf(s.style, k)) + '\u00a0px']), s.size, W.size)
       + `<p class="st-note">${esc(W.sizeNote(f.h1Laptop, f.h1Phone, scaleOf(s.style, 'l')))}</p>` + status('size', s.changed.size, W.sizeName[d.size]))}`);
@@ -378,14 +453,14 @@ function gFx(s) {
     return `<div class="st-fx${stuck ? ' is-off' : ''}"><div class="st-fx__t"><h4><span>${esc(name)}</span>${tag(SHIP.fx[f])}</h4><p>${esc(what)}</p>
       ${why ? `<p class="st-why">${esc(why)}</p>` : ''}${s.changed.fx[f] ? back('fx:' + f, d.fx[f] ? W.on : W.off) : ''}</div>${sw('fx', f, s.fx[f], name, stuck)}</div>`;
   };
-  return card('fx', 4, W.gFx, `
+  return card('fx', 11, W.gFx, `
     <p class="st-sub">${esc(W.fxSafe)}</p><div class="st-fxs">${OWNER_FX.slice(0, 3).map(row).join('')}</div>
     <p class="st-sub">${esc(W.fxExtra)}</p><div class="st-fxs">${OWNER_FX.slice(3).map(row).join('')}</div>`);
 }
 
 function gHero(s) {
   const line = h => (h === 'video' ? W.heroLine.video : W.heroLine[s.style][h]);
-  return card('hero', 5, W.gHero, `
+  return card('hero', 3, W.gHero, `
     <div class="st-field"><div class="st-heroes" role="group" aria-label="${esc(W.gHero[0])}">${STYLE[s.style].heroes.map(h => `<button type="button" class="st-hero" data-do="hero" data-v="${h}" data-id="hero:${h}" aria-pressed="${h === s.hero}">${HERO_ICON[h]}<span><b>${esc(W.heroName[h])}</b><small>${esc(line(h))}</small></span>${tag(SHIP.hero[h])}</button>`).join('')}</div>
     ${s.hero === 'video' ? `<p class="st-note">${esc(W.videoNote)}</p>` : ''}${status('hero', s.changed.hero, W.heroName[s.defaults.hero])}</div>`);
 }
@@ -403,7 +478,7 @@ function gSec(s) {
       <button type="button" class="st-mv" data-do="move" data-v="${k}:-1" data-id="move:${k}:-1" aria-label="${esc(W.moveUp(W.sec[k]))}"${i ? '' : ' disabled'}>${I.up}</button>
       <button type="button" class="st-mv" data-do="move" data-v="${k}:1" data-id="move:${k}:1" aria-label="${esc(W.moveDown(W.sec[k]))}"${i < n - 1 ? '' : ' disabled'}>${I.down}</button>
       ${LOCKED.includes(k) ? lock : sw('show', k, s.show[k], W.showSec(W.sec[k]))}</li>`;
-  return card('sec', 6, W.gSec, `
+  return card('sec', 4, W.gSec, `
     <p class="st-sub">${esc(W.secTop)}</p>
     <ul class="st-rows">${fixed('menu')}${fixed('hero')}${TOP.filter(k => k in s.show).map(top).join('')}</ul>
     <p class="st-sub">${esc(W.secMid)}${tag('later')}</p>
@@ -411,6 +486,84 @@ function gSec(s) {
     ${s.changed.order ? back('order', '', W.orderWord, W.orderReset) : `<p class="st-status">${esc(W.orderDflt)}</p>`}
     <p class="st-sub">${esc(W.secEnd)}</p>
     <ul class="st-rows">${fixed('footer')}</ul>`);
+}
+
+/* ---------- the owner's own details: contact, prices, links list, content pages, legal ---------- */
+const input = (kind, k, value, label, o = {}) => `<label class="st-in${o.cls ? ' ' + o.cls : ''}"><span>${esc(label)}</span>${o.area
+  ? `<textarea rows="${o.rows || 3}" data-in="${kind}" data-k="${esc(k)}" data-id="in:${kind}:${esc(k)}"${o.ph ? ` placeholder="${esc(o.ph)}"` : ''} spellcheck="${o.spell ? 'true' : 'false'}">${esc(value)}</textarea>`
+  : `<input type="text" value="${esc(value)}" data-in="${kind}" data-k="${esc(k)}" data-id="in:${kind}:${esc(k)}"${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}${o.list ? ` list="${o.list}"` : ''} autocomplete="off" spellcheck="${o.spell ? 'true' : 'false'}">`}${o.help ? `<small>${esc(o.help)}</small>` : ''}</label>`;
+
+function gContact() {
+  return card('contact', 5, W.gContact, `
+    <div class="st-grid2">${CONTACTS.map(k => input('contact', k, state.contact[k], W.cName[k], { ph: W.cPh[k] })).join('')}</div>
+    <p class="st-note">${esc(W.cNote)}</p>`, 'launch');
+}
+
+function gPrices() {
+  const n = gym.prices.filter(p => state.prices[p.id].onPage).length;
+  return card('prices', 6, W.gPrices, `
+    ${gym.prices.map(p => { const o = state.prices[p.id]; return `<div class="st-prod">
+      <div class="st-opt"><div><b>${esc(p.name)}</b><small>$${p.price.toFixed(2)} · ${esc(W.pFrom)}</small></div>${sw('feat', p.id, o.onPage, W.pFeat(p.name))}</div>
+      ${input('plabel', p.id, o.label, W.pLabel, { ph: W.pLabelPh, list: 'st-labels', spell: true })}
+      ${input('pticks', p.id, o.ticks.join('\n'), W.pGet, { area: true, rows: Math.max(2, o.ticks.length), help: W.pGetHelp, spell: true })}
+    </div>`; }).join('')}
+    <datalist id="st-labels"><option value="Most popular"><option value="New"><option value="Best value"></datalist>
+    <p class="st-note">${esc(W.pShown(n, gym.prices.length))} ${gym.tax && gym.tax.included ? esc(W.pTax) : ''}</p>`, 'launch');
+}
+
+function gLinks() {
+  const L = state.links, g = ownGym(), S = WORDS[state.lang], n = L.order.length;
+  const row = (id, i) => {
+    const it = linkItem(g, id, S), off = L.off.includes(id), c = L.custom.find(x => x.id === id), page = id.startsWith('page:') ? state.pages.find(p => 'page:' + p.slug === id) : null;
+    const name = c ? (c.name || W.lNew) : page ? (page.title || W.pgNew) : ZANA_LINKS[id][state.lang === 'es' && ZANA_LINKS[id][1] ? 1 : 0];
+    const kind = c ? W.lKind.mine : page ? W.lKind.page : W.lKind.zana;
+    const why = it ? '' : c ? W.lEmpty : page ? W.lNoPage : W.lNeeds(W.cName[id] || name);
+    const sub = it && (W.lSub[id] || it.sub || '');
+    return `<li class="st-row st-row--link${off || !it ? ' is-hidden' : ''}">
+      <div class="st-row__t"><b><span>${esc(name)}</span><em class="st-kind">${esc(kind)}</em></b>${why ? `<small class="st-why">${esc(why)}</small>` : sub ? `<small>${esc(sub)}</small>` : ''}
+        ${c ? `<div class="st-grid2 st-grid2--tight">${input('lname', id, c.name, W.lName, { spell: true })}${input('lurl', id, c.url, W.lUrl, { ph: 'example.com' })}</div><button type="button" class="st-link" data-do="ldel" data-v="${id}" data-id="ldel:${id}">${esc(W.lDel(c.name || W.lNew))}</button>` : ''}</div>
+      <button type="button" class="st-mv" data-do="lmove" data-v="${id}:-1" data-id="lmove:${id}:-1" aria-label="${esc(W.moveUp(name))}"${i ? '' : ' disabled'}>${I.up}</button>
+      <button type="button" class="st-mv" data-do="lmove" data-v="${id}:1" data-id="lmove:${id}:1" aria-label="${esc(W.moveDown(name))}"${i < n - 1 ? '' : ' disabled'}>${I.down}</button>
+      ${sw('lshow', id, !off && !!it, W.showSec(name), !it)}</li>`;
+  };
+  return card('links', 7, W.gLinks, `
+    <p class="st-addr">${esc(W.addr)} <b>${esc(gym.slug)}.zana.fit/links</b></p>
+    <ol class="st-rows">${L.order.map(row).join('')}</ol>
+    <p class="st-note">${esc(W.lMineHelp)}</p>
+    <div class="st-acts">${L.custom.length < CUSTOM_MAX ? `<button type="button" class="st-btn st-btn--ghost" data-do="ladd" data-id="ladd">${esc(W.lAdd)}</button>` : `<span class="st-note">${esc(W.lMax)}</span>`}
+      <a class="st-link" href="links.html" target="_blank" rel="noopener">${esc(W.tLinks)} ↗</a></div>`, 'launch');
+}
+
+const TB = [['h2', '<b>H</b>'], ['b', '<b>B</b>'], ['a', '<span class="st-tb__a">Link</span>'], ['p', '<span>¶</span>']];
+function gPages() {
+  const pg = curPage(), photos = gym.photos;
+  const pick = (kind, src) => `<div class="st-thumbs" role="group">${[null, ...photos].map((p, i) => `<button type="button" class="st-thumb${p ? '' : ' st-thumb--none'}" data-do="${kind}" data-v="${i - 1}" data-id="${kind}:${i - 1}" aria-pressed="${p ? p.src === src : !src}" aria-label="${esc(p ? W.photoN(i) : W.pgNone)}">${p ? `<img src="${esc(p.src)}" alt="" loading="lazy"${p.pos ? ` style="object-position:${p.pos}"` : ''}>` : `<span>${esc(W.pgNone)}</span>`}</button>`).join('')}</div>`;
+  const tabs = `<div class="st-pgtabs" role="group" aria-label="${esc(W.gPages[0])}">${state.pages.map(p => `<button type="button" data-do="pgsel" data-v="${esc(p.slug)}" data-id="pgsel:${esc(p.slug)}" aria-pressed="${!!pg && p.slug === pg.slug}" aria-label="${esc(W.pgEdit(p.title || W.pgNew))}">${esc(p.title || W.pgNew)}</button>`).join('')}
+    ${state.pages.length < PAGES_MAX ? `<button type="button" class="st-pgtabs__add" data-do="pgadd" data-id="pgadd">+ ${esc(W.pgAdd)}</button>` : ''}</div>
+    ${state.pages.length >= PAGES_MAX ? `<p class="st-note">${esc(W.pgMax)}</p>` : ''}`;
+  if (!pg) return card('pages', 8, W.gPages, tabs, 'launch');
+  const inLinks = !state.links.off.includes('page:' + pg.slug);
+  return card('pages', 8, W.gPages, `${tabs}
+    <div class="st-field">${input('pgtitle', pg.slug, pg.title, W.pgTitle, { spell: true })}
+      <label class="st-in"><span>${esc(W.pgAddr)}</span><span class="st-slug"><span>${esc(gym.slug)}.zana.fit/</span><input type="text" value="${esc(pg.slug)}" data-in="pgslug" data-k="${esc(pg.slug)}" data-id="in:pgslug" autocomplete="off" spellcheck="false"></span></label></div>
+    ${field(W.pgHero, pick('pghero', pg.hero && pg.hero.src) + input('pgherotext', pg.slug, (pg.hero || {}).text || '', W.pgHeroText, { spell: true }))}
+    ${field(W.pgBody, `<div class="st-tb" role="toolbar" aria-label="${esc(W.pgBody)}">${TB.map(([k, h]) => `<button type="button" data-tb="${k}" aria-label="${esc(W.tb[k])}" title="${esc(W.tb[k])}">${h}</button>`).join('')}</div>
+      <div class="st-rich" contenteditable="true" role="textbox" aria-multiline="true" aria-label="${esc(W.pgBody)}" data-rich data-id="rich">${cleanRich(pg.body)}</div><p class="st-note">${esc(W.pgBodyHelp)}</p>`)}
+    ${field(W.pgSide, pick('pgside', pg.side && pg.side.src) + input('pgsidetext', pg.slug, (pg.side || {}).text || '', W.pgSideText, { area: true, rows: 3, spell: true }))}
+    <div class="st-field">
+      <div class="st-opt"><div><b>${esc(W.pgFoot)}</b></div>${sw('pgfoot', pg.slug, pg.footer !== false, W.pgFoot)}</div>
+      <div class="st-opt"><div><b>${esc(W.pgLinks)}</b></div>${sw('pglinks', pg.slug, inLinks, W.pgLinks)}</div>
+      <p class="st-note">${esc(W.pgRule)}</p>
+      <div class="st-acts"><a class="st-link" href="content.html?p=barrio-games-2026" target="_blank" rel="noopener">${esc(W.pgOpen)} ↗</a><button type="button" class="st-link" data-do="pgdel" data-v="${esc(pg.slug)}" data-id="pgdel">${esc(W.pgDel)}</button></div>
+    </div>`, 'launch');
+}
+
+function gLegal() {
+  const S = WORDS[state.lang];
+  return card('legal', 9, W.gLegal, `
+    <ul class="st-docs"><li>${esc(S.privacy)}<small>${esc(gym.slug)}.zana.fit/privacy</small></li><li>${esc(S.terms)}<small>${esc(gym.slug)}.zana.fit/terms</small></li></ul>
+    <p class="st-note">${esc(W.lgWhere)}</p>
+    <div class="st-acts"><button type="button" class="st-btn st-btn--ghost" data-do="lgsee" data-id="lgsee">${esc(W.lgSee)}</button></div>`, 'launch');
 }
 
 /* ---------- drawing the screen ---------- */
@@ -426,8 +579,9 @@ function render(focus) {
     <div class="st-top__end"><div class="st-lang" role="group" aria-label="${esc(W.language)}">${['en', 'es'].map(l => `<button type="button" data-do="lang" data-v="${l}" data-id="lang:${l}" aria-pressed="${l === state.lang}" lang="${l}">${l.toUpperCase()}</button>`).join('')}</div>
     <button type="button" class="st-btn" data-do="publish" data-id="publish">${esc(W.publish)}</button></div>`;
   $('#st-body').dataset.view = state.view;
-  $('#st-settings').innerHTML = summary(s) + gStyle(s) + gBrand(s) + gSpace(s) + gFx(s) + gHero(s) + gSec(s);
-  $('#st-pvbar').innerHTML = `<h2>${esc(W.pvTitle)}</h2><p>${esc(W.pvNote)}</p>${seg('device', [['phone', W.phone], ['laptop', W.laptop]], state.device, W.pvTitle)}`;
+  $('#st-settings').innerHTML = summary(s) + gStyle(s) + gBrand(s) + gHero(s) + gSec(s) + gContact() + gPrices() + gLinks() + gPages() + gLegal() + gSpace(s) + gFx(s);
+  $('#st-pvbar').innerHTML = `<h2>${esc(W.pvTitle)}</h2><p>${esc(W.pvNote)}</p>${seg('device', [['phone', W.phone], ['laptop', W.laptop]], state.device, W.pvTitle)}
+    <div class="st-pv__tgt">${seg('pv', [['page', W.tPage], ['links', W.tLinks], ['content', W.tContent]], state.target, W.showing)}</div>`;
   $('#st-switch').innerHTML = [['settings', W.vSettings], ['preview', W.vPreview]].map(([v, l]) => `<button type="button" data-do="view" data-v="${v}" data-id="view:${v}" aria-pressed="${v === state.view}">${esc(l)}</button>`).join('');
   if (frame) frame.title = W.pvTitle;
   root.style.setProperty('--labs-h', $('#st-labs').offsetHeight + 'px');
@@ -447,7 +601,7 @@ function mountFrame() {
   if (frame) return;
   frame = document.createElement('iframe');
   frame.title = W.pvTitle;
-  frame.src = 'preview.html?v=17';
+  frame.src = 'preview.html?v=18';
   $('#st-holder').append(frame);
   fit();
 }
@@ -479,14 +633,15 @@ function fit() {
 }
 
 /* tell the frame the settings in force. focus: the part of the page to glide to. fromTop: start again at the top. */
-function send(extra = {}) {
+function send(more = {}) {
   if (!frame || !ready) return;
-  if (!shown()) { stale = true; waiting.focus = extra.focus || waiting.focus; waiting.fromTop = waiting.fromTop || !!extra.fromTop; return; }
+  if (!shown()) { stale = true; waiting.focus = more.focus || waiting.focus; waiting.fromTop = waiting.fromTop || !!more.fromTop; return; }
   const lg = state.logo, cv = state.cover;
   frame.contentWindow.postMessage({
     zana: 'settings', s: cur(), lang: state.lang, stamp: state.stamp, brand: brandNow(),
     logo: lg ? { src: lg.src, mono: lg.mono, ratio: lg.ratio } : null, cover: cv ? { src: cv.src, pos: cv.pos } : null,
-    focus: extra.focus || waiting.focus || null, fromTop: !!(extra.fromTop || waiting.fromTop), redraw: !!(extra.redraw || stale),
+    focus: more.focus || waiting.focus || null, fromTop: !!(more.fromTop || waiting.fromTop), redraw: !!(more.redraw || stale),
+    target: state.target, page: state.pg, extra: extra(),
   }, location.origin);
   stale = false; waiting.focus = null; waiting.fromTop = false;
 }
@@ -500,7 +655,17 @@ function relayout() {
 window.addEventListener('message', e => {
   if (!frame || e.origin !== location.origin || e.source !== frame.contentWindow) return;
   if (e.data && e.data.zana === 'ready') { ready = true; stale = true; send({ fromTop: true }); }
+  /* a link pressed inside the preview: the page, the links list or a content page */
+  if (e.data && e.data.zana === 'target') {
+    const was = state.target + state.pg;
+    state.target = e.data.v; if (e.data.page && state.pages.some(p => p.slug === e.data.page)) state.pg = e.data.page;
+    render(); send({ fromTop: was !== state.target + state.pg, focus: e.data.focus && e.data.focus !== 'top' ? e.data.focus : null });
+  }
 });
+
+/* what the preview shows follows the setting being changed. Switching what it shows starts it at the top. */
+const aim = t => { const was = state.target; state.target = t; return was !== t; };
+const slugOf = t => (String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48));
 
 /* ---------- what each control does ---------- */
 const FX_AT = { lightup: 'statement', strip: 'offer', word: 'top', bar: 'top' };   // where to look after switching an effect
@@ -559,6 +724,54 @@ function act(name, v, el) {
       return;
     case 'plan': state.plan = !state.plan; render(keep); return;
     case 'publish': toast(W.publishToast); return;
+    case 'pv': if (v === state.target) return; state.target = v; fromTop = true; break;
+    /* prices: featured on the page or behind "See all" */
+    case 'feat': { const p = state.prices[v]; if (!p) return; p.onPage = !p.onPage; fromTop = aim('page'); focus = 'prices'; break; }
+    /* the links list */
+    case 'lshow': { const L = state.links; L.off = L.off.includes(v) ? L.off.filter(x => x !== v) : [...L.off, v]; fromTop = aim('links'); break; }
+    case 'lmove': {
+      const [id, dir] = v.split(':'), o = state.links.order, i = o.indexOf(id), j = i + +dir;
+      if (i < 0 || j < 0 || j >= o.length) return;
+      o.splice(j, 0, o.splice(i, 1)[0]); fromTop = aim('links');
+      keep = [`[data-id="lmove:${id}:${dir}"]`, `[data-id="lmove:${id}:${-dir}"]`];
+      break;
+    }
+    case 'ladd': {
+      const L = state.links; if (L.custom.length >= CUSTOM_MAX) return;
+      let n = 1; while (L.custom.some(c => c.id === 'c' + n)) n++;
+      const id = 'c' + n; L.custom.push({ id, name: '', url: '' }); L.order.push(id); fromTop = aim('links');
+      keep = [`[data-id="in:lname:${id}"]`];
+      break;
+    }
+    case 'ldel': { const L = state.links; L.custom = L.custom.filter(c => c.id !== v); L.order = L.order.filter(x => x !== v); L.off = L.off.filter(x => x !== v); fromTop = aim('links'); keep = ['[data-id="ladd"]']; break; }
+    /* content pages */
+    case 'pgsel': if (v === state.pg && state.target === 'content') return; state.pg = v; aim('content'); fromTop = true; break;
+    case 'pgadd': {
+      if (state.pages.length >= PAGES_MAX) return;
+      let n = 1; while (state.pages.some(p => p.slug === 'new-page' + (n > 1 ? '-' + n : ''))) n++;
+      const slug = 'new-page' + (n > 1 ? '-' + n : '');
+      state.pages.push({ slug, title: '', footer: true, hero: { src: gym.photos[0].src, text: '' }, body: '', side: {} });
+      state.links.order.push('page:' + slug); state.pg = slug; aim('content'); fromTop = true;
+      keep = [`[data-id="in:pgtitle:${slug}"]`];
+      break;
+    }
+    case 'pgdel': {
+      state.pages = state.pages.filter(p => p.slug !== v);
+      state.links.order = state.links.order.filter(x => x !== 'page:' + v); state.links.off = state.links.off.filter(x => x !== 'page:' + v);
+      state.pg = (state.pages[0] || {}).slug || null; fromTop = true; if (!state.pg) aim('page');
+      keep = ['[data-id="pgadd"]'];
+      break;
+    }
+    case 'pghero': case 'pgside': {
+      const pg = curPage(), p = gym.photos[+v], k = name === 'pghero' ? 'hero' : 'side';
+      if (!pg) return; pg[k] = { ...(pg[k] || {}), src: p ? p.src : null, pos: p ? p.pos : null };
+      if (aim('content')) fromTop = true;
+      break;
+    }
+    case 'pgfoot': { const pg = curPage(); if (!pg) return; pg.footer = pg.footer === false; fromTop = aim('content'); focus = 'find'; break; }
+    case 'pglinks': { const L = state.links, id = 'page:' + v; if (!L.order.includes(id)) L.order.push(id); L.off = L.off.includes(id) ? L.off.filter(x => x !== id) : [...L.off, id]; fromTop = aim('links'); break; }
+    /* legal: show the footer, where Privacy Policy and Terms are linked */
+    case 'lgsee': fromTop = aim('page'); focus = 'find'; break;
     default: return;
   }
   render(keep);
@@ -591,6 +804,69 @@ function liveColor() {
   if (chip) { chip.style.background = v['--bg']; chip.style.color = v['--ink']; }
   send();
 }
+/* typing in the owner's own fields: the preview follows each key, and the screen is drawn again once the field is left */
+let pointerDown = false, redrawLater = false;
+document.addEventListener('pointerdown', () => { pointerDown = true; }, true);
+document.addEventListener('pointerup', () => { pointerDown = false; if (redrawLater) setTimeout(() => { if (redrawLater) { redrawLater = false; softRender(); } }, 0); }, true);
+function softRender() {
+  const a = document.activeElement, id = a && a.dataset && a.dataset.id;
+  render(id ? [`[data-id="${CSS.escape(id)}"]`] : []);
+}
+function takeInput(el) {
+  const k = el.dataset.k, v = el.value, pg = curPage();
+  let fromTop = false, focus = null;
+  switch (el.dataset.in) {
+    case 'contact': state.contact[k] = v; fromTop = aim(state.target === 'links' ? 'links' : 'page'); focus = state.target === 'page' ? 'find' : null; break;
+    case 'plabel': state.prices[k].label = v; fromTop = aim('page'); focus = 'prices'; break;
+    case 'pticks': state.prices[k].ticks = v.split('\n').map(t => t.trim()).filter(Boolean); fromTop = aim('page'); focus = 'prices'; break;
+    case 'lname': case 'lurl': { const c = state.links.custom.find(x => x.id === k); if (!c) return; c[el.dataset.in === 'lname' ? 'name' : 'url'] = v.trim() ? v : ''; fromTop = aim('links'); break; }
+    case 'pgtitle': if (!pg) return; pg.title = v; fromTop = aim('content'); break;
+    case 'pgherotext': if (!pg) return; pg.hero = { ...(pg.hero || {}), text: v }; fromTop = aim('content'); break;
+    case 'pgsidetext': if (!pg) return; pg.side = { ...(pg.side || {}), text: v }; fromTop = aim('content'); focus = null; break;
+    case 'pgslug': return;                      // the address changes when the field is left, so the page keeps one address while it is typed
+    default: return;
+  }
+  if (fromTop) syncPv();
+  send({ fromTop, focus: fromTop ? null : focus });
+}
+function takeSlug(el) {
+  const pg = curPage(); if (!pg) return;
+  const want = slugOf(el.value) || pg.slug, used = state.pages.some(p => p !== pg && p.slug === want);
+  const slug = used ? pg.slug : want, old = pg.slug;
+  if (slug !== old) {
+    pg.slug = slug; state.pg = slug;
+    state.links.order = state.links.order.map(x => (x === 'page:' + old ? 'page:' + slug : x));
+    state.links.off = state.links.off.map(x => (x === 'page:' + old ? 'page:' + slug : x));
+  }
+  el.value = slug; send();
+}
+/* the text editor: headings, bold and links, nothing else */
+document.addEventListener('mousedown', e => { if (e.target.closest('[data-tb]')) e.preventDefault(); });   // keep the text selected while a toolbar button is pressed
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-tb]'); if (!b) return;
+  const box = $('[data-rich]'); if (!box) return;
+  if (!box.contains(document.getSelection().anchorNode)) box.focus();
+  const k = b.dataset.tb;
+  if (k === 'b') document.execCommand('bold');
+  else if (k === 'h2' || k === 'p') document.execCommand('formatBlock', false, k === 'h2' ? 'H2' : 'P');
+  else if (k === 'a') { const u = prompt(W.linkAsk, 'https://'); if (u && /^https?:\/\/\S+\.\S+/i.test(u.trim())) document.execCommand('createLink', false, u.trim()); }
+  takeRich(box);
+});
+function takeRich(box) { const pg = curPage(); if (!pg) return; pg.body = cleanRich(box.innerHTML); const t = aim('content'); if (t) syncPv(); send({ fromTop: t }); }
+function syncPv() { document.querySelectorAll('[data-do="pv"]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === state.target)); writeUrl(); }
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset && el.dataset.in) return takeInput(el);
+  if (el.matches && el.matches('[data-rich]')) return takeRich(el);
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (!(el.dataset && el.dataset.in)) return;
+  if (el.dataset.in === 'pgslug') takeSlug(el);
+  if (pointerDown) redrawLater = true; else softRender();
+});
+document.addEventListener('focusout', e => { if (e.target.matches && e.target.matches('[data-rich]')) { if (pointerDown) redrawLater = true; else softRender(); } });
+
 document.addEventListener('input', e => {
   const el = e.target, what = el.dataset && el.dataset.do;
   if (what !== 'pick' && what !== 'hex') return;

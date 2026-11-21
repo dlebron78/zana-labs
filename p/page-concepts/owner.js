@@ -9,20 +9,33 @@
    Light or dark, corners, the heading typeface and the photo look are not here on purpose: they stay with the style.
    The settings screen (settings.js) and its preview (preview.js) both read these rules, so they cannot disagree. */
 
-import { GYMS } from './data.js?v=17';
-import { RECIPES, ORDER, FX_DEFAULTS } from './recipes.js?v=17';
-import { HEROES } from './blocks.js?v=17';
-import { buildTokens } from './tokens.js?v=17';
+import { GYMS } from './data.js?v=18';
+import { RECIPES, ORDER, FX_DEFAULTS } from './recipes.js?v=18';
+import { HEROES } from './blocks.js?v=18';
+import { buildTokens } from './tokens.js?v=18';
+import { SHIP } from './launch.js?v=18';
 
 const P = '../gym-page/img/';
 
-/* The owner in this mock: one invented gym with six photos in its library. It stays the same gym in every style. */
+/* The owner in this mock: Barrio 13 CrossFit, with six photos in its library (stock stand-ins). It stays the same business in every style. */
 export const OWNER_GYM = {
-  ...GYMS.litoral,
-  photos: [...GYMS.litoral.photos, { src: P + 'coach-plan.jpg', shape: 'wide', pos: '45% 40%' }, { src: P + 'box-ropes.jpg', shape: 'wide', pos: '60% 45%' }],
+  ...GYMS.barrio,
+  photos: [...GYMS.barrio.photos, { src: P + 'coach-plan.jpg', shape: 'wide', pos: '45% 40%' }],
 };
 
-export const STYLES = ORDER.filter(id => id !== 'solo');           // film, timetable, calm, mono. The solo trainer page has its own short list, not built in this mock
+/* The owner's own details, layered on the business: contact details, per-product label, "what you get" and featured,
+   the links list and the content pages. e: { place, prices: { id: {...} }, links, pages } */
+export function withOwner(base, e) {
+  if (!e) return base;
+  return {
+    ...base,
+    place: { ...base.place, ...(e.place || {}) },
+    prices: (base.prices || []).map(p => (e.prices && e.prices[p.id] ? { ...p, ...e.prices[p.id] } : p)),
+    links: e.links || base.links, pages: e.pages || base.pages,
+  };
+}
+
+export const STYLES = ['timetable', ...ORDER.filter(id => id !== 'solo' && id !== 'timetable')];   // timetable (the launch style for a business with classes), then film, calm, mono. The solo trainer page has its own short list, not built in this mock
 export const SPACES = ['compact', 'comfortable', 'airy'];
 export const SIZES = ['s', 'm', 'l'];                              // headline size, three steps inside the safe range
 export const OWNER_FX = ['rise', 'book', 'bar', 'lightup', 'strip', 'slide', 'word', 'pin'];   // "moving hero" is decided by the hero type instead
@@ -31,7 +44,7 @@ export const TOP = ['offer', 'bookbar'];                           // these keep
 export const LOCKED = ['schedule', 'prices'];                      // always shown: the Book button and the price link lead here
 const BLOCK_OF = {
   statement: ['statement'], classes: ['classCards'], schedule: ['scheduleCards', 'scheduleList'], coaches: ['coaches'],
-  first: ['firstVisit'], prices: ['priceCards'], reviews: ['reviews'], offer: ['offerStrip'], bookbar: ['bookingBar'],
+  first: ['firstVisit'], prices: ['priceCards'], reviews: ['reviews'], offer: ['offerStrip'], bookbar: ['bookingBar'], find: ['footer'],
 };
 export const blocksOf = key => BLOCK_OF[key] || [];
 
@@ -50,7 +63,7 @@ export const STYLE = {
    Each entry: the block, its options, whether it moves, and how the cover photo is used ("none" when it is not). */
 const HERO = {
   film:      { photo: ['heroFilm', {}, false, 'fill'], slideshow: ['heroFilm', { slides: true }, true, 'first'], video: ['heroFilm', {}, true, 'poster'] },
-  timetable: { today: ['heroSplit', { side: 'board' }, false, 'none'], photo: ['heroSplit', { side: 'photo' }, false, 'beside'], slideshow: ['heroFramed', {}, true, 'first'], video: ['heroFilm', {}, true, 'poster'] },
+  timetable: { today: ['heroSplit', { side: 'board' }, false, 'band'], photo: ['heroSplit', { side: 'photo' }, false, 'beside'], slideshow: ['heroFramed', {}, true, 'first'], video: ['heroFilm', {}, true, 'poster'] },
   calm:      { photo: ['heroTiles', {}, false, 'tile'], slideshow: ['heroTiles', {}, true, 'tile'], video: ['heroFilm', {}, true, 'poster'] },
   mono:      { photo: ['heroFilm', {}, false, 'fill'], slideshow: ['heroSlideshow', {}, true, 'none'], video: ['heroFilm', {}, true, 'poster'] },
 };
@@ -75,9 +88,11 @@ export function styleDefaults(style) {
     const a = st.add && st.add[k];
     order.splice(a ? order.indexOf(a.after) + 1 : order.length, 0, k);
   }
+  /* a launch style starts with only what ships at launch switched on. The owner can still switch on what comes later, tagged Later. */
+  const launch = SHIP.style[style] === 1, ships = k => !launch || !(k in SHIP.sec) || SHIP.sec[k] === 1;
   const show = {};
-  for (const k of [...TOP.filter(t => have.includes(t)), ...SECTIONS]) show[k] = have.includes(k);
-  const on = { ...FX_DEFAULTS, ...r.fx };
+  for (const k of [...TOP.filter(t => have.includes(t)), ...SECTIONS]) show[k] = have.includes(k) && ships(k);
+  const on = Object.fromEntries(Object.entries({ ...FX_DEFAULTS, ...r.fx }).map(([f, v]) => [f, v && (!launch || SHIP.fx[f] === 1)]));
   return { space: r.tokens.space, size: sizeOf(r.tokens.scale), hero: st.hero, fx: Object.fromEntries(OWNER_FX.map(f => [f, !!on[f]])), order, show };
 }
 
@@ -120,7 +135,7 @@ export const tokensOf = (s, brand) => buildTokens({ ...RECIPES[s.style].tokens, 
 /* The settings in force -> what page.js needs to build the page.
    o: { lang, brand, logo: { src, mono, ratio }, cover: { src, pos }, still: true when motion is reduced, gym } */
 export function compose(s, o = {}) {
-  const r = RECIPES[s.style], st = STYLE[s.style], base = o.gym || OWNER_GYM;
+  const r = RECIPES[s.style], st = STYLE[s.style], base = withOwner(o.gym || OWNER_GYM, o.extra);
   const list = listOf(s.style), iHero = list.findIndex(b => HEROES.includes(b[0]));
   const [heroName, heroOpt, moving] = HERO[s.style][s.hero];
 
@@ -145,14 +160,15 @@ export function compose(s, o = {}) {
     if (b[0] === 'classCards' && opt.variant === 'plain') opt.pin = false;          // a style with plain class cards keeps them plain
     if (b[0] === 'firstVisit') {                                                    // never the photo the hero is already showing
       let n = Math.min(opt.photo || 0, photos.length - 1);
-      if (n === 0 && coverUse(s.style, s.hero) !== 'none' && photos.length > 1) n = 1;
+      if (n === 0 && coverUse(s.style, s.hero) !== 'none' && photos.length > 1) n = 1;   // 'band' counts: the cover is already on screen
       opt.photo = n;
     }
     return [b[0], opt];
   });
   let tinted = false;                                                               // two tinted sections never sit back to back
   for (const b of content) { if (b[1].band && tinted) b[1].band = false; tinted = !!b[1].band; }
-  const recipe = { ...r, blocks: [...above, [heroName, { ...heroOpt }], ...under, ...content, 'footer'] };
+  const band = coverUse(s.style, s.hero) === 'band' ? [['coverBand', {}]] : [];        // a hero with no photo of its own: the cover photo as a wide band right under it
+  const recipe = { ...r, blocks: [...above, [heroName, { ...heroOpt }], ...band, ...under, ...content, 'footer'] };
 
   const want = { ...FX_DEFAULTS, ...r.fx, ...s.fx, hero: moving };
   const fx = o.still ? { book: want.book, bar: want.bar } : want;                  // reduced motion: only the two that do not move content

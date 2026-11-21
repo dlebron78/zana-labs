@@ -3,9 +3,9 @@
    2. runs the recipe's blocks in order and joins what they return
    3. wires the few things a visitor can press (day tabs, hero tabs, the phone menu, language, Book) */
 
-import { BLOCKS, WORDS, BLOCK_NAMES, HEROES, SCHEDULES, followBook, esc } from './blocks.js?v=17';
-import { buildTokens } from './tokens.js?v=17';
-import { setSlide } from './effects.js?v=17';
+import { BLOCKS, WORDS, BLOCK_NAMES, HEROES, SCHEDULES, followBook, esc } from './blocks.js?v=18';
+import { buildTokens } from './tokens.js?v=18';
+import { setSlide } from './effects.js?v=18';
 
 const pad2 = n => String(n).padStart(2, '0');
 const capFirst = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -20,7 +20,7 @@ export function makeContext(gym, { lang = 'en', fx = {}, voice = 'roof', follow 
   const solo = gym.unit === 'session';   // a personal trainer sells sessions, not classes, and the words change with that
   const S = solo ? { ...WORDS[lang], ...WORDS[lang].session, nav: { ...WORDS[lang].nav, ...WORDS[lang].session.nav } } : WORDS[lang];
   const L = o => (o == null ? '' : typeof o === 'string' ? o : (o[lang] ?? o.en ?? o.es ?? ''));
-  const money = n => '$' + n;
+  const money = n => '$' + (Number.isInteger(n) ? n : n.toFixed(2));
   const time = t => { const [h, m] = t.split(':').map(Number); return { clock: `${h % 12 || 12}:${pad2(m)}`, ap: lang === 'es' ? (h < 12 ? 'a.\u00a0m.' : 'p.\u00a0m.') : (h < 12 ? 'AM' : 'PM') }; };   /* \u00a0 keeps "a. m." on one line */
   const timeStr = t => { const v = time(t); return `${v.clock}\u00a0${v.ap}`; };
 
@@ -83,7 +83,7 @@ export function makeContext(gym, { lang = 'en', fx = {}, voice = 'roof', follow 
   /* the menu only links to sections that have something to show */
   const has = n => blocks.some(b => b[0] === n);
   const hasSched = (has('scheduleCards') || has('scheduleList')) && rows.length > 0, hasPrices = has('priceCards') && priced.length > 0;
-  const place = gym.place || {}, hasPlace = !!((place.addr && place.addr.length) || place.phone || place.email);
+  const place = gym.place || {}, hasPlace = !!((place.addr && place.addr.length) || place.phone || place.whatsapp || place.instagram || place.tiktok || place.email);
   const nav = [
     has('classCards') && classes.length > 0 && { id: 'classes', label: S.nav.classes },
     hasSched && { id: 'schedule', label: S.nav.schedule },
@@ -122,9 +122,9 @@ const defs = duo => `<svg class="zp-defs" aria-hidden="true" focusable="false"><
       hero / sched  swap the recipe's hero or schedule block for another one
       off     positions in the recipe's block list to leave out */
 /* A business may be missing almost anything. The gaps are filled once here, so no block has to ask whether a list exists. */
-const tidy = g => ({
+export const tidy = g => ({
   ...g, photos: g.photos || [], classes: g.classes || [], schedule: g.schedule || [], coaches: g.coaches || [], reviews: g.reviews || [],
-  prices: (g.prices || []).filter(p => p && Number.isFinite(p.price)), logo: g.logo || { word: g.name }, place: { addr: [], hours: [], ...(g.place || {}) },
+  prices: (g.prices || []).filter(p => p && Number.isFinite(p.price)), logo: g.logo || { word: g.name }, place: { addr: [], hours: [], ...(g.place || {}) }, pages: g.pages || [],
 });
 
 export function buildPage(recipe, gym, o = {}) {
@@ -165,7 +165,31 @@ export function labelBlocks(root) {
   root.querySelectorAll('[data-block]').forEach(el => { const n = BLOCK_NAMES[el.dataset.block]; if (n) el.dataset.label = n.en; });
 }
 
-/* The things a visitor can press. hooks: { setLang(lang), still(): true when motion is reduced } */
+/* The legal panel: Privacy Policy or Terms, opened from a footer link. Shared with the links list and the content pages (extras.js). */
+let sheetFrom = null;
+export function openSheet(root, k, from) {
+  const sh = root.querySelector('[data-sheet]'); if (!sh) return;
+  sh.querySelectorAll('[data-doc]').forEach(d => { d.hidden = d.dataset.doc !== k; });
+  sh.hidden = false; sheetFrom = from || null;
+  document.documentElement.classList.add('zp-locked');
+  const x = sh.querySelector(`[data-doc="${k}"] .zp-sheet__x`); if (x) x.focus({ preventScroll: true });
+}
+export function closeSheet(root) {
+  const sh = root.querySelector('[data-sheet]'); if (!sh || sh.hidden) return false;
+  sh.hidden = true; document.documentElement.classList.remove('zp-locked');
+  if (sheetFrom && sheetFrom.isConnected) sheetFrom.focus({ preventScroll: true });
+  return true;
+}
+/* Where an inside link goes. The page, its links list and its content pages are separate addresses.
+   hooks.go lets the owner's preview frame keep everything inside itself. */
+export function goWhere(v, hooks = {}) {
+  if (hooks.go) return hooks.go(v);
+  if (v === 'links') location.href = 'links.html';
+  else if (v.startsWith('page:')) location.href = 'content.html?p=' + encodeURIComponent(v.slice(5));
+  else location.href = './?r=timetable&launch=1#' + v;
+}
+
+/* The things a visitor can press. hooks: { setLang(lang), still(): true when motion is reduced, go(where) } */
 export function wirePage(root, page, hooks = {}) {
   const { x } = page, S = x.S;
   const how = () => (hooks.still && hooks.still() ? 'auto' : 'smooth');
@@ -210,6 +234,15 @@ export function wirePage(root, page, hooks = {}) {
       case 'reserve': e.preventDefault(); say(S.toast); return;
       case 'noop': e.preventDefault(); return;
       case 'clearfilter': setFilter(''); return;
+      case 'allprices': {                                   // "See all": the products the owner did not feature, in the same grid
+        const sec = t.closest('[data-block]'), open = t.getAttribute('aria-expanded') !== 'true';
+        sec.querySelectorAll('[data-more]').forEach(el => { el.hidden = !open; });
+        t.setAttribute('aria-expanded', open); t.textContent = open ? t.dataset.few : t.dataset.all; return;
+      }
+      case 'legal': e.preventDefault(); openSheet(root, t.dataset.v, t); return;
+      case 'sheetclose': closeSheet(root); return;
+      case 'out': e.preventDefault(); say(S.out(t.dataset.name)); return;
+      case 'go': e.preventDefault(); goWhere(t.dataset.v, hooks); return;
       case 'pause': case 'find': return;                    // the moving hero owns the pause button; the form is handled on submit
     }
     if (t.matches('a[href^="#"]')) { e.preventDefault(); closeMenu(); goTo(t.getAttribute('href').slice(1)); }
@@ -225,6 +258,7 @@ export function wirePage(root, page, hooks = {}) {
   const line = navigator.connection || {};
   const lazyT = line.saveData || /2g/.test(line.effectiveType || '') ? 0 : setTimeout(loadAll, 2500);
   window.addEventListener('beforeprint', loadAll);
-  root.addEventListener('click', onClick); root.addEventListener('submit', onSubmit);
-  return () => { root.removeEventListener('click', onClick); root.removeEventListener('submit', onSubmit); window.removeEventListener('beforeprint', loadAll); clearTimeout(toastT); clearTimeout(lazyT); };
+  const onKey = e => { if (e.key === 'Escape' && closeSheet(root)) e.stopPropagation(); };
+  root.addEventListener('click', onClick); root.addEventListener('submit', onSubmit); document.addEventListener('keydown', onKey, true);
+  return () => { closeSheet(root); root.removeEventListener('click', onClick); root.removeEventListener('submit', onSubmit); document.removeEventListener('keydown', onKey, true); window.removeEventListener('beforeprint', loadAll); clearTimeout(toastT); clearTimeout(lazyT); };
 }

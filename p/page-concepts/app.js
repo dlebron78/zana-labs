@@ -2,13 +2,13 @@
    All it does: pick a recipe, keep track of what the viewer changed, and ask the framework to draw.
    The framework itself is data.js, tokens.js, blocks.js, effects.js, recipes.js and page.js. */
 
-import { GYMS, STRESS } from './data.js?v=17';
-import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=17';
-import { buildTokens, CHOICES } from './tokens.js?v=17';
-import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=17';
-import { mountEffects } from './effects.js?v=17';
-import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=17';
-import { SHIP, LAUNCH_STYLES, launchCut, launchFx } from './launch.js?v=17';
+import { GYMS, STRESS } from './data.js?v=18';
+import { RECIPES, ORDER, FX, FX_DEFAULTS } from './recipes.js?v=18';
+import { buildTokens, CHOICES } from './tokens.js?v=18';
+import { buildPage, applyTokens, labelBlocks, wirePage } from './page.js?v=18';
+import { mountEffects } from './effects.js?v=18';
+import { BLOCK_NAMES, HEROES, SCHEDULES } from './blocks.js?v=18';
+import { SHIP, LAUNCH_STYLES, LAUNCH_GYM, launchCut, launchFx } from './launch.js?v=18';
 
 const $ = (s, el = document) => el.querySelector(s);
 const stage = $('#stage'), topBar = $('#vw-top'), note = $('#vw-note'), panel = $('#vw-panel'), fab = $('#vw-fab');
@@ -63,11 +63,11 @@ function readUrl() {
 }
 
 /* The recipe and the business being shown. Usually the sample's own. A test account swaps the business;
-   the launch version cuts both down to phase 1 (see launch.js). Worked out once per draw. */
+   the launch version cuts both down to what ships at launch (see launch.js). Worked out once per draw. */
 let REC = null, GYM = null;
 function sync() {
   const r = RECIPES[state.r];
-  let g = state.gym ? STRESS[state.gym] : GYMS[r.gym];
+  let g = state.gym ? STRESS[state.gym] : GYMS[(state.launch && LAUNCH_GYM[r.id]) || r.gym];
   if (state.gym && r.id === 'solo') g = { ...g, unit: 'session', lead: 'prices' };       // the same thin account, as a trainer's
   ({ recipe: REC, gym: GYM } = state.launch ? launchCut(r, g, state.lang) : { recipe: r, gym: g });
 }
@@ -157,15 +157,15 @@ function paint(redrawPanel = true) {
 /* ---------- the demo's controls ---------- */
 function drawTop() {
   topBar.innerHTML = `<a class="vw-brand" href="./"><b>Zana</b><span>page framework</span></a>
-    <div class="vw-mid"><div class="vw-tabs" role="group" aria-label="Sample page">${ORDER.map(id => `<button type="button" class="vw-tab" data-do="r" data-v="${id}" aria-pressed="${id === state.r}"${later(id) ? ' disabled title="Not in the launch version. It comes with the owner settings screen."' : ''}>${RECIPES[id].name}</button>`).join('')}</div>
-    <button type="button" class="vw-launch" role="switch" aria-checked="${state.launch}" data-do="launch" title="Show only what ships in the first cut"><i></i><span>Launch version</span></button></div>
-    <div class="vw-end"><a class="vw-link" href="settings.html">Owner settings</a><a class="vw-link" href="spec.html">How it works</a><button type="button" class="vw-adjust" data-do="toggle" aria-expanded="${state.open}">${ICON}<span>Adjust<span class="vw-more"> this page</span></span></button></div>`;
+    <div class="vw-mid"><div class="vw-tabs" role="group" aria-label="Sample page">${ORDER.map(id => `<button type="button" class="vw-tab" data-do="r" data-v="${id}" aria-pressed="${id === state.r}"${later(id) ? ' disabled title="Not in the launch version. It comes later."' : ''}>${RECIPES[id].name}</button>`).join('')}</div>
+    <button type="button" class="vw-launch" role="switch" aria-checked="${state.launch}" data-do="launch" title="Show only what ships at launch"><i></i><span>Launch version</span></button></div>
+    <div class="vw-end"><a class="vw-link vw-link--x" href="links.html">Links list</a><a class="vw-link vw-link--x" href="content.html">Content page</a><a class="vw-link" href="settings.html">Customizer</a><a class="vw-link" href="spec.html">How it works</a><button type="button" class="vw-adjust" data-do="toggle" aria-expanded="${state.open}">${ICON}<span>Adjust<span class="vw-more"> this page</span></span></button></div>`;
 }
 
 /* a line under the top bar that says what is being shown, whenever it is not the full sample */
 function drawNote() {
   const bits = [];
-  if (state.launch) bits.push(`<b>Launch version.</b> Only what ships in the first cut: ${LAUNCH_STYLES.map(id => RECIPES[id].name).join(' and ')}, built from what Zana already holds. Staff set the color, logo and cover photo. No owner screen yet. <button type="button" data-do="launch">Show the full sample</button>`);
+  if (state.launch) bits.push(`<b>Launch version.</b> What ships at launch: ${LAUNCH_STYLES.map(id => RECIPES[id].name + (LAUNCH_GYM[id] && !state.gym ? ` (shown with ${GYMS[LAUNCH_GYM[id]].name})` : '')).join(' and ')}. The owner sets it up in the <a href="settings.html">customizer</a>. Also at launch: the <a href="links.html">links list</a> and <a href="content.html">content pages</a>. <button type="button" data-do="launch">Show the full sample</button>`);
   if (state.gym) bits.push(`<b>Test account: ${STRESS[state.gym].label.toLowerCase()}.</b> Spanish only, no photos, only what Zana stores today. <button type="button" data-do="gym" data-v="">Back to the sample's own business</button>`);
   note.innerHTML = bits.map(t => `<p>${t}</p>`).join('');
   note.hidden = !bits.length || state.bare;
@@ -184,12 +184,13 @@ function lookTab() {
   const named = colors.find(([c]) => c.toUpperCase() === brand);
   return `
     <div class="vw-group"><p class="vw-label">Sample page</p>
-      <div class="vw-samples">${ORDER.map(id => `<button type="button" data-do="r" data-v="${id}" aria-pressed="${id === state.r}"${later(id) ? ' disabled' : ''}><b>${RECIPES[id].name}</b><small>${later(id) ? 'Later' : GYMS[RECIPES[id].gym].name}</small></button>`).join('')}</div>
+      <div class="vw-samples">${ORDER.map(id => `<button type="button" data-do="r" data-v="${id}" aria-pressed="${id === state.r}"${later(id) ? ' disabled' : ''}><b>${RECIPES[id].name}</b><small>${later(id) ? 'Later' : GYMS[(state.launch && LAUNCH_GYM[id]) || RECIPES[id].gym].name}</small></button>`).join('')}</div>
       <p class="vw-help"><b>${rec.name}.</b> ${rec.line} Suits: ${rec.suits.charAt(0).toLowerCase() + rec.suits.slice(1)}</p>
       ${state.launch || state.gym ? '' : `<p class="vw-try"><b>Try this.</b> ${rec.try}</p>`}
     </div>
     <div class="vw-group"><p class="vw-label">What ships first</p>
-      ${toggle('launch', '1', state.launch, 'Launch version', 'Only the first cut: two styles, the sections Zana can fill today, three safe effects. Staff set one cover photo. No other words or photos an owner would have to add.')}
+      ${toggle('launch', '1', state.launch, 'Launch version', 'What ships at launch: two styles, the launch sections, three safe effects, one cover photo, price labels and what you get, contact details, Privacy and Terms in the footer. Timetable shows Barrio 13 CrossFit. The owner sets it up in the customizer.')}
+      <p class="vw-help">Also at launch, each its own view: the <a href="links.html">links list</a> and up to 3 <a href="content.html">content pages</a>.</p>
     </div>
     ${seg('Business data', 'gym', [['', 'Own'], ...Object.entries(STRESS).map(([k, g]) => [k, g.label])], state.gym || '')}
     <p class="vw-help">The three test accounts hold only what Zana stores today: no classes, one class, or eight with long names. Spanish only, no photos. Use them to check that nothing breaks.</p>
@@ -207,7 +208,7 @@ function lookTab() {
     <p class="vw-help">Body text is 18px. Headings stay between 2.5 and 3 times that, so the two always look like a pair. One exception to try: on Film and Mono the headline over the photo grows to about 4 times on a wide screen${page.tokens.facts.heroWide > page.tokens.facts.h1Laptop ? ` (${page.tokens.facts.heroWide}px here)` : ''}.</p>
     ${seg('Language', 'lang', [['en', 'English'], ['es', 'Español']], state.lang)}
     <div class="vw-row"><button type="button" data-do="reset">Reset this sample</button><button type="button" data-do="copy">Copy link</button></div>
-    <p class="vw-help">This panel is a viewer: it shows every knob the framework has. The short list a gym owner would get is in the <a href="settings.html">owner settings mock</a>.</p>`;
+    <p class="vw-help">This panel is a viewer: it shows every knob the framework has. The short list an owner gets is in the <a href="settings.html">customizer</a>.</p>`;
 }
 
 function motionTab() {
@@ -352,5 +353,7 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 document.documentElement.classList.toggle('vw-bare', state.bare);
 fab.innerHTML = `${ICON}<span>Adjust this page</span>`;
 if (!state.open && !state.bare) { document.documentElement.classList.add('vw-hint-on'); setTimeout(hintOff, 9000); }   /* a short pointer to the Adjust button, once per visit */
+const HASH = location.hash.slice(1);
 draw(false);
+if (HASH) requestAnimationFrame(() => { const el = root.querySelector('#' + CSS.escape(HASH)); if (el) el.scrollIntoView({ block: 'start' }); });   // a link from the links list or a content page (#schedule, #prices)
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.dispatchEvent(new Event('resize')));
