@@ -144,20 +144,20 @@ const GAPS=[
     const lap=LAP('Settings',`<div class="cap">Sunday, November 22</div><div class="ptitle">Settings</div><div class="tabs"><span class="on">Business</span><span>Look</span><span>Payments</span><span>Documents</span><span>Tracks</span><span>Tax</span></div><div class="card"><h3>Business</h3><div class="mute">On a laptop, tabs stay as they are in every option.</div></div>`);
     return `<div class="stage"><div><p class="lab">Phone · Money</p>${phoneMoney}</div><div><p class="lab">Phone · Settings</p>${phoneSettings}</div><div class="laptopwrap"><p class="lab">Laptop · Settings</p>${lap}</div></div>`;}
 },
-{ id:'pills', title:'More than one pill on a row',
-  why:'Carmen owes three documents, so her row tries to show three red pills; they shrink to “Liability w…”, “L…” or an empty red box. Her profile header carries five.',
-  seen:'Seen on: People list (laptop and phone), the person page header.',
+{ id:'pills', title:'A pill whose word doesn’t fit',
+  why:'The rules already hold a row to one pill, the worst problem first (people/personFacts.ts rowFlag), and the kit lets that pill shrink before the name does (kit/Table.tsx, pick 9, your “go”). The trouble is the word: an unsigned document’s pill says the document’s own title, which a gym can make long, so it shrinks to “Liability w…” or “L…”. Separately, the person page’s header repeats pills the red card under it already says, which breaks “said once per screen”.',
+  seen:'Seen on: People list (laptop and phone), the person page header. Not a missing rule: the pill’s word is the choice to make.',
   pick:'B',
   opts:{
-    A:{short:'First pill, +2',name:'First pill, then +2',desc:'The most urgent pill shows in full; the rest collapse into a grey “+2” you can tap. A pill is never cut off: if it doesn’t fit, line 2 wraps.',trade:'Says which one first, but “+2” of what? You open the profile to find out.'},
-    B:{short:'Count per kind',name:'One pill per kind, with the count',desc:'Pills of the same kind merge: “3 TO SIGN”. A row never has more than one pill per kind, and never more than two in all. The profile lists them one by one, where there is room.',trade:'You lose which document from the list, which the list never needed: the desk’s act is the same (get her to sign).'},
-    C:{short:'Rest as words',name:'One pill, the rest as words',desc:'One pill for the worst problem; the others become a grey fact on line 2: “and 2 more to sign”.',trade:'Clear, but long on a phone, and a second problem of a different kind (owes money) reads as small grey text.'}
+    A:{short:'Title, never cut',name:'Keep the title, and let the name give way instead',desc:'Reverse pick 9: the pill keeps its full word, and the person’s name is cut first.',trade:'The pill reads, but “Carmen Ros…” is worse: the desk is scanning for a name.'},
+    B:{short:'Short word + count',name:'A short fixed word, with the count',desc:'The pill never carries a title: “TO SIGN”, or “3 TO SIGN” when she owes several. Short enough to never shrink. Which documents is the profile’s job, in its red card.',trade:'The list stops saying which document; the desk’s act is the same either way (get her to sign).'},
+    C:{short:'Word + title in grey',name:'A short pill, the title as a fact',desc:'The pill says “TO SIGN”; the document’s name moves to line 2 as grey text, cut if it must be.',trade:'Says which one, but line 2 was the plan’s place; a long title pushes the plan out on a phone.'}
   },
   render(o){
     const l2=(p)=>{const n=p[2].length;if(!n)return `<span class="pill red">Owes</span><span>${p[3]}</span>`;
-      if(o==='A')return `<span class="pill red">${p[2][0]}</span>${n>1?`<span class="tag grey">+${n-1}</span>`:''}<span>${p[3]}</span>`;
+      if(o==='A')return `<span class="pill red">${p[2][0]}</span><span>${p[3]}</span>`;
       if(o==='B')return `<span class="pill red">${n>1?n+' to sign':'To sign'}</span><span>${p[3]}</span>`;
-      return `<span class="pill red">${n>1?'To sign':p[2][0]}</span><span>${n>1?`${p[2][0]} and ${n-1} more · `:''}${p[3]}</span>`;};
+      return `<span class="pill red">To sign</span><span>${p[2][0]}${n>1?' +'+(n-1):''} · ${p[3]}</span>`;};
     const rows=PEOPLE.map(p=>`<div class="row"><span class="face">${p[0]}</span><div class="who"><b>${p[1]}</b><div class="l2">${l2(p)}</div></div></div>`).join('');
     const now=`<div class="row"><span class="face">CR</span><div class="who" style="display:flex;align-items:center;gap:6px"><b style="flex:none">Carmen Rosario</b><span class="pill red cut">Liability waiver</span><span class="pill red cut" style="max-width:22px">Waiver</span><span class="pill red cut" style="max-width:12px">T</span></div></div>`;
     const phone=PH('People',`<div class="card" style="padding:4px 14px">${rows}</div><p class="lab" style="margin-top:16px">Today, for comparison</p><div class="card" style="padding:4px 14px">${now}</div>`);
