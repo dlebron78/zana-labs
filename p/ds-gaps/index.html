@@ -100,6 +100,7 @@ h1{font-size:40px;line-height:1.1;letter-spacing:-.03em;margin:6px 0 10px}
 .intro{color:var(--t2);font-size:14px;margin:0 0 6px;max-width:60ch}
 .doc td:first-child{font-weight:500}
 .nowgrid{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}.nowgrid figure{margin:0;flex:0 1 auto;max-width:100%}.nowgrid img{display:block;max-width:100%;height:auto;max-height:620px;border:1px solid #D8D8D3;border-radius:12px;background:#fff}.nowgrid figcaption{font-size:13px;color:var(--t2);margin-top:6px;max-width:52ch}
+.chosen{display:inline-flex;margin-top:12px;background:var(--greenbg);color:var(--green);font-weight:600;font-size:14px;border-radius:8px;padding:6px 10px}
 .foot{margin-top:28px;color:var(--t3);font-size:13px}
 @media (max-width:760px){.stage>div{width:100%;min-width:0}h1{font-size:30px}.gap{padding:18px 16px}.gap h2{font-size:22px}.phone{width:100%}}
 </style>
@@ -122,7 +123,7 @@ const PH=(t,inner)=>`<div class="phone">${PHD(t)}<div class="ppage">${inner}</di
 const STAGE=(phone,laptop)=>`<div class="stage"><div><p class="lab">Phone · 390</p>${phone}</div><div class="laptopwrap"><p class="lab">Laptop</p>${laptop}</div></div>`;
 
 const STAFF=[['CP','Camila Pagán',['Front desk'],'Today'],['GP','Gabriela Pagán',['Coach'],'Today'],['IV','Isabel Vázquez',['Admin'],'Today'],['LM','Lucía Medina',['Coach','Front desk'],'Never signed in']];
-const PEOPLE=[['CR','Carmen Rosario',['Liability waiver','Waiver (demo)','Training intake'],'Unlimited monthly'],['BL','Beatriz Lugo',['Liability waiver'],'Nothing yet'],['YB','Yolanda Burgos',[],'Unlimited monthly · owes November'],['DT','Daniela Torres',['Liability waiver','Training intake'],'Yoga unlimited']];
+const PEOPLE=[['CR','Carmen Rosario',['Liability waiver','Waiver (demo)','Training intake'],'Unlimited monthly'],['BL','Beatriz Lugo',['Liability waiver'],'Nothing yet'],['YB','Yolanda Burgos',[],'Unlimited monthly · owes November'],['DT','Daniela Torres',['Liability waiver','Training intake'],'Yoga unlimited',true]];
 
 const GAPS=[
 { id:'tabs', title:'Tabs on a phone',
@@ -147,16 +148,18 @@ const GAPS=[
 { id:'pills', title:'A pill whose word doesn’t fit',
   why:'The rules already hold a row to one pill, the worst problem first (people/personFacts.ts rowFlag), and the kit lets that pill shrink before the name does (kit/Table.tsx, pick 9, your “go”). The trouble is the word: an unsigned document’s pill says the document’s own title, which a gym can make long, so it shrinks to “Liability w…” or “L…”. Separately, the person page’s header repeats pills the red card under it already says, which breaks “said once per screen”.',
   seen:'Seen on: People list (laptop and phone), the person page header. Not a missing rule: the pill’s word is the choice to make.',
-  pick:'B',
+  pick:'D',
   opts:{
     A:{short:'Title, never cut',name:'Keep the title, and let the name give way instead',desc:'Reverse pick 9: the pill keeps its full word, and the person’s name is cut first.',trade:'The pill reads, but “Carmen Ros…” is worse: the desk is scanning for a name.'},
     B:{short:'Short word + count',name:'A short fixed word, with the count',desc:'The pill never carries a title: “TO SIGN”, or “3 TO SIGN” when she owes several. Short enough to never shrink. Which documents is the profile’s job, in its red card.',trade:'The list stops saying which document; the desk’s act is the same either way (get her to sign).'},
-    C:{short:'Word + title in grey',name:'A short pill, the title as a fact',desc:'The pill says “TO SIGN”; the document’s name moves to line 2 as grey text, cut if it must be.',trade:'Says which one, but line 2 was the plan’s place; a long title pushes the plan out on a phone.'}
+    C:{short:'Word + title in grey',name:'A short pill, the title as a fact',desc:'The pill says “TO SIGN”; the document’s name moves to line 2 as grey text, cut if it must be.',trade:'Says which one, but line 2 was the plan’s place; a long title pushes the plan out on a phone.'},
+    D:{short:'Worst word +N',name:'One problem shows its word; several show the worst, plus a count',desc:'Daniel’s idea, 2026-11-22. One problem: a short fixed word (TO SIGN, PAST DUE, ACCESS OFF), never a document’s title. Several: the worst one’s word and how many more, “PAST DUE +2”, so money is never hidden behind a signature. On a laptop, hovering the pill lists the problems. Tapping the row opens her page at the red cards, one per problem, each with its button.',trade:'The list never names the document; the hover and her page do. One tap from the list to Sign now or Collect.'}
   },
   render(o){
-    const l2=(p)=>{const n=p[2].length;if(!n)return `<span class="pill red">Owes</span><span>${p[3]}</span>`;
+    const l2=(p)=>{const n=p[2].length;if(!n)return `<span class="pill red">${o==='D'?'Past due':'Owes'}</span><span>${p[3]}</span>`;
       if(o==='A')return `<span class="pill red">${p[2][0]}</span><span>${p[3]}</span>`;
       if(o==='B')return `<span class="pill red">${n>1?n+' to sign':'To sign'}</span><span>${p[3]}</span>`;
+      if(o==='D'){const iss=(p[4]?['Past due']:[]).concat(p[2].map(()=> 'To sign'));return `<span class="pill red">${iss[0]}${iss.length>1?' +'+(iss.length-1):''}</span><span>${p[3]}</span>`;}
       return `<span class="pill red">To sign</span><span>${p[2][0]}${n>1?' +'+(n-1):''} · ${p[3]}</span>`;};
     const rows=PEOPLE.map(p=>`<div class="row"><span class="face">${p[0]}</span><div class="who"><b>${p[1]}</b><div class="l2">${l2(p)}</div></div></div>`).join('');
     const now=`<div class="row"><span class="face">BL</span><div class="who" style="display:flex;align-items:center;gap:6px"><b style="flex:none">Beatriz Lugo</b><span class="tag outline" style="height:20px;font-size:12px">Invited</span><span class="pill red cut" style="max-width:34px">Liability waiver</span></div></div>`;
@@ -164,13 +167,15 @@ const GAPS=[
     const header=`<div class="card"><div style="display:flex;gap:14px;align-items:center"><span class="face" style="width:56px;height:56px;font-size:16px">CR</span><div><div style="font-size:28px;font-weight:700">Carmen Rosario</div><div class="l2" style="display:flex;gap:6px;align-items:center;color:var(--t2);font-size:14px">Member · since Nov 2026</div></div></div>
       <div class="prob"><b>${o==='B'?'3 documents to sign':'Liability waiver unsigned'}</b><div class="mute">They can’t book until ${o==='B'?'they’re':'it’s'} signed.</div>${o==='B'?`<div class="mute" style="margin-top:6px">Liability waiver · Waiver (demo) · Training intake</div>`:''}<div class="btns"><button class="btn main">Sign now</button></div></div>
       <div class="mute" style="margin-top:10px">Every option: the header drops the pills a card below already says (said once per screen).</div></div>`;
-    const lap=LAP('People',`<div class="cap">People</div><div class="ptitle" style="font-size:28px">Community</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div class="card" style="padding:4px 14px">${rows}</div><div>${header}</div></div>`);
+    const hover=`<div class="card" style="padding:12px 14px;box-shadow:0 12px 32px rgba(0,0,0,.14);margin-top:0"><div class="kind">On hover · Carmen Rosario</div><div style="margin-top:6px;font-size:14px;line-height:1.7">To sign · Liability waiver<br>To sign · Waiver (demo)<br>To sign · Training intake</div></div>`;
+    const page=`<div class="card"><div class="kind">Tap the row · her page opens here</div><div style="font-size:24px;font-weight:700;margin-top:4px">Carmen Rosario</div><div class="mute">Member · since Nov 2026</div>${['Liability waiver','Waiver (demo)','Training intake'].map((d,k)=>`<div class="prob" style="margin-top:${k?8:12}px"><b>${d} unsigned</b><div class="mute">She can’t book until it’s signed.</div><div class="btns"><button class="btn sm ${k?'white':'main'}">Sign now</button></div></div>`).join('')}</div>`;
+    const lap=LAP('People',`<div class="cap">People</div><div class="ptitle" style="font-size:28px">Community</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div class="card" style="padding:4px 14px">${rows}</div><div>${o==='D'?hover+page:header}</div></div>`);
     return STAGE(phone,lap);}
 },
 { id:'cardbtn', title:'Buttons on a grey or tinted card',
   why:'A tonal button is grey, so on a grey or pink card it fades. With no rule, each screen did something different: white on the payment card, white with a border on the person page, grey on the pink card.',
   seen:'Seen on: the payment card (Email receipt · Download), the Lead card (Message · Sell), the person page (Call · Message), the problem card (Sign now).',
-  pick:'A',
+  pick:'A', chosen:'A',
   opts:{
     A:{short:'White',name:'White, no border',desc:'On any card that isn’t white (grey, pink, blue), the second button is white with no border. The main button stays black. One rule for every tint.',trade:'On the pink problem card, white reads a little loud; fine, since that card is asking for action anyway.'},
     B:{short:'Deeper shade',name:'A deeper shade of the card',desc:'The second button takes a darker tone of its card: grey card → #E4E4E0; pink → #FAD7D3 with red text; blue → #D6E2FB with blue text.',trade:'Prettier, but a new button colour for every card colour: three more to keep straight.'},
@@ -188,7 +193,7 @@ const GAPS=[
 { id:'tag', title:'A plain label that isn’t a status',
   why:'Staff roles and Required/Optional are facts, not problems or news, but there is no style for them, so screens drew black pills. Black is the main button’s colour.',
   seen:'Seen on: People › Staff (roles), Settings › Documents (REQUIRED, OPTIONAL).',
-  pick:'C',
+  pick:'C', chosen:'C',
   opts:{
     A:{short:'Grey tag',name:'A grey tag',desc:'The quiet grey pair (#F0F0ED / #4A4A48), sentence case, not capitals, so it never reads as a status pill.',trade:'Clear and calm, but a list full of grey boxes is busy.'},
     B:{short:'Outlined tag',name:'An outlined tag',desc:'A thin line, grey text, no fill.',trade:'Lighter, but it looks like a button you can tap.'},
@@ -209,7 +214,7 @@ const GAPS=[
 { id:'heading', title:'A tab’s own heading under the page title',
   why:'Settings shows “Settings” at 40, then “Documents” at 28 under it. Today shows “Today”, then “Good morning” with the date a second time. My classes says its name twice.',
   seen:'Seen on: Today, Settings › Documents, Training (Programs · Programs), My classes.',
-  pick:'A',
+  pick:'A', chosen:'A',
   opts:{
     A:{short:'No tab heading',name:'No tab heading: the tab is the heading',desc:'The page has one title. The chosen tab says where you are. A tab’s button and one-line intro sit at the top of its content, right-aligned. Today has one title too: the greeting replaces “Today”.',trade:'Nothing big names the tab; the underline does that job.'},
     B:{short:'Small heading',name:'A small tab heading',desc:'A tab may have a heading at card-title size (20), never 28, and only when it has an intro line or its own button.',trade:'Two titles stay, just quieter; the page still says its name twice when a tab is a page’s main view.'},
@@ -238,7 +243,7 @@ const NOW={
 function nowView(id){return `<div class="nowgrid">${NOW[id].map(([f,c])=>`<figure><img src="now/${f}" alt="${c}" loading="lazy"><figcaption>${c}</figcaption></figure>`).join('')}</div>`;}
 function draw(){
   $('#gaps').innerHTML=GAPS.map((g,i)=>`<section class="gap" id="${g.id}"><div class="cap">Gap ${i+1} of 5</div><h2>${g.title}</h2><p class="why">${g.why}</p><div class="seen">${g.seen}</div>
-    <div class="pickrow"><div class="seg" role="group" aria-label="Options for gap ${i+1}"><button data-g="${i}" data-o="Now" aria-pressed="${g.cur==='Now'}">Now</button>${Object.keys(g.opts).map(k=>`<button data-g="${i}" data-o="${k}" aria-pressed="${k===g.cur}">${k} · ${g.opts[k].short}${k===g.pick?'<span class="star">★</span>':''}</button>`).join('')}</div></div>
+    ${g.chosen?`<div class="chosen">✓ Daniel picked ${g.chosen} · ${g.opts[g.chosen].short} (2026-11-22)</div>`:''}<div class="pickrow"><div class="seg" role="group" aria-label="Options for gap ${i+1}"><button data-g="${i}" data-o="Now" aria-pressed="${g.cur==='Now'}">Now</button>${Object.keys(g.opts).map(k=>`<button data-g="${i}" data-o="${k}" aria-pressed="${k===g.cur}">${k} · ${g.opts[k].short}${k===g.pick?'<span class="star">★</span>':''}</button>`).join('')}</div></div>
     ${g.cur==='Now'?`<p class="opt"><b>Now.</b> Today’s screens, from the scan of Nov 22 (the preview’s fake gym). Tap an option to see a fix.</p><div data-stage="${i}">${nowView(g.id)}</div>`:`<p class="opt"><b>${g.cur} · ${g.opts[g.cur].name}.</b> ${g.opts[g.cur].desc}<span class="trade">Trade-off: ${g.opts[g.cur].trade}</span></p>
     <div data-stage="${i}">${g.render(g.cur)}</div>`}</section>`).join('');
 }
