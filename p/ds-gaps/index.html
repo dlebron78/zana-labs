@@ -125,12 +125,12 @@ const STAFF=[['CP','Camila Pagán',['Front desk'],'Today'],['GP','Gabriela Pagá
 const PEOPLE=[['CR','Carmen Rosario',['Liability waiver','Waiver (demo)','Training intake'],'Unlimited monthly'],['BL','Beatriz Lugo',['Liability waiver'],'Nothing yet'],['YB','Yolanda Burgos',[],'Unlimited monthly · owes November'],['DT','Daniela Torres',['Liability waiver','Training intake'],'Yoga unlimited']];
 
 const GAPS=[
-{ id:'tabs', title:'Tabs that don’t fit on a phone',
-  why:'Settings has 9 tabs; on a phone they wrap into 4 rows before any content. On Money, + Collect sits on the tab row and covers “Owed to you”.',
-  seen:'Seen on: Settings and Money (phone). People and Training have the same shape.',
+{ id:'tabs', title:'Tabs on a phone',
+  why:'Half of this is already answered: the kit’s Tabs scroll in one row on a phone and never wrap (kit/Tabs.tsx, PHO-341). But no screen uses them. Settings and Training still use the old interim tab bar, which wraps into 4 rows; Money and People drew their own. What the system really lacks is where a page’s button goes when it has tabs: Money put + Collect on the tab row, and it covers “Owed to you”.',
+  seen:'Seen on: Settings and Training (old tab bar), Money (button on the tab row). Fix for all: use the kit’s Tabs.',
   pick:'C',
   opts:{
-    A:{short:'Scrolling row',name:'One row that scrolls',desc:'Tabs stay one line and scroll sideways; the edge fades so you can tell there is more, and the chosen tab scrolls into view. A page’s button never shares the tab row: on a phone it sits in its own row above the tabs, on the right.',trade:'Hidden tabs are easy to miss: an owner may never find “Zana plan”.',
+    A:{short:'Kit as is',name:'The kit as it is, plus a place for the button',desc:'What kit/Tabs already does: one line that scrolls sideways; the edge fades so you can tell there is more, and the chosen tab scrolls into view. A page’s button never shares the tab row: on a phone it sits in its own row above the tabs, on the right.',trade:'Hidden tabs are easy to miss: an owner may never find “Zana plan”.',
       phone:()=>`<div class="actrow"><button class="btn sm">⋯</button><button class="btn sm main">+ Collect</button></div><div class="tabs scroll" style="margin-top:4px"><span>Products</span><span>Tracks</span><span class="on">Owed to you</span><span>Ledger</span></div><div class="card"><h3>Owed to you</h3><div class="mute">$129.00 owed by 1 person</div></div>`},
     B:{short:'Drop-down',name:'A drop-down in place of the tabs',desc:'On a phone the tab row becomes one box that names the tab you’re on (Payments ▾); tap it for the list. The laptop keeps tabs.',trade:'One tap more to switch, and the other tabs are out of sight until you open it.',
       phone:()=>`<div class="sel">Owed to you <span style="color:var(--t3)">▾</span></div><div class="actrow" style="margin-top:12px"><button class="btn sm main">+ Collect</button></div><div class="card"><h3>Owed to you</h3><div class="mute">$129.00 owed by 1 person</div></div>`},
