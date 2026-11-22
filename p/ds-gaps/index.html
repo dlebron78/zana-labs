@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Design system gaps</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+[hidden]{display:none!important}
+:root{--ink:#111;--frame:#0E0E0E;--on-frame:#A3A3A0;--t2:#4A4A48;--t3:#5C5C59;--line:#E8E8E5;--row:#F0F0ED;--page:#F5F5F3;--card:#fff;--fill:#F0F0ED;--fillh:#E4E4E0;--sel:#EDEDEA;
+--red:#A8261B;--redbg:#FDE8E6;--prob:#FDF1EF;--probline:#F6D3CE;--blue:#1F4FB8;--bluebg:#E5EEFF;--green:#17663A;--greenbg:#E4F5E8;
+--sans:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:#E9E9E6;color:var(--ink);overflow-x:hidden}
+body{font:15px/1.45 var(--sans);-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1240px;margin:0 auto;padding:32px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px))}
+.cap{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+h1{font-size:40px;line-height:1.1;letter-spacing:-.03em;margin:6px 0 10px}
+.lead{max-width:70ch;color:var(--t2);margin:0 0 8px}
+.gap{background:#FBFBFA;border:1px solid var(--line);border-radius:20px;padding:24px;margin-top:28px}
+.gap h2{font-size:28px;margin:4px 0 6px;letter-spacing:-.02em}
+.gap .why{color:var(--t2);max-width:80ch;margin:0}
+.gap .seen{font-size:13px;color:var(--t3);margin-top:6px}
+.pickrow{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:18px 0 10px}
+.seg{display:inline-flex;flex-wrap:wrap;max-width:100%;background:var(--fill);border-radius:10px;padding:3px;gap:2px}
+.seg button{white-space:nowrap;border:0;background:none;border-radius:8px;height:34px;padding:0 14px;font-size:15px;font-weight:500;color:var(--t2)}
+.seg button[aria-pressed=true]{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.seg button .star{font-size:12px;margin-left:4px}
+.opt{max-width:85ch;margin:0 0 16px}
+.opt b{font-weight:600}.opt .trade{color:var(--t3);display:block;margin-top:4px;font-size:14px}
+.stage{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.lab{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);margin:0 0 6px}
+.phone{width:390px;max-width:100%;flex:none;background:var(--page);border:1px solid #D8D8D3;border-radius:28px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.laptopwrap{flex:1 1 560px;min-width:0;overflow-x:auto}
+.laptop{min-width:640px;background:var(--page);border:1px solid #D8D8D3;border-radius:14px;overflow:hidden;display:grid;grid-template-columns:72px 1fr}
+.band{background:var(--frame);display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:14px}
+.band .tile{width:32px;height:32px;border-radius:9px;background:#fff;color:var(--frame);font-weight:700;font-size:12px;display:grid;place-items:center;margin-bottom:10px}
+.band .bi{width:58px;height:50px;border-radius:12px;color:var(--on-frame);font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.band .bi i{width:16px;height:16px;border:2px solid currentColor;border-radius:5px;opacity:.8}
+.band .bi.on{background:rgba(255,255,255,.13);color:#fff;font-weight:600}
+.lpage{padding:22px 28px 28px;min-width:0}
+.phd{height:56px;background:var(--frame);color:#fff;display:flex;align-items:center;gap:10px;padding:0 16px;font-weight:700;font-size:18px}
+.phd .tile{width:32px;height:32px;border-radius:9px;background:#fff;color:var(--frame);font-size:12px;display:grid;place-items:center}
+.phd .sp{flex:1}.phd .face{width:32px;height:32px;border-radius:50%;background:#C9B7A6;color:#111;font-size:12px;display:grid;place-items:center}
+.ppage{padding:16px 16px 22px}
+.ptitle{font-size:40px;font-weight:700;letter-spacing:-.03em;margin:2px 0 0;line-height:1.1}
+.phone .ptitle{font-size:28px}
+.titlerow{display:flex;align-items:flex-end;gap:12px}
+.titlerow .grow{flex:1;min-width:0}
+.btn{border:0;border-radius:10px;height:36px;padding:0 14px;font-size:15px;font-weight:600;background:var(--fill);color:var(--ink);white-space:nowrap}
+.btn.main{background:var(--ink);color:#fff}
+.btn.sm{height:32px;border-radius:8px;font-size:14px;padding:0 12px}
+.btn.white{background:#fff}
+.btn.risk{background:var(--redbg);color:var(--red)}
+.btn.deep{background:#FAD7D3;color:var(--red)}
+.btn.deepg{background:var(--fillh)}
+.btn.bord{background:#fff;border:1px solid var(--line)}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-top:14px}
+.tabs span{padding:10px 0;font-size:15px;color:var(--t3);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs span.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.tabs.scroll{overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
+.tabs.scroll::-webkit-scrollbar{display:none}
+.tabs.wrapx{flex-wrap:wrap;row-gap:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
+.card h3{margin:0 0 4px;font-size:20px}
+.mute{color:var(--t3);font-size:14px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--row);min-width:0}
+.row:first-child{border-top:0}
+.face{flex:none;width:36px;height:36px;border-radius:50%;background:#EDE6DF;color:#4A4A48;font-size:12px;font-weight:600;display:grid;place-items:center}
+.who{flex:1;min-width:0}
+.who b{display:block;font-weight:500;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .l2{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:3px;font-size:14px;color:var(--t2)}
+.pill{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.pill.red{background:var(--redbg);color:var(--red)}
+.pill.cut{max-width:46px;overflow:hidden;text-overflow:ellipsis;display:inline-block;line-height:22px}
+.tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap}
+.tag.black{background:var(--ink);color:#fff;font-size:12px;font-weight:600}
+.tag.grey{background:var(--fill);color:var(--t2)}
+.tag.outline{border:1px solid var(--line);color:var(--t2);background:#fff}
+.plain{color:var(--t3);font-size:14px}
+.kind{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.prob{background:var(--prob);border:1px solid var(--probline);border-radius:14px;padding:14px;margin-top:12px}
+.prob b{color:var(--red);font-weight:600}
+.greycard{background:var(--fill);border-radius:14px;padding:14px;margin-top:12px}
+.btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btns .btn{flex:1}
+.textact{font-weight:600;font-size:14px}
+.table{width:100%;border-collapse:collapse;font-size:15px}
+.table th{text-align:left;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);padding:10px 12px;border-bottom:1px solid var(--line)}
+.table td{padding:12px;border-top:1px solid var(--row);vertical-align:middle}
+.irow{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-top:1px solid var(--row);font-size:16px}
+.irow:first-child{border-top:0}
+.irow span{color:var(--t3);font-size:14px}
+.back{font-size:14px;color:var(--t2);margin-bottom:6px}
+.sel{display:flex;align-items:center;justify-content:space-between;height:44px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:0 14px;font-weight:600;margin-top:12px}
+.actrow{display:flex;justify-content:flex-end;gap:8px;margin-bottom:6px}
+.h20{font-size:20px;font-weight:700;margin:18px 0 4px}
+.h28{font-size:28px;font-weight:700;margin:18px 0 4px;letter-spacing:-.02em}
+.intro{color:var(--t2);font-size:14px;margin:0 0 6px;max-width:60ch}
+.doc td:first-child{font-weight:500}
+.foot{margin-top:28px;color:var(--t3);font-size:13px}
+@media (max-width:760px){.stage>div{width:100%;min-width:0}h1{font-size:30px}.gap{padding:18px 16px}.gap h2{font-size:22px}.phone{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cap">Zana · design system</div>
+  <h1>Five gaps, two or three ways each</h1>
+  <p class="lead">Found by the screen scan of 2026-11-22. Each one is a case the design system has no rule for, so each screen made something up. Pick one per gap; ★ is my pick. Each mock shows a phone and a laptop.</p>
+  <div id="gaps"></div>
+  <p class="foot">Mock only. Names and numbers are the preview's fake gym.</p>
+</div>
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const PHD=(t)=>`<div class="phd"><span class="tile">PG</span>${t} ▾<span class="sp"></span><span style="font-size:18px">⌕</span><span class="face">MR</span></div>`;
+const BAND=(on)=>`<div class="band"><span class="tile">PG</span>${['Today','Schedule','People','Training','Money','Settings'].map(x=>`<span class="bi ${x===on?'on':''}"><i></i>${x}</span>`).join('')}</div>`;
+const LAP=(on,inner)=>`<div class="laptop">${BAND(on)}<div class="lpage">${inner}</div></div>`;
+const PH=(t,inner)=>`<div class="phone">${PHD(t)}<div class="ppage">${inner}</div></div>`;
+const STAGE=(phone,laptop)=>`<div class="stage"><div><p class="lab">Phone · 390</p>${phone}</div><div class="laptopwrap"><p class="lab">Laptop</p>${laptop}</div></div>`;
+
+const STAFF=[['CP','Camila Pagán',['Front desk'],'Today'],['GP','Gabriela Pagán',['Coach'],'Today'],['IV','Isabel Vázquez',['Admin'],'Today'],['LM','Lucía Medina',['Coach','Front desk'],'Never signed in']];
+const PEOPLE=[['CR','Carmen Rosario',['Liability waiver','Waiver (demo)','Training intake'],'Unlimited monthly'],['BL','Beatriz Lugo',['Liability waiver'],'Nothing yet'],['YB','Yolanda Burgos',[],'Unlimited monthly · owes November'],['DT','Daniela Torres',['Liability waiver','Training intake'],'Yoga unlimited']];
+
+const GAPS=[
+{ id:'tabs', title:'Tabs that don’t fit on a phone',
+  why:'Settings has 9 tabs; on a phone they wrap into 4 rows before any content. On Money, + Collect sits on the tab row and covers “Owed to you”.',
+  seen:'Seen on: Settings and Money (phone). People and Training have the same shape.',
+  pick:'C',
+  opts:{
+    A:{short:'Scrolling row',name:'One row that scrolls',desc:'Tabs stay one line and scroll sideways; the edge fades so you can tell there is more, and the chosen tab scrolls into view. A page’s button never shares the tab row: on a phone it sits in its own row above the tabs, on the right.',trade:'Hidden tabs are easy to miss: an owner may never find “Zana plan”.',
+      phone:()=>`<div class="actrow"><button class="btn sm">⋯</button><button class="btn sm main">+ Collect</button></div><div class="tabs scroll" style="margin-top:4px"><span>Products</span><span>Tracks</span><span class="on">Owed to you</span><span>Ledger</span></div><div class="card"><h3>Owed to you</h3><div class="mute">$129.00 owed by 1 person</div></div>`},
+    B:{short:'Drop-down',name:'A drop-down in place of the tabs',desc:'On a phone the tab row becomes one box that names the tab you’re on (Payments ▾); tap it for the list. The laptop keeps tabs.',trade:'One tap more to switch, and the other tabs are out of sight until you open it.',
+      phone:()=>`<div class="sel">Owed to you <span style="color:var(--t3)">▾</span></div><div class="actrow" style="margin-top:12px"><button class="btn sm main">+ Collect</button></div><div class="card"><h3>Owed to you</h3><div class="mute">$129.00 owed by 1 person</div></div>`},
+    C:{short:'Row + Settings list',name:'Scrolling row for sections, a list for Settings',desc:'Sections with a few tabs (Money, People, Training) use A. Settings, with many, opens on a list of its parts, each a row with ›; tap one for its page, with ‹ Settings to go back. Phone only; the laptop keeps tabs everywhere.',trade:'Two patterns to learn, but each fits its job: Settings is visited rarely and read like an index.',
+      phone:(g)=>g==='settings'?`<div class="card" style="padding:0">${['Business','Look','Payments','Documents','Tracks','Tax'].map(x=>`<div class="irow">${x}<span>›</span></div>`).join('')}</div><div class="mute" style="margin-top:10px">The six tabs the rules name (ENGINEERING_STANDARDS §16 rule 27).</div>`:`<div class="actrow"><button class="btn sm main">+ Collect</button></div><div class="tabs scroll" style="margin-top:4px"><span>Products</span><span>Tracks</span><span class="on">Owed to you</span><span>Ledger</span></div><div class="card"><h3>Owed to you</h3><div class="mute">$129.00 owed by 1 person</div></div>`}
+  },
+  now:()=>`<div class="tabs wrapx" style="margin-top:4px"><span class="on">Payment options</span><span>Business record</span><span>Look, hours and offer</span><span>Documents</span><span>Join links</span><span>Campaigns</span><span>Sign-up email</span><span>Billing</span><span>Zana plan</span></div><div class="h20">Credit card</div>`,
+  render(o){const O=this.opts[o];
+    const phoneMoney=PH('Money',O.phone('money'));
+    const phoneSettings=o==='C'?PH('Settings',O.phone('settings')):o==='B'?PH('Settings',`<div class="sel">Payments <span style="color:var(--t3)">▾</span></div><div class="h20">Credit card</div><div class="mute">Powered by Stripe.</div>`):PH('Settings',`<div class="tabs scroll" style="margin-top:0"><span class="on">Business</span><span>Look</span><span>Payments</span><span>Documents</span><span>Tracks</span><span>Tax</span></div><div class="h20">Business</div><div class="mute">Name, address, hours, what you offer.</div>`);
+    const lap=LAP('Settings',`<div class="cap">Sunday, November 22</div><div class="ptitle">Settings</div><div class="tabs"><span class="on">Business</span><span>Look</span><span>Payments</span><span>Documents</span><span>Tracks</span><span>Tax</span></div><div class="card"><h3>Business</h3><div class="mute">On a laptop, tabs stay as they are in every option.</div></div>`);
+    return `<div class="stage"><div><p class="lab">Phone · Money</p>${phoneMoney}</div><div><p class="lab">Phone · Settings</p>${phoneSettings}</div><div class="laptopwrap"><p class="lab">Laptop · Settings</p>${lap}</div></div>`;}
+},
+{ id:'pills', title:'More than one pill on a row',
+  why:'Carmen owes three documents, so her row tries to show three red pills; they shrink to “Liability w…”, “L…” or an empty red box. Her profile header carries five.',
+  seen:'Seen on: People list (laptop and phone), the person page header.',
+  pick:'B',
+  opts:{
+    A:{short:'First pill, +2',name:'First pill, then +2',desc:'The most urgent pill shows in full; the rest collapse into a grey “+2” you can tap. A pill is never cut off: if it doesn’t fit, line 2 wraps.',trade:'Says which one first, but “+2” of what? You open the profile to find out.'},
+    B:{short:'Count per kind',name:'One pill per kind, with the count',desc:'Pills of the same kind merge: “3 TO SIGN”. A row never has more than one pill per kind, and never more than two in all. The profile lists them one by one, where there is room.',trade:'You lose which document from the list, which the list never needed: the desk’s act is the same (get her to sign).'},
+    C:{short:'Rest as words',name:'One pill, the rest as words',desc:'One pill for the worst problem; the others become a grey fact on line 2: “and 2 more to sign”.',trade:'Clear, but long on a phone, and a second problem of a different kind (owes money) reads as small grey text.'}
+  },
+  render(o){
+    const l2=(p)=>{const n=p[2].length;if(!n)return `<span class="pill red">Owes</span><span>${p[3]}</span>`;
+      if(o==='A')return `<span class="pill red">${p[2][0]}</span>${n>1?`<span class="tag grey">+${n-1}</span>`:''}<span>${p[3]}</span>`;
+      if(o==='B')return `<span class="pill red">${n>1?n+' to sign':'To sign'}</span><span>${p[3]}</span>`;
+      return `<span class="pill red">${n>1?'To sign':p[2][0]}</span><span>${n>1?`${p[2][0]} and ${n-1} more · `:''}${p[3]}</span>`;};
+    const rows=PEOPLE.map(p=>`<div class="row"><span class="face">${p[0]}</span><div class="who"><b>${p[1]}</b><div class="l2">${l2(p)}</div></div></div>`).join('');
+    const now=`<div class="row"><span class="face">CR</span><div class="who" style="display:flex;align-items:center;gap:6px"><b style="flex:none">Carmen Rosario</b><span class="pill red cut">Liability waiver</span><span class="pill red cut" style="max-width:22px">Waiver</span><span class="pill red cut" style="max-width:12px">T</span></div></div>`;
+    const phone=PH('People',`<div class="card" style="padding:4px 14px">${rows}</div><p class="lab" style="margin-top:16px">Today, for comparison</p><div class="card" style="padding:4px 14px">${now}</div>`);
+    const header=`<div class="card"><div style="display:flex;gap:14px;align-items:center"><span class="face" style="width:56px;height:56px;font-size:16px">CR</span><div><div style="font-size:28px;font-weight:700">Carmen Rosario</div><div class="l2" style="display:flex;gap:6px;align-items:center;color:var(--t2);font-size:14px">Member · since Nov 2026</div></div></div>
+      <div class="prob"><b>${o==='B'?'3 documents to sign':'Liability waiver unsigned'}</b><div class="mute">They can’t book until ${o==='B'?'they’re':'it’s'} signed.</div>${o==='B'?`<div class="mute" style="margin-top:6px">Liability waiver · Waiver (demo) · Training intake</div>`:''}<div class="btns"><button class="btn main">Sign now</button></div></div>
+      <div class="mute" style="margin-top:10px">Every option: the header drops the pills a card below already says (said once per screen).</div></div>`;
+    const lap=LAP('People',`<div class="cap">People</div><div class="ptitle" style="font-size:28px">Community</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div class="card" style="padding:4px 14px">${rows}</div><div>${header}</div></div>`);
+    return STAGE(phone,lap);}
+},
+{ id:'cardbtn', title:'Buttons on a grey or tinted card',
+  why:'A tonal button is grey, so on a grey or pink card it disappears. Screens fell back to white buttons with borders, which the kit does not have.',
+  seen:'Seen on: the payment card (Email receipt · Download), the Lead card (Message · Sell), the person page (Call · Message), the problem card (Sign now).',
+  pick:'A',
+  opts:{
+    A:{short:'White',name:'White, no border',desc:'On any card that isn’t white (grey, pink, blue), the second button is white with no border. The main button stays black. One rule for every tint.',trade:'On the pink problem card, white reads a little loud; fine, since that card is asking for action anyway.'},
+    B:{short:'Deeper shade',name:'A deeper shade of the card',desc:'The second button takes a darker tone of its card: grey card → #E4E4E0; pink → #FAD7D3 with red text; blue → #D6E2FB with blue text.',trade:'Prettier, but a new button colour for every card colour: three more to keep straight.'},
+    C:{short:'Words',name:'Words, not buttons',desc:'On a tinted card, the second acts become text with ›: “Email receipt ›”. The main button stays black.',trade:'Lightest, but a text act is harder to hit with a thumb, and some cards need two equal choices.'}
+  },
+  render(o){
+    const b=(t)=>o==='A'?`<button class="btn sm white">${t}</button>`:o==='B'?`<button class="btn sm deepg">${t}</button>`:`<span class="textact">${t} ›</span>`;
+    const bp=(t)=>o==='A'?`<button class="btn sm white">${t}</button>`:o==='B'?`<button class="btn sm deep">${t}</button>`:`<span class="textact" style="color:var(--red)">${t} ›</span>`;
+    const pay=`<div class="greycard"><div style="display:flex;justify-content:space-between" class="kind"><span>Receipt No. 39</span><span>Nov 22</span></div><div style="display:flex;justify-content:space-between;margin-top:8px"><span>Unlimited monthly</span><b>$120.00</b></div><div class="${o==='C'?'':'btns'}" style="${o==='C'?'display:flex;gap:18px;margin-top:10px':''}">${b('Email receipt')}${b('Download')}</div></div>`;
+    const prob=`<div class="prob"><b>Liability waiver unsigned</b><div class="mute">They can’t book until it’s signed.</div><div class="btns"><button class="btn sm main">Sign now</button>${bp('Signed on paper')}</div></div>`;
+    const phone=PH('People',`<div style="font-size:28px;font-weight:700">Carmen Rosario</div><div class="btns">${o==='C'?'<button class="btn sm">Call</button><button class="btn sm">Message</button>':'<button class="btn sm">Call</button><button class="btn sm">Message</button>'}</div><div class="mute" style="margin-top:4px">On white, buttons stay tonal grey (no change).</div>${prob}${pay}`);
+    const lap=LAP('Money',`<div class="cap">Payment No. 39</div><div class="ptitle" style="font-size:28px">$120.00</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">${pay}${prob}</div>`);
+    return STAGE(phone,lap);}
+},
+{ id:'tag', title:'A plain label that isn’t a status',
+  why:'Staff roles and Required/Optional are facts, not problems or news, but there is no style for them, so screens drew black pills. Black is the main button’s colour.',
+  seen:'Seen on: People › Staff (roles), Settings › Documents (REQUIRED, OPTIONAL).',
+  pick:'C',
+  opts:{
+    A:{short:'Grey tag',name:'A grey tag',desc:'The quiet grey pair (#F0F0ED / #4A4A48), sentence case, not capitals, so it never reads as a status pill.',trade:'Clear and calm, but a list full of grey boxes is busy.'},
+    B:{short:'Outlined tag',name:'An outlined tag',desc:'A thin line, grey text, no fill.',trade:'Lighter, but it looks like a button you can tap.'},
+    C:{short:'Words first',name:'Plain words; a grey tag only where words can’t stand alone',desc:'In a table the column already says what it is, so the role is plain text: “Coach · Front desk”. Beside a title, where nothing names it, a grey tag (A): “Liability waiver  Required”.',trade:'Two looks, each where it reads best; the rule is “words first, a tag only if the words would get lost”.'}
+  },
+  render(o){
+    const t=(x)=>o==='A'?`<span class="tag grey">${x}</span>`:o==='B'?`<span class="tag outline">${x}</span>`:x;
+    const roles=(r)=>o==='C'?`<span class="plain">${r.join(' · ')}</span>`:r.map(t).join(' ');
+    const rq=(x)=>o==='B'?`<span class="tag outline">${x}</span>`:`<span class="tag grey">${x}</span>`;
+    const rowsP=STAFF.map(s=>`<div class="row"><span class="face">${s[0]}</span><div class="who"><b>${s[1]}</b><div class="l2">${roles(s[2])}<span class="plain">· ${s[3]==='Today'?'Last seen today':'Never signed in'}</span></div></div></div>`).join('');
+    const docs=[['Liability waiver','Required','When they join',9],['Personal training intake','Required','On 3 products',1],['Photo and video release','Optional','When they join',46]];
+    const ns=(d)=>d[1]==='Required'?`<span style="color:var(--red)">${d[3]} never signed</span>`:`${d[3]} haven’t answered`;
+    const phone=PH('People',`<div class="tabs" style="margin-top:0"><span>Community</span><span>Leads</span><span class="on">Staff</span></div><div class="card" style="padding:4px 14px">${rowsP}</div><p class="lab" style="margin-top:16px">Settings › Documents</p><div class="card" style="padding:4px 14px">${docs.map(d=>`<div class="row"><div class="who"><b style="white-space:normal">${d[0]} ${rq(d[1])}</b><div class="l2">${d[2]} · ${ns(d)}</div></div></div>`).join('')}</div>`);
+    const lap=LAP('People',`<div class="cap">People</div><div class="ptitle" style="font-size:28px">Staff</div><div class="card" style="padding:0"><table class="table"><tr><th>Person</th><th>Role</th><th>Last seen</th></tr>${STAFF.map(s=>`<tr><td>${s[1]}</td><td>${o==='C'?s[2].join(' · '):s[2].map(t).join(' ')}</td><td class="plain">${s[3]}</td></tr>`).join('')}</table></div>
+      <div class="card" style="padding:0"><table class="table doc"><tr><th>Document</th><th>Owed</th><th>Never signed</th></tr>${docs.map(d=>`<tr><td>${d[0]} ${rq(d[1])}</td><td class="plain">${d[2]}</td><td style="color:${d[3]>40?'var(--t3)':'var(--red)'}">${d[3]}</td></tr>`).join('')}</table></div>`);
+    return STAGE(phone,lap);}
+},
+{ id:'heading', title:'A tab’s own heading under the page title',
+  why:'Settings shows “Settings” at 40, then “Documents” at 28 under it. Today shows “Today”, then “Good morning” with the date a second time. My classes says its name twice.',
+  seen:'Seen on: Today, Settings › Documents, Training (Programs · Programs), My classes.',
+  pick:'A',
+  opts:{
+    A:{short:'No tab heading',name:'No tab heading: the tab is the heading',desc:'The page has one title. The chosen tab says where you are. A tab’s button and one-line intro sit at the top of its content, right-aligned. Today has one title too: the greeting replaces “Today”.',trade:'Nothing big names the tab; the underline does that job.'},
+    B:{short:'Small heading',name:'A small tab heading',desc:'A tab may have a heading at card-title size (20), never 28, and only when it has an intro line or its own button.',trade:'Two titles stay, just quieter; the page still says its name twice when a tab is a page’s main view.'},
+    C:{short:'Tab is the title',name:'The tab becomes the title',desc:'The section moves up into the small label, and the tab’s name is the title: SETTINGS above “Documents”. Tabs sit under it.',trade:'Reads well, but the title changes as you tap tabs, which can feel like leaving the page.'}
+  },
+  render(o){
+    const docs=`<div class="card" style="padding:0"><table class="table doc"><tr><th>Document</th><th>Owed</th><th>Never signed</th></tr><tr><td>Liability waiver <span class="tag grey">Required</span></td><td class="plain">When they join</td><td style="color:var(--red)">9</td></tr><tr><td>Photo and video release <span class="tag grey">Optional</span></td><td class="plain">When they join</td><td class="plain">46</td></tr></table></div>`;
+    const tabs=`<div class="tabs"><span>Business</span><span>Look</span><span>Payments</span><span class="on">Documents</span><span>Tracks</span><span>Tax</span></div>`;
+    let lap;
+    if(o==='A')lap=`<div class="titlerow"><div class="grow"><div class="cap">Sunday, November 22</div><div class="ptitle">Settings</div></div></div>${tabs}<div style="display:flex;align-items:center;gap:12px;margin-top:14px"><p class="intro" style="flex:1;margin:0">What people sign, and who still owes it.</p><button class="btn main">New document</button></div>${docs}`;
+    if(o==='B')lap=`<div class="cap">Sunday, November 22</div><div class="ptitle">Settings</div>${tabs}<div style="display:flex;align-items:center;gap:12px"><div class="h20" style="flex:1">Documents</div><button class="btn main" style="margin-top:12px">New document</button></div><p class="intro">What people sign, and who still owes it.</p>${docs}`;
+    if(o==='C')lap=`<div class="titlerow"><div class="grow"><div class="cap">Settings</div><div class="ptitle">Documents</div></div><button class="btn main">New document</button></div>${tabs}${docs}`;
+    const todayL=o==='C'||o==='A'?`<div class="cap">Sunday, November 22 · Preview Gym</div><div class="ptitle">Good morning, Marta</div>`:`<div class="cap">Sunday, November 22 · Preview Gym</div><div class="ptitle">Today</div><div class="h20">Good morning, Marta</div>`;
+    const now=`<div class="cap">Sunday, November 22</div><div class="ptitle" style="font-size:28px">Today</div><div class="cap" style="margin-top:12px">Sunday, November 22 · Preview Gym</div><div style="font-size:20px;font-weight:700">Good morning, Marta</div>`;
+    const phone=PH('Today',`${todayL}<div class="card"><h3>Needs you <span class="mute">10</span></h3><div class="mute">Yolanda Burgos · Owes</div></div><p class="lab" style="margin-top:18px">Laptop Today, now</p><div class="card">${now}</div>`);
+    return STAGE(phone,LAP('Settings',lap));}
+}];
+
+function draw(){
+  $('#gaps').innerHTML=GAPS.map((g,i)=>`<section class="gap" id="${g.id}"><div class="cap">Gap ${i+1} of 5</div><h2>${g.title}</h2><p class="why">${g.why}</p><div class="seen">${g.seen}</div>
+    <div class="pickrow"><div class="seg" role="group" aria-label="Options for gap ${i+1}">${Object.keys(g.opts).map(k=>`<button data-g="${i}" data-o="${k}" aria-pressed="${k===g.cur}">${k} · ${g.opts[k].short}${k===g.pick?'<span class="star">★</span>':''}</button>`).join('')}</div></div>
+    <p class="opt"><b>${g.cur} · ${g.opts[g.cur].name}.</b> ${g.opts[g.cur].desc}<span class="trade">Trade-off: ${g.opts[g.cur].trade}</span></p>
+    <div data-stage="${i}">${g.render(g.cur)}</div></section>`).join('');
+}
+GAPS.forEach(g=>g.cur=g.pick);
+document.addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;const g=GAPS[+b.dataset.g];g.cur=b.dataset.o;const y=b.getBoundingClientRect().top;draw();const nb=document.querySelector(`[data-g="${b.dataset.g}"][data-o="${g.cur}"]`);window.scrollBy(0,nb.getBoundingClientRect().top-y);});
+draw();
+</script>
+</body>
+</html>
