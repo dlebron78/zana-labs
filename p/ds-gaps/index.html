@@ -129,7 +129,7 @@ const GAPS=[
 { id:'tabs', title:'Tabs on a phone',
   why:'Half of this is already answered: the kit’s Tabs scroll in one row on a phone and never wrap (kit/Tabs.tsx, PHO-341). But no screen uses them. Settings and Training still use the old interim tab bar, which wraps into 4 rows; Money and People drew their own. What the system really lacks is where a page’s button goes when it has tabs: Money put + Collect on the tab row, and it covers “Owed to you”.',
   seen:'Seen on: Settings and Training (old tab bar), Money (button on the tab row). Fix for all: use the kit’s Tabs.',
-  pick:'C',
+  pick:'C', chosen:'C',
   opts:{
     A:{short:'Kit as is',name:'The kit as it is, plus a place for the button',desc:'What kit/Tabs already does: one line that scrolls sideways; the edge fades so you can tell there is more, and the chosen tab scrolls into view. A page’s button never shares the tab row: on a phone it sits in its own row above the tabs, on the right.',trade:'Hidden tabs are easy to miss: an owner may never find “Zana plan”.',
       phone:()=>`<div class="actrow"><button class="btn sm">⋯</button><button class="btn sm main">+ Collect</button></div><div class="tabs scroll" style="margin-top:4px"><span>Products</span><span>Tracks</span><span class="on">Owed to you</span><span>Ledger</span></div><div class="card"><h3>Owed to you</h3><div class="mute">$129.00 owed by 1 person</div></div>`},
@@ -148,7 +148,7 @@ const GAPS=[
 { id:'pills', title:'A pill whose word doesn’t fit',
   why:'The rules already hold a row to one pill, the worst problem first (people/personFacts.ts rowFlag), and the kit lets that pill shrink before the name does (kit/Table.tsx, pick 9, your “go”). The trouble is the word: an unsigned document’s pill says the document’s own title, which a gym can make long, so it shrinks to “Liability w…” or “L…”. Separately, the person page’s header repeats pills the red card under it already says, which breaks “said once per screen”.',
   seen:'Seen on: People list (laptop and phone), the person page header. Not a missing rule: the pill’s word is the choice to make.',
-  pick:'D',
+  pick:'D', chosen:'D',
   opts:{
     A:{short:'Title, never cut',name:'Keep the title, and let the name give way instead',desc:'Reverse pick 9: the pill keeps its full word, and the person’s name is cut first.',trade:'The pill reads, but “Carmen Ros…” is worse: the desk is scanning for a name.'},
     B:{short:'Short word + count',name:'A short fixed word, with the count',desc:'The pill never carries a title: “TO SIGN”, or “3 TO SIGN” when she owes several. Short enough to never shrink. Which documents is the profile’s job, in its red card.',trade:'The list stops saying which document; the desk’s act is the same either way (get her to sign).'},
@@ -243,7 +243,7 @@ const NOW={
 function nowView(id){return `<div class="nowgrid">${NOW[id].map(([f,c])=>`<figure><img src="now/${f}" alt="${c}" loading="lazy"><figcaption>${c}</figcaption></figure>`).join('')}</div>`;}
 function draw(){
   $('#gaps').innerHTML=GAPS.map((g,i)=>`<section class="gap" id="${g.id}"><div class="cap">Gap ${i+1} of 5</div><h2>${g.title}</h2><p class="why">${g.why}</p><div class="seen">${g.seen}</div>
-    ${g.chosen?`<div class="chosen">✓ Daniel picked ${g.chosen} · ${g.opts[g.chosen].short} (2026-11-22)</div>`:''}<div class="pickrow"><div class="seg" role="group" aria-label="Options for gap ${i+1}"><button data-g="${i}" data-o="Now" aria-pressed="${g.cur==='Now'}">Now</button>${Object.keys(g.opts).map(k=>`<button data-g="${i}" data-o="${k}" aria-pressed="${k===g.cur}">${k} · ${g.opts[k].short}${k===g.pick?'<span class="star">★</span>':''}</button>`).join('')}</div></div>
+    ${g.chosen?`<div class="chosen">✓ Daniel picked ${g.chosen} · ${g.opts[g.chosen].short} (2026-11-22) · now a rule in the design notes</div>`:''}<div class="pickrow"><div class="seg" role="group" aria-label="Options for gap ${i+1}"><button data-g="${i}" data-o="Now" aria-pressed="${g.cur==='Now'}">Now</button>${Object.keys(g.opts).map(k=>`<button data-g="${i}" data-o="${k}" aria-pressed="${k===g.cur}">${k} · ${g.opts[k].short}${k===g.pick?'<span class="star">★</span>':''}</button>`).join('')}</div></div>
     ${g.cur==='Now'?`<p class="opt"><b>Now.</b> Today’s screens, from the scan of Nov 22 (the preview’s fake gym). Tap an option to see a fix.</p><div data-stage="${i}">${nowView(g.id)}</div>`:`<p class="opt"><b>${g.cur} · ${g.opts[g.cur].name}.</b> ${g.opts[g.cur].desc}<span class="trade">Trade-off: ${g.opts[g.cur].trade}</span></p>
     <div data-stage="${i}">${g.render(g.cur)}</div>`}</section>`).join('');
 }
