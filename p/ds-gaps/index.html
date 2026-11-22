@@ -99,6 +99,7 @@ h1{font-size:40px;line-height:1.1;letter-spacing:-.03em;margin:6px 0 10px}
 .h28{font-size:28px;font-weight:700;margin:18px 0 4px;letter-spacing:-.02em}
 .intro{color:var(--t2);font-size:14px;margin:0 0 6px;max-width:60ch}
 .doc td:first-child{font-weight:500}
+.nowgrid{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}.nowgrid figure{margin:0;flex:0 1 auto;max-width:100%}.nowgrid img{display:block;max-width:100%;height:auto;max-height:620px;border:1px solid #D8D8D3;border-radius:12px;background:#fff}.nowgrid figcaption{font-size:13px;color:var(--t2);margin-top:6px;max-width:52ch}
 .foot{margin-top:28px;color:var(--t3);font-size:13px}
 @media (max-width:760px){.stage>div{width:100%;min-width:0}h1{font-size:30px}.gap{padding:18px 16px}.gap h2{font-size:22px}.phone{width:100%}}
 </style>
@@ -107,7 +108,7 @@ h1{font-size:40px;line-height:1.1;letter-spacing:-.03em;margin:6px 0 10px}
 <div class="wrap">
   <div class="cap">Zana · design system</div>
   <h1>Five gaps, two or three ways each</h1>
-  <p class="lead">Found by the screen scan of 2026-11-22. Each one is a case the design system has no rule for, so each screen made something up. Pick one per gap; ★ is my pick. Each mock shows a phone and a laptop.</p>
+  <p class="lead">Found by the screen scan of 2026-11-22. Each one is a case the design system has no rule for, so each screen made something up. Each gap opens on <b>Now</b>, today’s real screen from the scan; tap A, B or C to see a fix. ★ is my pick. Each mock shows a phone and a laptop.</p>
   <div id="gaps"></div>
   <p class="foot">Mock only. Names and numbers are the preview's fake gym.</p>
 </div>
@@ -167,7 +168,7 @@ const GAPS=[
     return STAGE(phone,lap);}
 },
 { id:'cardbtn', title:'Buttons on a grey or tinted card',
-  why:'A tonal button is grey, so on a grey or pink card it disappears. Screens fell back to white buttons with borders, which the kit does not have.',
+  why:'A tonal button is grey, so on a grey or pink card it fades. With no rule, each screen did something different: white on the payment card, white with a border on the person page, grey on the pink card.',
   seen:'Seen on: the payment card (Email receipt · Download), the Lead card (Message · Sell), the person page (Call · Message), the problem card (Sign now).',
   pick:'A',
   opts:{
@@ -227,13 +228,21 @@ const GAPS=[
     return STAGE(phone,LAP('Settings',lap));}
 }];
 
+const NOW={
+ tabs:[['tabs-settings-phone.png','Settings on a phone: 9 tabs wrap onto 4 rows'],['tabs-money-phone.png','Money on a phone: + Collect covers “Owed to you”']],
+ pills:[['pills-list-laptop.png','People, laptop: red pills cut to “Liability w…”, “Li…”, “L…”'],['pills-list-phone.png','People, phone: the same, plus an empty red pill'],['pills-header-laptop.png','Carmen’s header: four pills, repeated by the red card under it']],
+ cardbtn:[['card-payment-laptop.png','Payment card: white buttons on grey, no border (already option A)'],['card-person-laptop.png','Person page: Call · Message white with a border; Sign now grey on pink; Message · Sell white on the blue Lead card']],
+ tag:[['tag-staff-laptop.png','Staff: roles as black pills (and a lone “Everyone 5” chip)'],['heading-documents-laptop.png','Documents: REQUIRED and OPTIONAL as black and outlined pills']],
+ heading:[['heading-today-laptop.png','Today: “Today”, then the date again and “Good morning”'],['heading-documents-laptop.png','Settings at 40, then Documents at 28'],['heading-myclasses-laptop.png','My classes, twice (and a ticket number shown to coaches)']]
+};
+function nowView(id){return `<div class="nowgrid">${NOW[id].map(([f,c])=>`<figure><img src="now/${f}" alt="${c}" loading="lazy"><figcaption>${c}</figcaption></figure>`).join('')}</div>`;}
 function draw(){
   $('#gaps').innerHTML=GAPS.map((g,i)=>`<section class="gap" id="${g.id}"><div class="cap">Gap ${i+1} of 5</div><h2>${g.title}</h2><p class="why">${g.why}</p><div class="seen">${g.seen}</div>
-    <div class="pickrow"><div class="seg" role="group" aria-label="Options for gap ${i+1}">${Object.keys(g.opts).map(k=>`<button data-g="${i}" data-o="${k}" aria-pressed="${k===g.cur}">${k} · ${g.opts[k].short}${k===g.pick?'<span class="star">★</span>':''}</button>`).join('')}</div></div>
-    <p class="opt"><b>${g.cur} · ${g.opts[g.cur].name}.</b> ${g.opts[g.cur].desc}<span class="trade">Trade-off: ${g.opts[g.cur].trade}</span></p>
-    <div data-stage="${i}">${g.render(g.cur)}</div></section>`).join('');
+    <div class="pickrow"><div class="seg" role="group" aria-label="Options for gap ${i+1}"><button data-g="${i}" data-o="Now" aria-pressed="${g.cur==='Now'}">Now</button>${Object.keys(g.opts).map(k=>`<button data-g="${i}" data-o="${k}" aria-pressed="${k===g.cur}">${k} · ${g.opts[k].short}${k===g.pick?'<span class="star">★</span>':''}</button>`).join('')}</div></div>
+    ${g.cur==='Now'?`<p class="opt"><b>Now.</b> Today’s screens, from the scan of Nov 22 (the preview’s fake gym). Tap an option to see a fix.</p><div data-stage="${i}">${nowView(g.id)}</div>`:`<p class="opt"><b>${g.cur} · ${g.opts[g.cur].name}.</b> ${g.opts[g.cur].desc}<span class="trade">Trade-off: ${g.opts[g.cur].trade}</span></p>
+    <div data-stage="${i}">${g.render(g.cur)}</div>`}</section>`).join('');
 }
-GAPS.forEach(g=>g.cur=g.pick);
+GAPS.forEach(g=>g.cur='Now');
 document.addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;const g=GAPS[+b.dataset.g];g.cur=b.dataset.o;const y=b.getBoundingClientRect().top;draw();const nb=document.querySelector(`[data-g="${b.dataset.g}"][data-o="${g.cur}"]`);window.scrollBy(0,nb.getBoundingClientRect().top-y);});
 draw();
 </script>
