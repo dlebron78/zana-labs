@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your account</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --ink:#111; --t2:#4A4A48; --t3:#5C5C59; --line:#E8E8E5; --rowline:#F0F0ED; --page:#F5F5F3; --card:#fff; --fill:#F0F0ED; --fillh:#E4E4E0; --red:#A8261B; }
+* { box-sizing:border-box; }
+html, body { margin:0; max-width:100%; overflow-x:hidden; }
+body { background:var(--page); color:var(--ink); font-family:'Geist',system-ui,sans-serif; }
+button { font-family:inherit; color:var(--ink); -webkit-text-fill-color:currentColor; cursor:pointer; -webkit-appearance:none; appearance:none; }
+.test { background:#111; color:#ddd; font-size:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:8px 16px; position:relative; z-index:90; }
+.test b { color:#fff; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:11px; }
+.seg { display:inline-flex; gap:2px; background:#2a2a2a; padding:2px; border-radius:8px; }
+.seg button { border:0; background:none; color:#ccc; -webkit-text-fill-color:#ccc; height:28px; padding:0 10px; border-radius:6px; font-size:12px; }
+.seg button[aria-pressed="true"] { background:#fff; color:#111; -webkit-text-fill-color:#111; }
+.case { background:#1d1d1c; color:#e9e9e6; font-size:13px; padding:8px 16px; line-height:1.45; position:relative; z-index:90; } .case b { color:#fff; }
+/* the app behind */
+.app { position:relative; min-height:calc(100vh - 80px); }
+.bar { height:64px; background:#fff; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:12px; padding:0 16px 0 112px; }
+.band { position:absolute; left:0; top:0; bottom:0; width:96px; background:#0E0E0E; }
+.srch { flex:1; max-width:420px; margin-left:auto; height:44px; border-radius:12px; background:#F0F1F1; display:flex; align-items:center; padding:0 14px; color:var(--t3); font-size:15px; }
+.face { width:44px; height:44px; border-radius:50%; background:#E6E2DB; display:grid; place-items:center; font-weight:700; font-size:15px; border:0; }
+.content { padding:28px 40px 0 136px; } .content h1 { margin:0 0 16px; font-size:40px; letter-spacing:-.03em; }
+.ghost { height:64px; border-radius:14px; background:#fff; border:1px solid var(--line); margin-bottom:10px; max-width:640px; }
+.phone .band { display:none; } .phone .bar { padding:0 12px; } .phone .srch { display:none; } .phone .content { padding:20px 16px; } .phone .content h1 { font-size:28px; }
+.phone .app { max-width:390px; margin:0 auto; background:var(--page); border-left:1px solid #ccc; border-right:1px solid #ccc; overflow:hidden; }
+/* the panel */
+.dim { position:fixed; inset:0; background:rgba(17,17,17,.28); z-index:60; }
+.pnl { position:fixed; top:12px; right:12px; bottom:12px; width:440px; max-width:calc(100vw - 24px); background:#fff; border-radius:20px; box-shadow:0 12px 40px rgba(0,0,0,.18); z-index:61; display:flex; flex-direction:column; overflow:hidden; }
+.phone .pnl { top:auto; left:50%; right:auto; transform:translateX(-50%); bottom:0; width:390px; max-width:100vw; height:92vh; border-radius:20px 20px 0 0; }
+@media (max-width:720px){ .pnl { top:auto; left:0; right:0; bottom:0; width:100vw; max-width:100vw; height:92vh; border-radius:20px 20px 0 0; transform:none; } .band,.srch { display:none; } .bar { padding:0 12px; } .content { padding:20px 16px; } }
+.ph { display:flex; align-items:center; gap:12px; padding:16px 16px 14px 20px; border-bottom:1px solid var(--line); }
+.ph .me { width:44px; height:44px; border-radius:50%; background:#E6E2DB; display:grid; place-items:center; font-weight:700; flex:none; overflow:hidden; }
+.ph .tx { flex:1; min-width:0; } .ph h2 { margin:0; font-size:20px; font-weight:700; } .ph small { display:block; font-size:14px; color:var(--t3); margin-top:2px; }
+.ib { width:40px; height:40px; border-radius:12px; border:0; background:var(--fill); font-size:18px; display:grid; place-items:center; flex:none; } .ib:hover { background:var(--fillh); }
+.back { border:0; background:none; height:40px; padding:0 6px 0 0; font-size:15px; font-weight:500; color:var(--t2); -webkit-text-fill-color:var(--t2); }
+.pb { flex:1; overflow:auto; padding:8px 20px 20px; }
+.lab { font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); margin:18px 0 8px; }
+.rows { border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.r { display:flex; align-items:center; gap:12px; width:100%; min-height:60px; padding:10px 14px 10px 16px; background:#fff; border:0; border-top:1px solid var(--rowline); text-align:left; font-size:16px; }
+.r:first-child { border-top:0; } button.r:hover { background:#FAFAF8; }
+.r .k { flex:1; font-weight:500; } .r .k small { display:block; font-size:13px; font-weight:400; color:var(--t3); margin-top:2px; }
+.r .v { color:var(--t2); -webkit-text-fill-color:var(--t2); font-size:15px; display:flex; align-items:center; gap:10px; }
+.chev { color:var(--t3); -webkit-text-fill-color:var(--t3); font-size:20px; }
+.mini { width:32px; height:32px; border-radius:50%; background:#E6E2DB; display:grid; place-items:center; font-weight:700; font-size:12px; color:var(--ink); -webkit-text-fill-color:var(--ink); overflow:hidden; }
+.photo { background:linear-gradient(135deg,#B89F86,#6E5A48); color:#fff; -webkit-text-fill-color:#fff; }
+.tog { width:48px; height:28px; border-radius:14px; background:#CFCFCA; border:0; position:relative; flex:none; }
+.tog::after { content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:left .15s; }
+.tog.on { background:var(--ink); } .tog.on::after { left:23px; }
+.out { margin-top:24px; width:100%; height:48px; border-radius:12px; border:0; background:var(--fill); font-size:16px; font-weight:500; }
+.out:hover { background:var(--fillh); }
+.big { display:flex; flex-direction:column; align-items:center; gap:14px; padding:20px 0 8px; }
+.big .face2 { width:120px; height:120px; border-radius:50%; background:#E6E2DB; display:grid; place-items:center; font-size:40px; font-weight:700; }
+.btns { display:flex; gap:8px; justify-content:center; }
+.btn { height:40px; padding:0 16px; border-radius:10px; border:0; background:var(--fill); font-size:15px; font-weight:500; }
+.btn:hover { background:var(--fillh); } .btn.main { background:var(--ink); color:#fff; -webkit-text-fill-color:#fff; }
+.note { font-size:14px; color:var(--t3); text-align:center; margin:0; }
+.choice { display:flex; align-items:center; gap:12px; width:100%; min-height:56px; padding:0 16px; border:0; border-top:1px solid var(--rowline); background:#fff; font-size:16px; text-align:left; }
+.choice:first-child { border-top:0; } .choice .ck { margin-left:auto; font-weight:700; }
+.toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; padding:12px 16px; font-size:14px; z-index:80; }
+</style>
+</head>
+<body>
+<div class="test"><b>Who</b><span class="seg" id="g1"></span><b>Width</b><span class="seg" id="g2"></span><b>Panel</b><span class="seg" id="g3"></span></div>
+<div class="case" id="case"></div>
+<div class="app"><div class="band"></div><div class="bar"><div class="srch">⌕&nbsp; Search people</div><button class="face" data-a="open">PC</button></div><div class="content"><h1>People</h1><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div></div></div>
+<div id="layer"></div>
+<script>
+// Grounded at phoenix main 436ff73: frontend/src/Account.tsx (Your account, a Panel), MyPhotos.tsx (photo at the gym, staff only;
+// business-page photo + show switch), shellWords.ts (language, shortcut bar; "The gym's look", retired here: it is Settings › Look).
+var S={role:'owner', wid:'desk', open:true, view:'main', photo:false, pagePhoto:false, showOnPage:false, lang:'English', shortcuts:true, toast:null};
+var ROLES={owner:'Owner',admin:'Admin',desk:'Front desk',coach:'Coach'};
+var NAME='Preview Coach', GYM='Preview Gym';
+function face(cls,on,txt){ return '<span class="'+cls+(on?' photo':'')+'">'+(on?'':txt)+'</span>'; }
+function head(title,sub,back){ return '<div class="ph">'+(back?'<button class="back" data-a="view" data-v="main">‹ Your account</button><div class="tx"></div>':face('me',S.photo,'PC')+'<div class="tx"><h2>'+title+'</h2><small>'+sub+'</small></div>')+'<button class="ib" data-a="close" aria-label="Close Your account">✕</button></div>'; }
+function main(){
+  var h=head(NAME, ROLES[S.role]+' · '+GYM)+'<div class="pb">';
+  h+='<div class="lab">You</div><div class="rows">'+
+   '<button class="r" data-a="view" data-v="photo"><span class="k">Your photo<small>Only the staff of '+GYM+' see it.</small></span><span class="v">'+face('mini',S.photo,'PC')+'<span class="chev">›</span></span></button>'+
+   '<button class="r" data-a="view" data-v="page"><span class="k">On the business page<small>A professional photo, if the gym shows its staff.</small></span><span class="v">'+(S.showOnPage?'Shown':'Not shown')+'<span class="chev">›</span></span></button>'+
+   '<button class="r" data-a="view" data-v="lang"><span class="k">Language</span><span class="v">'+S.lang+'<span class="chev">›</span></span></button>'+
+   '<div class="r"><span class="k">Shortcut bar<small>Quick buttons along the bottom of your screen.</small></span><button class="tog '+(S.shortcuts?'on':'')+'" data-a="short" aria-label="Shortcut bar"></button></div></div>';
+  if(S.role==='owner'||S.role==='admin') h+='<div class="lab">'+GYM+'</div><div class="rows"><button class="r" data-a="settings"><span class="k">Settings<small>The business, its look, payments and tax.</small></span><span class="v"><span class="chev">›</span></span></button></div>';
+  h+='<button class="out" data-a="signout">Sign out</button></div>';
+  return h; }
+function photo(){ return head('','',true)+'<div class="pb"><div class="lab">Your photo</div><div class="big">'+face('face2',S.photo,'PC')+'<div class="btns">'+(S.photo?'<button class="btn" data-a="ph" data-v="up">Change</button><button class="btn" data-a="ph" data-v="rm">Remove</button>':'<button class="btn main" data-a="ph" data-v="up">Upload a photo</button>')+'</div><p class="note">Only the staff of '+GYM+' see it. Until then, your initials show.</p></div></div>'; }
+function page(){ return head('','',true)+'<div class="pb"><div class="lab">On the business page</div><div class="rows"><div class="r"><span class="k">Show me on the business page<small>'+(S.showOnPage?'Members and visitors see your photo and name.':'Off: you are not on the page.')+'</small></span><button class="tog '+(S.showOnPage?'on':'')+'" data-a="show" aria-label="Show me on the business page"></button></div></div>'+
+  (S.showOnPage?'<div class="big">'+face('face2',S.pagePhoto,'PC')+'<div class="btns">'+(S.pagePhoto?'<button class="btn" data-a="pp" data-v="up">Change</button><button class="btn" data-a="pp" data-v="rm">Remove</button>':'<button class="btn main" data-a="pp" data-v="up">Upload a professional photo</button>')+'</div><p class="note">Apart from your photo in the app. Shows once '+GYM+' puts its staff on its page.</p></div>':'')+'</div>'; }
+function lang(){ return head('','',true)+'<div class="pb"><div class="lab">Language</div><div class="rows">'+['English','Español'].map(function(l){ return '<button class="choice" data-a="lang" data-v="'+l+'">'+l+(S.lang===l?'<span class="ck">✓</span>':'')+'</button>'; }).join('')+'</div><p class="note" style="text-align:left;margin-top:10px">Zana’s words, for you only. Members get the gym’s language.</p></div>'; }
+var CASES={main:'<b>Your account</b>, from your face (top right). Your name, your role and the gym on top, the × always there. One row per thing, label left, value right. <b>The gym’s look is gone</b>: it is Settings › Look. Settings shows for owner and admin only; Sign out sits apart at the foot.',
+ photo:'<b>Your photo.</b> One big face, one button. Staff only see it.', page:'<b>On the business page.</b> The show switch first; the professional photo appears only once it is on.', lang:'<b>Language.</b> Two choices, a check on yours.'};
+function render(){
+  document.body.className=S.wid==='phone'?'phone':'';
+  document.getElementById('g1').innerHTML=[['owner','Owner'],['desk','Front desk']].map(function(x){return '<button data-a="role" data-v="'+x[0]+'" aria-pressed="'+(S.role===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('g2').innerHTML=[['desk','Laptop'],['phone','Phone']].map(function(x){return '<button data-a="wid" data-v="'+x[0]+'" aria-pressed="'+(S.wid===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('g3').innerHTML=[['main','Main'],['photo','Photo'],['page','Business page'],['lang','Language']].map(function(x){return '<button data-a="jump" data-v="'+x[0]+'" aria-pressed="'+(S.open&&S.view===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('case').innerHTML=S.open?CASES[S.view]:'Closed. Tap your face (top right) to open Your account.';
+  var L=document.getElementById('layer');
+  L.innerHTML=S.open?'<div class="dim" data-a="close"></div><section class="pnl" role="dialog" aria-modal="true" aria-label="Your account">'+({main:main,photo:photo,page:page,lang:lang}[S.view])()+'</section>':'';
+  // The test strip stays visible: the panel and its dim start below it, so the panel's head and × are never covered.
+  var top=document.getElementById('case').getBoundingClientRect().bottom, P=document.querySelector('.pnl'), D=document.querySelector('.dim');
+  if(D) D.style.top=top+'px';
+  if(P){ var sheet=S.wid==='phone'||window.innerWidth<=720; if(sheet){ P.style.top='auto'; P.style.height=Math.min(window.innerHeight*0.92, window.innerHeight-top-8)+'px'; } else { P.style.top=(top+12)+'px'; P.style.height=''; } }
+  var t=document.querySelector('.toast'); if(t) t.remove();
+  if(S.toast){ var d=document.createElement('div'); d.className='toast'; d.textContent=S.toast; document.body.appendChild(d); }
+}
+document.addEventListener('click',function(ev){ var el=ev.target.closest('[data-a]'); if(!el) return; var a=el.dataset.a, v=el.dataset.v; S.toast=null;
+  if(a==='open'){ S.open=true; S.view='main'; } if(a==='close'){ S.open=false; }
+  if(a==='view') S.view=v; if(a==='jump'){ S.open=true; S.view=v; }
+  if(a==='role') S.role=v; if(a==='wid') S.wid=v;
+  if(a==='short') S.shortcuts=!S.shortcuts;
+  if(a==='show') S.showOnPage=!S.showOnPage;
+  if(a==='ph'){ S.photo=v==='up'; S.toast=v==='up'?'Photo saved.':'Photo removed.'; }
+  if(a==='pp'){ S.pagePhoto=v==='up'; }
+  if(a==='lang'){ S.lang=v; S.view='main'; }
+  if(a==='settings'){ S.toast='Opens Settings.'; S.open=false; }
+  if(a==='signout'){ S.toast='Signed out.'; S.open=false; }
+  render(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&S.open){ if(S.view!=='main') S.view='main'; else S.open=false; render(); } });
+window.addEventListener('resize',render);
+render();
+</script>
+</body>
+</html>
