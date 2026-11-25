@@ -196,10 +196,34 @@ table.pt { width:100%; border-collapse:collapse; font-size:15px; }
 .sgt { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#8A5A00; -webkit-text-fill-color:#8A5A00; }
 .tg { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:14px 18px; background:#fff; }
 .tg b { display:block; font-size:15px; } .tg span { font-size:13px; color:var(--t3); }
+/* piece 1: phone list of parts, read-only rows, back link */
+.plist { border:1px solid var(--line); border-radius:16px; overflow:hidden; background:#fff; }
+.prt { display:flex; align-items:center; gap:12px; padding:14px 16px; border-top:1px solid var(--rowline); background:#fff; width:100%; text-align:left; border-left:0; border-right:0; border-bottom:0; -webkit-appearance:none; appearance:none; color:var(--ink); -webkit-text-fill-color:var(--ink); min-height:64px; }
+.prt:first-child { border-top:0; } .prt:hover { background:#FAFAF8; }
+.prt .tx { flex:1; min-width:0; } .prt b { display:block; font-size:17px; font-weight:600; } .prt small { display:block; font-size:14px; color:var(--t3); -webkit-text-fill-color:var(--t3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.back { border:0; background:none; padding:0; height:40px; font-size:15px; font-weight:500; color:var(--t2); -webkit-text-fill-color:var(--t2); display:inline-flex; align-items:center; gap:4px; margin-top:-8px; }
+.ronote { font-size:14px; color:var(--t3); margin:0 0 8px; }
+.srow2.ro { cursor:default; } .srow2.ro:hover { background:#fff; }
+.tabs { flex-wrap:nowrap!important; overflow-x:auto; scrollbar-width:none; } .tabs span { flex:none; }
+.taskcard { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin:0 0 20px; max-width:520px; }
+.taskcard .tx { flex:1; } .taskcard b { display:block; font-size:15px; } .taskcard small { font-size:13px; color:var(--t3); }
+/* member preview, drawn from frontend/src/member/MemberHome.tsx */
+.lapt.m { flex-direction:column; }
+.mbar { display:flex; align-items:center; gap:8px; padding:10px 12px; font-size:15px; font-weight:700; }
+.mbar .who { margin-left:auto; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:500; }
+.mbar .av { width:22px; height:22px; border-radius:50%; display:grid; place-items:center; font-size:10px; font-weight:700; background:rgba(127,127,127,.25); }
+.mtabs { display:flex; justify-content:center; gap:22px; border-bottom:1px solid var(--line); font-size:14px; color:var(--t3); }
+.mtabs span { padding:7px 2px; } .mtabs span.on { color:var(--ink); font-weight:600; box-shadow:inset 0 -2px 0 var(--ink); }
+.mbody { padding:12px 14px; display:flex; flex-direction:column; gap:8px; }
+.mnext { border:1px solid var(--line); border-radius:12px; padding:10px 12px; } .mnext small { display:block; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); } .mnext b { display:block; font-size:16px; margin-top:2px; } .mnext span { font-size:13px; color:var(--t2); }
+.phn.m { display:flex; flex-direction:column; height:270px; } .phone .phn.m { height:270px; }
+.phn.m .pbody { flex:1; }
+.mbot { display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--line); font-size:11px; color:var(--t3); text-align:center; padding:6px 0 8px; }
+.mbot span { display:flex; flex-direction:column; align-items:center; gap:3px; } .mbot i { width:26px; height:16px; border-radius:8px; display:block; } .mbot span.on { color:var(--ink); font-weight:600; } .mbot span.on i { background:#E4E4E0; }
 </style>
 </head>
 <body>
-<div class="test"><b>Tab</b><span class="seg" id="g1"></span><b>Address</b><span class="seg" id="g3"></span><b>Width</b><span class="seg" id="g2"></span></div>
+<div class="test"><b>Who</b><span class="seg" id="g1"></span><b>Task</b><span class="seg" id="g4"></span><b>Address</b><span class="seg" id="g3"></span><b>Width</b><span class="seg" id="g2"></span></div>
 <div class="case" id="case"></div>
 <div class="wrap"><div class="frame"><div class="band"></div><div class="appmain" id="main"></div></div></div>
 <div class="scrim" data-a="close"></div>
@@ -210,16 +234,31 @@ table.pt { width:100%; border-collapse:collapse; font-size:15px; }
 // ⚑ NEW (DECIDE_2026-11-07_signup item D/C): legal name, description, affiliations, focus.
 var LOOKS=[['black','Black','#111','#fff'],['light','Light','#F4F4F1','#111'],['brand','Your color','#1F6F78','#fff']];
 var COLORS=['#1F6F78','#A86B0C','#8C4A62','#2F5BA8','#5E6B3A','#B23A2E','#6E4A8C','#111111'];
-var S={ctry:'pr', taxok:false, own:[], pv:'staff', style:'line', logo:false, tab:'business', wid:'desk', panel:null, toast:null, look:'brand', color:'#1F6F78', collects:true, comps:[['IVU estatal',10.5],['IVU municipal',1]],
+var S={role:'owner', photos:false, ctry:'pr', taxok:false, own:[], pv:'staff', style:'line', logo:false, tab:(new URLSearchParams(location.search).get('part'))||'business', list:!(new URLSearchParams(location.search).get('part')), task:false, wid:'desk', panel:null, toast:null, look:'brand', color:'#1F6F78', collects:true, comps:[['IVU estatal',10.5],['IVU municipal',1]],
  b:{name:'Barrio Fitness',legal:'',desc:'',aff:['CrossFit'],addr:'Calle Loíza 1950, San Juan, PR 00911',email:'hola@barriofitness.com',focus:['Functional fitness','Strength'],work:['Group classes','Open gym','1:1 sessions'],staff:true,tz:'Atlantic (San Juan)',lang:'Español',clock:'12-hour',date:'Day first (8/11)'}};
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
 var CASES={
- business:'<b>Settings › Business.</b> Everything about the business, in rows; each opens the 520 panel. Grouped: who you are · how you work · time and format · hours. <span style="color:#7fd3dc">NEW</span> marks the fields sign-up added (legal name, description, affiliations, focus).',
- look:'<b>Settings › Look.</b> Logo, then the frame: Black · Light · Your color. Your color: suggested from the logo, 8 swatches, or Custom (the device’s picker plus a hex field); <b>Fill or Line</b>. A readability check picks white or black text; too light becomes a line. Preview: laptop sidebar + phone header. Controls stay ink.',
+ list:'<b>Settings on a phone.</b> The list of its parts, each with one grey line saying what is set. Front desk sees Business, Look, Documents and Tracks, read-only, and never Payments or Tax.',
+ task:'<b>Opened from a Task.</b> “Set up how people pay” on Today opens Settings › Payments directly, never the top of Settings. On a phone, ‹ Settings goes back to the list.',
+ business:'<b>Settings › Business.</b> Everything about the business, in rows; each opens the 520 panel. Grouped: who you are · how you work · time and format · hours. <span style="color:#7fd3dc">NEW</span> marks the fields sign-up added (legal name, description, affiliations, focus). Last: <b>More settings</b>, the one place for small switches that belong to no other part (Daniel, 2026-11-25).',
+ look:'<b>Settings › Look.</b> Logo, then the frame: Black · Light · Your color. Your color: suggested from the logo, 8 swatches, or Custom (the device’s picker plus a hex field); <b>Fill or Line</b>. A readability check picks white or black text; too light becomes a line. Preview: Staff (laptop sidebar, phone header) or Members (top bar; Home · Schedule · Me under it on a laptop, at the bottom on a phone), as the real member app draws it. Controls stay ink.',
  tax:'<b>Settings › Tax.</b> ⚑ Suggested from the address (Puerto Rico only; elsewhere, no suggestion), confirmed by the owner; once confirmed the rates are hers and Zana never changes them. Elsewhere: no suggestion, she adds the parts. One switch (collect tax), the named parts that add up (IVU estatal 10.5% + IVU municipal 1% = 11.5%; named in the members’ language, English: State IVU / Municipal IVU). Each product says whether its price includes tax, in Products.'
 };
-function header(){ return '<div class="titlerow"><h1>Settings</h1></div><div class="tabs">'+['Business','Look','Payments','Documents','Tracks','Tax'].map(function(t){ var k=t.toLowerCase(); return '<span class="'+(S.tab===k?'on':'')+'" data-a="tab" data-v="'+k+'" style="cursor:pointer">'+t+'</span>'; }).join('')+'</div>'; }
-function row(k,v,sub,id,isnew,empty){ return '<button class="srow2" data-a="edit" data-v="'+id+'"><span class="k">'+k+(isnew?'<span class="new">New</span>':'')+'</span><span class="v">'+(empty?'<span class="add">'+empty+'</span>':v)+(sub?'<small>'+sub+'</small>':'')+'</span><span class="chev">›</span></button>'; }
+var PARTS=[['business','Business'],['look','Look'],['payments','Payments'],['documents','Documents'],['tracks','Tracks'],['tax','Tax']];
+function phone(){ return S.wid==='phone'||window.innerWidth<=720; }
+function ro(){ return S.role==='desk'; }
+function parts(){ return PARTS.filter(function(p){ return !(ro()&&(p[0]==='payments'||p[0]==='tax')); }); }
+function said(k){ var b=S.b; return {business:esc(b.name)+' · Hours set · 6 days',
+  look:(S.look==='brand'?'Your color · '+(S.style==='fill'?'Fill':'Line'):S.look==='black'?'Black':'Light')+(S.logo?' · Logo':' · No logo yet'),
+  payments:'Not set up yet', documents:'2 documents · 1 owed at joining', tracks:'3 tracks',
+  tax:S.collects?(S.taxok?'On · 11.5%':'On · Suggested rates to check'):'Off'}[k]; }
+function header(){
+  if(phone()){ var nm=(PARTS.filter(function(p){return p[0]===S.tab;})[0]||[,''])[1];
+    return '<button class="back" data-a="list">‹ Settings</button><div class="titlerow"><h1>'+nm+'</h1></div>'+(ro()&&(S.tab==='business'||S.tab==='look'||S.tab==='documents'||S.tab==='tracks')?'<p class="ronote">Only the owner or an admin can change these.</p>':''); }
+  return '<div class="titlerow"><h1>Settings</h1></div><div class="tabs">'+parts().map(function(p){ return '<span class="'+(S.tab===p[0]?'on':'')+'" data-a="tab" data-v="'+p[0]+'" style="cursor:pointer">'+p[1]+'</span>'; }).join('')+'</div>'+(ro()?'<p class="ronote">Only the owner or an admin can change these.</p>':''); }
+function plist(){ return '<div class="titlerow"><h1>Settings</h1></div><div class="plist">'+parts().map(function(p){ return '<button class="prt" data-a="tab" data-v="'+p[0]+'"><span class="tx"><b>'+p[1]+'</b><small>'+said(p[0])+'</small></span><span class="chev">›</span></button>'; }).join('')+'</div>'+(ro()?'<p class="mut" style="font-size:13px;margin-top:10px">Front desk sees these to answer members. Only the owner or an admin changes them.</p>':''); }
+function row(k,v,sub,id,isnew,empty){ if(ro()) return '<div class="srow2 ro"><span class="k">'+k+'</span><span class="v">'+(empty?'<span class="add">Not set</span>':v)+(sub?'<small>'+sub+'</small>':'')+'</span></div>';
+  return '<button class="srow2" data-a="edit" data-v="'+id+'"><span class="k">'+k+(isnew?'<span class="new">New</span>':'')+'</span><span class="v">'+(empty?'<span class="add">'+empty+'</span>':v)+(sub?'<small>'+sub+'</small>':'')+'</span><span class="chev">›</span></button>'; }
 function business(){ var b=S.b, h=header();
   h+='<div class="grp"><div class="lab2">Who you are</div><div class="card">'+
    row('Business name',esc(b.name),'What members see. Owner only.','name')+
@@ -237,12 +276,14 @@ function business(){ var b=S.b, h=header();
    row('Members’ language',b.lang,'Emails and the member app.','lang')+
    row('Clock',b.clock,'','clock')+
    row('Dates',b.date,'','date')+'</div></div>';
-  h+='<div class="grp"><div class="lab2">Hours</div><div class="card"><button class="srow2" data-a="edit" data-v="hours"><span class="k">Opening hours</span><span class="v"><span class="hrs"><b>Mon–Fri</b><span>5:30 AM – 8:30 PM</span><b>Sat</b><span>7:00 AM – 12:00 PM</span><b>Sun</b><span>Closed</span><b>Dec 24</b><span>Closes 12:00 PM</span></span><small>Information only. They never block a booking.</small></span><span class="chev">›</span></button></div></div>';
+  h+='<div class="grp"><div class="lab2">Hours</div><div class="card">'+(ro()?'<div class="srow2 ro">':'<button class="srow2" data-a="edit" data-v="hours">')+'<span class="k">Opening hours</span><span class="v"><span class="hrs"><b>Mon–Fri</b><span>5:30 AM – 8:30 PM</span><b>Sat</b><span>7:00 AM – 12:00 PM</span><b>Sun</b><span>Closed</span><b>Dec 24</b><span>Closes 12:00 PM</span></span><small>Information only. They never block a booking.</small></span>'+(ro()?'</div>':'<span class="chev">›</span></button>')+'</div></div>';
+  h+='<div class="grp"><div class="lab2">More settings</div><div class="card"><div class="tg"><div><b>Members see each other’s photos</b><span>'+(S.photos?'On: members see the photos of others in their classes.':'Off: only staff see photos.')+'</span></div>'+(ro()?'<span class="mut" style="font-size:14px">'+(S.photos?'On':'Off')+'</span>':'<button class="tog '+(S.photos?'on':'')+'" data-a="photos" aria-label="Members see each other’s photos"></button>')+'</div></div><p class="mut" style="font-size:13px;margin-top:8px">Small switches that belong to no other part live here, together.</p></div>';
   return h; }
 function lum(hex){ var c=hex.replace('#',''); var r=parseInt(c.substr(0,2),16)/255,g=parseInt(c.substr(2,2),16)/255,b=parseInt(c.substr(4,2),16)/255; function f(x){return x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);} return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b); }
 function look(){ var h=header(), brand=S.look==='brand', col=S.color, L=lum(col), txt=L>0.4?'#111':'#fff', tooPale=L>0.85;
   var fill=brand&&S.style==='fill'&&!tooPale, line=brand&&(S.style==='line'||tooPale);
   var band=fill?col:(S.look==='black'?'#111':'#F4F4F1'), bandTxt=fill?txt:(S.look==='black'?'#fff':'#111');
+  if(ro()){ h+='<div class="grp"><div class="card">'+row('Logo',S.logo?'barrio-logo.png':'','', 'x',false,S.logo?'':'x')+row('Frame',S.look==='brand'?'Your color':S.look==='black'?'Black':'Light','','x')+(brand?row('Color',col.toUpperCase()+' · '+(S.style==='fill'?'Fill':'Line'),'','x'):'')+'</div></div>'; return h+preview(band,bandTxt,fill,line,col); }
   h+='<div class="grp"><div class="lab2">Logo</div><div class="logobox"><span class="lg" style="'+(S.logo?'background:#1F6F78;color:#fff':'')+'">'+(S.logo?'B':'BF')+'</span><div style="flex:1"><b>'+(S.logo?'barrio-logo.png':'No logo yet')+'</b><div class="mut" style="font-size:13px">'+(S.logo?'Colors below are suggested from it.':'Square works best. Until then, your initials show.')+'</div></div><button class="btn" data-a="logo">'+(S.logo?'Replace':'Upload')+'</button></div></div>';
   h+='<div class="grp"><div class="lab2">Frame</div><div class="look3">'+LOOKS.map(function(x){ var c=x[0]==='brand'?col:x[2], t=x[0]==='brand'?txt:x[3]; return '<button class="lk '+(S.look===x[0]?'on':'')+'" data-a="look" data-v="'+x[0]+'"><div class="sw" style="background:'+c+';color:'+t+';-webkit-text-fill-color:'+t+';'+(x[0]==='light'?'border:1px solid #e5e5e0':'')+'">Barrio</div><b>'+x[1]+'</b></button>'; }).join('')+'</div>';
   if(brand){
@@ -252,13 +293,22 @@ function look(){ var h=header(), brand=S.look==='brand', col=S.color, L=lum(col)
     h+='<div class="sub2">How it shows</div><div class="seg2"><button class="'+(S.style==='fill'?'on':'')+'" data-a="style" data-v="fill">Fill</button><button class="'+(S.style==='line'?'on':'')+'" data-a="style" data-v="line">Line</button></div>';
     if(tooPale) h+='<p class="mut" style="font-size:13px">This color is too light to read text on, so it shows as a line.</p>';
   }
-  var mem=S.pv==='members', nav=mem?['Classes','My plans','Workouts','Account']:['Today','Schedule','People','Money','Workouts'], title=mem?'Classes':'Today', cta=mem?'Book':'Collect', pcta=mem?'Book':'Check in';
-  var logoBg=S.logo?'#1F6F78':(fill?'rgba(255,255,255,.2)':'#111');
-  var ph=mem?'<div class="phold">Member side · placeholder, not designed yet</div>':'';
-  h+='</div><div class="grp"><div class="lab2" style="display:flex;justify-content:space-between;align-items:center">Preview<span class="seg2" style="text-transform:none;letter-spacing:0;font-weight:500"><button class="'+(!mem?'on':'')+'" data-a="pv" data-v="staff">Staff</button><button class="'+(mem?'on':'')+'" data-a="pv" data-v="members">Members</button></span></div><div class="pv2">'+
-   '<div class="lapt"><div class="band2" style="background:'+band+';color:'+bandTxt+';'+(line?'box-shadow:inset -4px 0 0 '+col+';':'')+(S.look==='light'||line?'border-right:1px solid #E6E6E2;':'')+'"><div class="bl" style="background:'+logoBg+'">'+(S.logo?'B':'BF')+'</div>'+nav.map(function(n,i){ return '<div class="bi" style="color:'+bandTxt+';-webkit-text-fill-color:'+bandTxt+';opacity:'+(i===0?1:.7)+'">'+n+'</div>'; }).join('')+'</div><div class="lmain"><div class="lh">'+title+'</div>'+ph+'<div class="lrow"></div><div class="lrow"></div><div class="lbtn">'+cta+'</div></div></div>'+
-   '<div class="phn"><div class="ph2" style="background:'+band+';color:'+bandTxt+';'+(line?'box-shadow:inset 0 -3px 0 '+col+';':'')+'"><span class="bl" style="width:26px;height:26px;font-size:11px;margin:0;background:'+logoBg+'">'+(S.logo?'B':'BF')+'</span><b style="color:'+bandTxt+';-webkit-text-fill-color:'+bandTxt+'">Barrio Fitness</b><span style="margin-left:auto;color:'+bandTxt+';-webkit-text-fill-color:'+bandTxt+'">☰</span></div><div class="pbody">'+ph+'<div class="lrow"></div><div class="lrow"></div><div class="lbtn" style="width:100%">'+pcta+'</div></div></div></div>'+
-   '<p class="mut" style="font-size:13px;margin-top:8px">Both sides, on a laptop and on a phone, use this look: the sidebar on a wide screen, the header and its menu on a phone. Buttons, tabs and panels stay black so every screen reads the same. Your business page has its own look, later.</p></div>';
+  h+='</div>'; return h+preview(band,bandTxt,fill,line,col); }
+function preview(band,bandTxt,fill,line,col){ var mem=S.pv==='members', h='';
+  var logoBg=S.logo?'#1F6F78':(fill?'rgba(255,255,255,.2)':(S.look==='light'||line?'#111':'rgba(255,255,255,.2)'));
+  var bl='<span class="bl" style="width:26px;height:26px;font-size:11px;margin:0;background:'+logoBg+'">'+(S.logo?'B':'BF')+'</span>';
+  var tc='color:'+bandTxt+';-webkit-text-fill-color:'+bandTxt;
+  h+='<div class="grp"><div class="lab2" style="display:flex;justify-content:space-between;align-items:center">Preview<span class="seg2" style="text-transform:none;letter-spacing:0;font-weight:500"><button class="'+(!mem?'on':'')+'" data-a="pv" data-v="staff">Staff</button><button class="'+(mem?'on':'')+'" data-a="pv" data-v="members">Members</button></span></div><div class="pv2">';
+  if(!mem){ var nav=['Today','Schedule','People','Money','Workouts'];
+    h+='<div class="lapt"><div class="band2" style="background:'+band+';color:'+bandTxt+';'+(line?'box-shadow:inset -4px 0 0 '+col+';':'')+(S.look==='light'||line?'border-right:1px solid #E6E6E2;':'')+'"><div class="bl" style="background:'+logoBg+'">'+(S.logo?'B':'BF')+'</div>'+nav.map(function(n,i){ return '<div class="bi" style="'+tc+';opacity:'+(i===0?1:.7)+'">'+n+'</div>'; }).join('')+'</div><div class="lmain"><div class="lh">Today</div><div class="lrow"></div><div class="lrow"></div><div class="lbtn">Collect</div></div></div>'+
+     '<div class="phn"><div class="ph2" style="background:'+band+';'+tc+';'+(line?'box-shadow:inset 0 -3px 0 '+col+';':'')+'">'+bl+'<b style="'+tc+'">Today</b><span style="margin-left:auto;'+tc+'">⌄</span></div><div class="pbody"><div class="lrow"></div><div class="lrow"></div><div class="lbtn" style="width:100%">Check in</div></div></div>';
+  } else {
+    var bar='background:'+band+';'+tc+';'+(line?'box-shadow:inset 0 -3px 0 '+col+';':'')+(S.look==='light'||line?'border-bottom:1px solid #E6E6E2;':'');
+    var next='<div class="mnext"><small>Your next class</small><b>Tomorrow, 6:00 AM</b><span>CrossFit · with Leo</span></div>';
+    h+='<div class="lapt m"><div class="mbar" style="'+bar+'">'+bl+'<span style="'+tc+'">Barrio Fitness</span><span class="who" style="'+tc+'">Ana Rivera<span class="av">AR</span></span></div><div class="mtabs"><span class="on">Home</span><span>Schedule</span><span>Me</span></div><div class="mbody">'+next+'<div class="lrow"></div></div></div>'+
+     '<div class="phn m"><div class="ph2 mbar" style="'+bar+'">'+bl+'<span style="'+tc+'">Barrio Fitness</span></div><div class="pbody">'+next+'<div class="lrow"></div></div><div class="mbot"><span class="on"><i></i>Home</span><span><i></i>Schedule</span><span><i></i>Me</span></div></div>';
+  }
+  h+='</div><p class="mut" style="font-size:13px;margin-top:8px">'+(mem?'Members: your color on the top bar, beside your logo and name. Their tabs (Home · Schedule · Me) sit under the bar on a laptop and at the bottom on a phone. Schedule shows only if you run classes. Drawn from the real member app.':'Staff: your color on the sidebar on a laptop, and on the header and its menu on a phone.')+' Buttons, tabs and panels stay black so every screen reads the same.</p></div>';
   return h; }
 var SUG={pr:['Puerto Rico',[['IVU estatal',10.5],['IVU municipal',1]],'IVU'],none:['',[],'']};
 function tax(){ var h=header(), sg=SUG[S.ctry], comps=S.ctry==='none'?S.own:(S.taxok?S.comps:sg[1]), tot=comps.reduce(function(a,c){return a+c[1];},0);
@@ -278,18 +328,25 @@ function panel(){ if(!S.panel) return ''; var id=S.panel, b=S.b, h='<div class="
   h+='Edit</h3><button class="ib" data-a="close">✕</button></div><div class="pb"><p class="mut">This row opens its own editor (the field’s control from the look README).</p></div>'; return h; }
 function render(){
   document.body.className=(S.wid==='phone'?'phone ':'')+(S.panel?'open':'');
-  document.getElementById('g1').innerHTML=[['business','Business'],['look','Look'],['tax','Tax']].map(function(x){return '<button data-a="tab" data-v="'+x[0]+'" aria-pressed="'+(S.tab===x[0])+'">'+x[1]+'</button>';}).join('');
+  if(ro()&&(S.tab==='payments'||S.tab==='tax')){ S.tab='business'; }
+  document.getElementById('g1').innerHTML=[['owner','Owner'],['desk','Front desk']].map(function(x){return '<button data-a="role" data-v="'+x[0]+'" aria-pressed="'+(S.role===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('g4').innerHTML='<button data-a="task" aria-pressed="false">Set up how people pay</button>';
   document.getElementById('g2').innerHTML=[['desk','Laptop'],['phone','Phone']].map(function(x){return '<button data-a="wid" data-v="'+x[0]+'" aria-pressed="'+(S.wid===x[0])+'">'+x[1]+'</button>';}).join('');
   document.getElementById('g3').innerHTML=[['pr','Puerto Rico'],['none','Elsewhere']].map(function(x){return '<button data-a="ctry" data-v="'+x[0]+'" aria-pressed="'+(S.ctry===x[0])+'">'+x[1]+'</button>';}).join('');
-  document.getElementById('case').innerHTML=CASES[S.tab]||'<b>'+S.tab+'</b> is designed in its own file.';
-  document.getElementById('main').innerHTML=S.tab==='business'?business():S.tab==='look'?look():S.tab==='tax'?tax():header()+'<p class="mut" style="margin-top:24px">Designed in its own mock.</p>';
+  var showList=phone()&&S.list;
+  document.getElementById('case').innerHTML=showList?CASES.list:(S.task&&S.tab==='payments'?CASES.task:(CASES[S.tab]||'<b>Settings › '+S.tab+'.</b> Designed in its own mock for now; joins here in piece 4.'));
+  var own={payments:'/p/payments/',documents:'/p/documents/',tracks:'/p/tracks/'};
+  document.getElementById('main').innerHTML=showList?plist():S.tab==='business'?business():S.tab==='look'?look():S.tab==='tax'?tax():header()+(S.task&&S.tab==='payments'?'<div class="taskcard"><div class="tx"><b>Set up how people pay</b><small>Opened from a Task on Today</small></div></div>':'')+'<p class="mut" style="margin-top:24px">'+S.tab.charAt(0).toUpperCase()+S.tab.slice(1)+' is drawn in its own mock for now: <a href="'+own[S.tab]+'">'+own[S.tab]+'</a>. It joins here, restyled, in piece 4.</p>';
   var tb=document.querySelector('.tabs'), on=tb&&tb.querySelector('.on'); if(on) tb.scrollLeft=Math.max(0,on.offsetLeft-tb.offsetLeft-16);
   document.getElementById('panel').innerHTML=panel();
   var old=document.querySelector('.undo'); if(old) old.remove();
   if(S.toast){ var u=document.createElement('div'); u.className='undo'; u.innerHTML='<span>'+S.toast+'</span><button data-a="untoast">Undo</button>'; document.body.appendChild(u); }
 }
 document.addEventListener('click',function(ev){ var el=ev.target.closest('[data-a]'); if(!el) return; var a=el.dataset.a, v=el.dataset.v; ev.preventDefault(); if(a!=='untoast') S.toast=null;
-  if(a==='tab'){ S.tab=v; S.panel=null; } if(a==='wid') S.wid=v;
+  if(a==='tab'){ S.tab=v; S.panel=null; S.list=false; S.task=false; } if(a==='wid'){ S.wid=v; S.list=true; S.task=false; }
+  if(a==='list'){ S.list=true; S.task=false; S.panel=null; } if(a==='role'){ S.role=v; S.list=true; S.panel=null; S.task=false; }
+  if(a==='task'){ if(S.role==='desk') S.role='owner'; S.tab='payments'; S.list=false; S.task=true; S.panel=null; }
+  if(a==='photos'){ S.photos=!S.photos; S.toast=S.photos?'Members now see each other’s photos.':'Only staff see photos now.'; }
   if(a==='edit') S.panel=v; if(a==='close') S.panel=null;
   if(a==='save'){ S.panel=null; S.toast='Saved.'; }
   if(a==='aff'){ var i=S.b.aff.indexOf(v); if(i>=0) S.b.aff.splice(i,1); else S.b.aff.push(v); }
@@ -302,6 +359,7 @@ document.addEventListener('click',function(ev){ var el=ev.target.closest('[data-
   if(a==='untoast') S.toast=null;
   render(); });
 document.addEventListener('input',function(ev){ var f=ev.target.dataset.f; if(!f) return; if(f==='picker'){ S.color=ev.target.value; render(); return; } if(f==='hex'){ var v=ev.target.value; if(/^#[0-9a-fA-F]{6}$/.test(v)){ S.color=v.toLowerCase(); var pos=ev.target.selectionStart; render(); var i=document.querySelector('[data-f=hex]'); i.focus(); i.setSelectionRange(pos,pos);} return; } S.b[f]=ev.target.value; });
+window.addEventListener('resize',function(){ render(); });
 render();
 </script>
 </body>
