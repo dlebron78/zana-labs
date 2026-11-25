@@ -1,6 +1,6 @@
 # Zana Labs
 
-Test pages and prototypes for Zana, served at try.zana.fit. A sandbox: no pull requests, no checks. Pushes to main go live in about a minute.
+Test pages and prototypes for Zana, served at https://zana-labs.onrender.com (the only working address; try.zana.fit was never set up). A sandbox: no pull requests, no checks. Pushes to main go live in about a minute.
 
 - `kit/zana.css`: Zana's look (Dev Docs/Phoenix/Frontend/DESIGN_2026-10-22_look).
 - `kit/labs.js`: test declaration and KPIs, tracking, the tester's saved data, the test strip with Feedback and Start over.
