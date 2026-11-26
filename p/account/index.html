@@ -60,6 +60,8 @@ button { font-family:inherit; color:var(--ink); -webkit-text-fill-color:currentC
 .note { font-size:14px; color:var(--t3); text-align:center; margin:0; }
 .choice { display:flex; align-items:center; gap:12px; width:100%; min-height:56px; padding:0 16px; border:0; border-top:1px solid var(--rowline); background:#fff; font-size:16px; text-align:left; }
 .choice:first-child { border-top:0; } .choice .ck { margin-left:auto; font-weight:700; }
+.unf { background:#FAFAF8; border-top:1px solid var(--rowline); padding:12px 16px; }
+.unf .big { padding:12px 0 4px; } .unf .face2 { width:88px; height:88px; font-size:30px; }
 .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; padding:12px 16px; font-size:14px; z-index:80; }
 </style>
 </head>
@@ -71,35 +73,35 @@ button { font-family:inherit; color:var(--ink); -webkit-text-fill-color:currentC
 <script>
 // Grounded at phoenix main 436ff73: frontend/src/Account.tsx (Your account, a Panel), MyPhotos.tsx (photo at the gym, staff only;
 // business-page photo + show switch), shellWords.ts (language, shortcut bar; "The gym's look", retired here: it is Settings › Look).
-var S={role:'owner', wid:'desk', open:true, view:'main', photo:false, pagePhoto:false, showOnPage:false, lang:'English', shortcuts:true, toast:null};
+var S={role:'owner', wid:'desk', open:true, view:'main', row:null, photo:false, pagePhoto:false, showOnPage:false, lang:'English', shortcuts:true, toast:null};
 var ROLES={owner:'Owner',admin:'Admin',desk:'Front desk',coach:'Coach'};
 var NAME='Preview Coach', GYM='Preview Gym';
 function face(cls,on,txt){ return '<span class="'+cls+(on?' photo':'')+'">'+(on?'':txt)+'</span>'; }
 function head(title,sub,back){ return '<div class="ph">'+(back?'<button class="back" data-a="view" data-v="main">‹ Your account</button><div class="tx"></div>':face('me',S.photo,'PC')+'<div class="tx"><h2>'+title+'</h2><small>'+sub+'</small></div>')+'<button class="ib" data-a="close" aria-label="Close Your account">✕</button></div>'; }
+function chev(k){ return '<span class="chev" style="display:inline-block;transform:rotate('+(S.row===k?'90':'0')+'deg);transition:transform .15s">›</span>'; }
+function inPhoto(){ return '<div class="unf"><div class="big">'+face('face2',S.photo,'PC')+'<div class="btns">'+(S.photo?'<button class="btn" data-a="ph" data-v="up">Change</button><button class="btn" data-a="ph" data-v="rm">Remove</button>':'<button class="btn main" data-a="ph" data-v="up">Upload a photo</button>')+'</div><p class="note">Until then, your initials show.</p></div></div>'; }
+function inPage(){ return '<div class="unf"><div class="r" style="border:0;padding:0;background:transparent"><span class="k">Show me on the business page<small>'+(S.showOnPage?'Members and visitors see your photo and name.':'Off: you are not on the page.')+'</small></span><button class="tog '+(S.showOnPage?'on':'')+'" data-a="show" aria-label="Show me on the business page"></button></div>'+
+  (S.showOnPage?'<div class="big">'+face('face2',S.pagePhoto,'PC')+'<div class="btns">'+(S.pagePhoto?'<button class="btn" data-a="pp" data-v="up">Change</button><button class="btn" data-a="pp" data-v="rm">Remove</button>':'<button class="btn main" data-a="pp" data-v="up">Upload a professional photo</button>')+'</div><p class="note">Apart from your photo in the app. Shows once '+GYM+' puts its staff on its page.</p></div>':'')+'</div>'; }
+function inLang(){ return '<div class="unf" style="padding:0">'+['English','Español'].map(function(l){ return '<button class="choice" data-a="lang" data-v="'+l+'">'+l+(S.lang===l?'<span class="ck">✓</span>':'')+'</button>'; }).join('')+'<p class="note" style="text-align:left;padding:8px 16px 12px;margin:0">Zana’s words, for you only. Members get the gym’s language.</p></div>'; }
 function main(){
   var h=head(NAME, ROLES[S.role]+' · '+GYM)+'<div class="pb">';
   h+='<div class="lab">You</div><div class="rows">'+
-   '<button class="r" data-a="view" data-v="photo"><span class="k">Your photo<small>Only the staff of '+GYM+' see it. Each place has its own.</small></span><span class="v">'+face('mini',S.photo,'PC')+'<span class="chev">›</span></span></button>'+
-   '<button class="r" data-a="view" data-v="page"><span class="k">On the business page<small>A professional photo, if the gym shows its staff.</small></span><span class="v">'+(S.showOnPage?'Shown':'Not shown')+'<span class="chev">›</span></span></button>'+
-   '<button class="r" data-a="view" data-v="lang"><span class="k">Language</span><span class="v">'+S.lang+'<span class="chev">›</span></span></button>'+
+   '<button class="r" data-a="row" data-v="photo" aria-expanded="'+(S.row==='photo')+'"><span class="k">Your photo<small>Only the staff of '+GYM+' see it. Each place has its own.</small></span><span class="v">'+face('mini',S.photo,'PC')+chev('photo')+'</span></button>'+(S.row==='photo'?inPhoto():'')+
+   '<button class="r" data-a="row" data-v="page" aria-expanded="'+(S.row==='page')+'"><span class="k">On the business page<small>A professional photo, if the gym shows its staff.</small></span><span class="v">'+(S.showOnPage?'Shown':'Not shown')+chev('page')+'</span></button>'+(S.row==='page'?inPage():'')+
+   '<button class="r" data-a="row" data-v="lang" aria-expanded="'+(S.row==='lang')+'"><span class="k">Language</span><span class="v">'+S.lang+chev('lang')+'</span></button>'+(S.row==='lang'?inLang():'')+
    '<div class="r"><span class="k">Shortcut bar<small>Quick buttons along the bottom of your screen.</small></span><button class="tog '+(S.shortcuts?'on':'')+'" data-a="short" aria-label="Shortcut bar"></button></div></div>';
   h+='<div class="rows" style="margin-top:20px"><button class="r" data-a="places"><span class="k">Your places<small>Switch to another gym, or to where you train.</small></span><span class="v">3<span class="chev">›</span></span></button></div>';
   h+='<button class="out" data-a="signout">Sign out</button></div>';
   return h; }
-function photo(){ return head('','',true)+'<div class="pb"><div class="lab">Your photo</div><div class="big">'+face('face2',S.photo,'PC')+'<div class="btns">'+(S.photo?'<button class="btn" data-a="ph" data-v="up">Change</button><button class="btn" data-a="ph" data-v="rm">Remove</button>':'<button class="btn main" data-a="ph" data-v="up">Upload a photo</button>')+'</div><p class="note">Only the staff of '+GYM+' see it. Until then, your initials show.</p></div></div>'; }
-function page(){ return head('','',true)+'<div class="pb"><div class="lab">On the business page</div><div class="rows"><div class="r"><span class="k">Show me on the business page<small>'+(S.showOnPage?'Members and visitors see your photo and name.':'Off: you are not on the page.')+'</small></span><button class="tog '+(S.showOnPage?'on':'')+'" data-a="show" aria-label="Show me on the business page"></button></div></div>'+
-  (S.showOnPage?'<div class="big">'+face('face2',S.pagePhoto,'PC')+'<div class="btns">'+(S.pagePhoto?'<button class="btn" data-a="pp" data-v="up">Change</button><button class="btn" data-a="pp" data-v="rm">Remove</button>':'<button class="btn main" data-a="pp" data-v="up">Upload a professional photo</button>')+'</div><p class="note">Apart from your photo in the app. Shows once '+GYM+' puts its staff on its page.</p></div>':'')+'</div>'; }
-function lang(){ return head('','',true)+'<div class="pb"><div class="lab">Language</div><div class="rows">'+['English','Español'].map(function(l){ return '<button class="choice" data-a="lang" data-v="'+l+'">'+l+(S.lang===l?'<span class="ck">✓</span>':'')+'</button>'; }).join('')+'</div><p class="note" style="text-align:left;margin-top:10px">Zana’s words, for you only. Members get the gym’s language.</p></div>'; }
-var CASES={main:'<b>Your account</b>, from your face (top right). Only your own things here. <b>Settings is not</b>: it lives in the section menu (Daniel, 2026-11-25). <b>Your places</b> sits at the foot, above Sign out, and opens Zana home, the hub for every gym you work or train at. Your photo is this gym’s only: one photo per place. Your name, your role and the gym on top, the × always there. One row per thing, label left, value right. <b>The gym’s look is gone</b>: it is Settings › Look. Sign out sits apart at the foot.',
- photo:'<b>Your photo.</b> One big face, one button. Staff only see it.', page:'<b>On the business page.</b> The show switch first; the professional photo appears only once it is on.', lang:'<b>Language.</b> Two choices, a check on yours.'};
+var CASES={main:'<b>Your account</b>, from your face (top right). Only your own things. <b>No pages inside it</b>: a row opens in place under itself and folds back (Daniel, 2026-11-25), so the × is the only way out and always closes. Your places sits at the foot, above Sign out.'};
 function render(){
   document.body.className=S.wid==='phone'?'phone':'';
   document.getElementById('g1').innerHTML=[['owner','Owner'],['desk','Front desk']].map(function(x){return '<button data-a="role" data-v="'+x[0]+'" aria-pressed="'+(S.role===x[0])+'">'+x[1]+'</button>';}).join('');
   document.getElementById('g2').innerHTML=[['desk','Laptop'],['phone','Phone']].map(function(x){return '<button data-a="wid" data-v="'+x[0]+'" aria-pressed="'+(S.wid===x[0])+'">'+x[1]+'</button>';}).join('');
-  document.getElementById('g3').innerHTML=[['main','Main'],['photo','Photo'],['page','Business page'],['lang','Language']].map(function(x){return '<button data-a="jump" data-v="'+x[0]+'" aria-pressed="'+(S.open&&S.view===x[0])+'">'+x[1]+'</button>';}).join('');
-  document.getElementById('case').innerHTML=S.open?CASES[S.view]:'Closed. Tap your face (top right) to open Your account.';
+  document.getElementById('g3').innerHTML=[['','All folded'],['photo','Photo open'],['page','Business page open'],['lang','Language open']].map(function(x){return '<button data-a="jump" data-v="'+x[0]+'" aria-pressed="'+(S.open&&(S.row||'')===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('case').innerHTML=S.open?CASES.main:'Closed. Tap your face (top right) to open Your account.';
   var L=document.getElementById('layer');
-  L.innerHTML=S.open?'<div class="dim" data-a="close"></div><section class="pnl" role="dialog" aria-modal="true" aria-label="Your account">'+({main:main,photo:photo,page:page,lang:lang}[S.view])()+'</section>':'';
+  L.innerHTML=S.open?'<div class="dim" data-a="close"></div><section class="pnl" role="dialog" aria-modal="true" aria-label="Your account">'+main()+'</section>':'';
   // The test strip stays visible: the panel and its dim start below it, so the panel's head and × are never covered.
   var top=document.getElementById('case').getBoundingClientRect().bottom, P=document.querySelector('.pnl'), D=document.querySelector('.dim');
   if(D) D.style.top=top+'px';
@@ -108,19 +110,19 @@ function render(){
   if(S.toast){ var d=document.createElement('div'); d.className='toast'; d.textContent=S.toast; document.body.appendChild(d); }
 }
 document.addEventListener('click',function(ev){ var el=ev.target.closest('[data-a]'); if(!el) return; var a=el.dataset.a, v=el.dataset.v; S.toast=null;
-  if(a==='open'){ S.open=true; S.view='main'; } if(a==='close'){ S.open=false; }
-  if(a==='view') S.view=v; if(a==='jump'){ S.open=true; S.view=v; }
+  if(a==='open'){ S.open=true; S.row=null; } if(a==='close'){ S.open=false; S.row=null; }
+  if(a==='row') S.row=S.row===v?null:v; if(a==='jump'){ S.open=true; S.row=v||null; }
   if(a==='role') S.role=v; if(a==='wid') S.wid=v;
   if(a==='short') S.shortcuts=!S.shortcuts;
   if(a==='show') S.showOnPage=!S.showOnPage;
   if(a==='ph'){ S.photo=v==='up'; S.toast=v==='up'?'Photo saved.':'Photo removed.'; }
   if(a==='pp'){ S.pagePhoto=v==='up'; }
-  if(a==='lang'){ S.lang=v; S.view='main'; }
+  if(a==='lang'){ S.lang=v; }
   if(a==='places'){ S.toast='Opens Zana home: one card per place (sketch: /p/switcher/, option C).'; S.open=false; }
   if(a==='settings'){ S.toast='Opens Settings.'; S.open=false; }
   if(a==='signout'){ S.toast='Signed out.'; S.open=false; }
   render(); });
-document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&S.open){ if(S.view!=='main') S.view='main'; else S.open=false; render(); } });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&S.open){ S.open=false; S.row=null; render(); } });
 window.addEventListener('resize',render);
 render();
 </script>
