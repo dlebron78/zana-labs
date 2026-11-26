@@ -78,8 +78,9 @@ function face(cls,on,txt){ return '<span class="'+cls+(on?' photo':'')+'">'+(on?
 function head(title,sub,back){ return '<div class="ph">'+(back?'<button class="back" data-a="view" data-v="main">‹ Your account</button><div class="tx"></div>':face('me',S.photo,'PC')+'<div class="tx"><h2>'+title+'</h2><small>'+sub+'</small></div>')+'<button class="ib" data-a="close" aria-label="Close Your account">✕</button></div>'; }
 function main(){
   var h=head(NAME, ROLES[S.role]+' · '+GYM)+'<div class="pb">';
+  h+='<div class="rows" style="margin-top:12px"><button class="r" data-a="places"><span class="k">Your places<small>Switch to another gym, or to where you train.</small></span><span class="v">3<span class="chev">›</span></span></button></div>';
   h+='<div class="lab">You</div><div class="rows">'+
-   '<button class="r" data-a="view" data-v="photo"><span class="k">Your photo<small>Only the staff of '+GYM+' see it.</small></span><span class="v">'+face('mini',S.photo,'PC')+'<span class="chev">›</span></span></button>'+
+   '<button class="r" data-a="view" data-v="photo"><span class="k">Your photo<small>Only the staff of '+GYM+' see it. Each place has its own.</small></span><span class="v">'+face('mini',S.photo,'PC')+'<span class="chev">›</span></span></button>'+
    '<button class="r" data-a="view" data-v="page"><span class="k">On the business page<small>A professional photo, if the gym shows its staff.</small></span><span class="v">'+(S.showOnPage?'Shown':'Not shown')+'<span class="chev">›</span></span></button>'+
    '<button class="r" data-a="view" data-v="lang"><span class="k">Language</span><span class="v">'+S.lang+'<span class="chev">›</span></span></button>'+
    '<div class="r"><span class="k">Shortcut bar<small>Quick buttons along the bottom of your screen.</small></span><button class="tog '+(S.shortcuts?'on':'')+'" data-a="short" aria-label="Shortcut bar"></button></div></div>';
@@ -90,7 +91,7 @@ function photo(){ return head('','',true)+'<div class="pb"><div class="lab">Your
 function page(){ return head('','',true)+'<div class="pb"><div class="lab">On the business page</div><div class="rows"><div class="r"><span class="k">Show me on the business page<small>'+(S.showOnPage?'Members and visitors see your photo and name.':'Off: you are not on the page.')+'</small></span><button class="tog '+(S.showOnPage?'on':'')+'" data-a="show" aria-label="Show me on the business page"></button></div></div>'+
   (S.showOnPage?'<div class="big">'+face('face2',S.pagePhoto,'PC')+'<div class="btns">'+(S.pagePhoto?'<button class="btn" data-a="pp" data-v="up">Change</button><button class="btn" data-a="pp" data-v="rm">Remove</button>':'<button class="btn main" data-a="pp" data-v="up">Upload a professional photo</button>')+'</div><p class="note">Apart from your photo in the app. Shows once '+GYM+' puts its staff on its page.</p></div>':'')+'</div>'; }
 function lang(){ return head('','',true)+'<div class="pb"><div class="lab">Language</div><div class="rows">'+['English','Español'].map(function(l){ return '<button class="choice" data-a="lang" data-v="'+l+'">'+l+(S.lang===l?'<span class="ck">✓</span>':'')+'</button>'; }).join('')+'</div><p class="note" style="text-align:left;margin-top:10px">Zana’s words, for you only. Members get the gym’s language.</p></div>'; }
-var CASES={main:'<b>Your account</b>, from your face (top right). Your name, your role and the gym on top, the × always there. One row per thing, label left, value right. <b>The gym’s look is gone</b>: it is Settings › Look. Settings shows for owner and admin only; Sign out sits apart at the foot.',
+var CASES={main:'<b>Your account</b>, from your face (top right). <b>Your places</b> first: it opens Zana home, the hub for every gym you work or train at (Daniel, 2026-11-25). Your photo is this gym’s only: one photo per place. Your name, your role and the gym on top, the × always there. One row per thing, label left, value right. <b>The gym’s look is gone</b>: it is Settings › Look. Settings shows for owner and admin only; Sign out sits apart at the foot.',
  photo:'<b>Your photo.</b> One big face, one button. Staff only see it.', page:'<b>On the business page.</b> The show switch first; the professional photo appears only once it is on.', lang:'<b>Language.</b> Two choices, a check on yours.'};
 function render(){
   document.body.className=S.wid==='phone'?'phone':'';
@@ -116,6 +117,7 @@ document.addEventListener('click',function(ev){ var el=ev.target.closest('[data-
   if(a==='ph'){ S.photo=v==='up'; S.toast=v==='up'?'Photo saved.':'Photo removed.'; }
   if(a==='pp'){ S.pagePhoto=v==='up'; }
   if(a==='lang'){ S.lang=v; S.view='main'; }
+  if(a==='places'){ S.toast='Opens Zana home: one card per place (sketch: /p/switcher/, option C).'; S.open=false; }
   if(a==='settings'){ S.toast='Opens Settings.'; S.open=false; }
   if(a==='signout'){ S.toast='Signed out.'; S.open=false; }
   render(); });
