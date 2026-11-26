@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your places: three ways to switch</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --ink:#111; --t2:#4A4A48; --t3:#5C5C59; --line:#E8E8E5; --rowline:#F0F0ED; --page:#F5F5F3; --fill:#F0F0ED; --fillh:#E4E4E0; }
+* { box-sizing:border-box; } html,body { margin:0; overflow-x:hidden; }
+body { background:var(--page); color:var(--ink); font-family:'Geist',system-ui,sans-serif; }
+button { font-family:inherit; color:var(--ink); -webkit-text-fill-color:currentColor; cursor:pointer; -webkit-appearance:none; appearance:none; }
+.test { background:#111; color:#ddd; font-size:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:8px 16px; }
+.test b { color:#fff; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:11px; }
+.seg { display:inline-flex; gap:2px; background:#2a2a2a; padding:2px; border-radius:8px; }
+.seg button { border:0; background:none; color:#ccc; -webkit-text-fill-color:#ccc; height:28px; padding:0 10px; border-radius:6px; font-size:12px; }
+.seg button[aria-pressed="true"] { background:#fff; color:#111; -webkit-text-fill-color:#111; }
+.case { background:#1d1d1c; color:#e9e9e6; font-size:13px; padding:8px 16px; line-height:1.45; } .case b { color:#fff; }
+.stage { display:flex; justify-content:center; padding:24px 12px 60px; }
+.dev { width:390px; height:780px; border:1px solid #ccc; border-radius:28px; overflow:hidden; background:var(--page); position:relative; box-shadow:0 8px 30px rgba(0,0,0,.08); }
+.lap .dev { width:1100px; height:720px; border-radius:14px; }
+.hdr { height:56px; background:#0E0E0E; color:#fff; display:flex; align-items:center; gap:10px; padding:0 12px; }
+.hdr.mem { background:#1F6F78; }
+.logo { width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,.2); display:grid; place-items:center; font-size:11px; font-weight:700; color:#fff; -webkit-text-fill-color:#fff; flex:none; }
+.hdr b { font-size:16px; } .hdr .face { margin-left:auto; }
+.face { width:36px; height:36px; border-radius:50%; border:2px solid rgba(255,255,255,.7); background:linear-gradient(135deg,#B89F86,#6E5A48); color:#fff; -webkit-text-fill-color:#fff; font-size:12px; font-weight:700; position:relative; }
+.face .sw { position:absolute; right:-6px; bottom:-4px; width:18px; height:18px; border-radius:50%; background:#fff; color:#111; -webkit-text-fill-color:#111; font-size:10px; display:grid; place-items:center; border:1px solid #ddd; }
+.body { padding:20px 16px; } .body h1 { margin:0 0 12px; font-size:28px; letter-spacing:-.02em; }
+.ghost { height:56px; background:#fff; border:1px solid var(--line); border-radius:12px; margin-bottom:8px; }
+.dim { position:absolute; inset:0; background:rgba(17,17,17,.28); }
+.menu { position:absolute; top:60px; right:8px; width:340px; max-width:calc(100% - 16px); background:#fff; border-radius:16px; box-shadow:0 12px 40px rgba(0,0,0,.2); overflow:hidden; max-height:calc(100% - 72px); overflow-y:auto; }
+.mh { display:flex; gap:10px; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line); }
+.mh .face { border:0; width:40px; height:40px; } .mh b { display:block; font-size:16px; } .mh small { font-size:13px; color:var(--t3); }
+.lab { font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); padding:14px 16px 6px; }
+.pl { display:flex; align-items:center; gap:12px; width:100%; min-height:56px; padding:8px 16px; border:0; background:#fff; text-align:left; border-top:1px solid var(--rowline); }
+.pl:hover { background:#FAFAF8; } .pl .tx { flex:1; min-width:0; } .pl b { display:block; font-size:15px; font-weight:600; } .pl small { font-size:13px; color:var(--t3); -webkit-text-fill-color:var(--t3); }
+.pl .ck { font-weight:700; } .pl .gl { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; font-size:11px; font-weight:700; color:#fff; -webkit-text-fill-color:#fff; flex:none; }
+.pl.cur { background:#F7F7F4; }
+.tagw { font-size:12px; font-weight:600; color:var(--t2); -webkit-text-fill-color:var(--t2); background:var(--fill); border-radius:6px; padding:3px 7px; margin-left:6px; }
+.foot { border-top:1px solid var(--line); margin-top:6px; }
+.foot .pl { min-height:48px; font-size:15px; }
+.home { position:absolute; inset:0; background:var(--page); overflow:auto; }
+.home .top { display:flex; align-items:center; justify-content:space-between; padding:16px; }
+.home h1 { margin:0; font-size:26px; letter-spacing:-.02em; } .home p { margin:2px 0 0; color:var(--t3); font-size:14px; }
+.card { display:flex; align-items:center; gap:14px; width:calc(100% - 32px); margin:0 16px 10px; padding:14px; border-radius:16px; border:1px solid var(--line); background:#fff; text-align:left; }
+.card .gl { width:48px; height:48px; border-radius:12px; display:grid; place-items:center; font-weight:700; color:#fff; -webkit-text-fill-color:#fff; flex:none; }
+.card b { display:block; font-size:17px; } .card small { display:block; font-size:14px; color:var(--t3); -webkit-text-fill-color:var(--t3); } .card .nx { display:block; font-size:13px; color:var(--t2); -webkit-text-fill-color:var(--t2); margin-top:4px; }
+.card .chev, .pl .chev { color:var(--t3); -webkit-text-fill-color:var(--t3); font-size:20px; margin-left:auto; }
+.lap .home .cards { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:0 16px; } .lap .home .card { width:auto; margin:0; }
+.pair { display:flex; gap:6px; margin-top:8px; } .pair button { height:34px; padding:0 12px; border-radius:9px; border:0; background:var(--fill); font-size:14px; font-weight:500; }
+.toast { position:absolute; left:50%; bottom:20px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; padding:10px 14px; font-size:13px; white-space:nowrap; }
+</style>
+</head>
+<body>
+<div class="test"><b>Option</b><span class="seg" id="g1"></span><b>Width</b><span class="seg" id="g2"></span><b>Now in</b><span class="seg" id="g3"></span></div>
+<div class="case" id="case"></div>
+<div class="stage"><div class="dev" id="dev"></div></div>
+<script>
+// Leo's places (invented test data). Grounded in phoenix main: FaceMenu.tsx ("Your gyms", the one place a gym is changed),
+// Zana home (PHO-366), member Me tab ("Your places", "Go to staff app", PHO-521). Role lines and "also trains here" need PHO-367.
+var P=[
+ {id:'barrio', name:'Barrio Fitness', color:'#1F6F78', i:'BF', work:'Coach', train:true, next:'You coach today 5:30 PM'},
+ {id:'leo', name:'Leo Strength', color:'#7A3E2B', i:'LS', work:'Owner', train:false, next:'2 things need you'},
+ {id:'cf', name:'CrossFit 787', color:'#3C3C8C', i:'C7', work:null, train:true, next:'Your next class: Thu 6:00 AM'}];
+var S={opt:'a', wid:'phone', at:'barrio:work', open:true, toast:null};
+function gym(id){ return P.filter(function(p){return p.id===id;})[0]; }
+function here(){ var a=S.at.split(':'); return {g:gym(a[0]), mode:a[1]}; }
+function gl(p,cls){ return '<span class="'+cls+'" style="background:'+p.color+'">'+p.i+'</span>'; }
+function go(id,mode){ return 'data-a="go" data-v="'+id+':'+mode+'"'; }
+function isCur(id,mode){ return S.at===id+':'+mode; }
+function head(){ var h=here(); return '<div class="mh"><button class="face">LR</button><div><b>Leo Rivera</b><small>'+h.g.name+' · '+(h.mode==='work'?h.g.work:'Member')+'</small></div></div>'; }
+function foot(){ return '<div class="foot"><button class="pl" data-a="x"><span class="tx">Your account</span><span class="chev">›</span></button><button class="pl" data-a="x"><span class="tx">Sign out</span></button></div>'; }
+// A: one flat list, a line per role (Afya-style switcher)
+function optA(){ var rows=[]; P.forEach(function(p){ if(p.work) rows.push([p,'work',p.work]); if(p.train) rows.push([p,'train','Member']); });
+  return '<div class="menu">'+head()+'<div class="lab">Switch to</div>'+rows.map(function(r){ var c=isCur(r[0].id,r[1]); return '<button class="pl'+(c?' cur':'')+'" '+go(r[0].id,r[1])+'>'+gl(r[0],'gl')+'<span class="tx"><b>'+r[0].name+'</b><small>'+r[2]+'</small></span>'+(c?'<span class="ck">✓</span>':'')+'</button>'; }).join('')+foot()+'</div>'; }
+// B: grouped Work / Train
+function optB(){ var w=P.filter(function(p){return p.work;}), t=P.filter(function(p){return p.train;});
+  function r(p,m,sub){ var c=isCur(p.id,m); return '<button class="pl'+(c?' cur':'')+'" '+go(p.id,m)+'>'+gl(p,'gl')+'<span class="tx"><b>'+p.name+'</b><small>'+sub+'</small></span>'+(c?'<span class="ck">✓</span>':'')+'</button>'; }
+  return '<div class="menu">'+head()+'<div class="lab">Where you work</div>'+w.map(function(p){return r(p,'work',p.work);}).join('')+'<div class="lab">Where you train</div>'+t.map(function(p){return r(p,'train','Member');}).join('')+foot()+'</div>'; }
+// C: Zana home as the hub; the menu holds one door to it
+function optC(){ if(S.homeOpen) return home(); return '<div class="menu">'+head()+'<button class="pl" data-a="home"><span class="tx"><b>Your places</b><small>'+P.length+' places · switch here</small></span><span class="chev">›</span></button>'+foot()+'</div>'; }
+function home(){ return '<div class="home"><div class="top"><div><h1>Your places</h1><p>Leo Rivera</p></div><button class="face" style="border:0">LR</button></div><div class="cards">'+P.map(function(p){
+  var roles=[p.work,p.train?'Member':null].filter(Boolean).join(' · ');
+  var both=p.work&&p.train;
+  return '<div class="card">'+gl(p,'gl')+'<div style="flex:1;min-width:0"><b>'+p.name+'</b><small>'+roles+'</small><span class="nx">'+p.next+'</span>'+(both?'<div class="pair"><button '+go(p.id,'work')+'>Work</button><button '+go(p.id,'train')+'>Train</button></div>':'')+'</div>'+(both?'':'<button class="pl" style="width:auto;border:0;background:none;padding:0" '+go(p.id,p.work?'work':'train')+'><span class="chev">›</span></button>')+'</div>'; }).join('')+'</div></div>'; }
+var CASES={
+ a:'<b>A · One list, a line per role</b> (the Afya-style switcher). Leo coaches at Barrio, owns Leo Strength, trains at CrossFit 787 and at Barrio. Every place and role he has is one tap from his face. Barrio shows twice: once as Coach, once as Member. Simple while he has 2–4 lines; long past 6.',
+ b:'<b>B · Grouped: where you work / where you train.</b> Same one tap, sorted by hat. Barrio appears in both groups. Reads well for a coach with several gyms; a plain member sees only “Where you train”.',
+ c:'<b>C · Zana home is the hub.</b> The face menu has one row, Your places, which opens a full page of cards: role line, the next thing that matters there, and Work / Train buttons where he has both. Two taps instead of one, but room for 10 places and for “what’s next” at each.'};
+function render(){
+  document.body.className=S.wid==='lap'?'lap':'';
+  document.getElementById('g1').innerHTML=[['a','A · One list'],['b','B · Work / Train'],['c','C · Zana home']].map(function(x){return '<button data-a="opt" data-v="'+x[0]+'" aria-pressed="'+(S.opt===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('g2').innerHTML=[['phone','Phone'],['lap','Laptop']].map(function(x){return '<button data-a="wid" data-v="'+x[0]+'" aria-pressed="'+(S.wid===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('g3').innerHTML=[['barrio:work','Barrio · Coach'],['cf:train','CrossFit 787 · Member']].map(function(x){return '<button data-a="go" data-v="'+x[0]+'" aria-pressed="'+(S.at===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('case').innerHTML=CASES[S.opt];
+  var h=here(), mem=h.mode==='train';
+  var app='<div class="hdr'+(mem?' mem':'')+'" style="'+(mem?'background:'+h.g.color:'')+'">'+'<span class="logo">'+h.g.i+'</span><b>'+(mem?h.g.name:'Today')+'</b><button class="face" data-a="open" aria-label="Your places">LR<span class="sw">⇄</span></button></div><div class="body"><h1>'+(mem?'Home':'Today')+'</h1><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div></div>';
+  var over=S.open?'<div class="dim" data-a="close"></div>'+({a:optA,b:optB,c:optC}[S.opt])():'';
+  document.getElementById('dev').innerHTML=app+over+(S.toast?'<div class="toast">'+S.toast+'</div>':'');
+}
+document.addEventListener('click',function(e){ var el=e.target.closest('[data-a]'); if(!el) return; var a=el.dataset.a, v=el.dataset.v; S.toast=null;
+  if(a==='opt'){ S.opt=v; S.open=true; S.homeOpen=false; } if(a==='wid') S.wid=v;
+  if(a==='open'){ S.open=true; S.homeOpen=false; } if(a==='close'){ S.open=false; S.homeOpen=false; }
+  if(a==='home') S.homeOpen=true;
+  if(a==='go'){ S.at=v; S.open=false; S.homeOpen=false; var h=here(); S.toast=(h.mode==='work'?'Working at ':'Training at ')+h.g.name; }
+  if(a==='x') S.toast='Not part of this sketch.';
+  render(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ S.open=false; S.homeOpen=false; render(); } });
+render();
+</script>
+</body>
+</html>
