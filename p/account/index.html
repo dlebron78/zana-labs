@@ -71,7 +71,7 @@ button { font-family:inherit; color:var(--ink); -webkit-text-fill-color:currentC
 </style>
 </head>
 <body>
-<div class="test"><b>Who</b><span class="seg" id="g1"></span><b>Width</b><span class="seg" id="g2"></span><b>Panel</b><span class="seg" id="g3"></span><b>Gym shows staff</b><span class="seg" id="g4"></span></div>
+<div class="test"><b>Who</b><span class="seg" id="g1"></span><b>Width</b><span class="seg" id="g2"></span><b>Panel</b><span class="seg" id="g3"></span></div>
 <div class="case" id="case"></div>
 <div class="app"><div class="band"></div><div class="bar"><div class="srch">⌕&nbsp; Search people</div><button class="face" data-a="open">PC</button></div><div class="content"><h1>People</h1><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div></div></div>
 <div id="layer"></div>
@@ -97,19 +97,17 @@ function main(){
   var h=head(NAME, ROLES[S.role]+' · '+GYM)+'<div class="pb">';
   h+='<div class="lab">You</div><div class="rows">'+
    '<button class="r" data-a="row" data-v="photo" aria-expanded="'+(S.row==='photo')+'"><span class="k">Your photo<small>Only the staff of '+GYM+' see it. Each place has its own.</small></span><span class="v">'+face('mini',S.photo,'PC')+chev('photo')+'</span></button>'+(S.row==='photo'?inPhoto():'')+
-   '<button class="r" data-a="row" data-v="page" aria-expanded="'+(S.row==='page')+'"><span class="k">Your profile on the business page<small>Bio, specialties and a professional photo.</small></span><span class="v">'+(S.bizShows?'Shown':'Not shown')+chev('page')+'</span></button>'+(S.row==='page'?inPage():'')+
    '<div class="r"><span class="k">Shortcut bar<small>Quick buttons along the bottom of your screen.</small></span><button class="tog '+(S.shortcuts?'on':'')+'" data-a="short" aria-label="Shortcut bar"></button></div></div>';
   h+='<div class="rows" style="margin-top:20px"><button class="r" data-a="places"><span class="k">Your places<small>Switch to another gym, or to where you train.</small></span><span class="v">3<span class="chev">›</span></span></button>'+
 '<button class="r" data-a="row" data-v="lang" aria-expanded="'+(S.row==='lang')+'"><span class="k">Language</span><span class="v">'+S.lang+chev('lang')+'</span></button>'+(S.row==='lang'?inLang():'')+'</div>';
   h+='<button class="out" data-a="signout">Sign out</button></div>';
   return h; }
-var CASES={main:'<b>Your account</b>, from your face (top right). Only your own things. <b>No pages inside it</b>: a row opens in place under itself and folds back (Daniel, 2026-11-25), so the × is the only way out and always closes. Your places and Language sit at the foot, above Sign out.'};
+var CASES={main:'<b>Your account</b>, from your face (top right). Only your own things, and only what Zana has today: no business-page profile until the business page can show staff (Daniel, 2026-11-25). <b>No pages inside it</b>: a row opens in place under itself and folds back (Daniel, 2026-11-25), so the × is the only way out and always closes. Your places and Language sit at the foot, above Sign out.'};
 function render(){
   document.body.className=S.wid==='phone'?'phone':'';
   document.getElementById('g1').innerHTML=[['owner','Owner'],['desk','Front desk']].map(function(x){return '<button data-a="role" data-v="'+x[0]+'" aria-pressed="'+(S.role===x[0])+'">'+x[1]+'</button>';}).join('');
   document.getElementById('g2').innerHTML=[['desk','Laptop'],['phone','Phone']].map(function(x){return '<button data-a="wid" data-v="'+x[0]+'" aria-pressed="'+(S.wid===x[0])+'">'+x[1]+'</button>';}).join('');
-  document.getElementById('g3').innerHTML=[['','All folded'],['photo','Photo open'],['page','Business page open'],['lang','Language open']].map(function(x){return '<button data-a="jump" data-v="'+x[0]+'" aria-pressed="'+(S.open&&(S.row||'')===x[0])+'">'+x[1]+'</button>';}).join('');
-  document.getElementById('g4').innerHTML='<button data-a="biz" aria-pressed="'+S.bizShows+'">'+(S.bizShows?'On':'Off')+'</button>';
+  document.getElementById('g3').innerHTML=[['','All folded'],['photo','Photo open'],['lang','Language open']].map(function(x){return '<button data-a="jump" data-v="'+x[0]+'" aria-pressed="'+(S.open&&(S.row||'')===x[0])+'">'+x[1]+'</button>';}).join('');
   document.getElementById('case').innerHTML=S.open?CASES.main:'Closed. Tap your face (top right) to open Your account.';
   var L=document.getElementById('layer');
   L.innerHTML=S.open?'<div class="dim" data-a="close"></div><section class="pnl" role="dialog" aria-modal="true" aria-label="Your account">'+main()+'</section>':'';
