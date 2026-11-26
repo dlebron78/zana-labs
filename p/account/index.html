@@ -62,32 +62,42 @@ button { font-family:inherit; color:var(--ink); -webkit-text-fill-color:currentC
 .choice:first-child { border-top:0; } .choice .ck { margin-left:auto; font-weight:700; }
 .unf { background:#FAFAF8; border-top:1px solid var(--rowline); padding:12px 16px; }
 .unf .big { padding:12px 0 4px; } .unf .face2 { width:88px; height:88px; font-size:30px; }
+.fl { font-size:13px; font-weight:600; color:var(--t2); margin:12px 0 6px; }
+.ta { width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font:inherit; font-size:15px; resize:vertical; background:#fff; }
+.ta::placeholder { color:#9A9A96; }
+.chips { display:flex; flex-wrap:wrap; gap:6px; } .chip { height:34px; padding:0 12px; border-radius:17px; border:1px solid var(--line); background:#fff; font-size:14px; } .chip.on { background:var(--ink); color:#fff; -webkit-text-fill-color:#fff; border-color:var(--ink); }
+.face3 { width:56px; height:56px; border-radius:50%; background:#E6E2DB; display:grid; place-items:center; font-weight:700; flex:none; }
 .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#111; color:#fff; border-radius:12px; padding:12px 16px; font-size:14px; z-index:80; }
 </style>
 </head>
 <body>
-<div class="test"><b>Who</b><span class="seg" id="g1"></span><b>Width</b><span class="seg" id="g2"></span><b>Panel</b><span class="seg" id="g3"></span></div>
+<div class="test"><b>Who</b><span class="seg" id="g1"></span><b>Width</b><span class="seg" id="g2"></span><b>Panel</b><span class="seg" id="g3"></span><b>Gym shows staff</b><span class="seg" id="g4"></span></div>
 <div class="case" id="case"></div>
 <div class="app"><div class="band"></div><div class="bar"><div class="srch">⌕&nbsp; Search people</div><button class="face" data-a="open">PC</button></div><div class="content"><h1>People</h1><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div><div class="ghost"></div></div></div>
 <div id="layer"></div>
 <script>
 // Grounded at phoenix main 436ff73: frontend/src/Account.tsx (Your account, a Panel), MyPhotos.tsx (photo at the gym, staff only;
 // business-page photo + show switch), shellWords.ts (language, shortcut bar; "The gym's look", retired here: it is Settings › Look).
-var S={role:'owner', wid:'desk', open:true, view:'main', row:null, photo:false, pagePhoto:false, showOnPage:false, lang:'English', shortcuts:true, toast:null};
+var S={bizShows:false, bio:'', spec:['Strength'], role:'owner', wid:'desk', open:true, view:'main', row:null, photo:false, pagePhoto:false, showOnPage:false, lang:'English', shortcuts:true, toast:null};
 var ROLES={owner:'Owner',admin:'Admin',desk:'Front desk',coach:'Coach'};
 var NAME='Preview Coach', GYM='Preview Gym';
 function face(cls,on,txt){ return '<span class="'+cls+(on?' photo':'')+'">'+(on?'':txt)+'</span>'; }
 function head(title,sub,back){ return '<div class="ph">'+(back?'<button class="back" data-a="view" data-v="main">‹ Your account</button><div class="tx"></div>':face('me',S.photo,'PC')+'<div class="tx"><h2>'+title+'</h2><small>'+sub+'</small></div>')+'<button class="ib" data-a="close" aria-label="Close Your account">✕</button></div>'; }
 function chev(k){ return '<span class="chev" style="display:inline-block;transform:rotate('+(S.row===k?'90':'0')+'deg);transition:transform .15s">›</span>'; }
 function inPhoto(){ return '<div class="unf"><div class="big">'+face('face2',S.photo,'PC')+'<div class="btns">'+(S.photo?'<button class="btn" data-a="ph" data-v="up">Change</button><button class="btn" data-a="ph" data-v="rm">Remove</button>':'<button class="btn main" data-a="ph" data-v="up">Upload a photo</button>')+'</div><p class="note">Until then, your initials show.</p></div></div>'; }
-function inPage(){ return '<div class="unf"><div class="r" style="border:0;padding:0;background:transparent"><span class="k">Show me on the business page<small>'+(S.showOnPage?'Members and visitors see your photo and name.':'Off: you are not on the page.')+'</small></span><button class="tog '+(S.showOnPage?'on':'')+'" data-a="show" aria-label="Show me on the business page"></button></div>'+
-  (S.showOnPage?'<div class="big">'+face('face2',S.pagePhoto,'PC')+'<div class="btns">'+(S.pagePhoto?'<button class="btn" data-a="pp" data-v="up">Change</button><button class="btn" data-a="pp" data-v="rm">Remove</button>':'<button class="btn main" data-a="pp" data-v="up">Upload a professional photo</button>')+'</div><p class="note">Apart from your photo in the app. Shows once '+GYM+' puts its staff on its page.</p></div>':'')+'</div>'; }
+function inPage(){
+  var h='<div class="unf"><p class="note" style="text-align:left;margin:0 0 10px">'+(S.bizShows?GYM+' shows its staff on its business page.':GYM+' doesn’t show its staff on its page yet. The owner or an admin turns that on; until then nothing here is public.')+'</p>';
+  h+='<div class="fl">Bio</div><textarea class="ta" data-f="bio" rows="3" placeholder="e.g. Coaching since 2015. I help beginners lift with confidence.">'+(S.bio||'')+'</textarea>';
+  h+='<div class="fl">Specialties</div><div class="chips">'+['Strength','Mobility','Beginners','Olympic lifting','Nutrition','Prenatal'].map(function(t){ var on=S.spec.indexOf(t)>-1; return '<button class="chip'+(on?' on':'')+'" data-a="spec" data-v="'+t+'">'+t+'</button>'; }).join('')+'</div>';
+  h+='<div class="fl">Professional photo</div><div style="display:flex;align-items:center;gap:12px">'+face('face3',S.pagePhoto,'PC')+'<div class="btns" style="justify-content:flex-start">'+(S.pagePhoto?'<button class="btn" data-a="pp" data-v="up">Change</button><button class="btn" data-a="pp" data-v="rm">Remove</button>':'<button class="btn" data-a="pp" data-v="up">Upload</button>')+'</div></div><p class="note" style="text-align:left;margin:6px 0 0">Apart from your photo in the app.</p>';
+  h+='<div class="r" style="border:0;padding:12px 0 0;background:transparent;min-height:0"><span class="k">Show my photo on the business page<small>'+(S.showOnPage?'Your photo shows when the gym shows its staff.':'Off: your name and bio can show, your photo does not.')+'</small></span><button class="tog '+(S.showOnPage?'on':'')+'" data-a="show" aria-label="Show my photo on the business page"></button></div>';
+  return h+'</div>'; }
 function inLang(){ return '<div class="unf" style="padding:0">'+['English','Español'].map(function(l){ return '<button class="choice" data-a="lang" data-v="'+l+'">'+l+(S.lang===l?'<span class="ck">✓</span>':'')+'</button>'; }).join('')+'<p class="note" style="text-align:left;padding:8px 16px 12px;margin:0">Zana’s words, for you only. Members get the gym’s language.</p></div>'; }
 function main(){
   var h=head(NAME, ROLES[S.role]+' · '+GYM)+'<div class="pb">';
   h+='<div class="lab">You</div><div class="rows">'+
    '<button class="r" data-a="row" data-v="photo" aria-expanded="'+(S.row==='photo')+'"><span class="k">Your photo<small>Only the staff of '+GYM+' see it. Each place has its own.</small></span><span class="v">'+face('mini',S.photo,'PC')+chev('photo')+'</span></button>'+(S.row==='photo'?inPhoto():'')+
-   '<button class="r" data-a="row" data-v="page" aria-expanded="'+(S.row==='page')+'"><span class="k">On the business page<small>A professional photo, if the gym shows its staff.</small></span><span class="v">'+(S.showOnPage?'Shown':'Not shown')+chev('page')+'</span></button>'+(S.row==='page'?inPage():'')+
+   '<button class="r" data-a="row" data-v="page" aria-expanded="'+(S.row==='page')+'"><span class="k">Your profile on the business page<small>Bio, specialties and a professional photo.</small></span><span class="v">'+(S.bizShows?'Shown':'Not shown')+chev('page')+'</span></button>'+(S.row==='page'?inPage():'')+
    '<div class="r"><span class="k">Shortcut bar<small>Quick buttons along the bottom of your screen.</small></span><button class="tog '+(S.shortcuts?'on':'')+'" data-a="short" aria-label="Shortcut bar"></button></div></div>';
   h+='<div class="rows" style="margin-top:20px"><button class="r" data-a="places"><span class="k">Your places<small>Switch to another gym, or to where you train.</small></span><span class="v">3<span class="chev">›</span></span></button>'+
 '<button class="r" data-a="row" data-v="lang" aria-expanded="'+(S.row==='lang')+'"><span class="k">Language</span><span class="v">'+S.lang+chev('lang')+'</span></button>'+(S.row==='lang'?inLang():'')+'</div>';
@@ -99,6 +109,7 @@ function render(){
   document.getElementById('g1').innerHTML=[['owner','Owner'],['desk','Front desk']].map(function(x){return '<button data-a="role" data-v="'+x[0]+'" aria-pressed="'+(S.role===x[0])+'">'+x[1]+'</button>';}).join('');
   document.getElementById('g2').innerHTML=[['desk','Laptop'],['phone','Phone']].map(function(x){return '<button data-a="wid" data-v="'+x[0]+'" aria-pressed="'+(S.wid===x[0])+'">'+x[1]+'</button>';}).join('');
   document.getElementById('g3').innerHTML=[['','All folded'],['photo','Photo open'],['page','Business page open'],['lang','Language open']].map(function(x){return '<button data-a="jump" data-v="'+x[0]+'" aria-pressed="'+(S.open&&(S.row||'')===x[0])+'">'+x[1]+'</button>';}).join('');
+  document.getElementById('g4').innerHTML='<button data-a="biz" aria-pressed="'+S.bizShows+'">'+(S.bizShows?'On':'Off')+'</button>';
   document.getElementById('case').innerHTML=S.open?CASES.main:'Closed. Tap your face (top right) to open Your account.';
   var L=document.getElementById('layer');
   L.innerHTML=S.open?'<div class="dim" data-a="close"></div><section class="pnl" role="dialog" aria-modal="true" aria-label="Your account">'+main()+'</section>':'';
@@ -115,6 +126,8 @@ document.addEventListener('click',function(ev){ var el=ev.target.closest('[data-
   if(a==='role') S.role=v; if(a==='wid') S.wid=v;
   if(a==='short') S.shortcuts=!S.shortcuts;
   if(a==='show') S.showOnPage=!S.showOnPage;
+  if(a==='spec'){ var k=S.spec.indexOf(v); if(k>-1) S.spec.splice(k,1); else S.spec.push(v); }
+  if(a==='biz') S.bizShows=!S.bizShows;
   if(a==='ph'){ S.photo=v==='up'; S.toast=v==='up'?'Photo saved.':'Photo removed.'; }
   if(a==='pp'){ S.pagePhoto=v==='up'; }
   if(a==='lang'){ S.lang=v; }
@@ -122,6 +135,7 @@ document.addEventListener('click',function(ev){ var el=ev.target.closest('[data-
   if(a==='settings'){ S.toast='Opens Settings.'; S.open=false; }
   if(a==='signout'){ S.toast='Signed out.'; S.open=false; }
   render(); });
+document.addEventListener('input',function(e){ if(e.target.dataset.f==='bio') S.bio=e.target.value; });
 document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&S.open){ S.open=false; S.row=null; render(); } });
 window.addEventListener('resize',render);
 render();
